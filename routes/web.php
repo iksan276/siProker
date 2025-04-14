@@ -8,6 +8,11 @@ use App\Http\Controllers\IsuStrategisController;
 use App\Http\Controllers\ProgramPengembanganController;
 use App\Http\Controllers\ProgramRektorController;
 use App\Http\Controllers\SatuanController;
+use App\Http\Controllers\UnitController;
+use App\Http\Controllers\IndikatorKinerjaController;
+use App\Http\Controllers\KegiatanController;
+use App\Http\Controllers\MetaAnggaranController;
+use App\Http\Controllers\UnitAnggaranController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -54,6 +59,13 @@ Route::middleware('auth')->group(function () {
 
     // Add this inside the auth middleware group
     Route::resource('satuans', SatuanController::class);
+
+    // Add these inside the auth middleware group
+    Route::resource('units', UnitController::class);
+    Route::resource('meta-anggarans', MetaAnggaranController::class);
+    Route::resource('indikator-kinerjas', IndikatorKinerjaController::class);
+    Route::resource('kegiatans', KegiatanController::class);
+
 });
 
 require __DIR__.'/auth.php';

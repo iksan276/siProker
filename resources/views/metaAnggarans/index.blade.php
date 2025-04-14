@@ -2,22 +2,22 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2 text-gray-800">Satuan Management</h1>
-<p class="mb-4">Manage all Satuan in the system.</p>
+<h1 class="h3 mb-2 text-gray-800">Meta Anggaran Management</h1>
+<p class="mb-4">Manage all Meta Anggaran in the system.</p>
 
 <!-- DataTales Card -->
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-primary">Satuan List</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Meta Anggaran List</h6>
         <div>
-            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('satuans.create') }}" data-title="Tambah Satuan">
-                <i class="fas fa-plus fa-sm"></i> Tambah Satuan
+            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('meta-anggarans.create') }}" data-title="Tambah Meta Anggaran">
+                <i class="fas fa-plus fa-sm"></i> Tambah Meta Anggaran
             </button>
         </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-bordered" id="satuanTable" width="100%" cellspacing="0">
+            <table class="table table-bordered" id="metaAnggaranTable" width="100%" cellspacing="0">
                 <thead>
                     <tr class="text-center text-dark">
                         <th>No</th>
@@ -27,27 +27,27 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($satuans as $index => $satuan)
-                    <tr class="{{ $satuan->NA == 'Y' ? 'bg-light text-muted' : '' }}">
+                    @foreach($metaAnggarans as $index => $metaAnggaran)
+                    <tr class="{{ $metaAnggaran->NA == 'Y' ? 'bg-light text-muted' : '' }}">
                         <td style="white-space:nowrap;width:1px" class="text-center">{{ $index + 1 }}</td>
-                        <td>{{ $satuan->Nama }}</td>
+                        <td>{{ $metaAnggaran->Nama }}</td>
                         <td class="text-center text-dark" style="white-space:nowrap;width:1px">
-                            @if($satuan->NA == 'Y')
+                            @if($metaAnggaran->NA == 'Y')
                                 <span class="badge badge-danger">Non Aktif</span>
                             @endif
 
-                            @if($satuan->NA == 'N')
+                            @if($metaAnggaran->NA == 'N')
                                 <span class="badge badge-success">Aktif</span>
                             @endif
                         </td>
                         <td class="text-center" style="white-space:nowrap;width:1px">
-                            <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('satuans.show', $satuan->SatuanID) }}" data-title="Detail Satuan">
+                            <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('meta-anggarans.show', $metaAnggaran->MetaAnggaranID) }}" data-title="Detail Meta Anggaran">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('satuans.edit', $satuan->SatuanID) }}" data-title="Edit Satuan">
+                            <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('meta-anggarans.edit', $metaAnggaran->MetaAnggaranID) }}" data-title="Edit Meta Anggaran">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <form action="{{ route('satuans.destroy', $satuan->SatuanID) }}" method="POST" class="d-inline">
+                            <form action="{{ route('meta-anggarans.destroy', $metaAnggaran->MetaAnggaranID) }}" method="POST" class="d-inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="button" class="btn btn-danger btn-square btn-sm delete-confirm">
@@ -67,7 +67,7 @@
 @push('scripts')
 <script>
     $(document).ready(function () {
-        $('#satuanTable').DataTable({
+        $('#metaAnggaranTable').DataTable({
             responsive: true
         });
     });

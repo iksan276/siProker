@@ -25,8 +25,8 @@
         <div class="table-responsive">
             <table class="table table-bordered" id="userTable" width="100%" cellspacing="0">
                 <thead>
-                    <tr>
-                        <th>#</th>
+                    <tr class="text-center text-dark">
+                        <th>No</th>
                         <th>Nama</th>
                         <th>Email</th>
                         <th>Actions</th>
@@ -36,20 +36,20 @@
                 <tbody>
                     @foreach($users as $index => $u)
                     <tr>
-                    <td>{{ $index + 1 }}</td>
+                    <td style="white-space:nowrap;width:1px">{{ $index + 1 }}</td>
                         <td>{{ $u->name }}</td>
-                        <td>{{ $u->email }}</td>
-                        <td>
-                            <a href="#" class="btn btn-info btn-circle btn-sm load-modal" data-url="{{ route('users.show', $u->id) }}" data-title="View User">
+                        <td class="text-center" style="white-space:nowrap;width:1px">{{ $u->email }}</td>
+                        <td class="text-center" style="white-space:nowrap;width:1px">
+                            <a href="#" class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('users.show', $u->id) }}" data-title="View User">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a href="#" class="btn btn-warning btn-circle btn-sm load-modal" data-url="{{ route('users.edit', $u->id) }}" data-title="Edit User">
+                            <a href="#" class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('users.edit', $u->id) }}" data-title="Edit User">
                                 <i class="fas fa-edit"></i>
                             </a>
                             <form action="{{ route('users.destroy', $u->id) }}" method="POST" class="d-inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="button" class="btn btn-danger btn-circle btn-sm delete-confirm">
+                                <button type="button" class="btn btn-danger btn-square btn-sm delete-confirm">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>

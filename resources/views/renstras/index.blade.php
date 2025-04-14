@@ -19,11 +19,11 @@
         <div class="table-responsive">
             <table class="table table-bordered" id="renstraTable" width="100%" cellspacing="0">
                 <thead>
-                    <tr>
-                        <th>#</th>
+                    <tr class="text-center text-dark">
+                        <th>No</th>
                         <th>Nama</th>
-                        <th>Periode Mulai</th>
-                        <th>Periode Selesai</th>
+                        <th style="white-space:nowrap;width:1px">Periode Mulai</th>
+                        <th style="white-space:nowrap;width:1px">Periode Selesai</th>
                         <th>NA</th>
                    
                         <th>Actions</th>
@@ -32,11 +32,11 @@
                 <tbody>
                     @foreach($renstras as $index => $renstra)
                     <tr class="{{ $renstra->NA == 'Y' ? 'bg-light text-muted' : '' }}">
-                        <td>{{ $index + 1 }}</td>
+                        <td class="text-center" style="white-space:nowrap;width:1px">{{ $index + 1 }}</td>
                         <td>{{ $renstra->Nama }}</td>
-                        <td>{{ $renstra->PeriodeMulai }}</td>
-                        <td>{{ $renstra->PeriodeSelesai }}</td>
-                        <td>
+                        <td class="text-center">{{ $renstra->PeriodeMulai }}</td>
+                        <td class="text-center">{{ $renstra->PeriodeSelesai }}</td>
+                        <td style="white-space:nowrap;width:1px" class="text-center">
                             @if($renstra->NA == 'Y')
                                 <span class="badge badge-danger">Non Aktif</span>
                             @endif
@@ -45,17 +45,17 @@
                             @endif
                         </td>
                     
-                        <td>
-                            <button class="btn btn-info btn-circle btn-sm load-modal" data-url="{{ route('renstras.show', $renstra->RenstraID) }}" data-title="Detail Renstra">
+                        <td style="white-space:nowrap;width:1px" class="text-center">
+                            <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('renstras.show', $renstra->RenstraID) }}" data-title="Detail Renstra">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-warning btn-circle btn-sm load-modal" data-url="{{ route('renstras.edit', $renstra->RenstraID) }}" data-title="Edit Renstra">
+                            <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('renstras.edit', $renstra->RenstraID) }}" data-title="Edit Renstra">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <form action="{{ route('renstras.destroy', $renstra->RenstraID) }}" method="POST" class="d-inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="button" class="btn btn-danger btn-circle btn-sm delete-confirm">
+                                <button type="button" class="btn btn-danger btn-square btn-sm delete-confirm">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>

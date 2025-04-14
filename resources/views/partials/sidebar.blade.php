@@ -79,6 +79,39 @@
         </a>
     </li>
 
+        <!-- Nav Item - Unit -->
+    <li class="nav-item {{ request()->is('units*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('units.index') }}">
+            <i class="fas fa-fw fa-building"></i>
+            <span>Unit</span>
+        </a>
+    </li>
+
+    <!-- Nav Item - Meta Anggaran -->
+    <li class="nav-item {{ request()->is('meta-anggarans*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('meta-anggarans.index') }}">
+            <i class="fas fa-fw fa-money-bill"></i>
+            <span>Meta Anggaran</span>
+        </a>
+    </li>
+
+    <!-- Nav Item - Indikator Kinerja -->
+    <li class="nav-item {{ request()->is('indikator-kinerjas*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('indikator-kinerjas.index') }}">
+            <i class="fas fa-fw fa-chart-line"></i>
+            <span>Indikator Kinerja</span>
+        </a>
+    </li>
+
+    <!-- Nav Item - Kegiatan -->
+    <li class="nav-item {{ request()->is('kegiatans*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('kegiatans.index') }}">
+            <i class="fas fa-fw fa-calendar-alt"></i>
+            <span>Kegiatan</span>
+        </a>
+    </li>
+
+
     <!-- Divider -->
     <hr class="sidebar-divider">
 

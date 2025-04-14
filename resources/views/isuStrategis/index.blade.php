@@ -19,10 +19,10 @@
         <div class="table-responsive">
             <table class="table table-bordered" id="isuStrategisTable" width="100%" cellspacing="0">
                 <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Pilar</th>
+                    <tr class="text-center text-dark">
+                        <th>No</th>
                         <th>Nama</th>
+                        <th>Pilar</th>
                         <th>NA</th>
                         <th>Actions</th>
                     </tr>
@@ -30,17 +30,17 @@
                 <tbody>
                     @foreach($isuStrategis as $index => $isu)
                     <tr class="{{ $isu->NA == 'Y' ? 'bg-light text-muted' : '' }}">
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $isu->pilar->Nama }}</td>
+                        <td class="text-center" style="white-space:nowrap;width:1px">{{ $index + 1 }}</td>
                         <td>{{ $isu->Nama }}</td>
-                        <td>
+                        <td>{{ $isu->pilar->Nama }}</td>
+                        <td class="text-center" style="white-space:nowrap;width:1px">
                             @if($isu->NA == 'Y')
                                 <span class="badge badge-danger">Non Aktif</span>
                             @else
                                 <span class="badge badge-success">Aktif</span>
                             @endif
                         </td>
-                        <td>
+                        <td class="text-center" style="white-space:nowrap;width:1px">
                             <button class="btn btn-info btn-circle btn-sm load-modal" data-url="{{ route('isu-strategis.show', $isu->IsuID) }}" data-title="Detail Isu Strategis">
                                 <i class="fas fa-eye"></i>
                             </button>

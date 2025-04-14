@@ -19,10 +19,10 @@
         <div class="table-responsive">
             <table class="table table-bordered" id="programPengembanganTable" width="100%" cellspacing="0">
                 <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Isu Strategis</th>
+                    <tr class="text-center text-dark">
+                        <th>No</th>
                         <th>Nama</th>
+                        <th>Isu Strategis</th>
                         <th>NA</th>
                         <th>Actions</th>
                     </tr>
@@ -30,10 +30,10 @@
                 <tbody>
                     @foreach($programPengembangans as $index => $program)
                     <tr class="{{ $program->NA == 'Y' ? 'bg-light text-muted' : '' }}">
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $program->isuStrategis->Nama }}</td>
+                        <td class="text-center" style="white-space:nowrap;width:1px">{{ $index + 1 }}</td>
                         <td>{{ $program->Nama }}</td>
-                        <td>
+                        <td>{{ $program->isuStrategis->Nama }}</td>
+                        <td class="text-center" style="white-space:nowrap;width:1px">
                            
                             @if($program->NA == 'Y')
                                 <span class="badge badge-danger">Non Aktif</span>
@@ -43,17 +43,17 @@
                             @endif
                         </td>
 
-                        <td>
-                            <button class="btn btn-info btn-circle btn-sm load-modal" data-url="{{ route('program-pengembangans.show', $program->ProgramPengembanganID) }}" data-title="Detail Program Pengembangan">
+                        <td class="text-center" style="white-space:nowrap;width:1px">
+                            <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('program-pengembangans.show', $program->ProgramPengembanganID) }}" data-title="Detail Program Pengembangan">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-warning btn-circle btn-sm load-modal" data-url="{{ route('program-pengembangans.edit', $program->ProgramPengembanganID) }}" data-title="Edit Program Pengembangan">
+                            <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('program-pengembangans.edit', $program->ProgramPengembanganID) }}" data-title="Edit Program Pengembangan">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <form action="{{ route('program-pengembangans.destroy', $program->ProgramPengembanganID) }}" method="POST" class="d-inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="button" class="btn btn-danger btn-circle btn-sm delete-confirm">
+                                <button type="button" class="btn btn-danger btn-square btn-sm delete-confirm">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
