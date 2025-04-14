@@ -31,7 +31,7 @@
                 </thead>
                 <tbody>
                     @foreach($renstras as $index => $renstra)
-                    <tr>
+                    <tr class="{{ $renstra->NA == 'Y' ? 'bg-light text-muted' : '' }}">
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $renstra->Nama }}</td>
                         <td>{{ $renstra->PeriodeMulai }}</td>

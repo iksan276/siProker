@@ -12,7 +12,7 @@
             <th>Status</th>
             <td>
                 @if($satuan->NA == 'Y')
-                    <span class="badge badge-danger">Non-Aktif</span>
+                    <span class="badge badge-danger">Non Aktif</span>
                 @endif
 
                 @if($satuan->NA == 'N')

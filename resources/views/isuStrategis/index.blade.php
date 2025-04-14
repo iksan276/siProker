@@ -29,13 +29,13 @@
                 </thead>
                 <tbody>
                     @foreach($isuStrategis as $index => $isu)
-                    <tr>
+                    <tr class="{{ $isu->NA == 'Y' ? 'bg-light text-muted' : '' }}">
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $isu->pilar->Nama }}</td>
                         <td>{{ $isu->Nama }}</td>
                         <td>
                             @if($isu->NA == 'Y')
-                                <span class="badge badge-danger">Non-Aktif</span>
+                                <span class="badge badge-danger">Non Aktif</span>
                             @else
                                 <span class="badge badge-success">Aktif</span>
                             @endif

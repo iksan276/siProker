@@ -30,7 +30,7 @@
                 </thead>
                 <tbody>
                     @foreach($programRektors as $index => $program)
-                    <tr>
+                    <tr class="{{ $program->NA == 'Y' ? 'bg-light text-muted' : '' }}">
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $program->programPengembangan->Nama }}</td>
                         <td>{{ $program->Nama }}</td>

@@ -28,12 +28,12 @@
                 </thead>
                 <tbody>
                     @foreach($satuans as $index => $satuan)
-                    <tr>
+                    <tr class="{{ $satuan->NA == 'Y' ? 'bg-light text-muted' : '' }}">
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $satuan->Nama }}</td>
                         <td>
                             @if($satuan->NA == 'Y')
-                                <span class="badge badge-danger">Non-Aktif</span>
+                                <span class="badge badge-danger">Non Aktif</span>
                             @endif
 
                             @if($satuan->NA == 'N')

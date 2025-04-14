@@ -7,7 +7,7 @@
     <div class="form-group">
         <label for="NA">Status</label>
         <select name="NA" id="NA" class="form-control" required>
-            <option value="Y">Non-Aktif</option>
+            <option value="Y">Non Aktif</option>
             <option value="N" selected>Aktif</option>
         </select>
     </div>

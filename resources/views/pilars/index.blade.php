@@ -29,7 +29,7 @@
                 </thead>
                 <tbody>
                     @foreach($pilars as $index => $pilar)
-                    <tr>
+                    <tr class="{{ $pilar->NA == 'Y' ? 'bg-light text-muted' : '' }}">
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $pilar->renstra->Nama }}</td>
                         <td>{{ $pilar->Nama }}</td>

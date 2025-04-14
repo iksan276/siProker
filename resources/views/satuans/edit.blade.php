@@ -8,7 +8,7 @@
     <div class="form-group">
         <label for="NA">Status</label>
         <select name="NA" id="NA" class="form-control" required>
-            <option value="Y" {{ $satuan->NA == 'Y' ? 'selected' : '' }}>Non-Aktif</option>
+            <option value="Y" {{ $satuan->NA == 'Y' ? 'selected' : '' }}>Non Aktif</option>
             <option value="N" {{ $satuan->NA == 'N' ? 'selected' : '' }}>Aktif</option>
         </select>
     </div>

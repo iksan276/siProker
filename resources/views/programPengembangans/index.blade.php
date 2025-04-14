@@ -29,7 +29,7 @@
                 </thead>
                 <tbody>
                     @foreach($programPengembangans as $index => $program)
-                    <tr>
+                    <tr class="{{ $program->NA == 'Y' ? 'bg-light text-muted' : '' }}">
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $program->isuStrategis->Nama }}</td>
                         <td>{{ $program->Nama }}</td>
