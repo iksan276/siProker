@@ -18,15 +18,15 @@
         </tr>
         <tr>
             <th>Bobot</th>
-            <td>{{ $indikatorKinerja->Bobot }}</td>
+            <td>{{ $indikatorKinerja->Bobot }}%</td>
         </tr>
         <tr>
             <th>Harga Satuan</th>
-            <td>{{ number_format($indikatorKinerja->HargaSatuan, 0, ',', '.') }}</td>
+            <td>Rp{{ number_format($indikatorKinerja->HargaSatuan, 0, ',', '.') }}</td>
         </tr>
         <tr>
             <th>Jumlah</th>
-            <td>{{ $indikatorKinerja->Jumlah }}</td>
+            <td>{{ number_format($indikatorKinerja->Jumlah, 0, ',', '.') }}</td>
         </tr>
         <tr>
             <th>Meta Anggaran</th>
@@ -38,7 +38,11 @@
         </tr>
         <tr>
             <th>Unit Terkait</th>
-            <td>{{ $indikatorKinerja->unitTerkait->Nama }}</td>
+            <td>
+                @foreach($unitTerkaits as $unitTerkait)
+                    <span class="badge badge-info">{{ $unitTerkait->Nama }}</span>
+                @endforeach
+            </td>
         </tr>
         <tr>
             <th>Status</th>

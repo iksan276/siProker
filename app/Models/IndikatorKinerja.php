@@ -44,7 +44,8 @@ class IndikatorKinerja extends Model
     
     public function unitTerkait()
     {
-        return $this->belongsTo(Unit::class, 'UnitTerkaitID', 'UnitID');
+        $ids = explode(',', $this->UnitTerkaitID);
+        return Unit::whereIn('UnitID', $ids)->get();
     }
     
     public function createdBy()

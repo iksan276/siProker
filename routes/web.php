@@ -56,6 +56,8 @@ Route::middleware('auth')->group(function () {
     
     // Program Rektor routes
     Route::resource('program-rektors', ProgramRektorController::class);
+    Route::get('/program-rektors/export/excel', [ProgramRektorController::class, 'exportExcel'])->name('program-rektors.export.excel');
+
 
     // Add this inside the auth middleware group
     Route::resource('satuans', SatuanController::class);
@@ -64,7 +66,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('units', UnitController::class);
     Route::resource('meta-anggarans', MetaAnggaranController::class);
     Route::resource('indikator-kinerjas', IndikatorKinerjaController::class);
+    // Add this route with your other indikator-kinerjas routes
+    Route::get('/indikator-kinerjas/export/excel', [IndikatorKinerjaController::class, 'exportExcel'])->name('indikator-kinerjas.export.excel');
+
+
     Route::resource('kegiatans', KegiatanController::class);
+    Route::get('/kegiatans/export/excel', [KegiatanController::class, 'exportExcel'])->name('kegiatans.export.excel');
+
 
 });
 

@@ -7,15 +7,31 @@ use App\Models\ProgramPengembangan;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ProgramRektorsExport;
 
 class ProgramRektorController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $programRektors = ProgramRektor::with(['programPengembangan', 'createdBy', 'editedBy'])
-        ->orderBy('DCreated', 'desc')
-        ->get();
-        return view('programRektors.index', compact('programRektors'));
+        // Get all program pengembangans for the filter
+        $programPengembangans = ProgramPengembangan::where('NA', 'N')->get();
+        
+        // Base query
+        $programRektorsQuery = ProgramRektor::with(['programPengembangan', 'createdBy', 'editedBy']);
+        
+        // Apply filter if programPengembanganID is provided
+        if ($request->has('programPengembanganID') && $request->programPengembanganID) {
+            $programRektorsQuery->where('ProgramPengembanganID', $request->programPengembanganID);
+        }
+        
+        // Get the filtered results
+        $programRektors = $programRektorsQuery->orderBy('DCreated', 'desc')->get();
+        
+        // Get the selected filter value (for re-populating the select)
+        $selectedProgramPengembangan = $request->programPengembanganID;
+        
+        return view('programRektors.index', compact('programRektors', 'programPengembangans', 'selectedProgramPengembangan'));
     }
 
     public function create()
@@ -27,6 +43,27 @@ class ProgramRektorController extends Controller
             return view('programRektors.create', compact('programPengembangans', 'users'))->render();
         }
         return view('programRektors.create', compact('programPengembangans', 'users'));
+    }
+
+
+    public function exportExcel(Request $request)
+    {
+        // Base query with all necessary relationships
+        $programRektorsQuery = ProgramRektor::with([
+            'programPengembangan.isuStrategis.pilar.renstra',
+            'createdBy', 
+            'editedBy'
+        ]);
+        
+        // Apply filter if programPengembanganID is provided
+        if ($request->has('programPengembanganID') && $request->programPengembanganID) {
+            $programRektorsQuery->where('ProgramPengembanganID', $request->programPengembanganID);
+        }
+        
+        // Get the filtered results
+        $programRektors = $programRektorsQuery->orderBy('DCreated', 'desc')->get();
+        
+        return Excel::download(new ProgramRektorsExport($programRektors), 'program_rektors.xlsx');
     }
 
     public function store(Request $request)

@@ -7,16 +7,55 @@ use App\Models\IndikatorKinerja;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\KegiatansExport;
 
 class KegiatanController extends Controller
 {
-    public function index()
+
+    public function index(Request $request)
     {
-        $kegiatans = Kegiatan::with(['indikatorKinerja', 'createdBy', 'editedBy'])
-            ->orderBy('KegiatanID', 'desc')
-            ->get();
-        return view('kegiatans.index', compact('kegiatans'));
+        // Get all active indikator kinerjas for the filter
+        $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get();
+        
+        // Base query
+        $kegiatansQuery = Kegiatan::with(['indikatorKinerja', 'createdBy', 'editedBy']);
+        
+        // Apply filter if indikatorKinerjaID is provided
+        if ($request->has('indikatorKinerjaID') && $request->indikatorKinerjaID) {
+            $kegiatansQuery->where('IndikatorKinerjaID', $request->indikatorKinerjaID);
+        }
+        
+        // Get the filtered results
+        $kegiatans = $kegiatansQuery->orderBy('KegiatanID', 'desc')->get();
+        
+        // Get the selected filter value (for re-populating the select)
+        $selectedIndikatorKinerja = $request->indikatorKinerjaID;
+        
+        return view('kegiatans.index', compact('kegiatans', 'indikatorKinerjas', 'selectedIndikatorKinerja'));
     }
+
+    public function exportExcel(Request $request)
+    {
+        // Base query with all necessary relationships
+        $kegiatansQuery = Kegiatan::with([
+            'indikatorKinerja.programRektor.programPengembangan.isuStrategis.pilar.renstra',
+            'createdBy', 
+            'editedBy'
+        ]);
+        
+        // Apply filter if indikatorKinerjaID is provided
+        if ($request->has('indikatorKinerjaID') && $request->indikatorKinerjaID) {
+            $kegiatansQuery->where('IndikatorKinerjaID', $request->indikatorKinerjaID);
+        }
+        
+        // Get the filtered results
+        $kegiatans = $kegiatansQuery->orderBy('KegiatanID', 'desc')->get();
+        
+        return Excel::download(new KegiatansExport($kegiatans), 'kegiatans.xlsx');
+    }
+
 
     public function create()
     {

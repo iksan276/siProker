@@ -10,16 +10,79 @@ use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\IndikatorKinerjasExport;
+
 
 class IndikatorKinerjaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $indikatorKinerjas = IndikatorKinerja::with(['programRektor', 'satuan', 'unitTerkait', 'createdBy', 'editedBy'])
-            ->orderBy('IndikatorKinerjaID', 'desc')
-            ->get();
-        return view('indikatorKinerjas.index', compact('indikatorKinerjas'));
+           // Get all program rektors and units for filters
+           $programRektors = ProgramRektor::where('NA', 'N')->get();
+           $units = Unit::where('NA', 'N')->get();
+           
+           // Base query
+           $indikatorKinerjasQuery = IndikatorKinerja::with(['programRektor', 'satuan', 'createdBy', 'editedBy']);
+           
+           // Apply filter if programRektorID is provided
+           if ($request->has('programRektorID') && $request->programRektorID) {
+               $indikatorKinerjasQuery->where('ProgramRektorID', $request->programRektorID);
+           }
+           
+           // Apply filter if unitID is provided
+           if ($request->has('unitID') && $request->unitID) {
+               $unitID = $request->unitID;
+               $indikatorKinerjasQuery->where(function($query) use ($unitID) {
+                   $query->where('UnitTerkaitID', $unitID)
+                         ->orWhere('UnitTerkaitID', 'LIKE', $unitID.',%')
+                         ->orWhere('UnitTerkaitID', 'LIKE', '%,'.$unitID)
+                         ->orWhere('UnitTerkaitID', 'LIKE', '%,'.$unitID.',%');
+               });
+           }
+           
+           // Get the filtered results
+           $indikatorKinerjas = $indikatorKinerjasQuery->orderBy('IndikatorKinerjaID', 'desc')->get();
+           
+           // Get the selected filter values (for re-populating the selects)
+           $selectedProgramRektor = $request->programRektorID;
+           $selectedUnit = $request->unitID;
+           
+           return view('indikatorKinerjas.index', compact('indikatorKinerjas', 'programRektors', 'units', 'selectedProgramRektor', 'selectedUnit'));
     }
+
+    public function exportExcel(Request $request)
+    {
+        // Base query with all necessary relationships
+        $indikatorKinerjasQuery = IndikatorKinerja::with([
+            'programRektor.programPengembangan.isuStrategis.pilar.renstra',
+            'satuan',
+            'createdBy', 
+            'editedBy'
+        ]);
+        
+        // Apply filter if programRektorID is provided
+        if ($request->has('programRektorID') && $request->programRektorID) {
+            $indikatorKinerjasQuery->where('ProgramRektorID', $request->programRektorID);
+        }
+        
+        // Apply filter if unitID is provided
+        if ($request->has('unitID') && $request->unitID) {
+            $unitID = $request->unitID;
+            $indikatorKinerjasQuery->where(function($query) use ($unitID) {
+                $query->where('UnitTerkaitID', $unitID)
+                      ->orWhere('UnitTerkaitID', 'LIKE', $unitID.',%')
+                      ->orWhere('UnitTerkaitID', 'LIKE', '%,'.$unitID)
+                      ->orWhere('UnitTerkaitID', 'LIKE', '%,'.$unitID.',%');
+            });
+        }
+        
+        // Get the filtered results
+        $indikatorKinerjas = $indikatorKinerjasQuery->orderBy('IndikatorKinerjaID', 'desc')->get();
+        
+        return Excel::download(new IndikatorKinerjasExport($indikatorKinerjas), 'indikator_kinerjas.xlsx');
+    }
+    
 
     public function create()
     {
@@ -45,7 +108,7 @@ class IndikatorKinerjaController extends Controller
             'HargaSatuan' => 'required|integer',
             'Jumlah' => 'required|integer',
             'MetaAnggaranID' => 'required|array',
-            'UnitTerkaitID' => 'required|exists:units,UnitID',
+            'UnitTerkaitID' => 'required|array', // Changed to array
             'NA' => 'required|in:Y,N',
         ]);
 
@@ -57,7 +120,7 @@ class IndikatorKinerjaController extends Controller
         $indikatorKinerja->HargaSatuan = $request->HargaSatuan;
         $indikatorKinerja->Jumlah = $request->Jumlah;
         $indikatorKinerja->MetaAnggaranID = implode(',', $request->MetaAnggaranID);
-        $indikatorKinerja->UnitTerkaitID = $request->UnitTerkaitID;
+        $indikatorKinerja->UnitTerkaitID = implode(',', $request->UnitTerkaitID); // Changed to implode array
         $indikatorKinerja->NA = $request->NA;
         $indikatorKinerja->DCreated = now();
         $indikatorKinerja->UCreated = Auth::id();
@@ -71,13 +134,14 @@ class IndikatorKinerjaController extends Controller
 
     public function show($id)
     {
-        $indikatorKinerja = IndikatorKinerja::with(['programRektor', 'satuan', 'unitTerkait', 'createdBy', 'editedBy'])->findOrFail($id);
+        $indikatorKinerja = IndikatorKinerja::findOrFail($id);
         $metaAnggarans = MetaAnggaran::whereIn('MetaAnggaranID', explode(',', $indikatorKinerja->MetaAnggaranID))->get();
+        $unitTerkaits = Unit::whereIn('UnitID', explode(',', $indikatorKinerja->UnitTerkaitID))->get(); // Added this line
         
         if (request()->ajax()) {
-            return view('indikatorKinerjas.show', compact('indikatorKinerja', 'metaAnggarans'))->render();
+            return view('indikatorKinerjas.show', compact('indikatorKinerja', 'metaAnggarans', 'unitTerkaits'))->render();
         }
-        return view('indikatorKinerjas.show', compact('indikatorKinerja', 'metaAnggarans'));
+        return view('indikatorKinerjas.show', compact('indikatorKinerja', 'metaAnggarans', 'unitTerkaits'));
     }
 
     public function edit($id)
@@ -89,11 +153,12 @@ class IndikatorKinerjaController extends Controller
         $units = Unit::all();
         $users = User::all();
         $selectedMetaAnggarans = explode(',', $indikatorKinerja->MetaAnggaranID);
+        $selectedUnitTerkaits = explode(',', $indikatorKinerja->UnitTerkaitID); // Added this line
         
         if (request()->ajax()) {
-            return view('indikatorKinerjas.edit', compact('indikatorKinerja', 'programRektors', 'satuans', 'metaAnggarans', 'units', 'users', 'selectedMetaAnggarans'))->render();
+            return view('indikatorKinerjas.edit', compact('indikatorKinerja', 'programRektors', 'satuans', 'metaAnggarans', 'units', 'users', 'selectedMetaAnggarans', 'selectedUnitTerkaits'))->render();
         }
-        return view('indikatorKinerjas.edit', compact('indikatorKinerja', 'programRektors', 'satuans', 'metaAnggarans', 'units', 'users', 'selectedMetaAnggarans'));
+        return view('indikatorKinerjas.edit', compact('indikatorKinerja', 'programRektors', 'satuans', 'metaAnggarans', 'units', 'users', 'selectedMetaAnggarans', 'selectedUnitTerkaits'));
     }
 
     public function update(Request $request, $id)
@@ -108,7 +173,7 @@ class IndikatorKinerjaController extends Controller
             'HargaSatuan' => 'required|integer',
             'Jumlah' => 'required|integer',
             'MetaAnggaranID' => 'required|array',
-            'UnitTerkaitID' => 'required|exists:units,UnitID',
+            'UnitTerkaitID' => 'required|array', // Changed to array
             'NA' => 'required|in:Y,N',
         ]);
 
@@ -119,7 +184,7 @@ class IndikatorKinerjaController extends Controller
         $indikatorKinerja->HargaSatuan = $request->HargaSatuan;
         $indikatorKinerja->Jumlah = $request->Jumlah;
         $indikatorKinerja->MetaAnggaranID = implode(',', $request->MetaAnggaranID);
-        $indikatorKinerja->UnitTerkaitID = $request->UnitTerkaitID;
+        $indikatorKinerja->UnitTerkaitID = implode(',', $request->UnitTerkaitID); // Changed to implode array
         $indikatorKinerja->NA = $request->NA;
         $indikatorKinerja->DEdited = now();
         $indikatorKinerja->UEdited = Auth::id();

@@ -9,10 +9,25 @@
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
         <h6 class="m-0 font-weight-bold text-primary">Program Rektor List</h6>
-        <div>
+        <div class="d-flex align-items-center">
+            <div class="mr-2">
+                <select id="programPengembanganFilter" class="form-control  select2-filter">
+                    <option value="">-- Pilih Program Pengembangan --</option>
+                    @foreach($programPengembangans as $programPengembangan)
+                        <option value="{{ $programPengembangan->ProgramPengembanganID }}" {{ isset($selectedProgramPengembangan) && $selectedProgramPengembangan == $programPengembangan->ProgramPengembanganID ? 'selected' : '' }}>
+                            {{ $programPengembangan->Nama }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
             <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('program-rektors.create') }}" data-title="Tambah Program Rektor">
                 <i class="fas fa-plus fa-sm"></i> Tambah Program Rektor
             </button>
+            <a href="{{ route('program-rektors.export.excel', request()->query()) }}" class="btn btn-success btn-sm">
+                <i class="fas fa-file-excel fa-sm"></i> Export Excel
+            </a>
+            </div>
         </div>
     </div>
     <div class="card-body">
@@ -71,8 +86,25 @@
 @push('scripts')
 <script>
     $(document).ready(function () {
-        $('#programRektorTable').DataTable({
+        // Initialize DataTable
+        var table = $('#programRektorTable').DataTable({
             responsive: true
+        });
+        
+        // Handle Program Pengembangan filter change
+        $('#programPengembanganFilter').on('change', function() {
+            var programPengembanganID = $(this).val();
+            var url = new URL(window.location.href);
+            
+            // Update or remove the query parameter
+            if (programPengembanganID) {
+                url.searchParams.set('programPengembanganID', programPengembanganID);
+            } else {
+                url.searchParams.delete('programPengembanganID');
+            }
+            
+            // Navigate to the filtered URL
+            window.location.href = url.toString();
         });
     });
 </script>

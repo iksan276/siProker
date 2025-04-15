@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('HargaSatuan');
             $table->integer('Jumlah');
             $table->text('MetaAnggaranID'); // Comma-separated IDs
-            $table->unsignedBigInteger('UnitTerkaitID');
+            $table->text('UnitTerkaitID');
             $table->enum('NA', ['Y', 'N'])->default('N');
             $table->dateTime('DCreated')->nullable();
             $table->unsignedBigInteger('UCreated')->nullable();
@@ -29,7 +29,6 @@ return new class extends Migration
             
             $table->foreign('ProgramRektorID')->references('ProgramRektorID')->on('program_rektors');
             $table->foreign('SatuanID')->references('SatuanID')->on('satuans');
-            $table->foreign('UnitTerkaitID')->references('UnitID')->on('units');
             $table->foreign('UCreated')->references('id')->on('users');
             $table->foreign('UEdited')->references('id')->on('users');
         });

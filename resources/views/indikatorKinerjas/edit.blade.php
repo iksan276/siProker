@@ -45,10 +45,9 @@
     </div>
     <div class="form-group">
         <label for="UnitTerkaitID">Unit Terkait</label>
-        <select name="UnitTerkaitID" id="UnitTerkaitID" class="form-control select2" required>
-        <option value="" disabled selected></option>
+        <select name="UnitTerkaitID[]" id="UnitTerkaitID" class="form-control select2" multiple required>
             @foreach($units as $unit)
-                <option value="{{ $unit->UnitID }}" {{ $indikatorKinerja->UnitTerkaitID == $unit->UnitID ? 'selected' : '' }}>{{ $unit->Nama }}</option>
+                <option value="{{ $unit->UnitID }}" {{ in_array($unit->UnitID, $selectedUnitTerkaits) ? 'selected' : '' }}>{{ $unit->Nama }}</option>
             @endforeach
         </select>
     </div>

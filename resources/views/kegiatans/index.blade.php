@@ -9,10 +9,25 @@
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
         <h6 class="m-0 font-weight-bold text-primary">Kegiatan List</h6>
-        <div>
+        <div class="d-flex align-items-center">
+          <div class="mr-2">
+                <select id="indikatorKinerjaFilter" class="form-control  select2-filter">
+                    <option value="">-- Pilih Indikator Kinerja --</option>
+                    @foreach($indikatorKinerjas as $indikatorKinerja)
+                        <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}" {{ isset($selectedIndikatorKinerja) && $selectedIndikatorKinerja == $indikatorKinerja->IndikatorKinerjaID ? 'selected' : '' }}>
+                            {{ $indikatorKinerja->Nama }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
             <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('kegiatans.create') }}" data-title="Tambah Kegiatan">
                 <i class="fas fa-plus fa-sm"></i> Tambah Kegiatan
             </button>
+            <a href="{{ route('kegiatans.export.excel', request()->query()) }}" class="btn btn-success btn-sm">
+                <i class="fas fa-file-excel fa-sm"></i> Export Excel
+            </a>
+            </div>
         </div>
     </div>
     <div class="card-body">
@@ -35,8 +50,8 @@
                         <td style="white-space:nowrap;width:1px" class="text-center">{{ $index + 1 }}</td>
                         <td>{{ $kegiatan->indikatorKinerja->Nama }}</td>
                         <td>{{ $kegiatan->Nama }}</td>
-                        <td>{{ \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y') }}</td>
+                        <td class="text-center">{{ \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y') }}</td>
+                        <td class="text-center">{{ \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y') }}</td>
                         <td>{!! nl2br(Str::limit($kegiatan->RincianKegiatan, 50)) !!}</td>
                         <td class="text-center" style="white-space:nowrap;width:1px">
                             <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('kegiatans.show', $kegiatan->KegiatanID) }}" data-title="Detail Kegiatan">
@@ -65,8 +80,25 @@
 @push('scripts')
 <script>
     $(document).ready(function () {
-        $('#kegiatanTable').DataTable({
+        // Initialize DataTable
+        var table = $('#kegiatanTable').DataTable({
             responsive: true
+        });
+        
+        // Handle filter change
+        $('#indikatorKinerjaFilter').on('change', function() {
+            var indikatorKinerjaID = $(this).val();
+            var url = new URL(window.location.href);
+            
+            // Update or remove the query parameter
+            if (indikatorKinerjaID) {
+                url.searchParams.set('indikatorKinerjaID', indikatorKinerjaID);
+            } else {
+                url.searchParams.delete('indikatorKinerjaID');
+            }
+            
+            // Navigate to the filtered URL
+            window.location.href = url.toString();
         });
     });
 </script>
