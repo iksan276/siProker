@@ -4,7 +4,7 @@
     <div class="form-group">
         <label for="IndikatorKinerjaID">Indikator Kinerja</label>
         <select name="IndikatorKinerjaID" id="IndikatorKinerjaID" class="form-control select2" required>
-            <option value="">-- Pilih Indikator Kinerja --</option>
+        <option value="" disabled selected></option>
             @foreach($indikatorKinerjas as $indikatorKinerja)
                 <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}" {{ $kegiatan->IndikatorKinerjaID == $indikatorKinerja->IndikatorKinerjaID ? 'selected' : '' }}>{{ $indikatorKinerja->Nama }}</option>
             @endforeach

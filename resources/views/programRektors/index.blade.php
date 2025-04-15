@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2 text-gray-800">Program Rektor Management</h1>
+<h1 class="h3 mb-2">Program Rektor Management</h1>
 <p class="mb-4">Manage all Program Rektor in the system.</p>
 
 <!-- DataTales Card -->

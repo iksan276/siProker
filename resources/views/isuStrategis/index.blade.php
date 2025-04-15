@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2 text-gray-800">Isu Strategis Management</h1>
+<h1 class="h3 mb-2">Isu Strategis Management</h1>
 <p class="mb-4">Manage all Isu Strategis in the system.</p>
 
 <!-- DataTales Card -->
@@ -41,16 +41,16 @@
                             @endif
                         </td>
                         <td class="text-center" style="white-space:nowrap;width:1px">
-                            <button class="btn btn-info btn-circle btn-sm load-modal" data-url="{{ route('isu-strategis.show', $isu->IsuID) }}" data-title="Detail Isu Strategis">
+                            <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('isu-strategis.show', $isu->IsuID) }}" data-title="Detail Isu Strategis">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-warning btn-circle btn-sm load-modal" data-url="{{ route('isu-strategis.edit', $isu->IsuID) }}" data-title="Edit Isu Strategis">
+                            <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('isu-strategis.edit', $isu->IsuID) }}" data-title="Edit Isu Strategis">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <form action="{{ route('isu-strategis.destroy', $isu->IsuID) }}" method="POST" class="d-inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="button" class="btn btn-danger btn-circle btn-sm delete-confirm">
+                                <button type="button" class="btn btn-danger btn-square btn-sm delete-confirm">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>

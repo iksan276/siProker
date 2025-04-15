@@ -7,7 +7,7 @@
     <div class="form-group">
         <label for="ProgramRektorID">Program Rektor</label>
         <select name="ProgramRektorID" id="ProgramRektorID" class="form-control select2" required>
-            <option value="">-- Pilih Program Rektor --</option>
+        <option value="" disabled selected></option>
             @foreach($programRektors as $programRektor)
                 <option value="{{ $programRektor->ProgramRektorID }}">{{ $programRektor->Nama }}</option>
             @endforeach
@@ -16,7 +16,7 @@
     <div class="form-group">
         <label for="SatuanID">Satuan</label>
         <select name="SatuanID" id="SatuanID" class="form-control select2" required>
-            <option value="">-- Pilih Satuan --</option>
+        <option value="" disabled selected></option>
             @foreach($satuans as $satuan)
                 <option value="{{ $satuan->SatuanID }}">{{ $satuan->Nama }}</option>
             @endforeach
@@ -45,7 +45,7 @@
     <div class="form-group">
         <label for="UnitTerkaitID">Unit Terkait</label>
         <select name="UnitTerkaitID" id="UnitTerkaitID" class="form-control select2" required>
-            <option value="">-- Pilih Unit --</option>
+        <option value="" disabled selected></option>
             @foreach($units as $unit)
                 <option value="{{ $unit->UnitID }}">{{ $unit->Nama }}</option>
             @endforeach

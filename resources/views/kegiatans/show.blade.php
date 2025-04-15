@@ -22,7 +22,7 @@
         </tr>
         <tr>
             <th>Rincian Kegiatan</th>
-            <td>{{ $kegiatan->RincianKegiatan }}</td>
+            <td>{!! nl2br(Str::limit($kegiatan->RincianKegiatan, 50)) !!}</td>
         </tr>
     </table>
 </div>

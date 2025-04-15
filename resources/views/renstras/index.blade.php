@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2 text-gray-800">Renstra Management</h1>
+<h1 class="h3 mb-2">Renstra Management</h1>
 <p class="mb-4">Manage all Renstra in the system.</p>
 
 <!-- DataTales Card -->

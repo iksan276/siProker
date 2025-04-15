@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2 text-gray-800">Kegiatan Management</h1>
+<h1 class="h3 mb-2">Kegiatan Management</h1>
 <p class="mb-4">Manage all Kegiatan in the system.</p>
 
 <!-- DataTales Card -->
@@ -37,7 +37,7 @@
                         <td>{{ $kegiatan->Nama }}</td>
                         <td>{{ \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y') }}</td>
                         <td>{{ \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y') }}</td>
-                        <td>{{ Str::limit($kegiatan->RincianKegiatan, 50) }}</td>
+                        <td>{!! nl2br(Str::limit($kegiatan->RincianKegiatan, 50)) !!}</td>
                         <td class="text-center" style="white-space:nowrap;width:1px">
                             <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('kegiatans.show', $kegiatan->KegiatanID) }}" data-title="Detail Kegiatan">
                                 <i class="fas fa-eye"></i>

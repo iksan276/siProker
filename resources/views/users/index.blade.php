@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2 text-gray-800">User Management</h1>
+<h1 class="h3 mb-2">User Management</h1>
 <p class="mb-4">Manage all users in the system.</p>
 
 <!-- DataTales Card -->
@@ -36,7 +36,7 @@
                 <tbody>
                     @foreach($users as $index => $u)
                     <tr>
-                    <td style="white-space:nowrap;width:1px">{{ $index + 1 }}</td>
+                    <td style="white-space:nowrap;width:1px"  class="center">{{ $index + 1 }}</td>
                         <td>{{ $u->name }}</td>
                         <td class="text-center" style="white-space:nowrap;width:1px">{{ $u->email }}</td>
                         <td class="text-center" style="white-space:nowrap;width:1px">

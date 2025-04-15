@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2 text-gray-800">Indikator Kinerja Management</h1>
+<h1 class="h3 mb-2">Indikator Kinerja Management</h1>
 <p class="mb-4">Manage all Indikator Kinerja in the system.</p>
 
 <!-- DataTales Card -->
@@ -42,10 +42,14 @@
                         <td class="text-right">{{ number_format($indikatorKinerja->HargaSatuan, 0, ',', '.') }}</td>
                         <td class="text-center">{{ $indikatorKinerja->Jumlah }}</td>
                         <td>
-                            @php
+                             @php
                                 $metaAnggarans = \App\Models\MetaAnggaran::whereIn('MetaAnggaranID', explode(',', $indikatorKinerja->MetaAnggaranID))->pluck('Nama')->toArray();
-                                echo implode(', ', $metaAnggarans);
                             @endphp
+                            <ul class="mb-0">
+                                @foreach($metaAnggarans as $metaAnggaran)
+                                    <li>{{ $metaAnggaran }}</li>
+                                @endforeach
+                            </ul>
                         </td>
                         <td>{{ $indikatorKinerja->unitTerkait->Nama }}</td>
                         <td class="text-center text-dark" style="white-space:nowrap;width:1px">
