@@ -11,13 +11,71 @@ use Illuminate\Database\QueryException;
 
 class PilarController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pilars = Pilar::with(['renstra', 'createdBy', 'editedBy'])
-        ->orderBy('DCreated', 'desc')
-        ->get();
-        return view('pilars.index', compact('pilars'));
+        // Get all active renstras for the filter
+        $renstras = Renstra::where('NA', 'N')->get();
+        
+        // Base query
+        $pilarsQuery = Pilar::with(['renstra', 'createdBy', 'editedBy']);
+        
+        // Apply filter if renstraID is provided
+        if ($request->has('renstraID') && $request->renstraID) {
+            $pilarsQuery->where('RenstraID', $request->renstraID);
+        }
+        
+        // Get the filtered results
+        $pilars = $pilarsQuery->orderBy('DCreated', 'desc')->get();
+        
+        // Get the selected filter value (for re-populating the select)
+        $selectedRenstra = $request->renstraID;
+        
+        // If it's an AJAX request, return JSON data for DataTable
+        if ($request->ajax() && $request->wantsJson()) {
+            $data = [];
+            foreach ($pilars as $index => $pilar) {
+                // Format the actions HTML
+                $actions = '';
+                if (auth()->user()->isAdmin()) {
+                    $actions = '
+                        <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('pilars.show', $pilar->PilarID).'" data-title="Detail Pilar">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('pilars.edit', $pilar->PilarID).'" data-title="Edit Pilar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button type="button" class="btn btn-danger btn-square btn-sm delete-pilar" data-id="'.$pilar->PilarID.'">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ';
+                }
+                
+                // Format the NA status
+                $naStatus = '';
+                if ($pilar->NA == 'Y') {
+                    $naStatus = '<span class="badge badge-danger">Non Aktif</span>';
+                } else if ($pilar->NA == 'N') {
+                    $naStatus = '<span class="badge badge-success">Aktif</span>';
+                }
+                
+                $data[] = [
+                    'no' => $index + 1,
+                    'nama' => $pilar->Nama,
+                    'renstra' => $pilar->renstra->Nama,
+                    'na' => $naStatus,
+                    'actions' => $actions,
+                    'row_class' => $pilar->NA == 'Y' ? 'bg-light text-muted' : ''
+                ];
+            }
+            
+            return response()->json([
+                'data' => $data
+            ]);
+        }
+        
+        return view('pilars.index', compact('pilars', 'renstras', 'selectedRenstra'));
     }
+
 
     public function create()
     {

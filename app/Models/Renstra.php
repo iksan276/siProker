@@ -35,4 +35,10 @@ class Renstra extends Model
     {
         return $this->belongsTo(User::class, 'UEdited', 'id');
     }
+    
+    // Scope untuk mendapatkan renstra aktif
+    public function scopeActive($query)
+    {
+        return $query->where('NA', 'N');
+    }
 }

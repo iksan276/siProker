@@ -12,10 +12,24 @@
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
         <h6 class="m-0 font-weight-bold text-primary">Pilar List</h6>
-        <div>
-            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('pilars.create') }}" data-title="Tambah Pilar">
-                <i class="fas fa-plus fa-sm"></i> Tambah Pilar
-            </button>
+        <div class="d-flex align-items-center">
+            <div class="mr-2">
+                <select id="renstraFilter" class="form-control select2-filter">
+                    <option value="">-- Pilih Renstra --</option>
+                    @foreach($renstras as $renstra)
+                        <option value="{{ $renstra->RenstraID }}" {{ isset($selectedRenstra) && $selectedRenstra == $renstra->RenstraID ? 'selected' : '' }}>
+                            {{ $renstra->Nama }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            @if(auth()->user()->isAdmin())
+            <div>
+                <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('pilars.create') }}" data-title="Tambah Pilar">
+                    <i class="fas fa-plus fa-sm"></i> Tambah Pilar
+                </button>
+            </div>
+            @endif
         </div>
     </div>
     <div class="card-body">
@@ -27,63 +41,47 @@
                         <th>Nama</th>
                         <th>Renstra</th>
                         <th>NA</th>
+                        @if(auth()->user()->isAdmin())
                         <th>Actions</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($pilars as $index => $pilar)
-                    <tr class="{{ $pilar->NA == 'Y' ? 'bg-light text-muted' : '' }}">
-                        <td class="text-center" style="white-space:nowrap;width:1px">{{ $index + 1 }}</td>
-                        <td>{{ $pilar->Nama }}</td>
-                        <td>{{ $pilar->renstra->Nama }}</td>
-                        <td class="text-center" style="white-space:nowrap;width:1px">
-                            @if($pilar->NA == 'Y')
-                                <span class="badge badge-danger">Non Aktif</span>
-                            @endif
-                            @if($pilar->NA == 'N')
-                              <span class="badge badge-success">Aktif</span>
-                            @endif
-                        </td>
-                        <td class="text-center" style="white-space:nowrap;width:1px">
-                            <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('pilars.show', $pilar->PilarID) }}" data-title="Detail Pilar">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('pilars.edit', $pilar->PilarID) }}" data-title="Edit Pilar">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button type="button" class="btn btn-danger btn-square btn-sm delete-pilar" data-id="{{ $pilar->PilarID }}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    @endforeach
+                    <!-- DataTable will populate this -->
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-
-<!-- Delete Form Template (Hidden) -->
-<form id="deleteForm" method="POST" style="display: none;">
-    @csrf
-    @method('DELETE')
-</form>
 @endsection
 
 @push('scripts')
 <script>
-    let pilarTable;
+    var pilarTable;
+    var isFiltering = false;
     
     $(document).ready(function () {
-        // Initialize DataTable
-        pilarTable = $('#pilarTable').DataTable({
-            responsive: true,
-            processing: true,
-            language: {
-                processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>'
-            }
+        // Initialize DataTable with AJAX source
+        initDataTable();
+        
+        // Handle filter change
+        $('#renstraFilter').on('change', function() {
+            var renstraID = $(this).val();
+            
+            // Set filtering flag to true
+            isFiltering = true;
+            
+            // Update URL without page refresh
+            updateUrlParameter('renstraID', renstraID);
+            
+            // Reload DataTable with new filter
+            pilarTable.ajax.reload(function() {
+                // Reset filtering flag after data is loaded
+                isFiltering = false;
+            });
         });
         
+        @if(auth()->user()->isAdmin())
         // Handle form submission within modal
         $(document).on('submit', '.modal-form', function(e) {
             e.preventDefault();
@@ -100,7 +98,6 @@
                     // Disable submit button and show loading indicator with smaller spinner
                     form.find('button[type="submit"]').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="width: 1rem; height: 1rem; border-width: 0.15em;"></span> <small>Processing...</small>');
                 },
-
                 success: function(response) {
                     if (response.success) {
                         // Close modal
@@ -109,8 +106,8 @@
                         // Show success message
                         showAlert('success', response.message || 'Operation completed successfully');
                         
-                        // Reload only the DataTable
-                        reloadTable();
+                        // Reload DataTable
+                        pilarTable.ajax.reload();
                     } else {
                         // Display error message
                         showAlert('danger', response.message || 'An error occurred');
@@ -170,8 +167,8 @@
                                 // Show success message
                                 showAlert('success', response.message || 'Pilar berhasil dihapus');
                                 
-                                // Reload only the DataTable
-                                reloadTable();
+                                // Reload DataTable
+                                pilarTable.ajax.reload();
                             } else {
                                 // Show error message
                                 showAlert('danger', response.message || 'Failed to delete pilar');
@@ -189,68 +186,186 @@
                 }
             });
         });
+        @endif
     });
     
-    // Function to reload DataTable
-    function reloadTable() {
-        $.ajax({
-            url: "{{ route('pilars.index') }}",
-            type: 'GET',
-            dataType: 'html',
-            success: function(response) {
-                // Extract the table HTML from the response
-                var newTableHtml = $(response).find('#pilarTable tbody').html();
-                
-                // Clear the current table and add the new data
-                pilarTable.clear().destroy();
-                $('#pilarTable tbody').html(newTableHtml);
-                
-                // Reinitialize DataTable with the same settings as initial load
-                pilarTable = $('#pilarTable').DataTable({
-                    responsive: true,
-                    processing: true,
-                    language: {
-                        processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>'
-                    },
-                    columnDefs: [
-                        // No column (index 0)
-                        { 
-                            targets: 0,
-                            className: 'text-center',
-                            width: '1px',
-                            orderable: true,
-                            render: function(data, type, row, meta) {
-                                return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
-                            }
-                        },
-                        // NA column (index 3)
-                        { 
-                            targets: 3,
-                            className: 'text-center',
-                            width: '1px',
-                            render: function(data, type, row, meta) {
-                                return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
-                            }
-                        },
-                        // Actions column (index 4)
-                        { 
-                            targets: 4,
-                            className: 'text-center',
-                            width: '1px',
-                            orderable: false,
-                            render: function(data, type, row, meta) {
-                                return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
-                            }
-                        }
-                    ]
-                });
+    function initDataTable() {
+        // Destroy existing DataTable if it exists
+        if ($.fn.DataTable.isDataTable('#pilarTable')) {
+            $('#pilarTable').DataTable().destroy();
+        }
+        
+        // Initialize DataTable with AJAX
+        pilarTable = $('#pilarTable').DataTable({
+            processing: true,
+            serverSide: false, // We're handling the data ourselves
+            ajax: {
+                url: '{{ route('pilars.index') }}',
+                type: 'GET',
+                data: function(d) {
+                    d.renstraID = $('#renstraFilter').val();
+                },
+                // Show processing only during filtering
+                beforeSend: function() {
+                    if (!isFiltering) {
+                        $('#pilarTable_processing').hide();
+                    }
+                }
             },
-            error: function() {
-                showAlert('danger', 'Failed to reload data');
+            columns: [
+                { 
+                    data: 'no', 
+                    className: 'text-center',
+                    width: '1px',
+                    orderable: false,
+                    render: function(data) {
+                        return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
+                    }
+                },
+                { data: 'nama' },
+                { data: 'renstra' },
+                { 
+                    data: 'na', 
+                    className: 'text-center',
+                    width: '1px',
+                    render: function(data) {
+                        return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
+                    }
+                },
+                @if(auth()->user()->isAdmin())
+                { 
+                    data: 'actions', 
+                    className: 'text-center',
+                    width: '1px',
+                    orderable: false,
+                    render: function(data) {
+                        return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
+                    }
+                }
+                @endif
+            ],
+            responsive: true,
+            drawCallback: function() {
+                // Re-initialize event handlers for dynamic content
+                initEventHandlers();
+            },
+            // Apply row class for inactive items
+            createdRow: function(row, data, dataIndex) {
+                if (data.row_class) {
+                    $(row).addClass(data.row_class);
+                }
+            },
+            // Hide processing indicator for all operations except filtering
+            language: {
+                processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>'
+            },
+            // Override the default processing display behavior
+            preDrawCallback: function() {
+                if (!isFiltering) {
+                    $('#pilarTable_processing').hide();
+                }
+                return true;
+            }
+        });
+        
+        // Additional override to hide processing indicator for pagination, sorting, etc.
+        $('#pilarTable').on('page.dt search.dt order.dt', function() {
+            if (!isFiltering) {
+                $('#pilarTable_processing').hide();
             }
         });
     }
-
+    
+    function updateUrlParameter(key, value) {
+        var url = new URL(window.location.href);
+        
+        if (value) {
+            url.searchParams.set(key, value);
+        } else {
+            url.searchParams.delete(key);
+        }
+        
+        window.history.pushState({}, '', url.toString());
+    }
+    
+    function initEventHandlers() {
+        // Re-initialize modal loading for dynamically added buttons
+        $('.load-modal').off('click').on('click', function(e) {
+            e.preventDefault();
+            var url = $(this).data('url');
+            var title = $(this).data('title');
+            
+            $('#mainModalLabel').text(title);
+            $('#mainModal .modal-body').html('<div class="text-center"><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>');
+            $('#mainModal').modal('show');
+            
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                    $('#mainModal .modal-body').html(response);
+                    initModalSelect2();
+                },
+                error: function(xhr) {
+                    console.error('AJAX Error:', xhr);
+                    $('#mainModal .modal-body').html('<div class="alert alert-danger">Error loading content</div>');
+                }
+            });
+        });
+        
+        @if(auth()->user()->isAdmin())
+        // Re-initialize delete confirmation for dynamically added buttons
+        $('.delete-pilar').off('click').on('click', function(e) {
+            e.preventDefault();
+            var pilarId = $(this).data('id');
+            var deleteUrl = "{{ route('pilars.destroy', ':id') }}".replace(':id', pilarId);
+            
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Perform AJAX delete
+                    $.ajax({
+                        url: deleteUrl,
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            _method: 'DELETE'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                // Show success message
+                                showAlert('success', response.message || 'Pilar berhasil dihapus');
+                                
+                                // Reload DataTable
+                                pilarTable.ajax.reload();
+                            } else {
+                                // Show error message
+                                showAlert('danger', response.message || 'Failed to delete pilar');
+                            }
+                        },
+                        error: function(xhr) {
+                            // Handle error response
+                            var message = 'An error occurred';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            }
+                            showAlert('danger', message);
+                        }
+                    });
+                }
+            });
+        });
+        @endif
+    }
+    
     // Function to show alert messages
     function showAlert(type, message) {
         var alertHtml = `
@@ -269,5 +384,23 @@
             $('.alert').alert('close');
         }, 5000);
     }
+    
+    // Initial data load - hide processing indicator if not filtering
+    $(document).ajaxStart(function() {
+        if (!isFiltering) {
+            $('#pilarTable_processing').hide();
+        }
+    });
+    
+    // Make sure processing indicator is hidden when page loads
+    $(window).on('load', function() {
+        if (!isFiltering) {
+            setTimeout(function() {
+                $('#pilarTable_processing').hide();
+            }, 200);
+        }
+    });
 </script>
 @endpush
+
+              
