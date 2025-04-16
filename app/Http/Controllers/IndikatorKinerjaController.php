@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\IndikatorKinerjasExport;
-
+use Illuminate\Database\QueryException;
 
 class IndikatorKinerjaController extends Controller
 {
@@ -86,13 +86,9 @@ class IndikatorKinerjaController extends Controller
                     <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('indikator-kinerjas.edit', $indikatorKinerja->IndikatorKinerjaID).'" data-title="Edit Indikator Kinerja">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <form action="'.route('indikator-kinerjas.destroy', $indikatorKinerja->IndikatorKinerjaID).'" method="POST" class="d-inline">
-                        '.csrf_field().'
-                        '.method_field('DELETE').'
-                        <button type="button" class="btn btn-danger btn-square btn-sm delete-confirm">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-danger btn-square btn-sm delete-indikator" data-id="'.$indikatorKinerja->IndikatorKinerjaID.'">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 ';
                 
                 $rowClass = $indikatorKinerja->NA == 'Y' ? 'bg-light text-muted' : '';
@@ -120,7 +116,6 @@ class IndikatorKinerjaController extends Controller
         
         return view('indikatorKinerjas.index', compact('indikatorKinerjas', 'programRektors', 'units', 'selectedProgramRektor', 'selectedUnitIDs'));
     }
-
 
     public function exportExcel(Request $request)
     {
@@ -153,7 +148,6 @@ class IndikatorKinerjaController extends Controller
         
         return Excel::download(new IndikatorKinerjasExport($indikatorKinerjas), 'indikator_kinerjas.xlsx');
     }
-    
 
     public function create()
     {
@@ -179,7 +173,7 @@ class IndikatorKinerjaController extends Controller
             'HargaSatuan' => 'required|integer',
             'Jumlah' => 'required|integer',
             'MetaAnggaranID' => 'required|array',
-            'UnitTerkaitID' => 'required|array', // Changed to array
+            'UnitTerkaitID' => 'required|array',
             'NA' => 'required|in:Y,N',
         ]);
 
@@ -191,23 +185,23 @@ class IndikatorKinerjaController extends Controller
         $indikatorKinerja->HargaSatuan = $request->HargaSatuan;
         $indikatorKinerja->Jumlah = $request->Jumlah;
         $indikatorKinerja->MetaAnggaranID = implode(',', $request->MetaAnggaranID);
-        $indikatorKinerja->UnitTerkaitID = implode(',', $request->UnitTerkaitID); // Changed to implode array
+        $indikatorKinerja->UnitTerkaitID = implode(',', $request->UnitTerkaitID);
         $indikatorKinerja->NA = $request->NA;
         $indikatorKinerja->DCreated = now();
         $indikatorKinerja->UCreated = Auth::id();
         $indikatorKinerja->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Indikator Kinerja berhasil ditambahkan']);
         }
-        return redirect()->route('indikatorKinerjas.index')->with('success', 'Indikator Kinerja created successfully');
+        return redirect()->route('indikator-kinerjas.index')->with('success', 'Indikator Kinerja berhasil ditambahkan');
     }
 
     public function show($id)
     {
         $indikatorKinerja = IndikatorKinerja::findOrFail($id);
         $metaAnggarans = MetaAnggaran::whereIn('MetaAnggaranID', explode(',', $indikatorKinerja->MetaAnggaranID))->get();
-        $unitTerkaits = Unit::whereIn('UnitID', explode(',', $indikatorKinerja->UnitTerkaitID))->get(); // Added this line
+        $unitTerkaits = Unit::whereIn('UnitID', explode(',', $indikatorKinerja->UnitTerkaitID))->get();
         
         if (request()->ajax()) {
             return view('indikatorKinerjas.show', compact('indikatorKinerja', 'metaAnggarans', 'unitTerkaits'))->render();
@@ -224,7 +218,7 @@ class IndikatorKinerjaController extends Controller
         $units = Unit::all();
         $users = User::all();
         $selectedMetaAnggarans = explode(',', $indikatorKinerja->MetaAnggaranID);
-        $selectedUnitTerkaits = explode(',', $indikatorKinerja->UnitTerkaitID); // Added this line
+        $selectedUnitTerkaits = explode(',', $indikatorKinerja->UnitTerkaitID);
         
         if (request()->ajax()) {
             return view('indikatorKinerjas.edit', compact('indikatorKinerja', 'programRektors', 'satuans', 'metaAnggarans', 'units', 'users', 'selectedMetaAnggarans', 'selectedUnitTerkaits'))->render();
@@ -244,7 +238,7 @@ class IndikatorKinerjaController extends Controller
             'HargaSatuan' => 'required|integer',
             'Jumlah' => 'required|integer',
             'MetaAnggaranID' => 'required|array',
-            'UnitTerkaitID' => 'required|array', // Changed to array
+            'UnitTerkaitID' => 'required|array',
             'NA' => 'required|in:Y,N',
         ]);
 
@@ -255,22 +249,53 @@ class IndikatorKinerjaController extends Controller
         $indikatorKinerja->HargaSatuan = $request->HargaSatuan;
         $indikatorKinerja->Jumlah = $request->Jumlah;
         $indikatorKinerja->MetaAnggaranID = implode(',', $request->MetaAnggaranID);
-        $indikatorKinerja->UnitTerkaitID = implode(',', $request->UnitTerkaitID); // Changed to implode array
+        $indikatorKinerja->UnitTerkaitID = implode(',', $request->UnitTerkaitID);
         $indikatorKinerja->NA = $request->NA;
         $indikatorKinerja->DEdited = now();
         $indikatorKinerja->UEdited = Auth::id();
         $indikatorKinerja->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Indikator Kinerja berhasil diupdate']);
         }
-        return redirect()->route('indikatorKinerjas.index')->with('success', 'Indikator Kinerja updated successfully');
+        return redirect()->route('indikator-kinerjas.index')->with('success', 'Indikator Kinerja berhasil diupdate');
     }
 
     public function destroy($id)
     {
-        $indikatorKinerja = IndikatorKinerja::findOrFail($id);
-        $indikatorKinerja->delete();
-        return redirect()->route('indikatorKinerjas.index')->with('success', 'Indikator Kinerja deleted successfully');
+        try {
+            $indikatorKinerja = IndikatorKinerja::findOrFail($id);
+            $indikatorKinerja->delete();
+            
+            if (request()->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Indikator Kinerja berhasil dihapus']);
+            }
+            
+            return redirect()->route('indikator-kinerjas.index')->with('success', 'Indikator Kinerja berhasil dihapus');
+        } catch (QueryException $e) {
+            // Check if it's a foreign key constraint error
+            if ($e->getCode() == 23000) { // Integrity constraint violation
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Tidak dapat menghapus  indikator kinerja ini karena dirujuk oleh baris di table lain.'
+                    ], 422);
+                }
+                
+                return redirect()->route('indikator-kinerjas.index')
+                    ->with('error', 'Tidak dapat menghapus  indikator kinerja ini karena dirujuk oleh baris di table lain.');
+            }
+            
+            // For other database errors
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Database error occurred: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->route('indikator-kinerjas.index')
+                ->with('error', 'Database error occurred: ' . $e->getMessage());
+        }
     }
 }

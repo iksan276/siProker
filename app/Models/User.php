@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'level',
     ];
 
     /**
@@ -41,4 +42,24 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    
+    /**
+     * Check if user is admin
+     *
+     * @return bool
+     */
+    public function isAdmin()
+    {
+        return $this->level === 1;
+    }
+    
+    /**
+     * Check if user is regular user
+     *
+     * @return bool
+     */
+    public function isUser()
+    {
+        return $this->level === 2;
+    }
 }

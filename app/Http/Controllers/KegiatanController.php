@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\KegiatansExport;
+use Illuminate\Database\QueryException;
 
 class KegiatanController extends Controller
 {
@@ -45,13 +46,9 @@ class KegiatanController extends Controller
                     <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('kegiatans.edit', $kegiatan->KegiatanID).'" data-title="Edit Kegiatan">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <form action="'.route('kegiatans.destroy', $kegiatan->KegiatanID).'" method="POST" class="d-inline">
-                        '.csrf_field().'
-                        '.method_field('DELETE').'
-                        <button type="button" class="btn btn-danger btn-square btn-sm delete-confirm">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" data-id="'.$kegiatan->KegiatanID.'">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 ';
                 
                 $data[] = [
@@ -73,8 +70,6 @@ class KegiatanController extends Controller
         return view('kegiatans.index', compact('kegiatans', 'indikatorKinerjas', 'selectedIndikatorKinerja'));
     }
     
-    
-
     public function exportExcel(Request $request)
     {
         // Base query with all necessary relationships
@@ -94,7 +89,6 @@ class KegiatanController extends Controller
         
         return Excel::download(new KegiatansExport($kegiatans), 'kegiatans.xlsx');
     }
-
 
     public function create()
     {
@@ -128,9 +122,9 @@ class KegiatanController extends Controller
         $kegiatan->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Kegiatan berhasil ditambahkan']);
         }
-        return redirect()->route('kegiatans.index')->with('success', 'Kegiatan created successfully');
+        return redirect()->route('kegiatans.index')->with('success', 'Kegiatan berhasil ditambahkan');
     }
 
     public function show($id)
@@ -177,15 +171,46 @@ class KegiatanController extends Controller
         $kegiatan->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Kegiatan berhasil diupdate']);
         }
-        return redirect()->route('kegiatans.index')->with('success', 'Kegiatan updated successfully');
+        return redirect()->route('kegiatans.index')->with('success', 'Kegiatan berhasil diupdate');
     }
 
     public function destroy($id)
     {
-        $kegiatan = Kegiatan::findOrFail($id);
-        $kegiatan->delete();
-        return redirect()->route('kegiatans.index')->with('success', 'Kegiatan deleted successfully');
+        try {
+            $kegiatan = Kegiatan::findOrFail($id);
+            $kegiatan->delete();
+            
+            if (request()->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Kegiatan berhasil dihapus']);
+            }
+            
+            return redirect()->route('kegiatans.index')->with('success', 'Kegiatan berhasil dihapus');
+        } catch (QueryException $e) {
+            // Check if it's a foreign key constraint error
+            if ($e->getCode() == 23000) { // Integrity constraint violation
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Tidak dapat menghapus  kegiatan ini karena dirujuk oleh baris di table lain.'
+                    ], 422);
+                }
+                
+                return redirect()->route('kegiatans.index')
+                    ->with('error', 'Tidak dapat menghapus  kegiatan ini karena dirujuk oleh baris di table lain.');
+            }
+            
+            // For other database errors
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Database error occurred: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->route('kegiatans.index')
+                ->with('error', 'Database error occurred: ' . $e->getMessage());
+        }
     }
 }

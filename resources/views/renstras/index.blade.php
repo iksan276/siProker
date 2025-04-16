@@ -5,6 +5,9 @@
 <h1 class="h3 mb-2">Renstra Management</h1>
 <p class="mb-4">Manage all Renstra in the system.</p>
 
+<!-- Alert Container for AJAX responses -->
+<div id="alertContainer"></div>
+
 <!-- DataTales Card -->
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -25,7 +28,6 @@
                         <th style="white-space:nowrap;width:1px">Periode Mulai</th>
                         <th style="white-space:nowrap;width:1px">Periode Selesai</th>
                         <th>NA</th>
-                   
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -44,7 +46,6 @@
                               <span class="badge badge-success">Aktif</span>
                             @endif
                         </td>
-                    
                         <td style="white-space:nowrap;width:1px" class="text-center">
                             <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('renstras.show', $renstra->RenstraID) }}" data-title="Detail Renstra">
                                 <i class="fas fa-eye"></i>
@@ -52,13 +53,9 @@
                             <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('renstras.edit', $renstra->RenstraID) }}" data-title="Edit Renstra">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <form action="{{ route('renstras.destroy', $renstra->RenstraID) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="button" class="btn btn-danger btn-square btn-sm delete-confirm">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
+                            <button type="button" class="btn btn-danger btn-square btn-sm delete-renstra" data-id="{{ $renstra->RenstraID }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </td>
                     </tr>
                     @endforeach
@@ -67,14 +64,232 @@
         </div>
     </div>
 </div>
+
+<!-- Delete Form Template (Hidden) -->
+<form id="deleteForm" method="POST" style="display: none;">
+    @csrf
+    @method('DELETE')
+</form>
 @endsection
 
 @push('scripts')
 <script>
+    let renstraTable;
+    
     $(document).ready(function () {
-        $('#renstraTable').DataTable({
-            responsive: true
+        // Initialize DataTable
+        renstraTable = $('#renstraTable').DataTable({
+            responsive: true,
+            processing: true,
+            language: {
+                processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>'
+            }
+        });
+        
+        // Handle form submission within modal
+        $(document).on('submit', '.modal-form', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var url = form.attr('action');
+            var method = form.attr('method');
+            var data = form.serialize();
+            
+            $.ajax({
+                url: url,
+                type: method,
+                data: data,
+                beforeSend: function() {
+                    // Disable submit button and show loading indicator with smaller spinner
+                    form.find('button[type="submit"]').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="width: 1rem; height: 1rem; border-width: 0.15em;"></span> <small>Processing...</small>');
+                },
+
+                success: function(response) {
+                    if (response.success) {
+                        // Close modal
+                        $('#mainModal').modal('hide');
+                        
+                        // Show success message
+                        showAlert('success', response.message || 'Operation completed successfully');
+                        
+                        // Reload only the DataTable
+                        reloadTable();
+                    } else {
+                        // Display error message
+                        showAlert('danger', response.message || 'An error occurred');
+                    }
+                },
+                error: function(xhr) {
+                    // Handle validation errors
+                    var errors = xhr.responseJSON?.errors;
+                    var errorMessage = '';
+                    
+                    if (errors) {
+                        for (var field in errors) {
+                            errorMessage += errors[field][0] + '<br>';
+                        }
+                    } else if (xhr.responseJSON?.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    } else {
+                        errorMessage = 'An error occurred';
+                    }
+                    
+                    showAlert('danger', errorMessage);
+                },
+                complete: function() {
+                    // Re-enable submit button
+                    form.find('button[type="submit"]').prop('disabled', false).html('Save');
+                }
+            });
+        });
+        
+        // Handle delete button click
+        $(document).on('click', '.delete-renstra', function(e) {
+            e.preventDefault();
+            var renstraId = $(this).data('id');
+            var deleteUrl = "{{ route('renstras.destroy', ':id') }}".replace(':id', renstraId);
+            
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Perform AJAX delete
+                    $.ajax({
+                        url: deleteUrl,
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            _method: 'DELETE'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                // Show success message
+                                showAlert('success', response.message || 'Renstra berhasil dihapus');
+                                
+                                // Reload only the DataTable
+                                reloadTable();
+                            } else {
+                                // Show error message
+                                showAlert('danger', response.message || 'Failed to delete renstra');
+                            }
+                        },
+                        error: function(xhr) {
+                            // Handle error response
+                            var message = 'An error occurred';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            }
+                            showAlert('danger', message);
+                        }
+                    });
+                }
+            });
         });
     });
+    
+    // Function to reload DataTable
+  // Function to reload DataTable
+function reloadTable() {
+    $.ajax({
+        url: "{{ route('renstras.index') }}",
+        type: 'GET',
+        dataType: 'html',
+        success: function(response) {
+            // Extract the table HTML from the response
+            var newTableHtml = $(response).find('#renstraTable tbody').html();
+            
+            // Clear the current table and add the new data
+            renstraTable.clear().destroy();
+            $('#renstraTable tbody').html(newTableHtml);
+            
+            // Reinitialize DataTable with the same settings as initial load
+            renstraTable = $('#renstraTable').DataTable({
+                responsive: true,
+                processing: true,
+                language: {
+                    processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>'
+                },
+                columnDefs: [
+                    // No column (index 0)
+                    { 
+                        targets: 0,
+                        className: 'text-center',
+                        width: '1px',
+                        orderable: true,
+                        render: function(data, type, row, meta) {
+                            return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
+                        }
+                    },
+                    // Periode Mulai column (index 2)
+                    { 
+                        targets: 2,
+                        className: 'text-center',
+                        width: '1px',
+                        render: function(data, type, row, meta) {
+                            return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
+                        }
+                    },
+                    // Periode Selesai column (index 3)
+                    { 
+                        targets: 3,
+                        className: 'text-center',
+                        width: '1px',
+                        render: function(data, type, row, meta) {
+                            return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
+                        }
+                    },
+                    // NA column (index 4)
+                    { 
+                        targets: 4,
+                        className: 'text-center',
+                        width: '1px',
+                        render: function(data, type, row, meta) {
+                            return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
+                        }
+                    },
+                    // Actions column (index 5)
+                    { 
+                        targets: 5,
+                        className: 'text-center',
+                        width: '1px',
+                        orderable: false,
+                        render: function(data, type, row, meta) {
+                            return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
+                        }
+                    }
+                ]
+            });
+        },
+        error: function() {
+            showAlert('danger', 'Failed to reload data');
+        }
+    });
+}
+
+
+    // Function to show alert messages
+    function showAlert(type, message) {
+        var alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        `;
+        
+        $('#alertContainer').html(alertHtml);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(function() {
+            $('.alert').alert('close');
+        }, 5000);
+    }
 </script>
 @endpush

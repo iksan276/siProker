@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ProgramRektorsExport;
+use Illuminate\Database\QueryException;
 
 class ProgramRektorController extends Controller
 {
@@ -43,13 +44,9 @@ class ProgramRektorController extends Controller
                     <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('program-rektors.edit', $program->ProgramRektorID).'" data-title="Edit Program Rektor">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <form action="'.route('program-rektors.destroy', $program->ProgramRektorID).'" method="POST" class="d-inline">
-                        '.csrf_field().'
-                        '.method_field('DELETE').'
-                        <button type="button" class="btn btn-danger btn-square btn-sm delete-confirm">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-danger btn-square btn-sm delete-program-rektor" data-id="'.$program->ProgramRektorID.'">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 ';
                 
                 // Format the NA status
@@ -79,7 +76,6 @@ class ProgramRektorController extends Controller
         return view('programRektors.index', compact('programRektors', 'programPengembangans', 'selectedProgramPengembangan'));
     }
 
-
     public function create()
     {
         $programPengembangans = ProgramPengembangan::where('NA', 'N')->get();
@@ -90,7 +86,6 @@ class ProgramRektorController extends Controller
         }
         return view('programRektors.create', compact('programPengembangans', 'users'));
     }
-
 
     public function exportExcel(Request $request)
     {
@@ -131,9 +126,9 @@ class ProgramRektorController extends Controller
         $programRektor->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Program Rektor berhasil ditambahkan']);
         }
-        return redirect()->route('programRektors.index')->with('success', 'Program Rektor created successfully');
+        return redirect()->route('program-rektors.index')->with('success', 'Program Rektor berhasil ditambahkan');
     }
 
     public function show(ProgramRektor $programRektor)
@@ -173,14 +168,45 @@ class ProgramRektorController extends Controller
         $programRektor->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Program Rektor berhasil diupdate']);
         }
-        return redirect()->route('programRektors.index')->with('success', 'Program Rektor updated successfully');
+        return redirect()->route('program-rektors.index')->with('success', 'Program Rektor berhasil diupdate');
     }
 
     public function destroy(ProgramRektor $programRektor)
     {
-        $programRektor->delete();
-        return redirect()->route('programRektors.index')->with('success', 'Program Rektor deleted successfully');
+        try {
+            $programRektor->delete();
+            
+            if (request()->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Program Rektor berhasil dihapus']);
+            }
+            
+            return redirect()->route('program-rektors.index')->with('success', 'Program Rektor berhasil dihapus');
+        } catch (QueryException $e) {
+            // Check if it's a foreign key constraint error
+            if ($e->getCode() == 23000) { // Integrity constraint violation
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Tidak dapat menghapus  program rektor ini karena dirujuk oleh baris di table lain.'
+                    ], 422);
+                }
+                
+                return redirect()->route('program-rektors.index')
+                    ->with('error', 'Tidak dapat menghapus  program rektor ini karena dirujuk oleh baris di table lain.');
+            }
+            
+            // For other database errors
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Database error occurred: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->route('program-rektors.index')
+                ->with('error', 'Database error occurred: ' . $e->getMessage());
+        }
     }
 }

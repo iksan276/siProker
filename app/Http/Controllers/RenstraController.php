@@ -6,6 +6,7 @@ use App\Models\Renstra;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\QueryException;
 
 class RenstraController extends Controller
 {
@@ -45,9 +46,9 @@ class RenstraController extends Controller
         $renstra->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Renstra berhasil ditambahkan']);
         }
-        return redirect()->route('renstras.index')->with('success', 'Renstra created successfully');
+        return redirect()->route('renstras.index')->with('success', 'Renstra berhasil ditambahkan');
     }
 
     public function show(Renstra $renstra)
@@ -85,14 +86,45 @@ class RenstraController extends Controller
         $renstra->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Renstra berhasil diupdate']);
         }
-        return redirect()->route('renstras.index')->with('success', 'Renstra updated successfully');
+        return redirect()->route('renstras.index')->with('success', 'Renstra berhasil diupdate');
     }
 
     public function destroy(Renstra $renstra)
     {
-        $renstra->delete();
-        return redirect()->route('renstras.index')->with('success', 'Renstra deleted successfully');
+        try {
+            $renstra->delete();
+            
+            if (request()->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Renstra berhasil dihapus']);
+            }
+            
+            return redirect()->route('renstras.index')->with('success', 'Renstra berhasil dihapus');
+        } catch (QueryException $e) {
+            // Check if it's a foreign key constraint error
+            if ($e->getCode() == 23000) { // Integrity constraint violation
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Tidak dapat menghapus  renstra ini karena dirujuk oleh baris di table lain.'
+                    ], 422);
+                }
+                
+                return redirect()->route('renstras.index')
+                    ->with('error', 'Tidak dapat menghapus  renstra ini karena dirujuk oleh baris di table lain.');
+            }
+            
+            // For other database errors
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Database error occurred: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->route('renstras.index')
+                ->with('error', 'Database error occurred: ' . $e->getMessage());
+        }
     }
 }

@@ -37,43 +37,46 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // User routes
-    Route::resource('users', UserController::class);
-    Route::get('/users/export-excel', [UserController::class, 'exportExcel'])->name('users.export.excel');
-    Route::get('/users/export-pdf', [UserController::class, 'exportPdf'])->name('users.export.pdf');
-    
-    // Renstra routes
-    Route::resource('renstras', RenstraController::class);
-    
-    // Pilar routes
+    // Pilar routes - accessible by all users
     Route::resource('pilars', PilarController::class);
     
-    // Isu Strategis routes
-    Route::resource('isu-strategis', IsuStrategisController::class);
-    
-    // Program Pengembangan routes
-    Route::resource('program-pengembangans', ProgramPengembanganController::class);
-    
-    // Program Rektor routes
-    Route::resource('program-rektors', ProgramRektorController::class);
-    Route::get('/program-rektors/export/excel', [ProgramRektorController::class, 'exportExcel'])->name('program-rektors.export.excel');
+    // Routes accessible only by admin (level 1)
+    Route::middleware(['admin'])->group(function () {
+        // User routes
+        Route::resource('users', UserController::class);
+        Route::get('/users/export/excel', [UserController::class, 'exportExcel'])->name('users.export.excel');
+        Route::get('/users/export/pdf', [UserController::class, 'exportPdf'])->name('users.export.pdf');
 
+        // Renstra routes
+        Route::resource('renstras', RenstraController::class);
+        
+        // Isu Strategis routes
+        Route::resource('isu-strategis', IsuStrategisController::class);
+        
+        // Program Pengembangan routes
+        Route::resource('program-pengembangans', ProgramPengembanganController::class);
+        
+        // Program Rektor routes
+        Route::resource('program-rektors', ProgramRektorController::class);
+        Route::get('/program-rektors/export/excel', [ProgramRektorController::class, 'exportExcel'])->name('program-rektors.export.excel');
 
-    // Add this inside the auth middleware group
-    Route::resource('satuans', SatuanController::class);
+        // Satuan routes
+        Route::resource('satuans', SatuanController::class);
 
-    // Add these inside the auth middleware group
-    Route::resource('units', UnitController::class);
-    Route::resource('meta-anggarans', MetaAnggaranController::class);
-    Route::resource('indikator-kinerjas', IndikatorKinerjaController::class);
-    // Add this route with your other indikator-kinerjas routes
-    Route::get('/indikator-kinerjas/export/excel', [IndikatorKinerjaController::class, 'exportExcel'])->name('indikator-kinerjas.export.excel');
+        // Unit routes
+        Route::resource('units', UnitController::class);
+        
+        // Meta Anggaran routes
+        Route::resource('meta-anggarans', MetaAnggaranController::class);
+        
+        // Indikator Kinerja routes
+        Route::resource('indikator-kinerjas', IndikatorKinerjaController::class);
+        Route::get('/indikator-kinerjas/export/excel', [IndikatorKinerjaController::class, 'exportExcel'])->name('indikator-kinerjas.export.excel');
 
-
-    Route::resource('kegiatans', KegiatanController::class);
-    Route::get('/kegiatans/export/excel', [KegiatanController::class, 'exportExcel'])->name('kegiatans.export.excel');
-
-
+        // Kegiatan routes
+        Route::resource('kegiatans', KegiatanController::class);
+        Route::get('/kegiatans/export/excel', [KegiatanController::class, 'exportExcel'])->name('kegiatans.export.excel');
+    });
 });
 
 require __DIR__.'/auth.php';

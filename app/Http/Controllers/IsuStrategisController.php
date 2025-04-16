@@ -7,6 +7,7 @@ use App\Models\Pilar;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\QueryException;
 
 class IsuStrategisController extends Controller
 {
@@ -46,9 +47,9 @@ class IsuStrategisController extends Controller
         $isuStrategis->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Isu Strategis berhasil ditambahkan']);
         }
-        return redirect()->route('isu-strategis.index')->with('success', 'Isu Strategis created successfully');
+        return redirect()->route('isu-strategis.index')->with('success', 'Isu Strategis berhasil ditambahkan');
     }
 
     public function show($id)
@@ -91,15 +92,46 @@ class IsuStrategisController extends Controller
         $isuStrategis->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Isu Strategis berhasil diupdate']);
         }
-        return redirect()->route('isu-strategis.index')->with('success', 'Isu Strategis updated successfully');
+        return redirect()->route('isu-strategis.index')->with('success', 'Isu Strategis berhasil diupdate');
     }
 
     public function destroy($id)
     {
-        $isuStrategis = IsuStrategis::findOrFail($id);
-        $isuStrategis->delete();
-        return redirect()->route('isu-strategis.index')->with('success', 'Isu Strategis deleted successfully');
+        try {
+            $isuStrategis = IsuStrategis::findOrFail($id);
+            $isuStrategis->delete();
+            
+            if (request()->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Isu Strategis berhasil dihapus']);
+            }
+            
+            return redirect()->route('isu-strategis.index')->with('success', 'Isu Strategis berhasil dihapus');
+        } catch (QueryException $e) {
+            // Check if it's a foreign key constraint error
+            if ($e->getCode() == 23000) { // Integrity constraint violation
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Tidak dapat menghapus  Isu Strategis ini karena dirujuk oleh baris di table lain.'
+                    ], 422);
+                }
+                
+                return redirect()->route('isu-strategis.index')
+                    ->with('error', 'Tidak dapat menghapus  Isu Strategis ini karena dirujuk oleh baris di table lain.');
+            }
+            
+            // For other database errors
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Database error occurred: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->route('isu-strategis.index')
+                ->with('error', 'Database error occurred: ' . $e->getMessage());
+        }
     }
 }

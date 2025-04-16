@@ -6,6 +6,7 @@ use App\Models\Satuan;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\QueryException;
 
 class SatuanController extends Controller
 {
@@ -41,9 +42,9 @@ class SatuanController extends Controller
         $satuan->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Satuan berhasil ditambahkan']);
         }
-        return redirect()->route('satuans.index')->with('success', 'Satuan created successfully');
+        return redirect()->route('satuans.index')->with('success', 'Satuan berhasil ditambahkan');
     }
 
     public function show($id)
@@ -83,15 +84,46 @@ class SatuanController extends Controller
         $satuan->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Satuan berhasil diupdate']);
         }
-        return redirect()->route('satuans.index')->with('success', 'Satuan updated successfully');
+        return redirect()->route('satuans.index')->with('success', 'Satuan berhasil diupdate');
     }
 
     public function destroy($id)
     {
-        $satuan = Satuan::findOrFail($id);
-        $satuan->delete();
-        return redirect()->route('satuans.index')->with('success', 'Satuan deleted successfully');
+        try {
+            $satuan = Satuan::findOrFail($id);
+            $satuan->delete();
+            
+            if (request()->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Satuan berhasil dihapus']);
+            }
+            
+            return redirect()->route('satuans.index')->with('success', 'Satuan berhasil dihapus');
+        } catch (QueryException $e) {
+            // Check if it's a foreign key constraint error
+            if ($e->getCode() == 23000) { // Integrity constraint violation
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Tidak dapat menghapus  satuan ini karena dirujuk oleh baris di table lain.'
+                    ], 422);
+                }
+                
+                return redirect()->route('satuans.index')
+                    ->with('error', 'Tidak dapat menghapus  satuan ini karena dirujuk oleh baris di table lain.');
+            }
+            
+            // For other database errors
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Database error occurred: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->route('satuans.index')
+                ->with('error', 'Database error occurred: ' . $e->getMessage());
+        }
     }
 }

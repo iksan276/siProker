@@ -21,7 +21,8 @@
         Management
     </div>
 
-    <!-- Nav Item - Users -->
+    @if(auth()->user()->isAdmin())
+    <!-- Nav Item - Users - Only for Admin -->
     <li class="nav-item {{ request()->is('users*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('users.index') }}">
             <i class="fas fa-fw fa-users"></i>
@@ -29,17 +30,16 @@
         </a>
     </li>
 
-   
-
-    <!-- Nav Item - Renstra -->
+    <!-- Nav Item - Renstra - Only for Admin -->
     <li class="nav-item {{ request()->is('renstras*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('renstras.index') }}">
             <i class="fas fa-fw fa-book"></i>
             <span>Renstra</span>
         </a>
     </li>
+    @endif
 
-    <!-- Nav Item - Pilar -->
+    <!-- Nav Item - Pilar - For All Users -->
     <li class="nav-item {{ request()->is('pilars*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('pilars.index') }}">
             <i class="fas fa-fw fa-columns"></i>
@@ -47,7 +47,8 @@
         </a>
     </li>
 
-    <!-- Nav Item - Isu Strategis -->
+    @if(auth()->user()->isAdmin())
+    <!-- Nav Item - Isu Strategis - Only for Admin -->
     <li class="nav-item {{ request()->is('isu-strategis*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('isu-strategis.index') }}">
             <i class="fas fa-fw fa-lightbulb"></i>
@@ -55,7 +56,7 @@
         </a>
     </li>
 
-    <!-- Nav Item - Program Pengembangan -->
+    <!-- Nav Item - Program Pengembangan - Only for Admin -->
     <li class="nav-item {{ request()->is('program-pengembangans*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('program-pengembangans.index') }}">
             <i class="fas fa-fw fa-project-diagram"></i>
@@ -63,7 +64,7 @@
         </a>
     </li>
 
-    <!-- Nav Item - Program Rektor -->
+    <!-- Nav Item - Program Rektor - Only for Admin -->
     <li class="nav-item {{ request()->is('program-rektors*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('program-rektors.index') }}">
             <i class="fas fa-fw fa-tasks"></i>
@@ -71,7 +72,7 @@
         </a>
     </li>
 
-    <!-- Nav Item - Satuan -->
+    <!-- Nav Item - Satuan - Only for Admin -->
     <li class="nav-item {{ request()->is('satuans*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('satuans.index') }}">
             <i class="fas fa-fw fa-ruler"></i>
@@ -79,7 +80,7 @@
         </a>
     </li>
 
-        <!-- Nav Item - Unit -->
+    <!-- Nav Item - Unit - Only for Admin -->
     <li class="nav-item {{ request()->is('units*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('units.index') }}">
             <i class="fas fa-fw fa-building"></i>
@@ -87,7 +88,7 @@
         </a>
     </li>
 
-    <!-- Nav Item - Meta Anggaran -->
+    <!-- Nav Item - Meta Anggaran - Only for Admin -->
     <li class="nav-item {{ request()->is('meta-anggarans*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('meta-anggarans.index') }}">
             <i class="fas fa-fw fa-money-bill"></i>
@@ -95,7 +96,7 @@
         </a>
     </li>
 
-    <!-- Nav Item - Indikator Kinerja -->
+    <!-- Nav Item - Indikator Kinerja - Only for Admin -->
     <li class="nav-item {{ request()->is('indikator-kinerjas*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('indikator-kinerjas.index') }}">
             <i class="fas fa-fw fa-chart-line"></i>
@@ -103,14 +104,13 @@
         </a>
     </li>
 
-    <!-- Nav Item - Kegiatan -->
+    <!-- Nav Item - Kegiatan - Only for Admin -->
     <li class="nav-item {{ request()->is('kegiatans*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('kegiatans.index') }}">
             <i class="fas fa-fw fa-calendar-alt"></i>
             <span>Kegiatan</span>
         </a>
     </li>
-
 
     <!-- Divider -->
     <hr class="sidebar-divider">
@@ -120,7 +120,7 @@
         Reports
     </div>
 
-    <!-- Nav Item - Charts -->
+    <!-- Nav Item - Charts - Only for Admin -->
     <li class="nav-item">
         <a class="nav-link" href="#">
             <i class="fas fa-fw fa-chart-area"></i>
@@ -128,13 +128,14 @@
         </a>
     </li>
 
-    <!-- Nav Item - Reports -->
+    <!-- Nav Item - Reports - Only for Admin -->
     <li class="nav-item">
         <a class="nav-link" href="#">
             <i class="fas fa-fw fa-file-pdf"></i>
             <span>Reports</span>
         </a>
     </li>
+    @endif
 
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">

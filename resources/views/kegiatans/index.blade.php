@@ -5,6 +5,9 @@
 <h1 class="h3 mb-2">Kegiatan Management</h1>
 <p class="mb-4">Manage all Kegiatan in the system.</p>
 
+<!-- Alert Container for AJAX responses -->
+<div id="alertContainer"></div>
+
 <!-- DataTales Card -->
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -78,6 +81,113 @@
                 isFiltering = false;
             });
         });
+        
+        // Handle form submission within modal
+        $(document).on('submit', '.modal-form', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var url = form.attr('action');
+            var method = form.attr('method');
+            var data = form.serialize();
+            
+            $.ajax({
+                url: url,
+                type: method,
+                data: data,
+                beforeSend: function() {
+                    // Disable submit button and show loading indicator with smaller spinner
+                    form.find('button[type="submit"]').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="width: 1rem; height: 1rem; border-width: 0.15em;"></span> <small>Processing...</small>');
+                },
+
+                success: function(response) {
+                    if (response.success) {
+                        //
+                        // Close modal
+                        $('#mainModal').modal('hide');
+                        
+                        // Show success message
+                        showAlert('success', response.message || 'Operation completed successfully');
+                        
+                        // Reload DataTable
+                        kegiatanTable.ajax.reload();
+                    } else {
+                        // Display error message
+                        showAlert('danger', response.message || 'An error occurred');
+                    }
+                },
+                error: function(xhr) {
+                    // Handle validation errors
+                    var errors = xhr.responseJSON?.errors;
+                    var errorMessage = '';
+                    
+                    if (errors) {
+                        for (var field in errors) {
+                            errorMessage += errors[field][0] + '<br>';
+                        }
+                    } else if (xhr.responseJSON?.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    } else {
+                        errorMessage = 'An error occurred';
+                    }
+                    
+                    showAlert('danger', errorMessage);
+                },
+                complete: function() {
+                    // Re-enable submit button
+                    form.find('button[type="submit"]').prop('disabled', false).html('Save');
+                }
+            });
+        });
+        
+        // Handle delete button click
+        $(document).on('click', '.delete-kegiatan', function(e) {
+            e.preventDefault();
+            var kegiatanId = $(this).data('id');
+            var deleteUrl = "{{ route('kegiatans.destroy', ':id') }}".replace(':id', kegiatanId);
+            
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Perform AJAX delete
+                    $.ajax({
+                        url: deleteUrl,
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            _method: 'DELETE'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                // Show success message
+                                showAlert('success', response.message || 'Kegiatan berhasil dihapus');
+                                
+                                // Reload DataTable
+                                kegiatanTable.ajax.reload();
+                            } else {
+                                // Show error message
+                                showAlert('danger', response.message || 'Failed to delete kegiatan');
+                            }
+                        },
+                        error: function(xhr) {
+                            // Handle error response
+                            var message = 'An error occurred';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            }
+                            showAlert('danger', message);
+                        }
+                    });
+                }
+            });
+        });
     });
     
     function initDataTable() {
@@ -138,7 +248,6 @@
                 processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>'
             },
             // Override the default processing display behavior
-            // Override the default processing display behavior
             preDrawCallback: function() {
                 if (!isFiltering) {
                     $('#kegiatanTable_processing').hide();
@@ -191,16 +300,25 @@
                 }
             });
         });
+    }
+    
+    // Function to show alert messages
+    function showAlert(type, message) {
+        var alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        `;
         
-        // Re-initialize delete confirmation for dynamically added buttons
-        $('.delete-confirm').off('click').on('click', function(e) {
-            e.preventDefault();
-            var form = $(this).closest('form');
-            
-            if (confirm('Are you sure you want to delete this item?')) {
-                form.submit();
-            }
-        });
+        $('#alertContainer').html(alertHtml);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(function() {
+            $('.alert').alert('close');
+        }, 5000);
     }
     
     // Initial data load - hide processing indicator if not filtering

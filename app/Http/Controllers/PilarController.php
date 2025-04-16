@@ -7,6 +7,7 @@ use App\Models\Renstra;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\QueryException;
 
 class PilarController extends Controller
 {
@@ -46,9 +47,9 @@ class PilarController extends Controller
         $pilar->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Pilar berhasil ditambahkan']);
         }
-        return redirect()->route('pilars.index')->with('success', 'Pilar created successfully');
+        return redirect()->route('pilars.index')->with('success', 'Pilar berhasil ditambahkan');
     }
 
     public function show(Pilar $pilar)
@@ -86,14 +87,45 @@ class PilarController extends Controller
         $pilar->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Pilar berhasil diupdate']);
         }
-        return redirect()->route('pilars.index')->with('success', 'Pilar updated successfully');
+        return redirect()->route('pilars.index')->with('success', 'Pilar berhasil diupdate');
     }
 
     public function destroy(Pilar $pilar)
     {
-        $pilar->delete();
-        return redirect()->route('pilars.index')->with('success', 'Pilar deleted successfully');
+        try {
+            $pilar->delete();
+            
+            if (request()->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Pilar berhasil dihapus']);
+            }
+            
+            return redirect()->route('pilars.index')->with('success', 'Pilar berhasil dihapus');
+        } catch (QueryException $e) {
+            // Check if it's a foreign key constraint error
+            if ($e->getCode() == 23000) { // Integrity constraint violation
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Tidak dapat menghapus  pilar ini karena dirujuk oleh baris di table lain.'
+                    ], 422);
+                }
+                
+                return redirect()->route('pilars.index')
+                    ->with('error', 'Tidak dapat menghapus  pilar ini karena dirujuk oleh baris di table lain.');
+            }
+            
+            // For other database errors
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Database error occurred: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->route('pilars.index')
+                ->with('error', 'Database error occurred: ' . $e->getMessage());
+        }
     }
 }

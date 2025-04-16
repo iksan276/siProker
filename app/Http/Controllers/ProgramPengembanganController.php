@@ -7,6 +7,7 @@ use App\Models\IsuStrategis;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\QueryException;
 
 class ProgramPengembanganController extends Controller
 {
@@ -46,9 +47,9 @@ class ProgramPengembanganController extends Controller
         $programPengembangan->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Program Pengembangan berhasil ditambahkan']);
         }
-        return redirect()->route('programPengembangans.index')->with('success', 'Program Pengembangan created successfully');
+        return redirect()->route('program-pengembangans.index')->with('success', 'Program Pengembangan berhasil ditambahkan');
     }
 
     public function show(ProgramPengembangan $programPengembangan)
@@ -86,14 +87,45 @@ class ProgramPengembanganController extends Controller
         $programPengembangan->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Program Pengembangan berhasil diupdate']);
         }
-        return redirect()->route('programPengembangans.index')->with('success', 'Program Pengembangan updated successfully');
+        return redirect()->route('program-pengembangans.index')->with('success', 'Program Pengembangan berhasil diupdate');
     }
 
     public function destroy(ProgramPengembangan $programPengembangan)
     {
-        $programPengembangan->delete();
-        return redirect()->route('programPengembangans.index')->with('success', 'Program Pengembangan deleted successfully');
+        try {
+            $programPengembangan->delete();
+            
+            if (request()->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Program Pengembangan berhasil dihapus']);
+            }
+            
+            return redirect()->route('program-pengembangans.index')->with('success', 'Program Pengembangan berhasil dihapus');
+        } catch (QueryException $e) {
+            // Check if it's a foreign key constraint error
+            if ($e->getCode() == 23000) { // Integrity constraint violation
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Tidak dapat menghapus  program pengembangan ini karena dirujuk oleh baris di table lain.'
+                    ], 422);
+                }
+                
+                return redirect()->route('program-pengembangans.index')
+                    ->with('error', 'Tidak dapat menghapus  program pengembangan ini karena dirujuk oleh baris di table lain.');
+            }
+            
+            // For other database errors
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Database error occurred: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->route('program-pengembangans.index')
+                ->with('error', 'Database error occurred: ' . $e->getMessage());
+        }
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\QueryException;
 
 class UnitController extends Controller
 {
@@ -41,9 +42,9 @@ class UnitController extends Controller
         $unit->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Unit berhasil ditambahkan']);
         }
-        return redirect()->route('units.index')->with('success', 'Unit created successfully');
+        return redirect()->route('units.index')->with('success', 'Unit berhasil ditambahkan');
     }
 
     public function show($id)
@@ -83,15 +84,46 @@ class UnitController extends Controller
         $unit->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Unit berhasil diupdate']);
         }
-        return redirect()->route('units.index')->with('success', 'Unit updated successfully');
+        return redirect()->route('units.index')->with('success', 'Unit berhasil diupdate');
     }
 
     public function destroy($id)
     {
-        $unit = Unit::findOrFail($id);
-        $unit->delete();
-        return redirect()->route('units.index')->with('success', 'Unit deleted successfully');
+        try {
+            $unit = Unit::findOrFail($id);
+            $unit->delete();
+            
+            if (request()->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Unit berhasil dihapus']);
+            }
+            
+            return redirect()->route('units.index')->with('success', 'Unit berhasil dihapus');
+        } catch (QueryException $e) {
+            // Check if it's a foreign key constraint error
+            if ($e->getCode() == 23000) { // Integrity constraint violation
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Tidak dapat menghapus  unit ini karena dirujuk oleh baris di table lain.'
+                    ], 422);
+                }
+                
+                return redirect()->route('units.index')
+                    ->with('error', 'Tidak dapat menghapus  unit ini karena dirujuk oleh baris di table lain.');
+            }
+            
+            // For other database errors
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Database error occurred: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->route('units.index')
+                ->with('error', 'Database error occurred: ' . $e->getMessage());
+        }
     }
 }

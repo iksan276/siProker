@@ -7,12 +7,19 @@
     </div>
     <div class="form-group">
         <label for="email">Email</label>
-        <input type="email" name="email" id="email" class="form-control"  value="{{ $user->email }}" required>
+        <input type="email" name="email" id="email" class="form-control" value="{{ $user->email }}" required>
     </div>
     <div class="form-group">
         <label for="password">Password</label>
         <input type="password" name="password" id="password" class="form-control" placeholder="Password (leave blank to keep current)">
         <small class="form-text text-muted">Leave blank to keep current password</small>
+    </div>
+    <div class="form-group">
+        <label for="level">Level</label>
+        <select name="level" id="level" class="form-control" required>
+            <option value="1" {{ $user->level == 1 ? 'selected' : '' }}>Admin</option>
+            <option value="2" {{ $user->level == 2 ? 'selected' : '' }}>User</option>
+        </select>
     </div>
     <div class="modal-footer">
         <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
