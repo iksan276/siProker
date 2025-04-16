@@ -31,8 +31,54 @@ class ProgramRektorController extends Controller
         // Get the selected filter value (for re-populating the select)
         $selectedProgramPengembangan = $request->programPengembanganID;
         
+        // If it's an AJAX request, return JSON data for DataTable
+        if ($request->ajax()) {
+            $data = [];
+            foreach ($programRektors as $index => $program) {
+                // Format the actions HTML
+                $actions = '
+                    <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('program-rektors.show', $program->ProgramRektorID).'" data-title="Detail Program Rektor">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('program-rektors.edit', $program->ProgramRektorID).'" data-title="Edit Program Rektor">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <form action="'.route('program-rektors.destroy', $program->ProgramRektorID).'" method="POST" class="d-inline">
+                        '.csrf_field().'
+                        '.method_field('DELETE').'
+                        <button type="button" class="btn btn-danger btn-square btn-sm delete-confirm">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                ';
+                
+                // Format the NA status
+                $naStatus = '';
+                if ($program->NA == 'Y') {
+                    $naStatus = '<span class="badge badge-danger">Non Aktif</span>';
+                } else if ($program->NA == 'N') {
+                    $naStatus = '<span class="badge badge-success">Aktif</span>';
+                }
+                
+                $data[] = [
+                    'no' => $index + 1,
+                    'nama' => $program->Nama,
+                    'program_pengembangan' => $program->programPengembangan->Nama,
+                    'tahun' => $program->Tahun,
+                    'na' => $naStatus,
+                    'actions' => $actions,
+                    'row_class' => $program->NA == 'Y' ? 'bg-light text-muted' : ''
+                ];
+            }
+            
+            return response()->json([
+                'data' => $data
+            ]);
+        }
+        
         return view('programRektors.index', compact('programRektors', 'programPengembangans', 'selectedProgramPengembangan'));
     }
+
 
     public function create()
     {

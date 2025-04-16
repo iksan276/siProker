@@ -33,8 +33,47 @@ class KegiatanController extends Controller
         // Get the selected filter value (for re-populating the select)
         $selectedIndikatorKinerja = $request->indikatorKinerjaID;
         
+        // If it's an AJAX request, return JSON data for DataTable
+        if ($request->ajax()) {
+            $data = [];
+            foreach ($kegiatans as $index => $kegiatan) {
+                // Match the exact styling from the Meta Anggaran page, but without td tags
+                $actions = '
+                    <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('kegiatans.show', $kegiatan->KegiatanID).'" data-title="Detail Kegiatan">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('kegiatans.edit', $kegiatan->KegiatanID).'" data-title="Edit Kegiatan">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <form action="'.route('kegiatans.destroy', $kegiatan->KegiatanID).'" method="POST" class="d-inline">
+                        '.csrf_field().'
+                        '.method_field('DELETE').'
+                        <button type="button" class="btn btn-danger btn-square btn-sm delete-confirm">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                ';
+                
+                $data[] = [
+                    'no' => $index + 1,
+                    'indikator_kinerja' => $kegiatan->indikatorKinerja->Nama,
+                    'nama' => $kegiatan->Nama,
+                    'tanggal_mulai' => \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y'),
+                    'tanggal_selesai' => \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y'),
+                    'rincian_kegiatan' => nl2br(\Illuminate\Support\Str::limit($kegiatan->RincianKegiatan, 50)),
+                    'actions' => $actions
+                ];
+            }
+            
+            return response()->json([
+                'data' => $data
+            ]);
+        }
+        
         return view('kegiatans.index', compact('kegiatans', 'indikatorKinerjas', 'selectedIndikatorKinerja'));
     }
+    
+    
 
     public function exportExcel(Request $request)
     {
