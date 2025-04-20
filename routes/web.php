@@ -39,6 +39,7 @@ Route::middleware('auth')->group(function () {
     
     // Pilar routes - accessible by all users
     Route::resource('pilars', PilarController::class);
+    Route::resource('kegiatans', KegiatanController::class);
     
     // Routes accessible only by admin (level 1)
     Route::middleware(['admin'])->group(function () {
@@ -74,7 +75,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/indikator-kinerjas/export/excel', [IndikatorKinerjaController::class, 'exportExcel'])->name('indikator-kinerjas.export.excel');
 
         // Kegiatan routes
-        Route::resource('kegiatans', KegiatanController::class);
         Route::get('/kegiatans/export/excel', [KegiatanController::class, 'exportExcel'])->name('kegiatans.export.excel');
     });
 });

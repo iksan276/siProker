@@ -15,6 +15,9 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <!-- SweetAlert2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+      <!-- Tambahkan TreeGrid CSS -->
+   
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-treegrid/0.2.0/css/jquery.treegrid.min.css">
     <style>
     /* Fix Select2 to match Bootstrap form-control */
     .select2-container .select2-selection--single {
@@ -55,7 +58,8 @@
     }
     @keyframes spinner-border {
         to { transform: rotate(360deg); }
-    }
+    }    
+    
     </style>
 </head>
 <body id="page-top">
@@ -87,6 +91,11 @@
     
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+       
+   <!-- Di bagian scripts setelah jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-treegrid/0.2.0/js/jquery.treegrid.min.js"></script>
+
     
     <script>
     $(document).ready(function() {

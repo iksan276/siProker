@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\QueryException;
+use App\Models\Kegiatan;
+use App\Models\IndikatorKinerja;
 
 class PilarController extends Controller
 {
@@ -17,7 +19,7 @@ class PilarController extends Controller
         $renstras = Renstra::where('NA', 'N')->get();
         
         // Base query
-        $pilarsQuery = Pilar::with(['renstra', 'createdBy', 'editedBy']);
+        $pilarsQuery = Pilar::with(['renstra', 'createdBy', 'editedBy', 'isuStrategis.programPengembangans.programRektors']);
         
         // Apply filter if renstraID is provided
         if ($request->has('renstraID') && $request->renstraID) {
@@ -30,8 +32,31 @@ class PilarController extends Controller
         // Get the selected filter value (for re-populating the select)
         $selectedRenstra = $request->renstraID;
         
+        // If user is not admin, prepare tree grid data
+        if (!auth()->user()->isAdmin()) {
+            $userId = Auth::id();
+            
+            if ($request->ajax() && $request->wantsJson()) {
+                $treeData = $this->buildTreeData($pilars, $userId);
+                return response()->json([
+                    'data' => $treeData
+                ]);
+            }
+            
+            return view('pilars.user_index', compact('pilars', 'renstras', 'selectedRenstra'));
+        }
+        
         // If it's an AJAX request, return JSON data for DataTable
         if ($request->ajax() && $request->wantsJson()) {
+            // If format=tree is requested, return tree data even for admin
+            if ($request->has('format') && $request->format === 'tree') {
+                $treeData = $this->buildTreeData($pilars, Auth::id());
+                return response()->json([
+                    'data' => $treeData
+                ]);
+            }
+            
+            // Otherwise return regular datatable format
             $data = [];
             foreach ($pilars as $index => $pilar) {
                 // Format the actions HTML
@@ -75,7 +100,149 @@ class PilarController extends Controller
         
         return view('pilars.index', compact('pilars', 'renstras', 'selectedRenstra'));
     }
-
+    
+    private function buildTreeData($pilars, $userId)
+    {
+        $treeData = [];
+        $rowIndex = 1;
+        
+        foreach ($pilars as $pilar) {
+            if ($pilar->NA == 'Y') continue; // Skip non-active pilars
+            
+            $pilarNode = [
+                'id' => 'pilar_' . $pilar->PilarID,
+                'no' => $rowIndex++,
+                'nama' => $pilar->Nama,
+                'type' => 'pilar',
+                'parent' => null,
+                'level' => 0,
+                'has_children' => true,
+                'actions' => '',
+                'row_class' => ''
+            ];
+            
+            $treeData[] = $pilarNode;
+            
+            // Add Isu Strategis
+            foreach ($pilar->isuStrategis as $isu) {
+                if ($isu->NA == 'Y') continue; // Skip non-active isu
+                
+                $isuNode = [
+                    'id' => 'isu_' . $isu->IsuID,
+                    'no' => '',
+                    'nama' => $isu->Nama,
+                    'type' => 'isu',
+                    'parent' => 'pilar_' . $pilar->PilarID,
+                    'level' => 1,
+                    'has_children' => true,
+                    'actions' => '',
+                    'row_class' => ''
+                ];
+                
+                $treeData[] = $isuNode;
+                
+                // Add Program Pengembangan
+                foreach ($isu->programPengembangans as $program) {
+                    if ($program->NA == 'Y') continue; // Skip non-active programs
+                    
+                    $programNode = [
+                        'id' => 'program_' . $program->ProgramPengembanganID,
+                        'no' => '',
+                        'nama' => $program->Nama,
+                        'type' => 'program',
+                        'parent' => 'isu_' . $isu->IsuID,
+                        'level' => 2,
+                        'has_children' => true,
+                        'actions' => '',
+                        'row_class' => ''
+                    ];
+                    
+                    $treeData[] = $programNode;
+                    
+                    // Add Program Rektor
+                    foreach ($program->programRektors as $rektor) {
+                        if ($rektor->NA == 'Y') continue; // Skip non-active rektor programs
+                        
+                        $rektorNode = [
+                            'id' => 'rektor_' . $rektor->ProgramRektorID,
+                            'no' => '',
+                            'nama' => $rektor->Nama,
+                            'type' => 'rektor',
+                            'parent' => 'program_' . $program->ProgramPengembanganID,
+                            'level' => 3,
+                            'has_children' => true,
+                            'actions' => '',
+                            'row_class' => ''
+                        ];
+                        
+                        $treeData[] = $rektorNode;
+                        
+                        // Add Indikator Kinerja
+                        $indikatorKinerjas = IndikatorKinerja::where('ProgramRektorID', $rektor->ProgramRektorID)
+                                            ->where('NA', 'N')
+                                            ->get();
+                                            
+                        foreach ($indikatorKinerjas as $indikator) {
+                            $indikatorNode = [
+                                'id' => 'indikator_' . $indikator->IndikatorKinerjaID,
+                                'no' => '',
+                                'nama' => $indikator->Nama,
+                                'type' => 'indikator',
+                                'parent' => 'rektor_' . $rektor->ProgramRektorID,
+                                'level' => 4,
+                                'has_children' => true,
+                                'actions' => '
+                                    <button class="btn btn-primary btn-square btn-sm load-modal" 
+                                        data-url="' . route('kegiatans.create') . '?indikator=' . $indikator->IndikatorKinerjaID . '" 
+                                        data-title="Tambah Kegiatan">
+                                        <i class="fas fa-plus"></i>
+                                    </button>',
+                                'row_class' => ''
+                            ];
+                            
+                            $treeData[] = $indikatorNode;
+                            
+                            // Add Kegiatan for this user
+                            $kegiatans = Kegiatan::where('IndikatorKinerjaID', $indikator->IndikatorKinerjaID)
+                                ->get();
+                                
+                            foreach ($kegiatans as $kegiatan) {
+                                $kegiatanNode = [
+                                    'id' => 'kegiatan_' . $kegiatan->KegiatanID,
+                                    'no' => '',
+                                    'nama' => $kegiatan->Nama,
+                                    'type' => 'kegiatan',
+                                    'parent' => 'indikator_' . $indikator->IndikatorKinerjaID,
+                                    'level' => 5,
+                                    'has_children' => false,
+                                    'actions' => '
+                                        <button class="btn btn-info btn-square btn-sm load-modal" 
+                                            data-url="' . route('kegiatans.show', $kegiatan->KegiatanID) . '" 
+                                            data-title="Detail Kegiatan">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-warning btn-square btn-sm load-modal" 
+                                            data-url="' . route('kegiatans.edit', $kegiatan->KegiatanID) . '" 
+                                            data-title="Edit Kegiatan">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" 
+                                            data-id="' . $kegiatan->KegiatanID . '">
+                                            <i class="fas fa-trash"></i>
+                                        </button>',
+                                    'row_class' => ''
+                                ];
+                                
+                                $treeData[] = $kegiatanNode;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $treeData;
+    }
 
     public function create()
     {
@@ -166,12 +333,12 @@ class PilarController extends Controller
                 if (request()->ajax()) {
                     return response()->json([
                         'success' => false, 
-                        'message' => 'Tidak dapat menghapus  pilar ini karena dirujuk oleh baris di table lain.'
+                        'message' => 'Tidak dapat menghapus pilar ini karena dirujuk oleh baris di table lain.'
                     ], 422);
                 }
                 
                 return redirect()->route('pilars.index')
-                    ->with('error', 'Tidak dapat menghapus  pilar ini karena dirujuk oleh baris di table lain.');
+                    ->with('error', 'Tidak dapat menghapus pilar ini karena dirujuk oleh baris di table lain.');
             }
             
             // For other database errors
