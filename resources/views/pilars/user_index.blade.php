@@ -154,7 +154,35 @@
     transition: all 0.2s ease;
 }
 
+/* New styles for dashed indentation */
+.tree-indent {
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 1px;
+}
 
+.tree-indent::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background-color: #6c757d;
+    animation: dashGrow 1.5s ease-in-out infinite;
+}
+
+.tree-indent:nth-child(1)::before { animation-delay: 0.1s; }
+.tree-indent:nth-child(2)::before { animation-delay: 0.2s; }
+.tree-indent:nth-child(3)::before { animation-delay: 0.3s; }
+.tree-indent:nth-child(4)::before { animation-delay: 0.4s; }
+.tree-indent:nth-child(5)::before { animation-delay: 0.5s; }
+
+@keyframes dashGrow {
+    0%, 100% { width: 0; opacity: 0.3; }
+    50% { width: 15px; opacity: 1; }
+}
 </style>
 @endpush
 
@@ -391,7 +419,8 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
             childNodeIds.push(childId);
             
             // Remove from expanded nodes
-            delete expandedNodes[childId];
+            delete
+            expandedNodes[childId];
         });
         
         // Recursively collapse each child and its descendants
@@ -508,11 +537,11 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                     
                     // Create name cell with tooltip that shows on click
                     var nameText = '';
-                    var indentPrefix = '';
                     
-                    // Add visual indentation markers based on level
+                    // Add visual indentation markers based on level - MODIFIED HERE
+                    var indentPrefix = '';
                     for (var i = 0; i < item.level; i++) {
-                        indentPrefix += '<span class="tree-indent">&nbsp;&nbsp;&nbsp;&nbsp;</span>';
+                        indentPrefix += '<span class="tree-indent">- - -&nbsp;</span>';
                     }
                     
                     if (item.tooltip) {
