@@ -90,16 +90,23 @@ class KegiatanController extends Controller
         return Excel::download(new KegiatansExport($kegiatans), 'kegiatans.xlsx');
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get();
         $users = User::all();
         
-        if (request()->ajax()) {
-            return view('kegiatans.create', compact('indikatorKinerjas', 'users'))->render();
+        // Get the pre-selected indikator if provided
+        $selectedIndikator = null;
+        if ($request->has('indikator')) {
+            $selectedIndikator = IndikatorKinerja::find($request->indikator);
         }
-        return view('kegiatans.create', compact('indikatorKinerjas', 'users'));
+        
+        if (request()->ajax()) {
+            return view('kegiatans.create', compact('indikatorKinerjas', 'users', 'selectedIndikator'))->render();
+        }
+        return view('kegiatans.create', compact('indikatorKinerjas', 'users', 'selectedIndikator'));
     }
+    
 
     public function store(Request $request)
     {

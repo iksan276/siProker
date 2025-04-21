@@ -3,9 +3,12 @@
     <div class="form-group">
         <label for="IndikatorKinerjaID">Indikator Kinerja</label>
         <select name="IndikatorKinerjaID" id="IndikatorKinerjaID" class="form-control select2" required>
-        <option value="" disabled selected></option>
+            <option value="" disabled {{ !isset($selectedIndikator) ? 'selected' : '' }}></option>
             @foreach($indikatorKinerjas as $indikatorKinerja)
-                <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}">{{ $indikatorKinerja->Nama }}</option>
+                <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}" 
+                    {{ (isset($selectedIndikator) && $selectedIndikator->IndikatorKinerjaID == $indikatorKinerja->IndikatorKinerjaID) ? 'selected' : '' }}>
+                    {{ $indikatorKinerja->Nama }}
+                </option>
             @endforeach
         </select>
     </div>

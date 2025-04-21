@@ -116,9 +116,10 @@ class PilarController extends Controller
                 'type' => 'pilar',
                 'parent' => null,
                 'level' => 0,
-                'has_children' => true,
+                'has_children' => count($pilar->isuStrategis->where('NA', 'N')) > 0,
                 'actions' => '',
-                'row_class' => ''
+                'row_class' => '',
+                'tooltip' => 'Lihat isu strategis'
             ];
             
             $treeData[] = $pilarNode;
@@ -134,9 +135,10 @@ class PilarController extends Controller
                     'type' => 'isu',
                     'parent' => 'pilar_' . $pilar->PilarID,
                     'level' => 1,
-                    'has_children' => true,
+                    'has_children' => count($isu->programPengembangans->where('NA', 'N')) > 0,
                     'actions' => '',
-                    'row_class' => ''
+                    'row_class' => '',
+                    'tooltip' => 'Lihat program pengembangan'
                 ];
                 
                 $treeData[] = $isuNode;
@@ -152,9 +154,10 @@ class PilarController extends Controller
                         'type' => 'program',
                         'parent' => 'isu_' . $isu->IsuID,
                         'level' => 2,
-                        'has_children' => true,
+                        'has_children' => count($program->programRektors->where('NA', 'N')) > 0,
                         'actions' => '',
-                        'row_class' => ''
+                        'row_class' => '',
+                        'tooltip' => 'Lihat program rektor'
                     ];
                     
                     $treeData[] = $programNode;
@@ -163,6 +166,10 @@ class PilarController extends Controller
                     foreach ($program->programRektors as $rektor) {
                         if ($rektor->NA == 'Y') continue; // Skip non-active rektor programs
                         
+                        $indikatorKinerjas = IndikatorKinerja::where('ProgramRektorID', $rektor->ProgramRektorID)
+                                            ->where('NA', 'N')
+                                            ->get();
+                        
                         $rektorNode = [
                             'id' => 'rektor_' . $rektor->ProgramRektorID,
                             'no' => '',
@@ -170,19 +177,21 @@ class PilarController extends Controller
                             'type' => 'rektor',
                             'parent' => 'program_' . $program->ProgramPengembanganID,
                             'level' => 3,
-                            'has_children' => true,
+                            'has_children' => count($indikatorKinerjas) > 0,
                             'actions' => '',
-                            'row_class' => ''
+                            'row_class' => '',
+                            'tooltip' => 'Lihat indikator kinerja'
                         ];
                         
                         $treeData[] = $rektorNode;
                         
                         // Add Indikator Kinerja
-                        $indikatorKinerjas = IndikatorKinerja::where('ProgramRektorID', $rektor->ProgramRektorID)
-                                            ->where('NA', 'N')
-                                            ->get();
-                                            
                         foreach ($indikatorKinerjas as $indikator) {
+                            // Get kegiatan count for this user and indikator
+                            $kegiatanCount = Kegiatan::where('IndikatorKinerjaID', $indikator->IndikatorKinerjaID)
+                                            ->where('UCreated', $userId)
+                                            ->count();
+                            
                             $indikatorNode = [
                                 'id' => 'indikator_' . $indikator->IndikatorKinerjaID,
                                 'no' => '',
@@ -190,20 +199,22 @@ class PilarController extends Controller
                                 'type' => 'indikator',
                                 'parent' => 'rektor_' . $rektor->ProgramRektorID,
                                 'level' => 4,
-                                'has_children' => true,
+                                'has_children' => $kegiatanCount > 0,
                                 'actions' => '
                                     <button class="btn btn-primary btn-square btn-sm load-modal" 
                                         data-url="' . route('kegiatans.create') . '?indikator=' . $indikator->IndikatorKinerjaID . '" 
                                         data-title="Tambah Kegiatan">
                                         <i class="fas fa-plus"></i>
                                     </button>',
-                                'row_class' => ''
+                                'row_class' => '',
+                                'tooltip' => 'Lihat kegiatan'
                             ];
                             
                             $treeData[] = $indikatorNode;
                             
-                            // Add Kegiatan for this user
+                            // Add Kegiatan for this user only
                             $kegiatans = Kegiatan::where('IndikatorKinerjaID', $indikator->IndikatorKinerjaID)
+                                ->where('UCreated', $userId)
                                 ->get();
                                 
                             foreach ($kegiatans as $kegiatan) {
@@ -230,7 +241,8 @@ class PilarController extends Controller
                                             data-id="' . $kegiatan->KegiatanID . '">
                                             <i class="fas fa-trash"></i>
                                         </button>',
-                                    'row_class' => ''
+                                    'row_class' => '',
+                                    'tooltip' => ''
                                 ];
                                 
                                 $treeData[] = $kegiatanNode;
@@ -243,6 +255,7 @@ class PilarController extends Controller
         
         return $treeData;
     }
+    
 
     public function create()
     {
