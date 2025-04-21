@@ -330,7 +330,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                 // Collapse this node
                 collapseNode(nodeId);
                 $(this).removeClass('expanded');
-                $(this).html('<i class="fas fa-chevron-right"></i>');
+                $(this).html('<i class="fas fa-chevron-right text-primary"></i>');
                 
                 // Remove from expanded nodes
                 delete expandedNodes[nodeId];
@@ -352,7 +352,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                         if ($otherExpander.hasClass('expanded')) {
                             collapseNodeAndAllChildren(otherNodeId);
                             $otherExpander.removeClass('expanded');
-                            $otherExpander.html('<i class="fas fa-chevron-right"></i>');
+                            $otherExpander.html('<i class="fas fa-chevron-right text-primary"></i>');
                             
                             // Remove from expanded nodes
                             delete expandedNodes[otherNodeId];
@@ -363,7 +363,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                 // Expand this node
                 expandNode(nodeId);
                 $(this).addClass('expanded');
-                $(this).html('<i class="fas fa-chevron-down"></i>');
+                $(this).html('<i class="fas fa-chevron-down text-primary"></i>');
                 
                 // Add to expanded nodes
                 expandedNodes[nodeId] = true;
@@ -501,8 +501,8 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                     var expander = '';
                     if (item.has_children) {
                         var expanderIcon = expandedNodes[item.id] ? 
-                            '<i class="fas fa-chevron-down"></i>' : 
-                            '<i class="fas fa-chevron-right"></i>';
+                            '<i class="fas fa-chevron-down text-primary"></i>' : 
+                            '<i class="fas fa-chevron-right text-primary"></i>';
                         expander = '<span class="node-expander ' + (expandedNodes[item.id] ? 'expanded' : '') + '" data-node-id="' + item.id + '">' + expanderIcon + '</span>';
                     }
                     
@@ -578,7 +578,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
             expandNode(nodeId);
             $('tr[data-node-id="' + nodeId + '"] .node-expander')
                 .addClass('expanded')
-                .html('<i class="fas fa-chevron-down"></i>');
+                .html('<i class="fas fa-chevron-down text-primary"></i>');
         });
     }
     
