@@ -37,7 +37,7 @@
             <table class="table table-bordered" id="pilarTable" width="100%" cellspacing="0">
                 <thead>
                     <tr class="text-center text-dark">
-                        <th>#</th>
+                        <th>No</th>
                         <th>Nama</th>
                         <th>Renstra</th>
                         <th>NA</th>
