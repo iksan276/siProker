@@ -19,6 +19,12 @@
    
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-treegrid/0.2.0/css/jquery.treegrid.min.css">
     <style>
+      /* Apply dark text color to all text elements */
+      body, p, h1, h2, h3, h4, h5, h6, input, select, textarea, 
+    table, th, td, label, .card-title, .form-control {
+        color: #343a40 !important; /* Bootstrap's text-dark color */
+    }
+    
     /* Fix Select2 to match Bootstrap form-control */
     .select2-container .select2-selection--single {
         height: calc(1.5em + 0.75rem + 2px);

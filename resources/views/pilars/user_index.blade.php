@@ -8,6 +8,53 @@
 <!-- Alert Container for AJAX responses -->
 <div id="alertContainer"></div>
 
+<!-- Color Legend Card -->
+<div class="card shadow mb-3">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Keterangan Warna</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-2 mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(231, 74, 59, 0.1); height: 5px; width: 30px;"></div>
+                    <span class="ml-2">Pilar</span>
+                </div>
+            </div>
+            <div class="col-md-2 mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(246, 194, 62, 0.1); height: 5px; width: 30px;"></div>
+                    <span class="ml-2">Isu Strategis</span>
+                </div>
+            </div>
+            <div class="col-md-2 mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(28, 200, 138, 0.1); height: 5px; width: 30px;"></div>
+                    <span class="ml-2">Program Pengembangan</span>
+                </div>
+            </div>
+            <div class="col-md-2 mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(10, 63, 223, 0.1); height: 5px; width: 30px;"></div>
+                    <span class="ml-2">Program Rektor</span>
+                </div>
+            </div>
+            <div class="col-md-2 mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(2, 255, 251, 0.1); height: 5px; width: 30px;"></div>
+                    <span class="ml-2">Indikator Kinerja</span>
+                </div>
+            </div>
+            <div class="col-md-2 mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(156, 39, 176, 0.1); height: 5px; width: 30px;"></div>
+                    <span class="ml-2">Kegiatan</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- DataTales Card -->
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -105,29 +152,29 @@
         background-color: rgba(78, 115, 223, 0.1); /* light-primary color */
     }
     
-    /* Different background colors for different levels */
-    tr.level-0 {
-        background-color: #f8f9fa;
+    /* Different background colors for different node types */
+    tr.node-pilar {
+        background-color: rgba(231, 74, 59, 0.1); /* Light red for Pilar */
     }
     
-    tr.level-1 {
-        background-color: #f1f8ff;
+    tr.node-isu {
+        background-color: rgba(246, 194, 62, 0.1); /* Light yellow for Isu Strategis */
     }
     
-    tr.level-2 {
-        background-color: #f5f5f5;
+    tr.node-program {
+        background-color: rgba(28, 200, 138, 0.1); /* Light green for Program Pengembangan */
     }
     
-    tr.level-3 {
-        background-color: #fff8e1;
+    tr.node-rektor {
+        background-color: rgba(78, 115, 223, 0.1); /* Light blue for Program Rektor */
     }
     
-    tr.level-4 {
-        background-color: #f1f8e9;
+    tr.node-indikator {
+        background-color: rgba(54, 185, 204, 0.1); /* Light info color for Indikator Kinerja */
     }
     
-    tr.level-5 {
-        background-color: #fce4ec;
+    tr.node-kegiatan {
+        background-color: rgba(156, 39, 176, 0.1); /* Light purple for Kegiatan */
     }
     
     /* Custom expand/collapse icons */
@@ -183,6 +230,31 @@
     0%, 100% { width: 0; opacity: 0.3; }
     50% { width: 15px; opacity: 1; }
 }
+
+/* Color gradient for indentation dashes */
+tr[data-level="0"] .tree-indent::before {
+    background-color: #0d47a1; /* Darkest blue */
+}
+tr[data-level="1"] .tree-indent::before {
+    background-color: #1976d2; /* Dark blue */
+}
+tr[data-level="2"] .tree-indent::before {
+    background-color: #2196f3; /* Medium blue */
+}
+tr[data-level="3"] .tree-indent::before {
+    background-color: #64b5f6; /* Light blue */
+}
+tr[data-level="4"] .tree-indent::before {
+    background-color: #90caf9; /* Lighter blue */
+}
+tr[data-level="5"] .tree-indent::before {
+    background-color: #bbdefb; /* Lightest blue */
+}
+
+/* Ensure all tooltips are visible */
+.tooltip {
+    z-index: 9999;
+}
 </style>
 @endpush
 
@@ -191,13 +263,22 @@
 <script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
 <script>
     // Add this to your document ready function in the scripts section
+// Replace the existing mouseenter and mouseleave event handlers with this code
+// Replace the existing mouseenter and mouseleave event handlers with this code
+// Replace the existing mouseenter and mouseleave event handlers with this code
 $(document).on('mouseenter', '#tree-grid tbody tr', function() {
-    $(this).css('background-color', '#edf1ff');
+    // Store the original background color before changing it
+    var originalBgColor = $(this).css('background-color');
+    $(this).data('original-bg-color', originalBgColor);
+    
+    // Apply a subtle highlight effect instead of completely changing the background
+    $(this).css('filter', 'brightness(1.1)');
     $(this).css('cursor', 'pointer');
 });
 
 $(document).on('mouseleave', '#tree-grid tbody tr', function() {
-    $(this).css('background-color', '');
+    // Remove the highlight effect
+    $(this).css('filter', 'none');
 });
 
     // Store expanded state
@@ -223,22 +304,28 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
             loadTreeData();
         });
         
-           
-        // Handle tooltip clicks
-        $(document).on('click', '.node-name', function(e) {
-            e.stopPropagation();
-            
-            // Hide any existing tooltips
+        // Handle tooltip for node names - using direct event binding
+        $(document).on('mouseenter', '.node-name', function() {
+            $(this).tooltip('show');
+        });
+        
+        $(document).on('mouseleave', '.node-name', function() {
+            $(this).tooltip('hide');
+        });
+        
+        // Handle tooltip for expander icons - using direct event binding
+        $(document).on('mouseenter', '.node-expander i', function() {
+            $(this).tooltip('show');
+        });
+        
+        $(document).on('mouseleave', '.node-expander i', function() {
+            $(this).tooltip('hide');
+        });
+        
+        // Ensure tooltips are destroyed when elements are clicked
+        $(document).on('click', '.node-expander', function() {
+            // Hide any tooltips that might be visible
             $('.tooltip').remove();
-            
-            // Show tooltip for this element
-            var $this = $(this);
-            $this.tooltip('show');
-            
-            // Hide tooltip when clicking elsewhere
-            $(document).one('click', function() {
-                $this.tooltip('hide');
-            });
         });
 
         // Handle form submission within modal
@@ -255,7 +342,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                 data: data,
                 beforeSend: function() {
                     // Disable submit button and show loading indicator
-                    form.find('button[type="submit"]').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
+                    form.find('button[type="submit"]').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="width: 1rem; height: 1rem; border-width: 0.15em;"></span> Processing...');
                 },
                 success: function(response) {
                     if (response.success) {
@@ -349,6 +436,10 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
         // Handle tree node expansion/collapse
         $(document).on('click', '.node-expander', function(e) {
             e.stopPropagation();
+            
+            // Hide any tooltips that might be visible
+            $('.tooltip').remove();
+            
             var nodeId = $(this).closest('tr').data('node-id');
             var isExpanded = $(this).hasClass('expanded');
             var level = $(this).closest('tr').data('level');
@@ -358,10 +449,16 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                 // Collapse this node
                 collapseNode(nodeId);
                 $(this).removeClass('expanded');
-                $(this).html('<i class="fas fa-chevron-right text-primary"></i>');
+                
+                // Update icon with appropriate tooltip based on node type
+                var expandTooltip = getExpandTooltip(nodeType);
+                $(this).html('<i class="fas fa-chevron-right text-primary" data-toggle="tooltip" title="' + expandTooltip + '"></i>');
                 
                 // Remove from expanded nodes
                 delete expandedNodes[nodeId];
+                
+                // Reset UI state for all descendants
+                resetDescendantUIState(nodeId);
             } else {
                 // Collapse all other nodes at the same level with the same parent
                 var parentId = nodeRelationships[nodeId];
@@ -370,6 +467,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                 $('tr[data-level="' + level + '"]').each(function() {
                     var otherNodeId = $(this).data('node-id');
                     var otherParentId = nodeRelationships[otherNodeId];
+                    var otherNodeType = nodeTypes[otherNodeId] || '';
                     
                     // If it's a different node but has the same parent (or both are top-level)
                     if (otherNodeId !== nodeId && otherParentId === parentId) {
@@ -380,10 +478,16 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                         if ($otherExpander.hasClass('expanded')) {
                             collapseNodeAndAllChildren(otherNodeId);
                             $otherExpander.removeClass('expanded');
-                            $otherExpander.html('<i class="fas fa-chevron-right text-primary"></i>');
+                            
+                            // Update icon with appropriate tooltip
+                            var expandTooltip = getExpandTooltip(otherNodeType);
+                            $otherExpander.html('<i class="fas fa-chevron-right text-primary" data-toggle="tooltip" title="' + expandTooltip + '"></i>');
                             
                             // Remove from expanded nodes
                             delete expandedNodes[otherNodeId];
+                            
+                            // Reset UI state for all descendants
+                            resetDescendantUIState(otherNodeId);
                         }
                     }
                 });
@@ -391,11 +495,17 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                 // Expand this node
                 expandNode(nodeId);
                 $(this).addClass('expanded');
-                $(this).html('<i class="fas fa-chevron-down text-primary"></i>');
+                
+                // Update icon with appropriate tooltip based on node type
+                var collapseTooltip = getCollapseTooltip(nodeType);
+                $(this).html('<i class="fas fa-chevron-down text-primary" data-toggle="tooltip" title="' + collapseTooltip + '"></i>');
                 
                 // Add to expanded nodes
                 expandedNodes[nodeId] = true;
             }
+            
+            // Initialize tooltips for newly added elements
+            initTooltips();
             
             // Save expanded state to localStorage
             localStorage.setItem('expandedNodes', JSON.stringify(expandedNodes));
@@ -410,6 +520,101 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
         });
     });
     
+    // Function to reset UI state for all descendants of a node
+    function resetDescendantUIState(nodeId) {
+        // Find all descendants
+        findAllDescendants(nodeId).forEach(function(descendantId) {
+            // Find the expander for this descendant
+            var $descendantExpander = $('tr[data-node-id="' + descendantId + '"] .node-expander');
+            
+            // Reset the expander UI
+            if ($descendantExpander.length) {
+                $descendantExpander.removeClass('expanded');
+                
+                var nodeType = nodeTypes[descendantId] || '';
+                var expandTooltip = getExpandTooltip(nodeType);
+                
+                $descendantExpander.html('<i class="fas fa-chevron-right text-primary" data-toggle="tooltip" title="' + expandTooltip + '"></i>');
+            }
+            
+            // Remove from expanded nodes
+            delete expandedNodes[descendantId];
+        });
+    }
+    
+    // Function to find all descendants of a node
+    function findAllDescendants(nodeId) {
+        var descendants = [];
+        
+        // Find direct children
+        var directChildren = [];
+        $('tr[data-parent="' + nodeId + '"]').each(function() {
+            var childId = $(this).data('node-id');
+            directChildren.push(childId);
+            descendants.push(childId);
+        });
+        
+        // Recursively find descendants of each child
+        directChildren.forEach(function(childId) {
+            descendants = descendants.concat(findAllDescendants(childId));
+        });
+        
+        return descendants;
+    }
+    
+    // Function to initialize tooltips properly
+    function initTooltips() {
+        // First destroy any existing tooltips to prevent duplicates
+        $('[data-toggle="tooltip"]').tooltip('dispose');
+        
+        // Then reinitialize with proper settings
+        $('[data-toggle="tooltip"]').tooltip({
+            trigger: 'hover',
+            container: 'body',
+            animation: false
+        });
+    }
+    
+    // Function to get expand tooltip based on node type
+    function getExpandTooltip(nodeType) {
+        switch(nodeType) {
+            case 'pilar':
+                return 'Lihat isu strategis';
+            case 'isu':
+                return 'Lihat program pengembangan';
+            case 'program':
+                return 'Lihat program rektor';
+            case 'rektor':
+                return 'Lihat indikator kinerja';
+            case 'indikator':
+                return 'Lihat kegiatan';
+            case 'kegiatan':
+                return 'Lihat detail kegiatan';
+            default:
+                return 'Lihat detail';
+        }
+    }
+    
+    // Function to get collapse tooltip based on node type
+    function getCollapseTooltip(nodeType) {
+        switch(nodeType) {
+            case 'pilar':
+                return 'Tutup isu strategis';
+            case 'isu':
+                return 'Tutup program pengembangan';
+            case 'program':
+                return 'Tutup program rektor';
+            case 'rektor':
+                return 'Tutup indikator kinerja';
+            case 'indikator':
+                return 'Tutup kegiatan';
+            case 'kegiatan':
+                return 'Tutup detail kegiatan';
+            default:
+                return 'Tutup detail';
+        }
+    }
+    
     // Function to collapse a node and all its children recursively
     function collapseNodeAndAllChildren(nodeId) {
         // First find all direct children
@@ -419,8 +624,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
             childNodeIds.push(childId);
             
             // Remove from expanded nodes
-            delete
-            expandedNodes[childId];
+            delete expandedNodes[childId];
         });
         
         // Recursively collapse each child and its descendants
@@ -482,21 +686,21 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                     nodeTypes[item.id] = item.type;
                 });
                 
-                // Process tree data to update tooltips based on has_children
+                // Process tree data to update tooltips based on node type
                 treeData.forEach(function(item) {
-                    // Update tooltip based on node type and has_children
+                    // Update tooltip based on node type
                     if (item.type === 'pilar') {
-                        item.tooltip = item.has_children ? 'Lihat isu strategis' : 'Belum ada isu strategis';
+                        item.tooltip = 'Ini adalah Pilar';
                     } else if (item.type === 'isu') {
-                        item.tooltip = item.has_children ? 'Lihat program pengembangan' : 'Belum ada program pengembangan';
+                        item.tooltip = 'Ini adalah Isu Strategis';
                     } else if (item.type === 'program') {
-                        item.tooltip = item.has_children ? 'Lihat program rektor' : 'Belum ada program rektor';
+                        item.tooltip = 'Ini adalah Program Pengembangan';
                     } else if (item.type === 'rektor') {
-                        item.tooltip = item.has_children ? 'Lihat indikator kinerja' : 'Belum ada indikator kinerja';
+                        item.tooltip = 'Ini adalah Program Rektor';
                     } else if (item.type === 'indikator') {
-                        item.tooltip = item.has_children ? 'Lihat kegiatan' : 'Belum ada kegiatan';
+                        item.tooltip = 'Ini adalah Indikator Kinerja';
                     } else if (item.type === 'kegiatan') {
-                        item.tooltip = 'Detail kegiatan';
+                        item.tooltip = 'Ini adalah Kegiatan';
                     }
                 });
                 
@@ -509,6 +713,24 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                     row.attr('data-parent', item.parent || '');
                     row.attr('data-level', item.level);
                     row.attr('data-has-children', item.has_children);
+                    row.attr('data-node-type', item.type); // Add node type as data attribute
+                    
+                    // Add node type class for styling
+                    row.addClass('node-' + item.type);
+                                        // Apply background color directly based on node type
+                    if (item.type === 'pilar') {
+                        row.css('background-color', 'rgba(231, 74, 59, 0.1)'); // Light red
+                    } else if (item.type === 'isu') {
+                        row.css('background-color', 'rgba(246, 194, 62, 0.1)'); // Light yellow
+                    } else if (item.type === 'program') {
+                        row.css('background-color', 'rgba(28, 200, 138, 0.1)'); // Light green
+                    } else if (item.type === 'rektor') {
+                        row.css('background-color', 'rgba(10, 63, 223, 0.1)'); // Light blue
+                    } else if (item.type === 'indikator') {
+                        row.css('background-color', 'rgba(2, 255, 251, 0.1)'); // Light info
+                    } else if (item.type === 'kegiatan') {
+                        row.css('background-color', 'rgba(156, 39, 176, 0.1)'); // Light purple
+                    }
                     
                     // Add level class for styling
                     row.addClass('level-' + item.level);
@@ -526,26 +748,32 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                     // Add cells with proper styling
                     row.append('<td class="text-center" style="white-space:nowrap;width:1px;">' + (item.no || '') + '</td>');
                     
-                    // Add expander if has children (without type-specific icons)
+                    // Add expander if has children
                     var expander = '';
                     if (item.has_children) {
-                        var expanderIcon = expandedNodes[item.id] ? 
-                            '<i class="fas fa-chevron-down text-primary"></i>' : 
-                            '<i class="fas fa-chevron-right text-primary"></i>';
-                        expander = '<span class="node-expander ' + (expandedNodes[item.id] ? 'expanded' : '') + '" data-node-id="' + item.id + '">' + expanderIcon + '</span>';
+                        var isExpanded = expandedNodes[item.id];
+                        var tooltipText = isExpanded ? 
+                            getCollapseTooltip(item.type) : 
+                            getExpandTooltip(item.type);
+                        
+                        var expanderIcon = isExpanded ? 
+                            '<i class="fas fa-chevron-down text-primary" data-toggle="tooltip" title="' + tooltipText + '"></i>' : 
+                            '<i class="fas fa-chevron-right text-primary" data-toggle="tooltip" title="' + tooltipText + '"></i>';
+                        
+                        expander = '<span class="node-expander ' + (isExpanded ? 'expanded' : '') + '" data-node-id="' + item.id + '">' + expanderIcon + '</span>';
                     }
                     
-                    // Create name cell with tooltip that shows on click
+                    // Create name cell with tooltip that shows on hover
                     var nameText = '';
                     
-                    // Add visual indentation markers based on level - MODIFIED HERE
+                    // Add visual indentation markers based on level - with color gradient
                     var indentPrefix = '';
                     for (var i = 0; i < item.level; i++) {
-                        indentPrefix += '<span class="tree-indent">- - -&nbsp;</span>';
+                        indentPrefix += '<span class="tree-indent text-primary">- - -&nbsp;</span>';
                     }
                     
                     if (item.tooltip) {
-                        nameText = indentPrefix + '<span class="node-name" data-toggle="tooltip" data-trigger="manual" title="' + item.tooltip + '">' + item.nama + '</span>';
+                        nameText = indentPrefix + '<span class="node-name" data-toggle="tooltip" title="' + item.tooltip + '">' + item.nama + '</span>';
                     } else {
                         nameText = indentPrefix + item.nama;
                     }
@@ -557,10 +785,8 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                     tableBody.append(row);
                 });
                 
-                // Initialize tooltips with manual trigger
-                $('.node-name[data-toggle="tooltip"]').tooltip({
-                    trigger: 'manual'
-                });
+                // Initialize tooltips
+                initTooltips();
                 
                 // Clean up expandedNodes to remove any that no longer exist in the tree
                 for (var nodeId in expandedNodes) {
@@ -605,10 +831,16 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
         // Expand each node
         nodesToExpand.forEach(function(nodeId) {
             expandNode(nodeId);
+            var nodeType = nodeTypes[nodeId] || '';
+            var collapseTooltip = getCollapseTooltip(nodeType);
+            
             $('tr[data-node-id="' + nodeId + '"] .node-expander')
                 .addClass('expanded')
-                .html('<i class="fas fa-chevron-down text-primary"></i>');
+                .html('<i class="fas fa-chevron-down text-primary" data-toggle="tooltip" title="' + collapseTooltip + '"></i>');
         });
+        
+        // Re-initialize tooltips
+        initTooltips();
     }
     
     function expandNode(nodeId) {
@@ -630,8 +862,8 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
         $('tr[data-parent="' + nodeId + '"]').hide();
     }
 
-    // Function to initialize event handlers for dynamic content
-    function initEventHandlers() {
+     // Function to initialize event handlers for dynamic content
+     function initEventHandlers() {
         // Handle modal loading
         $('.load-modal').off('click').on('click', function(e) {
             e.preventDefault();
