@@ -24,12 +24,12 @@
                 </select>
             </div>
             <div>
-            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('kegiatans.create') }}" data-title="Tambah Kegiatan">
-                <i class="fas fa-plus fa-sm"></i> Tambah Kegiatan
-            </button>
             <a href="{{ route('kegiatans.export.excel', request()->query()) }}" class="btn btn-success btn-sm">
                 <i class="fas fa-file-excel fa-sm"></i> Export Excel
             </a>
+            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('kegiatans.create') }}" data-title="Tambah Kegiatan">
+                <i class="fas fa-plus fa-sm"></i> Tambah Kegiatan
+            </button>
             </div>
         </div>
     </div>

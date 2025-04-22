@@ -34,12 +34,12 @@
                 </select>
             </div>
             <div>
+               <a href="{{ route('indikator-kinerjas.export.excel', request()->query()) }}" class="btn btn-success btn-sm">
+                    <i class="fas fa-file-excel fa-sm"></i> Export Excel
+                </a>
                 <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('indikator-kinerjas.create') }}" data-title="Tambah Indikator Kinerja">
                     <i class="fas fa-plus fa-sm"></i> Tambah Indikator Kinerja
                 </button>
-                <a href="{{ route('indikator-kinerjas.export.excel', request()->query()) }}" class="btn btn-success btn-sm">
-                    <i class="fas fa-file-excel fa-sm"></i> Export Excel
-                </a>
             </div>
         </div>
     </div>
