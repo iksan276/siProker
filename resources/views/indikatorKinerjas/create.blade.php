@@ -38,16 +38,16 @@
         <small id="jumlahError" class="text-danger" style="display: none;">Field Jumlah hanya boleh diisi dengan angka!</small>
     </div>
     <div class="form-group">
-        <label for="MetaAnggaranID">Meta Anggaran</label>
-        <select name="MetaAnggaranID[]" id="MetaAnggaranID" class="form-control select2" multiple>
+        <label for="MetaAnggaranID" class="d-block">Meta Anggaran</label>
+        <select name="MetaAnggaranID[]" id="MetaAnggaranID" class="form-control select2 satuan-select" multiple>
             @foreach($metaAnggarans as $metaAnggaran)
                 <option value="{{ $metaAnggaran->MetaAnggaranID }}">{{ $metaAnggaran->Nama }}</option>
             @endforeach
         </select>
     </div>
     <div class="form-group">
-        <label for="UnitTerkaitID">Unit Terkait</label>
-        <select name="UnitTerkaitID[]" id="UnitTerkaitID" class="form-control select2" multiple>
+        <label for="UnitTerkaitID" class="d-block">Unit Terkait</label>
+        <select name="UnitTerkaitID[]" id="UnitTerkaitID" class="form-control select2 satuan-select" multiple>
             @foreach($units as $unit)
                 <option value="{{ $unit->UnitID }}">{{ $unit->Nama }}</option>
             @endforeach
