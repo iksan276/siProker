@@ -38,12 +38,12 @@
             <table class="table table-bordered" id="programRektorTable" width="100%" cellspacing="0">
                 <thead>
                     <tr class="text-center text-dark">
-                        <th>No</th>
-                        <th>Nama</th>
-                        <th>Program Pengembangan</th>
-                        <th>Tahun</th>
-                        <th>NA</th>
-                        <th>Actions</th>
+                        <th style="white-space:nowrap">No</th>
+                        <th style="white-space:nowrap">Program Pengembangan</th>
+                        <th style="white-space:nowrap">Nama</th>
+                        <th style="white-space:nowrap">Tahun</th>
+                        <th style="white-space:nowrap">NA</th>
+                        <th style="white-space:nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -220,8 +220,8 @@
                         return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
                     }
                 },
-                { data: 'nama' },
                 { data: 'program_pengembangan' },
+                { data: 'nama' },
                 { 
                     data: 'tahun', 
                     className: 'text-center',

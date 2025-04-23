@@ -29,11 +29,11 @@
             <table class="table table-bordered" id="userTable" width="100%" cellspacing="0">
                 <thead>
                     <tr class="text-center text-dark">
-                        <th>No</th>
-                        <th>Nama</th>
-                        <th>Email</th>
-                        <th>Level</th>
-                        <th>Actions</th>
+                        <th style="white-space:nowrap">No</th>
+                        <th style="white-space:nowrap">Nama</th>
+                        <th style="white-space:nowrap">Email</th>
+                        <th style="white-space:nowrap">Level</th>
+                        <th style="white-space:nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

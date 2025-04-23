@@ -59,8 +59,8 @@ class ProgramRektorController extends Controller
                 
                 $data[] = [
                     'no' => $index + 1,
-                    'nama' => $program->Nama,
-                    'program_pengembangan' => $program->programPengembangan->Nama,
+                    'program_pengembangan' => nl2br($program->programPengembangan->Nama),
+                    'nama' => nl2br($program->Nama),
                     'tahun' => $program->Tahun,
                     'na' => $naStatus,
                     'actions' => $actions,
@@ -111,7 +111,7 @@ class ProgramRektorController extends Controller
     {
         $request->validate([
             'ProgramPengembanganID' => 'required|exists:program_pengembangans,ProgramPengembanganID',
-            'Nama' => 'required|string|max:255',
+            'Nama' => 'required|string',
             'Tahun' => 'required',
             'NA' => 'required|in:Y,N',
         ]);
@@ -154,7 +154,7 @@ class ProgramRektorController extends Controller
     {
         $request->validate([
             'ProgramPengembanganID' => 'required|exists:program_pengembangans,ProgramPengembanganID',
-            'Nama' => 'required|string|max:255',
+            'Nama' => 'required|string',
             'Tahun' => 'required',
             'NA' => 'required|in:Y,N',
         ]);

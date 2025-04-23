@@ -48,17 +48,17 @@
             <table class="table table-bordered" id="indikatorKinerjaTable" width="100%" cellspacing="0">
                 <thead>
                     <tr class="text-center text-dark">
-                        <th>No</th>
-                        <th>Nama</th>
-                        <th>Program Rektor</th>
-                        <th>Bobot</th>
-                        <th>Satuan</th>
-                        <th>Harga Satuan</th>
-                        <th>Jumlah</th>
-                        <th>Meta Anggaran</th>
-                        <th>Unit Terkait</th>
-                        <th>NA</th>
-                        <th>Actions</th>
+                        <th style="white-space:nowrap">No</th>
+                        <th style="white-space:nowrap">Program Rektor</th>
+                        <th style="white-space:nowrap">Nama</th>
+                        <th style="white-space:nowrap">Bobot</th>
+                        <th style="white-space:nowrap">Satuan</th>
+                        <th style="white-space:nowrap">Harga Satuan</th>
+                        <th style="white-space:nowrap">Jumlah</th>
+                        <th style="white-space:nowrap">Meta Anggaran</th>
+                        <th style="white-space:nowrap">Unit Terkait</th>
+                        <th style="white-space:nowrap">NA</th>
+                        <th style="white-space:nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -288,8 +288,8 @@
                         return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
                     }
                 },
-                { data: 'nama' },
                 { data: 'program_rektor' },
+                { data: 'nama' },
                 { data: 'bobot', className: 'text-center' },
                 { data: 'satuan', className: 'text-center', width: '1px' },
                 { data: 'harga_satuan', className: 'text-center' },

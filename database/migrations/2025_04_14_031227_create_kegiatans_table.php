@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('kegiatans', function (Blueprint $table) {
             $table->id('KegiatanID');
             $table->unsignedBigInteger('IndikatorKinerjaID');
-            $table->string('Nama', 255);
+            $table->text('Nama');
             $table->dateTime('TanggalMulai');
             $table->dateTime('TanggalSelesai');
             $table->text('RincianKegiatan');

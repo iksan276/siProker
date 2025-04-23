@@ -34,7 +34,7 @@ class IsuStrategisController extends Controller
     {
         $request->validate([
             'PilarID' => 'required|exists:pilars,PilarID',
-            'Nama' => 'required|string|max:255',
+            'Nama' => 'required|string',
             'NA' => 'required|in:Y,N',
         ]);
 
@@ -80,7 +80,7 @@ class IsuStrategisController extends Controller
         
         $request->validate([
             'PilarID' => 'required|exists:pilars,PilarID',
-            'Nama' => 'required|string|max:255',
+            'Nama' => 'required|string',
             'NA' => 'required|in:Y,N',
         ]);
 

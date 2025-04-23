@@ -96,9 +96,9 @@ class IndikatorKinerjaController extends Controller
                 $data[] = [
                     'DT_RowClass' => $rowClass,
                     'no' => $index + 1,
-                    'nama' => $indikatorKinerja->Nama,
-                    'program_rektor' => $indikatorKinerja->programRektor->Nama,
-                    'bobot' => $indikatorKinerja->Bobot . '%',
+                    'program_rektor' => nl2br($indikatorKinerja->programRektor->Nama),
+                    'nama' => nl2br($indikatorKinerja->Nama),
+                    'bobot' => number_format($indikatorKinerja->Bobot , 0, ',', '.') . '%',
                     'satuan' => $indikatorKinerja->satuan->Nama,
                     'harga_satuan' => 'Rp ' . number_format($indikatorKinerja->HargaSatuan, 0, ',', '.'),
                     'jumlah' => number_format($indikatorKinerja->Jumlah, 0, ',', '.'),
@@ -168,22 +168,27 @@ class IndikatorKinerjaController extends Controller
         $request->validate([
             'ProgramRektorID' => 'required|exists:program_rektors,ProgramRektorID',
             'SatuanID' => 'required|exists:satuans,SatuanID',
-            'Nama' => 'required|string|max:255',
-            'Bobot' => 'required|integer',
-            'HargaSatuan' => 'required|integer',
-            'Jumlah' => 'required|integer',
+            'Nama' => 'required|string',
+            'Bobot' => 'required|numeric',
+            'HargaSatuan' => 'required|numeric',
+            'Jumlah' => 'required|numeric',
             'MetaAnggaranID' => 'required|array',
             'UnitTerkaitID' => 'required|array',
             'NA' => 'required|in:Y,N',
         ]);
 
+        // Clean numeric inputs from formatting
+        $bobot = str_replace('.', '', $request->Bobot);
+        $hargaSatuan = str_replace('.', '', $request->HargaSatuan);
+        $jumlah = str_replace('.', '', $request->Jumlah);
+
         $indikatorKinerja = new IndikatorKinerja();
         $indikatorKinerja->ProgramRektorID = $request->ProgramRektorID;
         $indikatorKinerja->SatuanID = $request->SatuanID;
         $indikatorKinerja->Nama = $request->Nama;
-        $indikatorKinerja->Bobot = $request->Bobot;
-        $indikatorKinerja->HargaSatuan = $request->HargaSatuan;
-        $indikatorKinerja->Jumlah = $request->Jumlah;
+        $indikatorKinerja->Bobot = $bobot;
+        $indikatorKinerja->HargaSatuan = $hargaSatuan;
+        $indikatorKinerja->Jumlah = $jumlah;
         $indikatorKinerja->MetaAnggaranID = implode(',', $request->MetaAnggaranID);
         $indikatorKinerja->UnitTerkaitID = implode(',', $request->UnitTerkaitID);
         $indikatorKinerja->NA = $request->NA;
@@ -233,21 +238,26 @@ class IndikatorKinerjaController extends Controller
         $request->validate([
             'ProgramRektorID' => 'required|exists:program_rektors,ProgramRektorID',
             'SatuanID' => 'required|exists:satuans,SatuanID',
-            'Nama' => 'required|string|max:255',
-            'Bobot' => 'required|integer',
-            'HargaSatuan' => 'required|integer',
-            'Jumlah' => 'required|integer',
+            'Nama' => 'required|string',
+            'Bobot' => 'required|numeric',
+            'HargaSatuan' => 'required|numeric',
+            'Jumlah' => 'required|numeric',
             'MetaAnggaranID' => 'required|array',
             'UnitTerkaitID' => 'required|array',
             'NA' => 'required|in:Y,N',
         ]);
 
+        // Clean numeric inputs from formatting
+        $bobot = str_replace('.', '', $request->Bobot);
+        $hargaSatuan = str_replace('.', '', $request->HargaSatuan);
+        $jumlah = str_replace('.', '', $request->Jumlah);
+
         $indikatorKinerja->ProgramRektorID = $request->ProgramRektorID;
         $indikatorKinerja->SatuanID = $request->SatuanID;
         $indikatorKinerja->Nama = $request->Nama;
-        $indikatorKinerja->Bobot = $request->Bobot;
-        $indikatorKinerja->HargaSatuan = $request->HargaSatuan;
-        $indikatorKinerja->Jumlah = $request->Jumlah;
+        $indikatorKinerja->Bobot = $bobot;
+        $indikatorKinerja->HargaSatuan = $hargaSatuan;
+        $indikatorKinerja->Jumlah = $jumlah;
         $indikatorKinerja->MetaAnggaranID = implode(',', $request->MetaAnggaranID);
         $indikatorKinerja->UnitTerkaitID = implode(',', $request->UnitTerkaitID);
         $indikatorKinerja->NA = $request->NA;

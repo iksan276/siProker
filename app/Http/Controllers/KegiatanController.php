@@ -53,11 +53,11 @@ class KegiatanController extends Controller
                 
                 $data[] = [
                     'no' => $index + 1,
-                    'indikator_kinerja' => $kegiatan->indikatorKinerja->Nama,
-                    'nama' => $kegiatan->Nama,
+                    'indikator_kinerja' => nl2br($kegiatan->indikatorKinerja->Nama),
+                    'nama' => nl2br($kegiatan->Nama),
                     'tanggal_mulai' => \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y'),
                     'tanggal_selesai' => \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y'),
-                    'rincian_kegiatan' => nl2br(\Illuminate\Support\Str::limit($kegiatan->RincianKegiatan, 50)),
+                    'rincian_kegiatan' => nl2br($kegiatan->RincianKegiatan),
                     'actions' => $actions
                 ];
             }
@@ -112,7 +112,7 @@ class KegiatanController extends Controller
     {
         $request->validate([
             'IndikatorKinerjaID' => 'required|exists:indikator_kinerjas,IndikatorKinerjaID',
-            'Nama' => 'required|string|max:255',
+            'Nama' => 'required|string',
             'TanggalMulai' => 'required|date',
             'TanggalSelesai' => 'required|date|after_or_equal:TanggalMulai',
             'RincianKegiatan' => 'required|string',
@@ -162,7 +162,7 @@ class KegiatanController extends Controller
         
         $request->validate([
             'IndikatorKinerjaID' => 'required|exists:indikator_kinerjas,IndikatorKinerjaID',
-            'Nama' => 'required|string|max:255',
+            'Nama' => 'required|string',
             'TanggalMulai' => 'required|date',
             'TanggalSelesai' => 'required|date|after_or_equal:TanggalMulai',
             'RincianKegiatan' => 'required|string',

@@ -23,19 +23,19 @@
             <table class="table table-bordered" id="isuStrategisTable" width="100%" cellspacing="0">
                 <thead>
                     <tr class="text-center text-dark">
-                        <th>No</th>
-                        <th>Nama</th>
-                        <th>Pilar</th>
-                        <th>NA</th>
-                        <th>Actions</th>
+                        <th style="white-space:nowrap">No</th>
+                        <th style="white-space:nowrap">Pilar</th>
+                        <th style="white-space:nowrap">Nama</th>
+                        <th style="white-space:nowrap">NA</th>
+                        <th style="white-space:nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($isuStrategis as $index => $isu)
                     <tr class="{{ $isu->NA == 'Y' ? 'bg-light text-muted' : '' }}">
                         <td class="text-center" style="white-space:nowrap;width:1px">{{ $index + 1 }}</td>
-                        <td>{{ $isu->Nama }}</td>
-                        <td>{{ $isu->pilar->Nama }}</td>
+                        <td>{!! nl2br($isu->pilar->Nama) !!}</td>
+                        <td>{!! nl2br($isu->Nama) !!}</td>
                         <td class="text-center" style="white-space:nowrap;width:1px">
                             @if($isu->NA == 'Y')
                                 <span class="badge badge-danger">Non Aktif</span>

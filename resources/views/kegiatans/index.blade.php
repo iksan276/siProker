@@ -38,13 +38,13 @@
             <table class="table table-bordered" id="kegiatanTable" width="100%" cellspacing="0">
                 <thead>
                     <tr class="text-center text-dark">
-                        <th>No</th>
-                        <th>Indikator Kinerja</th>
-                        <th>Nama</th>
-                        <th>Tanggal Mulai</th>
-                        <th>Tanggal Selesai</th>
-                        <th>Rincian Kegiatan</th>
-                        <th>Actions</th>
+                        <th style="white-space:nowrap">No</th>
+                        <th style="white-space:nowrap">Indikator Kinerja</th>
+                        <th style="white-space:nowrap">Nama</th>
+                        <th style="white-space:nowrap">Tanggal Mulai</th>
+                        <th style="white-space:nowrap">Tanggal Selesai</th>
+                        <th style="white-space:nowrap">Rincian Kegiatan</th>
+                        <th style="white-space:nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

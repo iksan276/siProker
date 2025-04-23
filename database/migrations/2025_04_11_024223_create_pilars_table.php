@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pilars', function (Blueprint $table) {
             $table->id('PilarID');
             $table->unsignedBigInteger('RenstraID');
-            $table->string('Nama', 255);
+            $table->text('Nama');
             $table->enum('NA', ['Y', 'N'])->default('N');
             $table->dateTime('DCreated')->nullable();
             $table->unsignedBigInteger('UCreated')->nullable();

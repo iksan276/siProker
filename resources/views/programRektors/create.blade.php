@@ -1,8 +1,8 @@
-<form action="{{ route('program-rektors.store') }}" method="POST" class="modal-form">
+<form action="{{ route('program-rektors.store') }}" method="POST" class="modal-form" id="programRektorForm">
     @csrf
     <div class="form-group">
         <label for="ProgramPengembanganID">Program Pengembangan</label>
-        <select name="ProgramPengembanganID" id="ProgramPengembanganID" class="form-control select2" required>
+        <select name="ProgramPengembanganID" id="ProgramPengembanganID" class="form-control select2" >
         <option value="" disabled selected></option>
             @foreach($programPengembangans as $program)
                 <option value="{{ $program->ProgramPengembanganID }}">{{ $program->Nama }}</option>
@@ -11,15 +11,20 @@
     </div>
     <div class="form-group">
         <label for="Nama">Nama</label>
-        <input type="text" name="Nama" id="Nama" class="form-control" required>
+        <textarea name="Nama" id="Nama" class="form-control" rows="3"></textarea>
     </div>
     <div class="form-group">
         <label for="Tahun">Tahun</label>
-        <input type="number" name="Tahun" id="Tahun" class="form-control" min="2000" max="2100" required>
+        <select name="Tahun" id="Tahun" class="form-control">
+        <option value="" disabled selected></option>
+            @for ($year = 2025; $year < 2030; $year++)
+                <option value="{{ $year }}">{{ $year }}</option>
+            @endfor
+        </select>
     </div>
     <div class="form-group">
         <label for="NA">NA</label>
-        <select name="NA" id="NA" class="form-control" required>
+        <select name="NA" id="NA" class="form-control" >
         <option value="Y">Non Aktif</option>
         <option value="N" selected>Aktif</option>
         </select>
@@ -29,3 +34,47 @@
         <button class="btn btn-primary" type="submit">Simpan</button>
     </div>
 </form>
+
+<script>
+document.getElementById('programRektorForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the form from traditional submission
+    
+    // Validate empty fields
+    const programPengembanganID = document.getElementById('ProgramPengembanganID').value.trim();
+    const nama = document.getElementById('Nama').value.trim();
+    const tahun = document.getElementById('Tahun').value.trim();
+    
+    // Create an array to store error messages
+    let emptyFields = [];
+    
+    // Check each field and add to error messages if empty
+    if (!programPengembanganID) {
+        emptyFields.push('Program Pengembangan harus dipilih');
+    }
+    
+    if (!nama) {
+        emptyFields.push('Nama harus diisi');
+    }
+    
+    if (!tahun) {
+        emptyFields.push('Tahun harus dipilih');
+    }
+    
+    // If there are empty fields, show the error message
+    if (emptyFields.length > 0) {
+        const errorList = '<ul style="text-align:left;margin-left:40px;margin-right:50px" class="text-danger">' + 
+            emptyFields.map(error => `<li>${error}</li>`).join('') + 
+            '</ul>';
+            
+        Swal.fire({
+            title: 'Validasi Inputan',
+            html: errorList,
+            icon: 'error',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'OK'
+        });
+        return false;
+    }
+    
+});
+</script>

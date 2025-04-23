@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('program_pengembangans', function (Blueprint $table) {
             $table->id('ProgramPengembanganID');
             $table->unsignedBigInteger('IsuID');
-            $table->string('Nama', 255);
+            $table->text('Nama');
             $table->enum('NA', ['Y', 'N'])->default('N');
             $table->dateTime('DCreated')->nullable();
             $table->unsignedBigInteger('UCreated')->nullable();

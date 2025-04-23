@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('program_rektors', function (Blueprint $table) {
             $table->id('ProgramRektorID');
             $table->unsignedBigInteger('ProgramPengembanganID');
-            $table->string('Nama', 255);
+            $table->text('Nama');
             $table->year('Tahun');
             $table->enum('NA', ['Y', 'N'])->default('N');
             $table->dateTime('DCreated')->nullable();

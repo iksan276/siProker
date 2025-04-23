@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('IndikatorKinerjaID');
             $table->unsignedBigInteger('ProgramRektorID');
             $table->unsignedBigInteger('SatuanID');
-            $table->string('Nama', 255);
+            $table->text('Nama');
             $table->integer('Bobot');
             $table->integer('HargaSatuan');
             $table->integer('Jumlah');

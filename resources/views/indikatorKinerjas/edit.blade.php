@@ -1,13 +1,13 @@
-<form action="{{ route('indikator-kinerjas.update', $indikatorKinerja->IndikatorKinerjaID) }}" method="POST" class="modal-form">
+<form action="{{ route('indikator-kinerjas.update', $indikatorKinerja->IndikatorKinerjaID) }}" method="POST" class="modal-form" id="indikatorKinerjaEditForm">
     @csrf
     @method('PUT')
     <div class="form-group">
         <label for="Nama">Nama</label>
-        <input type="text" name="Nama" id="Nama" class="form-control" value="{{ $indikatorKinerja->Nama }}" required>
+        <textarea name="Nama" id="Nama" class="form-control" rows="3">{{ $indikatorKinerja->Nama }}</textarea>
     </div>
     <div class="form-group">
         <label for="ProgramRektorID">Program Rektor</label>
-        <select name="ProgramRektorID" id="ProgramRektorID" class="form-control select2" required>
+        <select name="ProgramRektorID" id="ProgramRektorID" class="form-control select2">
         <option value="" disabled selected></option>
             @foreach($programRektors as $programRektor)
                 <option value="{{ $programRektor->ProgramRektorID }}" {{ $indikatorKinerja->ProgramRektorID == $programRektor->ProgramRektorID ? 'selected' : '' }}>{{ $programRektor->Nama }}</option>
@@ -16,7 +16,7 @@
     </div>
     <div class="form-group">
         <label for="SatuanID">Satuan</label>
-        <select name="SatuanID" id="SatuanID" class="form-control select2" required>
+        <select name="SatuanID" id="SatuanID" class="form-control select2">
         <option value="" disabled selected></option>
             @foreach($satuans as $satuan)
                 <option value="{{ $satuan->SatuanID }}" {{ $indikatorKinerja->SatuanID == $satuan->SatuanID ? 'selected' : '' }}>{{ $satuan->Nama }}</option>
@@ -25,19 +25,19 @@
     </div>
     <div class="form-group">
         <label for="Bobot">Bobot</label>
-        <input type="number" name="Bobot" id="Bobot" class="form-control" value="{{ $indikatorKinerja->Bobot }}" required>
+        <input type="text" name="Bobot" id="Bobot" class="form-control number-input" value="{{ number_format($indikatorKinerja->Bobot, 0, ',', '.') }}">
     </div>
     <div class="form-group">
         <label for="HargaSatuan">Harga Satuan</label>
-        <input type="number" name="HargaSatuan" id="HargaSatuan" class="form-control" value="{{ $indikatorKinerja->HargaSatuan }}" required>
+        <input type="text" name="HargaSatuan" id="HargaSatuan" class="form-control currency-input" value="{{ number_format($indikatorKinerja->HargaSatuan, 0, ',', '.') }}">
     </div>
     <div class="form-group">
         <label for="Jumlah">Jumlah</label>
-        <input type="number" name="Jumlah" id="Jumlah" class="form-control" value="{{ $indikatorKinerja->Jumlah }}" required>
+        <input type="text" name="Jumlah" id="Jumlah" class="form-control number-input" value="{{ number_format($indikatorKinerja->Jumlah, 0, ',', '.') }}">
     </div>
     <div class="form-group">
         <label for="MetaAnggaranID">Meta Anggaran</label>
-        <select name="MetaAnggaranID[]" id="MetaAnggaranID" class="form-control select2" multiple required>
+        <select name="MetaAnggaranID[]" id="MetaAnggaranID" class="form-control select2" multiple>
             @foreach($metaAnggarans as $metaAnggaran)
                 <option value="{{ $metaAnggaran->MetaAnggaranID }}" {{ in_array($metaAnggaran->MetaAnggaranID, $selectedMetaAnggarans) ? 'selected' : '' }}>{{ $metaAnggaran->Nama }}</option>
             @endforeach
@@ -45,7 +45,7 @@
     </div>
     <div class="form-group">
         <label for="UnitTerkaitID">Unit Terkait</label>
-        <select name="UnitTerkaitID[]" id="UnitTerkaitID" class="form-control select2" multiple required>
+        <select name="UnitTerkaitID[]" id="UnitTerkaitID" class="form-control select2" multiple>
             @foreach($units as $unit)
                 <option value="{{ $unit->UnitID }}" {{ in_array($unit->UnitID, $selectedUnitTerkaits) ? 'selected' : '' }}>{{ $unit->Nama }}</option>
             @endforeach
@@ -53,7 +53,7 @@
     </div>
     <div class="form-group">
         <label for="NA">Status</label>
-        <select name="NA" id="NA" class="form-control" required>
+        <select name="NA" id="NA" class="form-control">
             <option value="Y" {{ $indikatorKinerja->NA == 'Y' ? 'selected' : '' }}>Non Aktif</option>
             <option value="N" {{ $indikatorKinerja->NA == 'N' ? 'selected' : '' }}>Aktif</option>
         </select>
@@ -63,4 +63,103 @@
         <button class="btn btn-primary" type="submit">Update</button>
     </div>
 </form>
-           
+
+<script>
+$(document).ready(function() {
+    // Format number inputs with thousand separators
+    $('.number-input').on('input', function() {
+        // Remove non-numeric characters except dots
+        let value = $(this).val().replace(/[^\d]/g, '');
+        
+        // Format with thousand separator
+        if (value) {
+            $(this).val(new Intl.NumberFormat('id-ID').format(value));
+        }
+    });
+    
+    // Format currency inputs with thousand separators
+    $('.currency-input').on('input', function() {
+        // Remove non-numeric characters except dots
+        let value = $(this).val().replace(/[^\d]/g, '');
+        
+        // Format with thousand separator
+        if (value) {
+            $(this).val(new Intl.NumberFormat('id-ID').format(value));
+        }
+    });
+    
+    // Before form submission, remove formatting
+    $('.modal-form').on('submit', function() {
+        $('.number-input, .currency-input').each(function() {
+            $(this).val($(this).val().replace(/\./g, ''));
+        });
+    });
+});
+
+document.getElementById('indikatorKinerjaEditForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the form from traditional submission
+    
+    // Validate empty fields
+    const nama = document.getElementById('Nama').value.trim();
+    const programRektorID = document.getElementById('ProgramRektorID').value.trim();
+    const satuanID = document.getElementById('SatuanID').value.trim();
+    const bobot = document.getElementById('Bobot').value.trim();
+    const hargaSatuan = document.getElementById('HargaSatuan').value.trim();
+    const jumlah = document.getElementById('Jumlah').value.trim();
+    const metaAnggaranID = $('#MetaAnggaranID').val();
+    const unitTerkaitID = $('#UnitTerkaitID').val();
+    
+    // Create an array to store error messages
+    let emptyFields = [];
+    
+    // Check each field and add to error messages if empty
+    if (!nama) {
+        emptyFields.push('Nama harus diisi');
+    }
+    
+    if (!programRektorID) {
+        emptyFields.push('Program Rektor harus dipilih');
+    }
+    
+    if (!satuanID) {
+        emptyFields.push('Satuan harus dipilih');
+    }
+    
+    if (!bobot) {
+        emptyFields.push('Bobot harus diisi');
+    }
+    
+    if (!hargaSatuan) {
+        emptyFields.push('Harga Satuan harus diisi');
+    }
+    
+    if (!jumlah) {
+        emptyFields.push('Jumlah harus diisi');
+    }
+    
+    if (!metaAnggaranID || metaAnggaranID.length === 0) {
+        emptyFields.push('Meta Anggaran harus dipilih');
+    }
+    
+    if (!unitTerkaitID || unitTerkaitID.length === 0) {
+        emptyFields.push('Unit Terkait harus dipilih');
+    }
+    
+    // If there are empty fields, show the error message
+    if (emptyFields.length > 0) {
+        const errorList = '<ul style="text-align:left;margin-left:40px;margin-right:50px" class="text-danger">' + 
+            emptyFields.map(error => `<li>${error}</li>`).join('') + 
+            '</ul>';
+            
+        Swal.fire({
+            title: 'Validasi Inputan',
+            html: errorList,
+            icon: 'error',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'OK'
+        });
+        return false;
+    }
+    
+});
+</script>

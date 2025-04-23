@@ -1,13 +1,13 @@
-<form action="{{ route('meta-anggarans.update', $metaAnggaran->MetaAnggaranID) }}" method="POST" class="modal-form">
+<form action="{{ route('meta-anggarans.update', $metaAnggaran->MetaAnggaranID) }}" method="POST" class="modal-form" id="metaAnggaranEditForm">
     @csrf
     @method('PUT')
     <div class="form-group">
         <label for="Nama">Nama</label>
-        <input type="text" name="Nama" id="Nama" class="form-control" value="{{ $metaAnggaran->Nama }}" required>
+        <input type="text" name="Nama" id="Nama" class="form-control" value="{{ $metaAnggaran->Nama }}">
     </div>
     <div class="form-group">
         <label for="NA">Status</label>
-        <select name="NA" id="NA" class="form-control" required>
+        <select name="NA" id="NA" class="form-control">
             <option value="Y" {{ $metaAnggaran->NA == 'Y' ? 'selected' : '' }}>Non Aktif</option>
             <option value="N" {{ $metaAnggaran->NA == 'N' ? 'selected' : '' }}>Aktif</option>
         </select>
@@ -18,3 +18,37 @@
     </div>
 </form>
 
+<script>
+document.getElementById('metaAnggaranEditForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the form from traditional submission
+    
+    // Validate empty fields
+    const nama = document.getElementById('Nama').value.trim();
+    
+    // Create an array to store error messages
+    let emptyFields = [];
+    
+    // Check each field and add to error messages if empty
+    if (!nama) {
+        emptyFields.push('Nama harus diisi');
+    }
+    
+    // If there are empty fields, show the error message
+    if (emptyFields.length > 0) {
+        const errorList = '<ul style="text-align:left;margin-left:40px;margin-right:50px" class="text-danger">' + 
+            emptyFields.map(error => `<li>${error}</li>`).join('') + 
+            '</ul>';
+            
+        Swal.fire({
+            title: 'Validasi Inputan',
+            html: errorList,
+            icon: 'error',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'OK'
+        });
+        return false;
+    }
+    
+  
+});
+</script>

@@ -2,11 +2,11 @@
     <table class="table table-bordered">
         <tr>
             <th>Program Pengembangan</th>
-            <td>{{ $programRektor->programPengembangan->Nama }}</td>
+            <td>{!! nl2br($programRektor->programPengembangan->Nama) !!}</td>
         </tr>
         <tr>
             <th>Nama</th>
-            <td>{{ $programRektor->Nama }}</td>
+            <td>{!! nl2br($programRektor->Nama) !!}</td>
         </tr>
         <tr>
             <th>Tahun</th>

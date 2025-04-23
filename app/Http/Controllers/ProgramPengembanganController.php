@@ -34,7 +34,7 @@ class ProgramPengembanganController extends Controller
     {
         $request->validate([
             'IsuID' => 'required|exists:isu_strategis,IsuID',
-            'Nama' => 'required|string|max:255',
+            'Nama' => 'required|string',
             'NA' => 'required|in:Y,N',
         ]);
 
@@ -75,7 +75,7 @@ class ProgramPengembanganController extends Controller
     {
         $request->validate([
             'IsuID' => 'required|exists:isu_strategis,IsuID',
-            'Nama' => 'required|string|max:255',
+            'Nama' => 'required|string',
             'NA' => 'required|in:Y,N',
         ]);
 

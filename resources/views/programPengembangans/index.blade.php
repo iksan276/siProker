@@ -23,19 +23,19 @@
             <table class="table table-bordered" id="programPengembanganTable" width="100%" cellspacing="0">
                 <thead>
                     <tr class="text-center text-dark">
-                        <th>No</th>
-                        <th>Nama</th>
-                        <th>Isu Strategis</th>
-                        <th>NA</th>
-                        <th>Actions</th>
+                        <th style="white-space:nowrap">No</th>
+                        <th style="white-space:nowrap">Isu Strategis</th>
+                        <th style="white-space:nowrap">Nama</th>
+                        <th style="white-space:nowrap">NA</th>
+                        <th style="white-space:nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($programPengembangans as $index => $program)
                     <tr class="{{ $program->NA == 'Y' ? 'bg-light text-muted' : '' }}">
                         <td class="text-center" style="white-space:nowrap;width:1px">{{ $index + 1 }}</td>
-                        <td>{{ $program->Nama }}</td>
-                        <td>{{ $program->isuStrategis->Nama }}</td>
+                        <td>{!! nl2br($program->isuStrategis->Nama) !!}</td>
+                        <td>{!! nl2br($program->Nama) !!}</td>
                         <td class="text-center" style="white-space:nowrap;width:1px">
                             @if($program->NA == 'Y')
                                 <span class="badge badge-danger">Non Aktif</span>

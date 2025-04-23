@@ -2,11 +2,11 @@
     <table class="table table-bordered">
         <tr>
             <th>Pilar</th>
-            <td>{{ $isuStrategis->pilar->Nama }}</td>
+            <td>{!! nl2br($isuStrategis->pilar->Nama) !!}</td>
         </tr>
         <tr>
             <th>Nama</th>
-            <td>{{ $isuStrategis->Nama }}</td>
+            <td>{!! nl2br($isuStrategis->Nama) !!}</td>
         </tr>
         <tr>
             <th>NA</th>

@@ -85,8 +85,8 @@ class PilarController extends Controller
                 
                 $data[] = [
                     'no' => $index + 1,
-                    'nama' => $pilar->Nama,
                     'renstra' => $pilar->renstra->Nama,
+                    'nama' => nl2br($pilar->Nama),
                     'na' => $naStatus,
                     'actions' => $actions,
                     'row_class' => $pilar->NA == 'Y' ? 'bg-light text-muted' : ''
@@ -272,7 +272,7 @@ class PilarController extends Controller
     {
         $request->validate([
             'RenstraID' => 'required|exists:renstras,RenstraID',
-            'Nama' => 'required|string|max:255',
+            'Nama' => 'required|string',
             'NA' => 'required|in:Y,N',
         ]);
 
@@ -313,7 +313,7 @@ class PilarController extends Controller
     {
         $request->validate([
             'RenstraID' => 'required|exists:renstras,RenstraID',
-            'Nama' => 'required|string|max:255',
+            'Nama' => 'required|string',
             'NA' => 'required|in:Y,N',
         ]);
 

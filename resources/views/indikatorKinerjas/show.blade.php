@@ -5,12 +5,12 @@
             <td>{{ $indikatorKinerja->IndikatorKinerjaID }}</td>
         </tr>
         <tr>
-            <th>Nama</th>
-            <td>{{ $indikatorKinerja->Nama }}</td>
+            <th>Program Rektor</th>
+            <td>{!! nl2br($indikatorKinerja->programRektor->Nama) !!}</td>
         </tr>
         <tr>
-            <th>Program Rektor</th>
-            <td>{{ $indikatorKinerja->programRektor->Nama }}</td>
+            <th>Nama</th>
+            <td>{!! nl2br($indikatorKinerja->Nama) !!}</td>
         </tr>
         <tr>
             <th>Satuan</th>

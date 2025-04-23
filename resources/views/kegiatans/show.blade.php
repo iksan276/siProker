@@ -6,11 +6,11 @@
         </tr>
         <tr>
             <th>Indikator Kinerja</th>
-            <td>{{ $kegiatan->indikatorKinerja->Nama }}</td>
+            <td>{!! nl2br($kegiatan->indikatorKinerja->Nama) !!}</td>
         </tr>
         <tr>
             <th>Nama</th>
-            <td>{{ $kegiatan->Nama }}</td>
+            <td>{!! nl2br($kegiatan->Nama) !!}</td>
         </tr>
         <tr>
             <th>Tanggal Mulai</th>
@@ -22,7 +22,7 @@
         </tr>
         <tr>
             <th>Rincian Kegiatan</th>
-            <td>{!! nl2br(Str::limit($kegiatan->RincianKegiatan, 50)) !!}</td>
+            <td>{!! nl2br($kegiatan->RincianKegiatan) !!}</td>
         </tr>
     </table>
 </div>

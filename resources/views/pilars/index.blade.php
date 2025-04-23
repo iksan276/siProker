@@ -37,12 +37,12 @@
             <table class="table table-bordered" id="pilarTable" width="100%" cellspacing="0">
                 <thead>
                     <tr class="text-center text-dark">
-                        <th>No</th>
-                        <th>Nama</th>
-                        <th>Renstra</th>
-                        <th>NA</th>
+                        <th style="white-space:nowrap">No</th>
+                        <th style="white-space:nowrap">Renstra</th>
+                        <th style="white-space:nowrap">Nama</th>
+                        <th style="white-space:nowrap">NA</th>
                         @if(auth()->user()->isAdmin())
-                        <th>Actions</th>
+                        <th style="white-space:nowrap">Actions</th>
                         @endif
                     </tr>
                 </thead>
@@ -222,8 +222,8 @@
                         return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
                     }
                 },
-                { data: 'nama' },
                 { data: 'renstra' },
+                { data: 'nama' },
                 { 
                     data: 'na', 
                     className: 'text-center',
