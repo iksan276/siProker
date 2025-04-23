@@ -66,17 +66,6 @@
         to { transform: rotate(360deg); }
     }    
     
-    /* Default style for extra small screens (xs) */
-        .responsive-element {
-        width: 100%;
-        }
-
-        /* For screens larger than extra small */
-        @media (min-width: 576px) {
-        .responsive-element {
-            width: 25%;
-        }
-        }
 
         /* Custom responsive styling for Harga Satuan Select2 only */
         .satuan-select + .select2-container {

@@ -24,17 +24,17 @@
     </div>
     <div class="form-group">
         <label for="Bobot">Bobot</label>
-        <input type="text" name="Bobot" id="Bobot" class="form-control number-input responsive-element" onkeyup="validateNumericInput(this, 'bobotError')">
+        <input type="text" name="Bobot" id="Bobot" class="form-control number-input " onkeyup="validateNumericInput(this, 'bobotError')">
         <small id="bobotError" class="text-danger" style="display: none;">Field Bobot hanya boleh diisi dengan angka!</small>
     </div>
     <div class="form-group">
         <label for="HargaSatuan">Harga Satuan</label>
-        <input type="text" name="HargaSatuan" id="HargaSatuan" class="form-control currency-input responsive-element" onkeyup="validateNumericInput(this, 'hargaSatuanError')">
+        <input type="text" name="HargaSatuan" id="HargaSatuan" class="form-control currency-input " onkeyup="validateNumericInput(this, 'hargaSatuanError')">
         <small id="hargaSatuanError" class="text-danger" style="display: none;">Field Harga Satuan hanya boleh diisi dengan angka!</small>
     </div>
     <div class="form-group">
         <label for="Jumlah">Jumlah</label>
-        <input type="text" name="Jumlah" id="Jumlah" class="form-control number-input responsive-element" onkeyup="validateNumericInput(this, 'jumlahError')">
+        <input type="text" name="Jumlah" id="Jumlah" class="form-control number-input " onkeyup="validateNumericInput(this, 'jumlahError')">
         <small id="jumlahError" class="text-danger" style="display: none;">Field Jumlah hanya boleh diisi dengan angka!</small>
     </div>
     <div class="form-group">

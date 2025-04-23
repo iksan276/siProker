@@ -6,7 +6,7 @@
     </div>
     <div class="form-group">
         <label for="PeriodeMulai">Periode Mulai</label>
-        <select name="PeriodeMulai" id="PeriodeMulai" class="form-control responsive-element"  onchange="validatePeriods()">
+        <select name="PeriodeMulai" id="PeriodeMulai" class="form-control "  onchange="validatePeriods()">
         <option value="" disabled selected></option>
             @for ($year = 2025; $year < 2030; $year++)
                 <option value="{{ $year }}">{{ $year }}</option>
@@ -15,7 +15,7 @@
     </div>
     <div class="form-group">
         <label for="PeriodeSelesai">Periode Selesai</label>
-        <select name="PeriodeSelesai" id="PeriodeSelesai" class="form-control responsive-element"  onchange="validatePeriods()">
+        <select name="PeriodeSelesai" id="PeriodeSelesai" class="form-control "  onchange="validatePeriods()">
         <option value="" disabled selected></option>
             @for ($year = 2025; $year < 2030; $year++)
                 <option value="{{ $year }}">{{ $year }}</option>

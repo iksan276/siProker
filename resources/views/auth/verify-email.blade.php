@@ -15,6 +15,24 @@
 
     <!-- Custom styles for this template-->
     <link href="{{ asset('sb-admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
+    <style>
+            .bg-password-image {
+            background-image: url('https://img.freepik.com/free-vector/business-team-discussing-ideas-startup_74855-4380.jpg');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        
+        .bg-password-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(79, 70, 229, 0.1) 100%);
+        }
+    </style>
 </head>
 
 <body class="bg-gradient-primary">
