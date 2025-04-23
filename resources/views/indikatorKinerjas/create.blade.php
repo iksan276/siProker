@@ -14,8 +14,8 @@
         <textarea name="Nama" id="Nama" class="form-control" rows="3"></textarea>
     </div>
     <div class="form-group">
-        <label for="SatuanID">Satuan</label>
-        <select name="SatuanID" id="SatuanID" class="form-control select2">
+        <label for="SatuanID" class="d-block">Satuan</label>
+        <select name="SatuanID" id="SatuanID" class="form-control select2 satuan-select">
         <option value="" disabled selected></option>
             @foreach($satuans as $satuan)
                 <option value="{{ $satuan->SatuanID }}">{{ $satuan->Nama }}</option>

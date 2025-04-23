@@ -15,8 +15,8 @@
         <textarea name="Nama" id="Nama" class="form-control" rows="3">{{ $indikatorKinerja->Nama }}</textarea>
     </div>
     <div class="form-group">
-        <label for="SatuanID">Satuan</label>
-        <select name="SatuanID" id="SatuanID" class="form-control select2">
+        <label for="SatuanID" class="d-block">Satuan</label>
+        <select name="SatuanID" id="SatuanID" class="form-control select2 satuan-select">
         <option value="" disabled selected></option>
             @foreach($satuans as $satuan)
                 <option value="{{ $satuan->SatuanID }}" {{ $indikatorKinerja->SatuanID == $satuan->SatuanID ? 'selected' : '' }}>{{ $satuan->Nama }}</option>
@@ -25,17 +25,17 @@
     </div>
     <div class="form-group">
         <label for="Bobot">Bobot</label>
-        <input type="text" name="Bobot" id="Bobot" class="form-control number-input" value="{{ number_format($indikatorKinerja->Bobot, 0, ',', '.') }}" onkeyup="validateNumericInput(this, 'bobotError')">
+        <input type="text" name="Bobot" id="Bobot" class="form-control number-input responsive-element" value="{{ number_format($indikatorKinerja->Bobot, 0, ',', '.') }}" onkeyup="validateNumericInput(this, 'bobotError')">
         <small id="bobotError" class="text-danger" style="display: none;">Field Bobot hanya boleh diisi dengan angka!</small>
     </div>
     <div class="form-group">
         <label for="HargaSatuan">Harga Satuan</label>
-        <input type="text" name="HargaSatuan" id="HargaSatuan" class="form-control currency-input" value="{{ number_format($indikatorKinerja->HargaSatuan, 0, ',', '.') }}" onkeyup="validateNumericInput(this, 'hargaSatuanError')">
+        <input type="text" name="HargaSatuan" id="HargaSatuan" class="form-control currency-input responsive-element" value="{{ number_format($indikatorKinerja->HargaSatuan, 0, ',', '.') }}" onkeyup="validateNumericInput(this, 'hargaSatuanError')">
         <small id="hargaSatuanError" class="text-danger" style="display: none;">Field Harga Satuan hanya boleh diisi dengan angka!</small>
     </div>
     <div class="form-group">
         <label for="Jumlah">Jumlah</label>
-        <input type="text" name="Jumlah" id="Jumlah" class="form-control number-input" value="{{ number_format($indikatorKinerja->Jumlah, 0, ',', '.') }}" onkeyup="validateNumericInput(this, 'jumlahError')">
+        <input type="text" name="Jumlah" id="Jumlah" class="form-control number-input responsive-element" value="{{ number_format($indikatorKinerja->Jumlah, 0, ',', '.') }}" onkeyup="validateNumericInput(this, 'jumlahError')">
         <small id="jumlahError" class="text-danger" style="display: none;">Field Jumlah hanya boleh diisi dengan angka!</small>
     </div>
     <div class="form-group">

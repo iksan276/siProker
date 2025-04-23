@@ -78,6 +78,18 @@
         }
         }
 
+        /* Custom responsive styling for Harga Satuan Select2 only */
+        .satuan-select + .select2-container {
+            width: 100% !important;
+        }
+
+        @media (min-width: 576px) {
+            .satuan-select + .select2-container {
+                width: 25% !important;
+            }
+        }
+
+
     </style>
 </head>
 <body id="page-top">
