@@ -62,18 +62,22 @@
     </div>
     <div class="modal-footer">
         <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary" type="submit">Simpan</button>
+        <button class="btn btn-primary" type="submit" id="submitBtn">Simpan</button>
     </div>
 </form>
 
 <script>
 function validateNumericInput(input, errorId) {
     const errorElement = document.getElementById(errorId);
+    const submitBtn = document.getElementById('submitBtn');
+    
     // Check if input contains non-numeric characters
     if (/[^\d\.]/.test(input.value)) {
         errorElement.style.display = 'block';
+        submitBtn.disabled = true;
     } else {
         errorElement.style.display = 'none';
+        submitBtn.disabled = false;
     }
     
     // Remove non-numeric characters except dots
@@ -86,55 +90,6 @@ function validateNumericInput(input, errorId) {
 }
 
 $(document).ready(function() {
-    // Format number inputs with thousand separators
-    $('.number-input').on('input', function() {
-        // Check if input contains non-numeric characters
-        if (/[^\d\.]/.test($(this).val())) {
-            // Get field name for the alert
-            let fieldName = $(this).attr('id');
-            
-            // Show alert for non-numeric input
-            Swal.fire({
-                title: 'Input Tidak Valid',
-                text: 'Field ' + fieldName + ' hanya boleh diisi dengan angka!',
-                icon: 'warning',
-                confirmButtonColor: '#3085d6',
-                confirmButtonText: 'OK'
-            });
-        }
-        
-        // Remove non-numeric characters except dots
-        let value = $(this).val().replace(/[^\d]/g, '');
-        
-        // Format with thousand separator
-        if (value) {
-            $(this).val(new Intl.NumberFormat('id-ID').format(value));
-        }
-    });
-    
-    // Format currency inputs with thousand separators
-    $('.currency-input').on('input', function() {
-        // Check if input contains non-numeric characters
-        if (/[^\d\.]/.test($(this).val())) {
-            // Show alert for non-numeric input
-            Swal.fire({
-                title: 'Input Tidak Valid',
-                text: 'Field Harga Satuan hanya boleh diisi dengan angka!',
-                icon: 'warning',
-                confirmButtonColor: '#3085d6',
-                confirmButtonText: 'OK'
-            });
-        }
-        
-        // Remove non-numeric characters except dots
-        let value = $(this).val().replace(/[^\d]/g, '');
-        
-        // Format with thousand separator
-        if (value) {
-            $(this).val(new Intl.NumberFormat('id-ID').format(value));
-        }
-    });
-    
     // Before form submission, remove formatting
     $('.modal-form').on('submit', function() {
         $('.number-input, .currency-input').each(function() {
@@ -208,5 +163,7 @@ document.getElementById('indikatorKinerjaForm').addEventListener('submit', funct
         return false;
     }
     
+    // If all validations pass, submit the form
+    this.submit();
 });
 </script>
