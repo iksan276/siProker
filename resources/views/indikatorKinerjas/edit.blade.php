@@ -164,8 +164,7 @@ document.getElementById('indikatorKinerjaEditForm').addEventListener('submit', f
         return false;
     }
     
-    // If all validations pass, submit the form
-    this.submit();
+
 });
 
 // Run validation on page load

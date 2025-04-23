@@ -163,7 +163,6 @@ document.getElementById('indikatorKinerjaForm').addEventListener('submit', funct
         return false;
     }
     
-    // If all validations pass, submit the form
-    this.submit();
+
 });
 </script>
