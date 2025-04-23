@@ -18,11 +18,12 @@
     </div>
     <div class="form-group">
         <label for="TanggalMulai">Tanggal Mulai</label>
-        <input type="datetime-local" name="TanggalMulai" id="TanggalMulai" class="form-control" >
+        <input type="datetime-local" name="TanggalMulai" id="TanggalMulai" class="form-control" onchange="validateDates()">
     </div>
     <div class="form-group">
         <label for="TanggalSelesai">Tanggal Selesai</label>
-        <input type="datetime-local" name="TanggalSelesai" id="TanggalSelesai" class="form-control" >
+        <input type="datetime-local" name="TanggalSelesai" id="TanggalSelesai" class="form-control" onchange="validateDates()">
+        <small id="dateError" class="text-danger" style="display: none;">Tanggal Selesai harus lebih besar atau sama dengan Tanggal Mulai.</small>
     </div>
     <div class="form-group">
         <label for="RincianKegiatan">Rincian Kegiatan</label>
@@ -30,11 +31,28 @@
     </div>
     <div class="modal-footer">
         <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary" type="submit">Simpan</button>
+        <button class="btn btn-primary" type="submit" id="submitBtn">Simpan</button>
     </div>
 </form>
 
 <script>
+function validateDates() {
+    const tanggalMulai = new Date(document.getElementById('TanggalMulai').value);
+    const tanggalSelesai = new Date(document.getElementById('TanggalSelesai').value);
+    const errorElement = document.getElementById('dateError');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (document.getElementById('TanggalMulai').value && document.getElementById('TanggalSelesai').value) {
+        if (tanggalSelesai < tanggalMulai) {
+            errorElement.style.display = 'block';
+            submitBtn.disabled = true;
+        } else {
+            errorElement.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+    }
+}
+
 document.getElementById('kegiatanForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent the form from traditional submission
     
@@ -85,5 +103,22 @@ document.getElementById('kegiatanForm').addEventListener('submit', function(even
         return false;
     }
     
+    // Check if tanggal selesai is valid
+    if (new Date(tanggalSelesai) < new Date(tanggalMulai)) {
+        Swal.fire({
+            title: 'Validasi Inputan',
+            html: 'Tanggal Selesai harus lebih besar atau sama dengan Tanggal Mulai.',
+            icon: 'error',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'OK'
+        });
+        return false;
+    }
+
+});
+
+// Run validation on page load
+document.addEventListener('DOMContentLoaded', function() {
+    validateDates();
 });
 </script>

@@ -16,11 +16,12 @@
     </div>
     <div class="form-group">
         <label for="TanggalMulai">Tanggal Mulai</label>
-        <input type="datetime-local" name="TanggalMulai" id="TanggalMulai" class="form-control" value="{{ \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('Y-m-d\TH:i') }}" >
+        <input type="datetime-local" name="TanggalMulai" id="TanggalMulai" class="form-control" value="{{ \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('Y-m-d\TH:i') }}" onchange="validateDatesEdit()">
     </div>
     <div class="form-group">
         <label for="TanggalSelesai">Tanggal Selesai</label>
-        <input type="datetime-local" name="TanggalSelesai" id="TanggalSelesai" class="form-control" value="{{ \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('Y-m-d\TH:i') }}" >
+        <input type="datetime-local" name="TanggalSelesai" id="TanggalSelesai" class="form-control" value="{{ \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('Y-m-d\TH:i') }}" onchange="validateDatesEdit()">
+        <small id="dateErrorEdit" class="text-danger" style="display: none;">Tanggal Selesai harus lebih besar atau sama dengan Tanggal Mulai.</small>
     </div>
     <div class="form-group">
         <label for="RincianKegiatan">Rincian Kegiatan</label>
@@ -28,11 +29,28 @@
     </div>
     <div class="modal-footer">
         <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary" type="submit">Update</button>
+        <button class="btn btn-primary" type="submit" id="submitBtnEdit">Update</button>
     </div>
 </form>
 
 <script>
+function validateDatesEdit() {
+    const tanggalMulai = new Date(document.getElementById('TanggalMulai').value);
+    const tanggalSelesai = new Date(document.getElementById('TanggalSelesai').value);
+    const errorElement = document.getElementById('dateErrorEdit');
+    const submitBtn = document.getElementById('submitBtnEdit');
+    
+    if (document.getElementById('TanggalMulai').value && document.getElementById('TanggalSelesai').value) {
+        if (tanggalSelesai < tanggalMulai) {
+            errorElement.style.display = 'block';
+            submitBtn.disabled = true;
+        } else {
+            errorElement.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+    }
+}
+
 document.getElementById('kegiatanEditForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent the form from traditional submission
     
@@ -83,5 +101,23 @@ document.getElementById('kegiatanEditForm').addEventListener('submit', function(
         return false;
     }
     
+    // Check if tanggal selesai is valid
+    if (new Date(tanggalSelesai) < new Date(tanggalMulai)) {
+        Swal.fire({
+            title: 'Validasi Inputan',
+            html: 'Tanggal Selesai harus lebih besar atau sama dengan Tanggal Mulai.',
+            icon: 'error',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'OK'
+        });
+        return false;
+    }
+    
+
+});
+
+// Run validation on page load
+document.addEventListener('DOMContentLoaded', function() {
+    validateDatesEdit();
 });
 </script>

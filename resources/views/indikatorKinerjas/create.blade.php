@@ -1,10 +1,6 @@
 <form action="{{ route('indikator-kinerjas.store') }}" method="POST" class="modal-form" id="indikatorKinerjaForm">
     @csrf
     <div class="form-group">
-        <label for="Nama">Nama</label>
-        <textarea name="Nama" id="Nama" class="form-control" rows="3"></textarea>
-    </div>
-    <div class="form-group">
         <label for="ProgramRektorID">Program Rektor</label>
         <select name="ProgramRektorID" id="ProgramRektorID" class="form-control select2">
         <option value="" disabled selected></option>
@@ -12,6 +8,10 @@
                 <option value="{{ $programRektor->ProgramRektorID }}">{{ $programRektor->Nama }}</option>
             @endforeach
         </select>
+    </div>
+    <div class="form-group">
+        <label for="Nama">Nama</label>
+        <textarea name="Nama" id="Nama" class="form-control" rows="3"></textarea>
     </div>
     <div class="form-group">
         <label for="SatuanID">Satuan</label>
@@ -24,15 +24,18 @@
     </div>
     <div class="form-group">
         <label for="Bobot">Bobot</label>
-        <input type="text" name="Bobot" id="Bobot" class="form-control number-input responsive-element">
+        <input type="text" name="Bobot" id="Bobot" class="form-control number-input responsive-element" onkeyup="validateNumericInput(this, 'bobotError')">
+        <small id="bobotError" class="text-danger" style="display: none;">Field Bobot hanya boleh diisi dengan angka!</small>
     </div>
     <div class="form-group">
         <label for="HargaSatuan">Harga Satuan</label>
-        <input type="text" name="HargaSatuan" id="HargaSatuan" class="form-control currency-input responsive-element">
+        <input type="text" name="HargaSatuan" id="HargaSatuan" class="form-control currency-input responsive-element" onkeyup="validateNumericInput(this, 'hargaSatuanError')">
+        <small id="hargaSatuanError" class="text-danger" style="display: none;">Field Harga Satuan hanya boleh diisi dengan angka!</small>
     </div>
     <div class="form-group">
         <label for="Jumlah">Jumlah</label>
-        <input type="text" name="Jumlah" id="Jumlah" class="form-control number-input responsive-element">
+        <input type="text" name="Jumlah" id="Jumlah" class="form-control number-input responsive-element" onkeyup="validateNumericInput(this, 'jumlahError')">
+        <small id="jumlahError" class="text-danger" style="display: none;">Field Jumlah hanya boleh diisi dengan angka!</small>
     </div>
     <div class="form-group">
         <label for="MetaAnggaranID">Meta Anggaran</label>
@@ -64,9 +67,42 @@
 </form>
 
 <script>
+function validateNumericInput(input, errorId) {
+    const errorElement = document.getElementById(errorId);
+    // Check if input contains non-numeric characters
+    if (/[^\d\.]/.test(input.value)) {
+        errorElement.style.display = 'block';
+    } else {
+        errorElement.style.display = 'none';
+    }
+    
+    // Remove non-numeric characters except dots
+    let value = input.value.replace(/[^\d]/g, '');
+    
+    // Format with thousand separator
+    if (value) {
+        input.value = new Intl.NumberFormat('id-ID').format(value);
+    }
+}
+
 $(document).ready(function() {
     // Format number inputs with thousand separators
     $('.number-input').on('input', function() {
+        // Check if input contains non-numeric characters
+        if (/[^\d\.]/.test($(this).val())) {
+            // Get field name for the alert
+            let fieldName = $(this).attr('id');
+            
+            // Show alert for non-numeric input
+            Swal.fire({
+                title: 'Input Tidak Valid',
+                text: 'Field ' + fieldName + ' hanya boleh diisi dengan angka!',
+                icon: 'warning',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK'
+            });
+        }
+        
         // Remove non-numeric characters except dots
         let value = $(this).val().replace(/[^\d]/g, '');
         
@@ -78,6 +114,18 @@ $(document).ready(function() {
     
     // Format currency inputs with thousand separators
     $('.currency-input').on('input', function() {
+        // Check if input contains non-numeric characters
+        if (/[^\d\.]/.test($(this).val())) {
+            // Show alert for non-numeric input
+            Swal.fire({
+                title: 'Input Tidak Valid',
+                text: 'Field Harga Satuan hanya boleh diisi dengan angka!',
+                icon: 'warning',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK'
+            });
+        }
+        
         // Remove non-numeric characters except dots
         let value = $(this).val().replace(/[^\d]/g, '');
         
