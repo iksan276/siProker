@@ -12,7 +12,7 @@
     <link href="{{ asset('sb-admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
     <link href="{{ asset('sb-admin/vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
     <!-- Select2 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="{{ asset('custom/select2.css') }}" rel="stylesheet" />
     <!-- SweetAlert2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
       <!-- Tambahkan TreeGrid CSS -->
@@ -89,6 +89,14 @@
             }
         }
 
+            #programPengembanganFilter + .select2-container,
+    #programRektorFilter + .select2-container,
+    #unitFilter + .select2-container,
+    #indikatorKinerjaFilter + .select2-container {
+        max-width: 200px !important;
+    }
+
+
 
     </style>
 </head>
@@ -117,7 +125,7 @@
     <script src="{{ asset('sb-admin/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
     
     <!-- Select2 JS (after jQuery) -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="{{ asset('custom/select2.js') }}"></script>
     
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
