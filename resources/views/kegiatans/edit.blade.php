@@ -16,11 +16,11 @@
     </div>
     <div class="form-group">
         <label for="TanggalMulai">Tanggal Mulai</label>
-        <input type="datetime-local" name="TanggalMulai" id="TanggalMulai" class="form-control" value="{{ \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('Y-m-d\TH:i') }}" onchange="validateDatesEdit()">
+        <input type="datetime-local" name="TanggalMulai" id="TanggalMulai" class="form-control responsive-element" value="{{ \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('Y-m-d\TH:i') }}" onchange="validateDatesEdit()">
     </div>
     <div class="form-group">
         <label for="TanggalSelesai">Tanggal Selesai</label>
-        <input type="datetime-local" name="TanggalSelesai" id="TanggalSelesai" class="form-control" value="{{ \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('Y-m-d\TH:i') }}" onchange="validateDatesEdit()">
+        <input type="datetime-local" name="TanggalSelesai" id="TanggalSelesai" class="form-control responsive-element" value="{{ \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('Y-m-d\TH:i') }}" onchange="validateDatesEdit()">
         <small id="dateErrorEdit" class="text-danger" style="display: none;">Tanggal Selesai harus lebih besar atau sama dengan Tanggal Mulai.</small>
     </div>
     <div class="form-group">

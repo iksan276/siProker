@@ -15,7 +15,7 @@
     </div>
     <div class="form-group">
         <label for="Tahun">Tahun</label>
-        <select name="Tahun" id="Tahun" class="form-control">
+        <select name="Tahun" id="Tahun" class="form-control responsive-element">
         <option value="" disabled selected></option>
             @for ($year = 2025; $year < 2030; $year++)
                 <option value="{{ $year }}">{{ $year }}</option>
@@ -24,7 +24,7 @@
     </div>
     <div class="form-group">
         <label for="NA">NA</label>
-        <select name="NA" id="NA" class="form-control" >
+        <select name="NA" id="NA" class="form-control " >
         <option value="Y">Non Aktif</option>
         <option value="N" selected>Aktif</option>
         </select>

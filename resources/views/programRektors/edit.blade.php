@@ -16,7 +16,7 @@
  
     <div class="form-group">
         <label for="Tahun">Tahun</label>
-        <select name="Tahun" id="Tahun" class="form-control">
+        <select name="Tahun" id="Tahun" class="form-control responsive-element">
         <option value="" disabled selected></option>
             @for ($year = 2025; $year < 2030; $year++)
                 <option value="{{ $year }}" {{  $programRektor->Tahun == $year ? 'selected' : '' }}>{{ $year }}</option>

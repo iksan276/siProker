@@ -18,11 +18,11 @@
     </div>
     <div class="form-group">
         <label for="TanggalMulai">Tanggal Mulai</label>
-        <input type="datetime-local" name="TanggalMulai" id="TanggalMulai" class="form-control" onchange="validateDates()">
+        <input type="datetime-local" name="TanggalMulai" id="TanggalMulai" class="form-control responsive-element" onchange="validateDates()">
     </div>
     <div class="form-group">
         <label for="TanggalSelesai">Tanggal Selesai</label>
-        <input type="datetime-local" name="TanggalSelesai" id="TanggalSelesai" class="form-control" onchange="validateDates()">
+        <input type="datetime-local" name="TanggalSelesai" id="TanggalSelesai" class="form-control responsive-element" onchange="validateDates()">
         <small id="dateError" class="text-danger" style="display: none;">Tanggal Selesai harus lebih besar atau sama dengan Tanggal Mulai.</small>
     </div>
     <div class="form-group">
