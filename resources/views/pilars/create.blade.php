@@ -13,13 +13,18 @@
         <label for="Nama">Nama</label>
         <textarea name="Nama" id="Nama" class="form-control" rows="3"></textarea>
     </div>
-    <div class="form-group">
+    <div class="row">
+        <div class="col-sm-4">
+        <div class="form-group">
         <label for="NA">NA</label>
         <select name="NA" id="NA" class="form-control" >
         <option value="Y">Non Aktif</option>
         <option value="N" selected>Aktif</option>
         </select>
     </div>
+        </div>
+    </div>
+   
   
     <div class="modal-footer">
         <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>

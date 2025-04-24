@@ -5,7 +5,9 @@
         <label for="Nama">Nama</label>
         <input type="text" name="Nama" id="Nama" class="form-control" value="{{ $renstra->Nama }}">
     </div>
-    <div class="form-group">
+    <div class="row">
+        <div class="col-sm-4">
+        <div class="form-group">
         <label for="PeriodeMulai">Periode Mulai</label>
         <select name="PeriodeMulai" id="PeriodeMulai" class="form-control " onchange="validatePeriodsEdit()">
         <option value="" disabled selected></option>
@@ -14,7 +16,9 @@
             @endfor
         </select>
     </div>
-    <div class="form-group">
+        </div>
+        <div class="col-sm-4">
+        <div class="form-group">
         <label for="PeriodeSelesai">Periode Selesai</label>
         <select name="PeriodeSelesai" id="PeriodeSelesai" class="form-control " onchange="validatePeriodsEdit()">
         <option value="" disabled selected></option>
@@ -24,13 +28,20 @@
         </select>
         <small id="periodErrorEdit" class="text-danger" style="display: none;">Periode Selesai harus lebih besar atau sama dengan Periode Mulai.</small>
     </div>
-    <div class="form-group">
+        </div>
+        <div class="col-sm-4">
+        <div class="form-group">
         <label for="NA">NA</label>
         <select name="NA" id="NA" class="form-control">
             <option value="Y" {{ $renstra->NA == 'Y' ? 'selected' : '' }}>Non Aktif</option>
             <option value="N" {{ $renstra->NA == 'N' ? 'selected' : '' }}>Aktif</option>
         </select>
     </div>
+        </div>
+    </div>
+  
+  
+   
     <div class="modal-footer">
         <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
         <button class="btn btn-primary" type="submit" id="submitBtnEdit">Update</button>

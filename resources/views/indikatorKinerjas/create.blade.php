@@ -13,52 +13,72 @@
         <label for="Nama">Nama</label>
         <textarea name="Nama" id="Nama" class="form-control" rows="3"></textarea>
     </div>
-    <div class="form-group">
-        <label for="SatuanID" class="d-block">Satuan</label>
-        <select name="SatuanID" id="SatuanID" class="form-control select2 satuan-select">
-        <option value="" disabled selected></option>
-            @foreach($satuans as $satuan)
-                <option value="{{ $satuan->SatuanID }}">{{ $satuan->Nama }}</option>
-            @endforeach
-        </select>
+    <div class="row">
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="SatuanID">Satuan</label>
+            <select name="SatuanID" id="SatuanID" class="form-control select2">
+            <option value="" disabled selected></option>
+                @foreach($satuans as $satuan)
+                    <option value="{{ $satuan->SatuanID }}">{{ $satuan->Nama }}</option>
+                @endforeach
+            </select>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="Bobot">Bobot</label>
-        <input type="text" name="Bobot" id="Bobot" class="form-control number-input " onkeyup="validateNumericInput(this, 'bobotError')">
-        <small id="bobotError" class="text-danger" style="display: none;">Field Bobot hanya boleh diisi dengan angka!</small>
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="Bobot">Bobot</label>
+            <input type="text" name="Bobot" id="Bobot" class="form-control number-input " onkeyup="validateNumericInput(this, 'bobotError')">
+            <small id="bobotError" class="text-danger" style="display: none;">Field Bobot hanya boleh diisi dengan angka!</small>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="HargaSatuan">Harga Satuan</label>
-        <input type="text" name="HargaSatuan" id="HargaSatuan" class="form-control currency-input " onkeyup="validateNumericInput(this, 'hargaSatuanError')">
-        <small id="hargaSatuanError" class="text-danger" style="display: none;">Field Harga Satuan hanya boleh diisi dengan angka!</small>
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="HargaSatuan">Harga Satuan</label>
+            <input type="text" name="HargaSatuan" id="HargaSatuan" class="form-control currency-input " onkeyup="validateNumericInput(this, 'hargaSatuanError')">
+            <small id="hargaSatuanError" class="text-danger" style="display: none;">Field Harga Satuan hanya boleh diisi dengan angka!</small>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="Jumlah">Jumlah</label>
-        <input type="text" name="Jumlah" id="Jumlah" class="form-control number-input " onkeyup="validateNumericInput(this, 'jumlahError')">
-        <small id="jumlahError" class="text-danger" style="display: none;">Field Jumlah hanya boleh diisi dengan angka!</small>
     </div>
-    <div class="form-group">
-        <label for="MetaAnggaranID" class="d-block">Meta Anggaran</label>
-        <select name="MetaAnggaranID[]" id="MetaAnggaranID" class="form-control select2 satuan-select" multiple>
-            @foreach($metaAnggarans as $metaAnggaran)
-                <option value="{{ $metaAnggaran->MetaAnggaranID }}">{{ $metaAnggaran->Nama }}</option>
-            @endforeach
-        </select>
+    <div class="row">
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="Jumlah">Jumlah</label>
+            <input type="text" name="Jumlah" id="Jumlah" class="form-control number-input " onkeyup="validateNumericInput(this, 'jumlahError')">
+            <small id="jumlahError" class="text-danger" style="display: none;">Field Jumlah hanya boleh diisi dengan angka!</small>
+        </div>
+        </div>
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="MetaAnggaranID" class="d-block">Meta Anggaran</label>
+            <select name="MetaAnggaranID[]" id="MetaAnggaranID" class="form-control select2" multiple>
+                @foreach($metaAnggarans as $metaAnggaran)
+                    <option value="{{ $metaAnggaran->MetaAnggaranID }}">{{ $metaAnggaran->Nama }}</option>
+                @endforeach
+            </select>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="UnitTerkaitID" class="d-block">Unit Terkait</label>
-        <select name="UnitTerkaitID[]" id="UnitTerkaitID" class="form-control select2 satuan-select" multiple>
-            @foreach($units as $unit)
-                <option value="{{ $unit->UnitID }}">{{ $unit->Nama }}</option>
-            @endforeach
-        </select>
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="UnitTerkaitID" class="d-block">Unit Terkait</label>
+            <select name="UnitTerkaitID[]" id="UnitTerkaitID" class="form-control select2" multiple>
+                @foreach($units as $unit)
+                    <option value="{{ $unit->UnitID }}">{{ $unit->Nama }}</option>
+                @endforeach
+            </select>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="NA">Status</label>
-        <select name="NA" id="NA" class="form-control">
-            <option value="Y">Non Aktif</option>
-            <option value="N" selected>Aktif</option>
-        </select>
+    </div>
+    <div class="row">
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="NA">Status</label>
+            <select name="NA" id="NA" class="form-control">
+                <option value="Y">Non Aktif</option>
+                <option value="N" selected>Aktif</option>
+            </select>
+        </div>
+    </div>
     </div>
     <div class="modal-footer">
         <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>

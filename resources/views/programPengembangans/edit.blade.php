@@ -13,12 +13,16 @@
         <label for="Nama">Nama</label>
         <textarea name="Nama" id="Nama" class="form-control" rows="3">{{ $programPengembangan->Nama }}</textarea>
     </div>
+    <div class="row">
+    <div class="col-sm-4">
     <div class="form-group">
         <label for="NA">NA</label>
         <select name="NA" id="NA" class="form-control" >
             <option value="Y" {{ $programPengembangan->NA == 'Y' ? 'selected' : '' }}>Non Aktif</option>
             <option value="N" {{ $programPengembangan->NA == 'N' ? 'selected' : '' }}>Aktif</option>
         </select>
+    </div>
+    </div>
     </div>
  
     <div class="modal-footer">

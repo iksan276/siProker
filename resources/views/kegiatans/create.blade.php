@@ -16,14 +16,20 @@
         <label for="Nama">Nama</label>
         <textarea name="Nama" id="Nama" class="form-control" rows="3"></textarea>
     </div>
+    <div class="row">
+    <div class="col-sm-6">
     <div class="form-group">
         <label for="TanggalMulai">Tanggal Mulai</label>
         <input type="datetime-local" name="TanggalMulai" id="TanggalMulai" class="form-control " onchange="validateDates()">
     </div>
+    </div>
+    <div class="col-sm-6">
     <div class="form-group">
         <label for="TanggalSelesai">Tanggal Selesai</label>
         <input type="datetime-local" name="TanggalSelesai" id="TanggalSelesai" class="form-control " onchange="validateDates()">
         <small id="dateError" class="text-danger" style="display: none;">Tanggal Selesai harus lebih besar atau sama dengan Tanggal Mulai.</small>
+    </div>
+    </div>
     </div>
     <div class="form-group">
         <label for="RincianKegiatan">Rincian Kegiatan</label>
