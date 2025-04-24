@@ -55,8 +55,8 @@ class KegiatanController extends Controller
                     'no' => $index + 1,
                     'indikator_kinerja' => nl2br($kegiatan->indikatorKinerja->Nama),
                     'nama' => nl2br($kegiatan->Nama),
-                    'tanggal_mulai' => \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y'),
-                    'tanggal_selesai' => \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y'),
+                    'tanggal_mulai' => \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y H:i'),
+                    'tanggal_selesai' => \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y H:i'),
                     'rincian_kegiatan' => nl2br($kegiatan->RincianKegiatan),
                     'actions' => $actions
                 ];

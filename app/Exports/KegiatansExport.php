@@ -79,8 +79,8 @@ class KegiatansExport implements FromCollection, WithHeadings, WithMapping, With
             $programRektor->Nama,
             $indikatorKinerja->Nama,
             $kegiatan->Nama,
-            Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y'),
-            Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y'),
+            Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y H:i'),
+            Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y H:i'),
             $kegiatan->RincianKegiatan
         ];
     }
