@@ -2,8 +2,8 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2">User Management</h1>
-<p class="mb-4">Manage all users in the system.</p>
+<h1 class="h3 mb-2">User</h1>
+<p class="mb-4">Kelola Master user.</p>
 
 <!-- Alert Container for AJAX responses -->
 <div id="alertContainer"></div>
@@ -13,15 +13,15 @@
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
         <h6 class="m-0 font-weight-bold text-primary">Users List</h6>
         <div>
-            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('users.create') }}" data-title="Tambah User">
-                <i class="fas fa-user-plus fa-sm"></i> Tambah User
-            </button>
             <a href="{{ route('users.export.excel') }}" class="btn btn-success btn-sm">
                 <i class="fas fa-file-excel fa-sm"></i> Export Excel
             </a>
             <a href="{{ route('users.export.pdf') }}" class="btn btn-danger btn-sm">
                 <i class="fas fa-file-pdf fa-sm"></i> Export PDF
             </a>
+            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('users.create') }}" data-title="Tambah User">
+                <i class="fas fa-user-plus fa-sm"></i> Tambah User
+            </button>
         </div>
     </div>
     <div class="card-body">
@@ -148,13 +148,14 @@
             
             // Show confirmation dialog
             Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
+                title: 'Menghapus data?',
+                text: "Kamu yakin menghapus baris ini?",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
+                confirmButtonText: 'Iya, yakin',
+cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Perform AJAX delete
@@ -171,7 +172,7 @@
                                 // Reload only the DataTable
                                 reloadTable();
                                 Swal.fire({
-                                    title: 'Deleted!',
+                                    title: 'Terhapus!',
                                     text: response.message || 'Item has been successfully deleted.',
                                     icon: 'success',
                                     confirmButtonColor: '#3085d6',

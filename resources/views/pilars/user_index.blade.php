@@ -14,32 +14,32 @@
         <h6 class="m-0 font-weight-bold text-primary">Keterangan Warna</h6>
     </div>
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-3 mb-2">
+        <div class="d-flex flex-wrap justify-content-between">
+            <div class="mb-2">
                 <div class="d-flex align-items-center">
                     <div class="tree-legend-line" style="background-color: rgba(231, 74, 59, 0.1); height: 5px; width: 30px;"></div>
                     <span class="ml-2">Pilar</span>
                 </div>
             </div>
-            <div class="col-md-3 mb-2">
+            <div class="mb-2">
                 <div class="d-flex align-items-center">
                     <div class="tree-legend-line" style="background-color: rgba(246, 194, 62, 0.1); height: 5px; width: 30px;"></div>
                     <span class="ml-2">Isu Strategis</span>
                 </div>
             </div>
-            <div class="col-md-3 mb-2">
+            <div class="mb-2">
                 <div class="d-flex align-items-center">
                     <div class="tree-legend-line" style="background-color: rgba(28, 200, 138, 0.1); height: 5px; width: 30px;"></div>
                     <span class="ml-2">Program Pengembangan</span>
                 </div>
             </div>
-            <div class="col-md-3 mb-2">
+            <div class="mb-2">
                 <div class="d-flex align-items-center">
                     <div class="tree-legend-line" style="background-color: rgba(10, 63, 223, 0.1); height: 5px; width: 30px;"></div>
                     <span class="ml-2">Program Rektor</span>
                 </div>
             </div>
-            <div class="col-md-3 mb-2">
+            <div class="mb-2">
                 <div class="d-flex align-items-center">
                     <div class="tree-legend-line" style="background-color: rgba(156, 39, 176, 0.1); height: 5px; width: 30px;"></div>
                     <span class="ml-2">Kegiatan</span>
@@ -48,6 +48,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- DataTales Card -->
 <div class="card shadow mb-4">
@@ -385,13 +386,14 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
             
             // Show confirmation dialog
             Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
+                title: 'Menghapus data?',
+                text: "Kamu yakin menghapus baris ini?",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
+                confirmButtonText: 'Iya, yakin',
+cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Perform AJAX delete
@@ -409,7 +411,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                                 // Reload tree data
                                 loadTreeData();
                                 Swal.fire({
-                                    title: 'Deleted!',
+                                    title: 'Terhapus!',
                                     text: response.message || 'Item has been successfully deleted.',
                                     icon: 'success',
                                     confirmButtonColor: '#3085d6',

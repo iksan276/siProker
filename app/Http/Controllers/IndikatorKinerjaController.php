@@ -50,6 +50,9 @@ class IndikatorKinerjaController extends Controller
             $yearLabels = [2025, 2026, 2027, 2028];
         }
         
+        // Store year labels in session for use in other views and exports
+        session(['yearLabels' => $yearLabels]);
+        
         // If it's an AJAX request, return JSON data for DataTable
         if ($request->ajax()) {
             $data = [];
@@ -112,12 +115,32 @@ class IndikatorKinerjaController extends Controller
 
     public function exportExcel(Request $request)
     {
+        // Get the selected renstra ID from the request or session
+        $selectedRenstraID = $request->renstraID ?? session('selectedRenstraID');
+        
+        // Get the year labels from session
+        $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028]);
+        
+        // If renstra ID is provided but not in session, fetch the year labels
+        if ($selectedRenstraID && !session('yearLabels')) {
+            $renstra = Renstra::find($selectedRenstraID);
+            if ($renstra) {
+                $startYear = (int)$renstra->PeriodeMulai;
+                $endYear = (int)$renstra->PeriodeSelesai;
+                
+                $yearLabels = [];
+                for ($year = $startYear; $year <= $endYear; $year++) {
+                    $yearLabels[] = $year;
+                }
+            }
+        }
+        
         // Get all indikator kinerjas without filtering by RenstraID
         $indikatorKinerjas = IndikatorKinerja::with(['satuan', 'createdBy', 'editedBy'])
             ->orderBy('IndikatorKinerjaID', 'desc')
             ->get();
         
-        return Excel::download(new IndikatorKinerjasExport($indikatorKinerjas), 'indikator_kinerjas.xlsx');
+        return Excel::download(new IndikatorKinerjasExport($indikatorKinerjas, $yearLabels), 'indikator_kinerjas.xlsx');
     }
 
     public function create()
@@ -265,30 +288,30 @@ class IndikatorKinerjaController extends Controller
             }
             
             return redirect()->route('indikator-kinerjas.index')
-                ->with('error', 'Database error occurred: ' . $e->getMessage());
-        }
+            ->with('error', 'Database error occurred: ' . $e->getMessage());
+    }
+}
+
+public function getRenstraYears($id)
+{
+    $renstra = Renstra::findOrFail($id);
+    
+    // Generate year labels based on renstra
+    $yearLabels = [];
+    $startYear = (int)$renstra->PeriodeMulai;
+    $endYear = (int)$renstra->PeriodeSelesai;
+    
+    for ($year = $startYear; $year <= $endYear; $year++) {
+        $yearLabels[] = $year;
     }
     
-    public function getRenstraYears($id)
-    {
-        $renstra = Renstra::findOrFail($id);
-        
-        // Generate year labels based on renstra
-        $yearLabels = [];
-        $startYear = (int)$renstra->PeriodeMulai;
-        $endYear = (int)$renstra->PeriodeSelesai;
-        
-        for ($year = $startYear; $year <= $endYear; $year++) {
-            $yearLabels[] = $year;
-        }
-        
-        // Store year labels in session for use in other views
-        session(['yearLabels' => $yearLabels]);
-        
-        return response()->json([
-            'success' => true,
-            'yearLabels' => $yearLabels,
-            'renstra' => $renstra
-        ]);
-    }
+    // Store year labels and selected renstra ID in session for use in other views and exports
+    session(['yearLabels' => $yearLabels, 'selectedRenstraID' => $id]);
+    
+    return response()->json([
+        'success' => true,
+        'yearLabels' => $yearLabels,
+        'renstra' => $renstra
+    ]);
+}
 }

@@ -4,8 +4,7 @@
         <label for="Nama">Nama</label>
         <input type="text" name="Nama" id="Nama" class="form-control">
     </div>
-    <div class="row">
-    <div class="col-sm-4">
+    
     <div class="form-group">
         <label for="NA">Status</label>
         <select name="NA" id="NA" class="form-control">
@@ -13,10 +12,8 @@
             <option value="N" selected>Aktif</option>
         </select>
     </div>
-    </div>
-    </div>
     <div class="modal-footer">
-        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
         <button class="btn btn-primary" type="submit">Simpan</button>
     </div>
 </form>

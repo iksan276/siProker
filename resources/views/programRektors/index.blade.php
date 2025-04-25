@@ -179,13 +179,14 @@
             
             // Show confirmation dialog
             Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
+                title: 'Menghapus data?',
+                text: "Kamu yakin menghapus baris ini?",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
+                confirmButtonText: 'Iya, yakin',
+cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Perform AJAX delete
@@ -202,7 +203,7 @@
                                 // Reload DataTable
                                 programRektorTable.ajax.reload();
                                 Swal.fire({
-                                    title: 'Deleted!',
+                                    title: 'Terhapus!',
                                     text: response.message || 'Item has been successfully deleted.',
                                     icon: 'success',
                                     confirmButtonColor: '#3085d6',
@@ -398,13 +399,14 @@
             
             // Show confirmation dialog
             Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
+                title: 'Menghapus data?',
+                text: "Kamu yakin menghapus baris ini?",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
+                confirmButtonText: 'Iya, yakin',
+cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Perform AJAX delete
@@ -421,7 +423,7 @@
                                 // Reload DataTable
                                 programRektorTable.ajax.reload();
                                 Swal.fire({
-                                    title: 'Deleted!',
+                                    title: 'Terhapus!',
                                     text: response.message || 'Item has been successfully deleted.',
                                     icon: 'success',
                                     confirmButtonColor: '#3085d6',

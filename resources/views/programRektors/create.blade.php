@@ -121,7 +121,6 @@
             </div>
         </div>
     </div>
-    
     <div class="form-group">
         <label for="NA">Status</label>
         <select name="NA" id="NA" class="form-control">
@@ -131,7 +130,7 @@
     </div>
     
     <div class="modal-footer">
-        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
         <button class="btn btn-primary" type="submit" id="submitBtn">Simpan</button>
     </div>
 </form>

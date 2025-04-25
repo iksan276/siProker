@@ -43,8 +43,8 @@
   
    
     <div class="modal-footer">
-        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary" type="submit" id="submitBtnEdit">Update</button>
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
+        <button class="btn btn-primary" type="submit" id="submitBtnEdit">Ubah</button>
     </div>
 </form>
 

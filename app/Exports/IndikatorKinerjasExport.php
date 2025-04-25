@@ -13,10 +13,12 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
     protected $indikatorKinerjas;
+    protected $yearLabels;
 
-    public function __construct($indikatorKinerjas = null)
+    public function __construct($indikatorKinerjas = null, $yearLabels = null)
     {
         $this->indikatorKinerjas = $indikatorKinerjas;
+        $this->yearLabels = $yearLabels ?? [2025, 2026, 2027, 2028];
     }
 
     /**
@@ -36,15 +38,16 @@ class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMappi
     */
     public function headings(): array
     {
+        // Use dynamic year labels for the headings
         return [
             'No',
             'Nama',
             'Satuan',
             'Baseline',
-            'Tahun 1',
-            'Tahun 2',
-            'Tahun 3',
-            'Tahun 4',
+            $this->yearLabels[0] ?? 'Tahun 1',
+            $this->yearLabels[1] ?? 'Tahun 2',
+            $this->yearLabels[2] ?? 'Tahun 3',
+            $this->yearLabels[3] ?? 'Tahun 4',
             'Mendukung IKU PT / Kriteria Akreditasi',
             'Status'
         ];

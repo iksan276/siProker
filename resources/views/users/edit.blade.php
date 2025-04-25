@@ -11,8 +11,8 @@
     </div>
     <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" name="password" id="password" class="form-control" placeholder="Password (leave blank to keep current)">
-        <small class="form-text text-muted">Leave blank to keep current password</small>
+        <input type="password" name="password" id="password" class="form-control" placeholder="Password (Biarkan kosong untuk menyimpan kata sandi sebelumnya)">
+        <small class="form-text text-muted">Biarkan kosong untuk menyimpan kata sandi sebelumnya. Jika diisi, minimal 8 karakter.</small>
     </div>
     <div class="form-group">
         <label for="level">Level</label>
@@ -22,8 +22,8 @@
         </select>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary" type="submit">Update</button>
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
+        <button class="btn btn-primary" type="submit">Ubah</button>
     </div>
 </form>
 
@@ -34,6 +34,7 @@ document.getElementById('userEditForm').addEventListener('submit', function(even
     // Validate empty fields
     const name = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
     
     // Create an array to store error messages
     let emptyFields = [];
@@ -45,6 +46,11 @@ document.getElementById('userEditForm').addEventListener('submit', function(even
     
     if (!email) {
         emptyFields.push('Email harus diisi');
+    }
+    
+    // Check password length only if password is provided (since it's optional in edit form)
+    if (password && password.length < 8) {
+        emptyFields.push('Password minimal 8 karakter');
     }
     
     // If there are empty fields, show the error message
@@ -63,5 +69,6 @@ document.getElementById('userEditForm').addEventListener('submit', function(even
         return false;
     }
     
+
 });
 </script>

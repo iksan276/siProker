@@ -2,8 +2,8 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2">Renstra Management</h1>
-<p class="mb-4">Manage all Renstra in the system.</p>
+<h1 class="h3 mb-2">Rencana Strategi (Renstra)</h1>
+<p class="mb-4">Kelola Master Rencana Strategi (Renstra).</p>
 
 <!-- Alert Container for AJAX responses -->
 <div id="alertContainer"></div>
@@ -14,7 +14,7 @@
         <h6 class="m-0 font-weight-bold text-primary">Renstra List</h6>
         <div>
             <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('renstras.create') }}" data-title="Tambah Renstra">
-                <i class="fas fa-plus fa-sm"></i> Tambah Renstra
+                <i class="fas fa-plus fa-sm"></i> Tambah Rencana Strategi (Renstra)
             </button>
         </div>
     </div>
@@ -150,13 +150,14 @@
             
             // Show confirmation dialog
             Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
+                title: 'Menghapus data?',
+                text: "Kamu yakin menghapus baris ini?",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
+                confirmButtonText: 'Iya, yakin',
+cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Perform AJAX delete
@@ -173,7 +174,7 @@
                                 // Reload only the DataTable
                                 reloadTable();
                                 Swal.fire({
-                                    title: 'Deleted!',
+                                    title: 'Terhapus!',
                                     text: response.message || 'Item has been successfully deleted.',
                                     icon: 'success',
                                     confirmButtonColor: '#3085d6',

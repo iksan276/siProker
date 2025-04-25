@@ -28,12 +28,12 @@
             <td>{{ $user->created_at }}</td>
         </tr>
         <tr>
-            <th>Updated At</th>
+            <th>Ubahd At</th>
             <td>{{ $user->updated_at }}</td>
         </tr>
     </table>
 </div>
 </div>
 <div class="modal-footer">
-<button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+<button class="btn btn-secondary" type="button" data-dismiss="modal">Tutup</button>
 </div>

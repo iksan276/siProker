@@ -27,5 +27,5 @@
     </table>
 </div>
 <div class="modal-footer">
-    <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+    <button class="btn btn-secondary" type="button" data-dismiss="modal">Tutup</button>
 </div>

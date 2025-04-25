@@ -11,6 +11,7 @@
     <div class="form-group">
         <label for="password">Password</label>
         <input type="password" name="password" id="password" class="form-control" >
+        <small class="form-text text-muted">Password minimal 8 karakter</small>
     </div>
     <div class="form-group">
         <label for="level">Level</label>
@@ -20,7 +21,7 @@
         </select>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
         <button class="btn btn-primary" type="submit">Simpan</button>
     </div>
 </form>
@@ -48,6 +49,8 @@ document.getElementById('userForm').addEventListener('submit', function(event) {
     
     if (!password) {
         emptyFields.push('Password harus diisi');
+    } else if (password.length < 8) {
+        emptyFields.push('Password minimal 8 karakter');
     }
     
     // If there are empty fields, show the error message
@@ -66,5 +69,6 @@ document.getElementById('userForm').addEventListener('submit', function(event) {
         return false;
     }
     
+ 
 });
 </script>

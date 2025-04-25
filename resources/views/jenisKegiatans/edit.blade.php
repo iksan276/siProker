@@ -5,6 +5,7 @@
         <label for="Nama">Nama</label>
         <textarea name="Nama" id="Nama" class="form-control" rows="3">{{ $jenisKegiatan->Nama }}</textarea>
     </div>
+ 
     <div class="form-group">
         <label for="NA">Status</label>
         <select name="NA" id="NA" class="form-control">
@@ -13,8 +14,8 @@
         </select>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary" type="submit">Update</button>
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
+        <button class="btn btn-primary" type="submit">Ubah</button>
     </div>
 </form>
 
