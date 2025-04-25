@@ -14,30 +14,31 @@
         </tr>
         <tr>
             <th>Baseline</th>
-            <td>{{ $indikatorKinerja->Baseline }}</td>
+            <td>{!! nl2br($indikatorKinerja->Baseline) !!}</td>
         </tr>
         <tr>
             <th>{{ $yearLabels[0] ?? '2025' }}</th>
-            <td>{{ $indikatorKinerja->Tahun1 }}</td>
+            <td>{!! nl2br($indikatorKinerja->Tahun1) !!}</td>
         </tr>
         <tr>
             <th>{{ $yearLabels[1] ?? '2026' }}</th>
-            <td>{{ $indikatorKinerja->Tahun2 }}</td>
+            <td>{!! nl2br($indikatorKinerja->Tahun2) !!}</td>
         </tr>
         <tr>
             <th>{{ $yearLabels[2] ?? '2027' }}</th>
-            <td>{{ $indikatorKinerja->Tahun3 }}</td>
+            <td>{!! nl2br($indikatorKinerja->Tahun3) !!}</td>
         </tr>
         <tr>
             <th>{{ $yearLabels[3] ?? '2028' }}</th>
-            <td>{{ $indikatorKinerja->Tahun4 }}</td>
+            <td>{!! nl2br($indikatorKinerja->Tahun4) !!}</td>
         </tr>
         <tr>
             <th>Mendukung IKU PT / Kriteria Akreditasi</th>
             <td>
                 @if($indikatorKinerja->MendukungIKU == 'Y')
                     <span class="badge badge-success">Ya</span>
-                @else
+                @endif
+                @if($indikatorKinerja->MendukungIKU == 'N')
                     <span class="badge badge-danger">Tidak</span>
                 @endif
             </td>
@@ -53,22 +54,6 @@
                     <span class="badge badge-success">Aktif</span>
                 @endif
             </td>
-        </tr>
-        <tr>
-            <th>Dibuat Pada</th>
-            <td>{{ $indikatorKinerja->DCreated ? date('d-m-Y H:i:s', strtotime($indikatorKinerja->DCreated)) : '-' }}</td>
-        </tr>
-        <tr>
-            <th>Dibuat Oleh</th>
-            <td>{{ $indikatorKinerja->createdBy ? $indikatorKinerja->createdBy->name : '-' }}</td>
-        </tr>
-        <tr>
-            <th>Diubah Pada</th>
-            <td>{{ $indikatorKinerja->DEdited ? date('d-m-Y H:i:s', strtotime($indikatorKinerja->DEdited)) : '-' }}</td>
-        </tr>
-        <tr>
-            <th>Diubah Oleh</th>
-            <td>{{ $indikatorKinerja->editedBy ? $indikatorKinerja->editedBy->name : '-' }}</td>
         </tr>
     </table>
 </div>

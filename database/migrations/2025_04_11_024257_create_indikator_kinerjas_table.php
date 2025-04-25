@@ -16,10 +16,10 @@ return new class extends Migration
             $table->unsignedBigInteger('SatuanID');
             $table->text('Nama');
             $table->text('Baseline')->nullable();
-            $table->year('Tahun1')->nullable();
-            $table->year('Tahun2')->nullable();
-            $table->year('Tahun3')->nullable();
-            $table->year('Tahun4')->nullable();
+            $table->text('Tahun1')->nullable();
+            $table->text('Tahun2')->nullable();
+            $table->text('Tahun3')->nullable();
+            $table->text('Tahun4')->nullable();
             $table->enum('MendukungIKU', ['Y', 'N'])->default('Y');
             $table->enum('NA', ['Y', 'N'])->default('N');
             $table->dateTime('DCreated')->nullable();

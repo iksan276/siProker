@@ -96,7 +96,7 @@
         <div class="col-sm-4">
             <div class="form-group">
                 <label for="Total">Total</label>
-                <input type="text" name="Total" id="Total" class="form-control currency-input" readonly>
+                <input type="text" name="Total" id="Total" class="form-control currency-input">
             </div>
         </div>
         <div class="col-sm-4">

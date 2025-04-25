@@ -29,25 +29,25 @@
         <div class="col-sm-3">
             <div class="form-group">
                 <label for="Tahun1" id="tahun1Label">{{ $yearLabels[0] ?? '2025' }}</label>
-                <input type="number" name="Tahun1" id="Tahun1" class="form-control" step="0.01">
+                <input type="text" name="Tahun1" id="Tahun1" class="form-control">
             </div>
         </div>
         <div class="col-sm-3">
             <div class="form-group">
                 <label for="Tahun2" id="tahun2Label">{{ $yearLabels[1] ?? '2026' }}</label>
-                <input type="number" name="Tahun2" id="Tahun2" class="form-control" step="0.01">
+                <input type="text" name="Tahun2" id="Tahun2" class="form-control">
             </div>
         </div>
         <div class="col-sm-3">
             <div class="form-group">
                 <label for="Tahun3" id="tahun3Label">{{ $yearLabels[2] ?? '2027' }}</label>
-                <input type="number" name="Tahun3" id="Tahun3" class="form-control" step="0.01">
+                <input type="text" name="Tahun3" id="Tahun3" class="form-control">
             </div>
         </div>
         <div class="col-sm-3">
             <div class="form-group">
                 <label for="Tahun4" id="tahun4Label">{{ $yearLabels[3] ?? '2028' }}</label>
-                <input type="number" name="Tahun4" id="Tahun4" class="form-control" step="0.01">
+                <input type="text" name="Tahun4" id="Tahun4" class="form-control">
             </div>
         </div>
     </div>
@@ -113,42 +113,6 @@ document.getElementById('indikatorKinerjaForm').addEventListener('submit', funct
         return false;
     }
     
-    // If validation passes, submit the form via AJAX
-    const form = this;
-    const formData = new FormData(form);
-    
-    // Convert FormData to URL-encoded string
-    const urlEncodedData = new URLSearchParams(formData).toString();
-    
-    fetch(form.action, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: urlEncodedData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Close modal
-            $('#mainModal').modal('hide');
-            
-            // Show success message
-            showAlert('success', data.message || 'Operation completed successfully');
-            
-            // Reload DataTable
-            if (typeof indikatorKinerjaTable !== 'undefined') {
-                indikatorKinerjaTable.ajax.reload();
-            }
-        } else {
-            // Display error message
-            showAlert('danger', data.message || 'An error occurred');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showAlert('danger', 'An error occurred while processing your request');
-    });
+  
 });
 </script>

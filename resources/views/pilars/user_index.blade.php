@@ -15,37 +15,31 @@
     </div>
     <div class="card-body">
         <div class="row">
-            <div class="col-md-2 mb-2">
+            <div class="col-md-3 mb-2">
                 <div class="d-flex align-items-center">
                     <div class="tree-legend-line" style="background-color: rgba(231, 74, 59, 0.1); height: 5px; width: 30px;"></div>
                     <span class="ml-2">Pilar</span>
                 </div>
             </div>
-            <div class="col-md-2 mb-2">
+            <div class="col-md-3 mb-2">
                 <div class="d-flex align-items-center">
                     <div class="tree-legend-line" style="background-color: rgba(246, 194, 62, 0.1); height: 5px; width: 30px;"></div>
                     <span class="ml-2">Isu Strategis</span>
                 </div>
             </div>
-            <div class="col-md-2 mb-2">
+            <div class="col-md-3 mb-2">
                 <div class="d-flex align-items-center">
                     <div class="tree-legend-line" style="background-color: rgba(28, 200, 138, 0.1); height: 5px; width: 30px;"></div>
                     <span class="ml-2">Program Pengembangan</span>
                 </div>
             </div>
-            <div class="col-md-2 mb-2">
+            <div class="col-md-3 mb-2">
                 <div class="d-flex align-items-center">
                     <div class="tree-legend-line" style="background-color: rgba(10, 63, 223, 0.1); height: 5px; width: 30px;"></div>
                     <span class="ml-2">Program Rektor</span>
                 </div>
             </div>
-            <div class="col-md-2 mb-2">
-                <div class="d-flex align-items-center">
-                    <div class="tree-legend-line" style="background-color: rgba(2, 255, 251, 0.1); height: 5px; width: 30px;"></div>
-                    <span class="ml-2">Indikator Kinerja</span>
-                </div>
-            </div>
-            <div class="col-md-2 mb-2">
+            <div class="col-md-3 mb-2">
                 <div class="d-flex align-items-center">
                     <div class="tree-legend-line" style="background-color: rgba(156, 39, 176, 0.1); height: 5px; width: 30px;"></div>
                     <span class="ml-2">Kegiatan</span>
@@ -575,45 +569,41 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
         });
     }
     
-    // Function to get expand tooltip based on node type
-    function getExpandTooltip(nodeType) {
-        switch(nodeType) {
-            case 'pilar':
-                return 'Lihat isu strategis';
-            case 'isu':
-                return 'Lihat program pengembangan';
-            case 'program':
-                return 'Lihat program rektor';
-            case 'rektor':
-                return 'Lihat indikator kinerja';
-            case 'indikator':
-                return 'Lihat kegiatan';
-            case 'kegiatan':
-                return 'Lihat detail kegiatan';
-            default:
-                return 'Lihat detail';
-        }
+   // Function to get expand tooltip based on node type
+function getExpandTooltip(nodeType) {
+    switch(nodeType) {
+        case 'pilar':
+            return 'Lihat isu strategis';
+        case 'isu':
+            return 'Lihat program pengembangan';
+        case 'program':
+            return 'Lihat program rektor';
+        case 'rektor':
+            return 'Lihat kegiatan';
+        case 'kegiatan':
+            return 'Lihat detail kegiatan';
+        default:
+            return 'Lihat detail';
     }
-    
-    // Function to get collapse tooltip based on node type
-    function getCollapseTooltip(nodeType) {
-        switch(nodeType) {
-            case 'pilar':
-                return 'Tutup isu strategis';
-            case 'isu':
-                return 'Tutup program pengembangan';
-            case 'program':
-                return 'Tutup program rektor';
-            case 'rektor':
-                return 'Tutup indikator kinerja';
-            case 'indikator':
-                return 'Tutup kegiatan';
-            case 'kegiatan':
-                return 'Tutup detail kegiatan';
-            default:
-                return 'Tutup detail';
-        }
+}
+
+// Function to get collapse tooltip based on node type
+function getCollapseTooltip(nodeType) {
+    switch(nodeType) {
+        case 'pilar':
+            return 'Tutup isu strategis';
+        case 'isu':
+            return 'Tutup program pengembangan';
+        case 'program':
+            return 'Tutup program rektor';
+        case 'rektor':
+            return 'Tutup kegiatan';
+        case 'kegiatan':
+            return 'Tutup detail kegiatan';
+        default:
+            return 'Tutup detail';
     }
+}
     
     // Function to collapse a node and all its children recursively
     function collapseNodeAndAllChildren(nodeId) {

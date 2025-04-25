@@ -53,9 +53,14 @@
                         <th style="white-space:nowrap">Indikator Kinerja</th>
                         <th style="white-space:nowrap">Nama</th>
                         <th style="white-space:nowrap">Jenis Kegiatan</th>
+                        <th style="white-space:nowrap">Meta Anggaran</th>
+                        <th style="white-space:nowrap">Jumlah Kegiatan</th>
+                        <th style="white-space:nowrap">Satuan</th>
+                        <th style="white-space:nowrap">Harga Satuan</th>
                         <th style="white-space:nowrap">Total</th>
                         <th style="white-space:nowrap">Penanggung Jawab</th>
-                        <th style="white-space:nowrap">NA</th>
+                        <th style="white-space:nowrap">Pelaksana</th>
+                        <th style="white-space:nowrap">Status</th>
                         <th style="white-space:nowrap">Actions</th>
                     </tr>
                 </thead>
@@ -256,13 +261,42 @@
                 { data: 'nama' },
                 { data: 'jenis_kegiatan' },
                 { 
+                    data: 'meta_anggaran',
+                    orderable: false,
+                    render: function(data) {
+                        return data;
+                    }
+                },
+                { 
+                    data: 'jumlah_kegiatan', 
+                    className: 'text-center',
+                    render: function(data) {
+                        return '<span style="white-space:nowrap">' + data + '</span>';
+                    }
+                },
+                { data: 'satuan' },
+                { 
+                    data: 'harga_satuan', 
+                    className: 'text-center',
+                    render: function(data) {
+                        return '<span style="white-space:nowrap">' + data + '</span>';
+                    }
+                },
+                { 
                     data: 'total', 
-                    className: 'text-right',
+                    className: 'text-center',
                     render: function(data) {
                         return '<span style="white-space:nowrap">' + data + '</span>';
                     }
                 },
                 { data: 'penanggung_jawab' },
+                { 
+                    data: 'pelaksana',
+                    orderable: false,
+                    render: function(data) {
+                        return data;
+                    }
+                },
                 { 
                     data: 'na', 
                     className: 'text-center text-dark',
@@ -437,3 +471,4 @@
     });
 </script>
 @endpush
+

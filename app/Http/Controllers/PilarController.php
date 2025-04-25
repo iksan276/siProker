@@ -166,9 +166,10 @@ class PilarController extends Controller
                     foreach ($program->programRektors as $rektor) {
                         if ($rektor->NA == 'Y') continue; // Skip non-active rektor programs
                         
-                        $indikatorKinerjas = IndikatorKinerja::where('ProgramRektorID', $rektor->ProgramRektorID)
-                                            ->where('NA', 'N')
-                                            ->get();
+                        // Get kegiatan count directly from program rektor's IndikatorKinerjaID
+                        $kegiatanCount = Kegiatan::where('IndikatorKinerjaID', $rektor->IndikatorKinerjaID)
+                                        ->where('UCreated', $userId)
+                                        ->count();
                         
                         $rektorNode = [
                             'id' => 'rektor_' . $rektor->ProgramRektorID,
@@ -177,76 +178,58 @@ class PilarController extends Controller
                             'type' => 'rektor',
                             'parent' => 'program_' . $program->ProgramPengembanganID,
                             'level' => 3,
-                            'has_children' => count($indikatorKinerjas) > 0,
-                            'actions' => '',
+                            'has_children' => $kegiatanCount > 0,
+                            'actions' => '
+                                <button class="btn btn-info btn-square btn-sm load-modal" 
+                                    data-url="' . route('program-rektors.show', $rektor->ProgramRektorID) . '" 
+                                    data-title="Detail Program Rektor">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-primary btn-square btn-sm load-modal" 
+                                    data-url="' . route('kegiatans.create') . '?indikator=' . $rektor->IndikatorKinerjaID . '" 
+                                    data-title="Tambah Kegiatan">
+                                    <i class="fas fa-plus"></i>
+                                </button>',
                             'row_class' => '',
-                            'tooltip' => 'Lihat indikator kinerja'
+                            'tooltip' => 'Lihat kegiatan'
                         ];
                         
                         $treeData[] = $rektorNode;
                         
-                        // Add Indikator Kinerja
-                        foreach ($indikatorKinerjas as $indikator) {
-                            // Get kegiatan count for this user and indikator
-                            $kegiatanCount = Kegiatan::where('IndikatorKinerjaID', $indikator->IndikatorKinerjaID)
-                                            ->where('UCreated', $userId)
-                                            ->count();
+                        // Add Kegiatan directly under Program Rektor
+                        $kegiatans = Kegiatan::where('IndikatorKinerjaID', $rektor->IndikatorKinerjaID)
+                            ->where('UCreated', $userId)
+                            ->get();
                             
-                            $indikatorNode = [
-                                'id' => 'indikator_' . $indikator->IndikatorKinerjaID,
+                        foreach ($kegiatans as $kegiatan) {
+                            $kegiatanNode = [
+                                'id' => 'kegiatan_' . $kegiatan->KegiatanID,
                                 'no' => '',
-                                'nama' => $indikator->Nama,
-                                'type' => 'indikator',
+                                'nama' => $kegiatan->Nama,
+                                'type' => 'kegiatan',
                                 'parent' => 'rektor_' . $rektor->ProgramRektorID,
                                 'level' => 4,
-                                'has_children' => $kegiatanCount > 0,
+                                'has_children' => false,
                                 'actions' => '
-                                    <button class="btn btn-primary btn-square btn-sm load-modal" 
-                                        data-url="' . route('kegiatans.create') . '?indikator=' . $indikator->IndikatorKinerjaID . '" 
-                                        data-title="Tambah Kegiatan">
-                                        <i class="fas fa-plus"></i>
+                                    <button class="btn btn-info btn-square btn-sm load-modal" 
+                                        data-url="' . route('kegiatans.show', $kegiatan->KegiatanID) . '" 
+                                        data-title="Detail Kegiatan">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-warning btn-square btn-sm load-modal" 
+                                        data-url="' . route('kegiatans.edit', $kegiatan->KegiatanID) . '" 
+                                        data-title="Edit Kegiatan">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" 
+                                        data-id="' . $kegiatan->KegiatanID . '">
+                                        <i class="fas fa-trash"></i>
                                     </button>',
                                 'row_class' => '',
-                                'tooltip' => 'Lihat kegiatan'
+                                'tooltip' => ''
                             ];
                             
-                            $treeData[] = $indikatorNode;
-                            
-                            // Add Kegiatan for this user only
-                            $kegiatans = Kegiatan::where('IndikatorKinerjaID', $indikator->IndikatorKinerjaID)
-                                ->where('UCreated', $userId)
-                                ->get();
-                                
-                            foreach ($kegiatans as $kegiatan) {
-                                $kegiatanNode = [
-                                    'id' => 'kegiatan_' . $kegiatan->KegiatanID,
-                                    'no' => '',
-                                    'nama' => $kegiatan->Nama,
-                                    'type' => 'kegiatan',
-                                    'parent' => 'indikator_' . $indikator->IndikatorKinerjaID,
-                                    'level' => 5,
-                                    'has_children' => false,
-                                    'actions' => '
-                                        <button class="btn btn-info btn-square btn-sm load-modal" 
-                                            data-url="' . route('kegiatans.show', $kegiatan->KegiatanID) . '" 
-                                            data-title="Detail Kegiatan">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button class="btn btn-warning btn-square btn-sm load-modal" 
-                                            data-url="' . route('kegiatans.edit', $kegiatan->KegiatanID) . '" 
-                                            data-title="Edit Kegiatan">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" 
-                                            data-id="' . $kegiatan->KegiatanID . '">
-                                            <i class="fas fa-trash"></i>
-                                        </button>',
-                                    'row_class' => '',
-                                    'tooltip' => ''
-                                ];
-                                
-                                $treeData[] = $kegiatanNode;
-                            }
+                            $treeData[] = $kegiatanNode;
                         }
                     }
                 }

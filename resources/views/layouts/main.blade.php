@@ -284,6 +284,7 @@
                 dropdownParent: $('#mainModal'),
                 width: '100%',
             });
+            
         });
     }
     

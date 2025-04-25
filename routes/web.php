@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     // Pilar routes - accessible by all users
     Route::resource('pilars', PilarController::class);
     Route::resource('kegiatans', KegiatanController::class);
+    Route::resource('program-rektors', ProgramRektorController::class);
     
     // Routes accessible only by admin (level 1)
     Route::middleware(['admin'])->group(function () {
@@ -59,7 +60,6 @@ Route::middleware('auth')->group(function () {
         Route::resource('program-pengembangans', ProgramPengembanganController::class);
         
         // Program Rektor routes
-        Route::resource('program-rektors', ProgramRektorController::class);
         Route::get('/program-rektors/export/excel', [ProgramRektorController::class, 'exportExcel'])->name('program-rektors.export.excel');
 
         // Satuan routes

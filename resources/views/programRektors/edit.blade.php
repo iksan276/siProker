@@ -93,7 +93,7 @@
         <div class="col-sm-4">
             <div class="form-group">
                 <label for="Total">Total</label>
-                <input type="text" name="Total" id="Total" class="form-control currency-input" value="{{ number_format($programRektor->Total, 0, ',', '.') }}" readonly>
+                <input type="text" name="Total" id="Total" class="form-control currency-input" value="{{ number_format($programRektor->Total, 0, ',', '.') }}">
             </div>
         </div>
         <div class="col-sm-4">

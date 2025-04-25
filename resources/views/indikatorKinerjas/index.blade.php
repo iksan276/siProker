@@ -70,9 +70,9 @@
 <script>
     var indikatorKinerjaTable;
     var isFiltering = false;
-      $defaultYearLabels = ['2025', '2026', '2027', '2028'];
-        // Then in the view:
-     var yearLabels = @json($yearLabels ?? $defaultYearLabels);
+    var defaultYearLabels = ['2025', '2026', '2027', '2028'];
+    // Then in the view:
+    var yearLabels = @json($yearLabels ?? $defaultYearLabels);
     
     $(document).ready(function () {
         // Initialize DataTable with AJAX source
@@ -124,6 +124,61 @@
                     isFiltering = false;
                 });
             }
+        });
+        
+        // Handle form submission within modal
+        $(document).on('submit', '.modal-form', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var url = form.attr('action');
+            var method = form.attr('method');
+            var data = form.serialize();
+            
+            $.ajax({
+                url: url,
+                type: method,
+                data: data,
+                beforeSend: function() {
+                    // Disable submit button and show loading indicator with smaller spinner
+                    form.find('button[type="submit"]').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="width: 1rem; height: 1rem; border-width: 0.15em;"></span> <small>Processing...</small>');
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Close modal
+                        $('#mainModal').modal('hide');
+                        
+                        // Show success message
+                        showAlert('success', response.message || 'Operation completed successfully');
+                        
+                        // Reload DataTable
+                        indikatorKinerjaTable.ajax.reload();
+                    } else {
+                        // Display error message
+                        showAlert('danger', response.message || 'An error occurred');
+                    }
+                },
+                error: function(xhr) {
+                    // Handle validation errors
+                    var errors = xhr.responseJSON?.errors;
+                    var errorMessage = '';
+                    
+                    if (errors) {
+                        for (var field in errors) {
+                            errorMessage += errors[field][0] + '<br>';
+                        }
+                    } else if (xhr.responseJSON?.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    } else {
+                        errorMessage = 'An error occurred';
+                    }
+                    
+                    showAlert('danger', errorMessage);
+                },
+                complete: function() {
+                    // Re-enable submit button
+                    form.find('button[type="submit"]').prop('disabled', false).html('Save');
+                }
+            });
         });
         
         // Handle delete button click
@@ -371,3 +426,4 @@
     });
 </script>
 @endpush
+

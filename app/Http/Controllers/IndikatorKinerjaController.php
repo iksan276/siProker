@@ -90,11 +90,11 @@ class IndikatorKinerjaController extends Controller
                     'no' => $index + 1,
                     'nama' => nl2br($indikatorKinerja->Nama),
                     'satuan' => $indikatorKinerja->satuan->Nama,
-                    'baseline' => $indikatorKinerja->Baseline,
-                    'tahun1' => $indikatorKinerja->Tahun1,
-                    'tahun2' => $indikatorKinerja->Tahun2,
-                    'tahun3' => $indikatorKinerja->Tahun3,
-                    'tahun4' => $indikatorKinerja->Tahun4,
+                    'baseline' => nl2br($indikatorKinerja->Baseline),
+                    'tahun1' => nl2br($indikatorKinerja->Tahun1),
+                    'tahun2' => nl2br($indikatorKinerja->Tahun2),
+                    'tahun3' => nl2br($indikatorKinerja->Tahun3),
+                    'tahun4' => nl2br($indikatorKinerja->Tahun4),
                     'mendukung_iku' => $mendukungIKUBadge,
                     'na' => $naBadge,
                     'actions' => $actions
@@ -113,7 +113,7 @@ class IndikatorKinerjaController extends Controller
     public function exportExcel(Request $request)
     {
         // Get all indikator kinerjas without filtering by RenstraID
-        $indikatorKinerjas = IndikatorKinerja::with(['satuan', 'createdBy', 'editedBy', 'renstra'])
+        $indikatorKinerjas = IndikatorKinerja::with(['satuan', 'createdBy', 'editedBy'])
             ->orderBy('IndikatorKinerjaID', 'desc')
             ->get();
         
@@ -140,10 +140,10 @@ class IndikatorKinerjaController extends Controller
             'SatuanID' => 'required|exists:satuans,SatuanID',
             'Nama' => 'required|string',
             'Baseline' => 'nullable|string',
-            'Tahun1' => 'nullable|numeric',
-            'Tahun2' => 'nullable|numeric',
-            'Tahun3' => 'nullable|numeric',
-            'Tahun4' => 'nullable|numeric',
+            'Tahun1' => 'nullable|string',
+            'Tahun2' => 'nullable|string',
+            'Tahun3' => 'nullable|string',
+            'Tahun4' => 'nullable|string',
             'MendukungIKU' => 'required|in:Y,N',
             'NA' => 'required|in:Y,N',
         ]);
@@ -170,7 +170,7 @@ class IndikatorKinerjaController extends Controller
 
     public function show($id)
     {
-        $indikatorKinerja = IndikatorKinerja::with('renstra')->findOrFail($id);
+        $indikatorKinerja = IndikatorKinerja::findOrFail($id);
         
         // Get the year labels from the session or use default
         $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028]);
@@ -204,10 +204,10 @@ class IndikatorKinerjaController extends Controller
             'SatuanID' => 'required|exists:satuans,SatuanID',
             'Nama' => 'required|string',
             'Baseline' => 'nullable|string',
-            'Tahun1' => 'nullable|numeric',
-            'Tahun2' => 'nullable|numeric',
-            'Tahun3' => 'nullable|numeric',
-            'Tahun4' => 'nullable|numeric',
+            'Tahun1' => 'nullable|string',
+            'Tahun2' => 'nullable|string',
+            'Tahun3' => 'nullable|string',
+            'Tahun4' => 'nullable|string',
             'MendukungIKU' => 'required|in:Y,N',
             'NA' => 'required|in:Y,N',
         ]);

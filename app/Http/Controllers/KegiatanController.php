@@ -72,12 +72,8 @@ class KegiatanController extends Controller
     
     public function exportExcel(Request $request)
     {
-        // Base query with all necessary relationships
-        $kegiatansQuery = Kegiatan::with([
-            'indikatorKinerja.programRektor.programPengembangan.isuStrategis.pilar.renstra',
-            'createdBy', 
-            'editedBy'
-        ]);
+        // Base query with only indikatorKinerja relationship
+        $kegiatansQuery = Kegiatan::with(['indikatorKinerja']);
         
         // Apply filter if indikatorKinerjaID is provided
         if ($request->has('indikatorKinerjaID') && $request->indikatorKinerjaID) {
@@ -209,6 +205,7 @@ class KegiatanController extends Controller
             }
             
             // For other database errors
+        
             if (request()->ajax()) {
                 return response()->json([
                     'success' => false, 

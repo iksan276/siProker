@@ -29,9 +29,7 @@ class KegiatansExport implements FromCollection, WithHeadings, WithMapping, With
             return $this->kegiatans;
         }
         
-        return Kegiatan::with([
-            'indikatorKinerja.programRektor.programPengembangan.isuStrategis.pilar.renstra',
-        ])->get();
+        return Kegiatan::with(['indikatorKinerja'])->get();
     }
 
     /**
@@ -41,11 +39,6 @@ class KegiatansExport implements FromCollection, WithHeadings, WithMapping, With
     {
         return [
             'No',
-            'Renstra',
-            'Pilar',
-            'Isu Strategis',
-            'Program Pengembangan',
-            'Program Rektor',
             'Indikator Kinerja',
             'Nama',
             'Tanggal Mulai',
@@ -64,19 +57,9 @@ class KegiatansExport implements FromCollection, WithHeadings, WithMapping, With
         $rowNumber++;
 
         $indikatorKinerja = $kegiatan->indikatorKinerja;
-        $programRektor = $indikatorKinerja->programRektor;
-        $programPengembangan = $programRektor->programPengembangan;
-        $isuStrategis = $programPengembangan->isuStrategis;
-        $pilar = $isuStrategis->pilar;
-        $renstra = $pilar->renstra;
 
         return [
             $rowNumber,
-            $renstra->Nama,
-            $pilar->Nama,
-            $isuStrategis->Nama,
-            $programPengembangan->Nama,
-            $programRektor->Nama,
             $indikatorKinerja->Nama,
             $kegiatan->Nama,
             Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y H:i'),
@@ -118,7 +101,7 @@ class KegiatansExport implements FromCollection, WithHeadings, WithMapping, With
         $sheet->getStyle('A2:A' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         
         // Center the date columns
-        $sheet->getStyle('I2:J' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('D2:E' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         
         // Add borders to all cells
         $sheet->getStyle('A1:' . $highestColumn . $highestRow)->applyFromArray([

@@ -26,7 +26,7 @@ class ProgramRektorController extends Controller
         // Base query
         $programRektorsQuery = ProgramRektor::with([
             'programPengembangan', 
-            'indikatorKinerja', // Added indikatorKinerja relationship
+            'indikatorKinerja', 
             'jenisKegiatan', 
             'satuan', 
             'penanggungJawab', 
@@ -79,30 +79,50 @@ class ProgramRektorController extends Controller
                     $naStatus = '<span class="badge badge-success">Aktif</span>';
                 }
                 
-                // Get meta anggaran names
+                // Get meta anggaran names and format as ul/li
                 $metaAnggaranIds = explode(',', $program->MetaAnggaranID);
-                $metaAnggaranNames = MetaAnggaran::whereIn('MetaAnggaranID', $metaAnggaranIds)
-                    ->pluck('Nama')
-                    ->implode(', ');
+                $metaAnggaranItems = MetaAnggaran::whereIn('MetaAnggaranID', $metaAnggaranIds)->pluck('Nama')->toArray();
+                $metaAnggaranHtml = '';
+                if (count($metaAnggaranItems) > 0) {
+                    $metaAnggaranHtml = '<ul class=" mb-0">';
+                    foreach ($metaAnggaranItems as $item) {
+                        $metaAnggaranHtml .= '<li>' . $item . '</li>';
+                    }
+                    $metaAnggaranHtml .= '</ul>';
+                }
                 
-                // Get pelaksana names
+                // Get pelaksana names and format as ul/li
                 $pelaksanaIds = explode(',', $program->PelaksanaID);
-                $pelaksanaNames = Unit::whereIn('UnitID', $pelaksanaIds)
-                    ->pluck('Nama')
-                    ->implode(', ');
+                $pelaksanaItems = Unit::whereIn('UnitID', $pelaksanaIds)->pluck('Nama')->toArray();
+                $pelaksanaHtml = '';
+                if (count($pelaksanaItems) > 0) {
+                    $pelaksanaHtml = '<ul class=" mb-0">';
+                    foreach ($pelaksanaItems as $item) {
+                        $pelaksanaHtml .= '<li>' . $item . '</li>';
+                    }
+                    $pelaksanaHtml .= '</ul>';
+                }
                 
+                // In the index method, modify the data array construction:
                 $data[] = [
                     'no' => $index + 1,
                     'program_pengembangan' => nl2br($program->programPengembangan->Nama),
-                    'indikator_kinerja' => nl2br($program->indikatorKinerja->Nama), // Added indikator kinerja
+                    'indikator_kinerja' => nl2br($program->indikatorKinerja->Nama),
                     'nama' => nl2br($program->Nama),
                     'jenis_kegiatan' => $program->jenisKegiatan->Nama,
+                    'jumlah_kegiatan' => number_format($program->JumlahKegiatan, 0, ',', '.'),
+                    'satuan' => $program->satuan->Nama,
+                    'harga_satuan' => 'Rp ' . number_format($program->HargaSatuan, 0, ',', '.'),
+                    'meta_anggaran' => $metaAnggaranHtml,
                     'total' => 'Rp ' . number_format($program->Total, 0, ',', '.'),
                     'penanggung_jawab' => $program->penanggungJawab->Nama,
+                    'pelaksana' => $pelaksanaHtml,
                     'na' => $naStatus,
                     'actions' => $actions,
                     'row_class' => $program->NA == 'Y' ? 'bg-light text-muted' : ''
                 ];
+
+                
             }
             
             return response()->json([
@@ -116,7 +136,7 @@ class ProgramRektorController extends Controller
     public function create()
     {
         $programPengembangans = ProgramPengembangan::where('NA', 'N')->get();
-        $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get(); // Added indikatorKinerjas
+        $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get();
         $jenisKegiatans = JenisKegiatan::where('NA', 'N')->get();
         $metaAnggarans = MetaAnggaran::where('NA', 'N')->get();
         $satuans = Satuan::where('NA', 'N')->get();
@@ -126,7 +146,7 @@ class ProgramRektorController extends Controller
         if (request()->ajax()) {
             return view('programRektors.create', compact(
                 'programPengembangans', 
-                'indikatorKinerjas', // Added indikatorKinerjas
+                'indikatorKinerjas',
                 'jenisKegiatans', 
                 'metaAnggarans', 
                 'satuans', 
@@ -137,7 +157,7 @@ class ProgramRektorController extends Controller
         
         return view('programRektors.create', compact(
             'programPengembangans', 
-            'indikatorKinerjas', // Added indikatorKinerjas
+            'indikatorKinerjas',
             'jenisKegiatans', 
             'metaAnggarans', 
             'satuans', 
@@ -151,7 +171,7 @@ class ProgramRektorController extends Controller
         // Base query with all necessary relationships
         $programRektorsQuery = ProgramRektor::with([
             'programPengembangan.isuStrategis.pilar.renstra',
-            'indikatorKinerja', // Added indikatorKinerja relationship
+            'indikatorKinerja',
             'jenisKegiatan',
             'satuan',
             'penanggungJawab',
@@ -179,7 +199,7 @@ class ProgramRektorController extends Controller
     {
         $request->validate([
             'ProgramPengembanganID' => 'required|exists:program_pengembangans,ProgramPengembanganID',
-            'IndikatorKinerjaID' => 'required|exists:indikator_kinerjas,IndikatorKinerjaID', // Added validation
+            'IndikatorKinerjaID' => 'required|exists:indikator_kinerjas,IndikatorKinerjaID',
             'Nama' => 'required|string',
             'Output' => 'required|string',
             'Outcome' => 'required|string',
@@ -196,7 +216,7 @@ class ProgramRektorController extends Controller
 
         $programRektor = new ProgramRektor();
         $programRektor->ProgramPengembanganID = $request->ProgramPengembanganID;
-        $programRektor->IndikatorKinerjaID = $request->IndikatorKinerjaID; // Added IndikatorKinerjaID
+        $programRektor->IndikatorKinerjaID = $request->IndikatorKinerjaID;
         $programRektor->Nama = $request->Nama;
         $programRektor->Output = $request->Output;
         $programRektor->Outcome = $request->Outcome;
@@ -224,7 +244,7 @@ class ProgramRektorController extends Controller
         // Load relationships
         $programRektor->load([
             'programPengembangan',
-            'indikatorKinerja', // Added indikatorKinerja relationship
+            'indikatorKinerja',
             'jenisKegiatan',
             'satuan',
             'penanggungJawab',
@@ -247,7 +267,7 @@ class ProgramRektorController extends Controller
     public function edit(ProgramRektor $programRektor)
     {
         $programPengembangans = ProgramPengembangan::where('NA', 'N')->get();
-        $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get(); // Added indikatorKinerjas
+        $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get();
         $jenisKegiatans = JenisKegiatan::where('NA', 'N')->get();
         $metaAnggarans = MetaAnggaran::where('NA', 'N')->get();
         $satuans = Satuan::where('NA', 'N')->get();
@@ -262,7 +282,7 @@ class ProgramRektorController extends Controller
             return view('programRektors.edit', compact(
                 'programRektor',
                 'programPengembangans', 
-                'indikatorKinerjas', // Added indikatorKinerjas
+                'indikatorKinerjas',
                 'jenisKegiatans', 
                 'metaAnggarans', 
                 'satuans', 
@@ -276,7 +296,7 @@ class ProgramRektorController extends Controller
         return view('programRektors.edit', compact(
             'programRektor',
             'programPengembangans', 
-            'indikatorKinerjas', // Added indikatorKinerjas
+            'indikatorKinerjas',
             'jenisKegiatans', 
             'metaAnggarans', 
             'satuans', 
@@ -286,12 +306,11 @@ class ProgramRektorController extends Controller
             'selectedPelaksanas'
         ));
     }
-
     public function update(Request $request, ProgramRektor $programRektor)
     {
         $request->validate([
             'ProgramPengembanganID' => 'required|exists:program_pengembangans,ProgramPengembanganID',
-            'IndikatorKinerjaID' => 'required|exists:indikator_kinerjas,IndikatorKinerjaID', // Added validation
+            'IndikatorKinerjaID' => 'required|exists:indikator_kinerjas,IndikatorKinerjaID',
             'Nama' => 'required|string',
             'Output' => 'required|string',
             'Outcome' => 'required|string',
@@ -307,7 +326,7 @@ class ProgramRektorController extends Controller
         ]);
 
         $programRektor->ProgramPengembanganID = $request->ProgramPengembanganID;
-        $programRektor->IndikatorKinerjaID = $request->IndikatorKinerjaID; // Added IndikatorKinerjaID
+        $programRektor->IndikatorKinerjaID = $request->IndikatorKinerjaID;
         $programRektor->Nama = $request->Nama;
         $programRektor->Output = $request->Output;
         $programRektor->Outcome = $request->Outcome;
