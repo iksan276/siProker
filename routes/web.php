@@ -14,6 +14,7 @@ use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\MetaAnggaranController;
 use App\Http\Controllers\UnitAnggaranController;
 use App\Http\Controllers\JenisKegiatanController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,7 +32,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::redirect('/dashboard', '/users')->middleware(['auth', 'verified'])->name('dashboard');
+// Replace the existing dashboard route with our new controller
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -75,8 +79,6 @@ Route::middleware('auth')->group(function () {
         Route::resource('indikator-kinerjas', IndikatorKinerjaController::class);
         Route::get('/indikator-kinerjas/export/excel', [IndikatorKinerjaController::class, 'exportExcel'])->name('indikator-kinerjas.export.excel');
         Route::get('indikator-kinerjas/renstra-years/{id}', [IndikatorKinerjaController::class,'getRenstraYears'])->name('indikator-kinerjas.renstra-years');
-
-
 
         // Kegiatan routes
         Route::get('/kegiatans/export/excel', [KegiatanController::class, 'exportExcel'])->name('kegiatans.export.excel');

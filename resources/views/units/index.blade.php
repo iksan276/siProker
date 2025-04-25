@@ -166,11 +166,17 @@
                         },
                         success: function(response) {
                             if (response.success) {
-                                // Show success message
-                                showAlert('success', response.message || 'Unit berhasil dihapus');
-                                
+                           
                                 // Reload only the DataTable
                                 reloadTable();
+                                Swal.fire({
+                                    title: 'Deleted!',
+                                    text: response.message || 'Item has been successfully deleted.',
+                                    icon: 'success',
+                                    confirmButtonColor: '#3085d6',
+                                    confirmButtonText: 'OK'
+                                });
+        
                             } else {
                                 // Show error message
                                 showAlert('danger', response.message || 'Failed to delete unit');

@@ -405,10 +405,17 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                         success: function(response) {
                             if (response.success) {
                                 // Show success message
-                                showAlert('success', response.message || 'Kegiatan berhasil dihapus');
-                                
+                               
                                 // Reload tree data
                                 loadTreeData();
+                                Swal.fire({
+                                    title: 'Deleted!',
+                                    text: response.message || 'Item has been successfully deleted.',
+                                    icon: 'success',
+                                    confirmButtonColor: '#3085d6',
+                                    confirmButtonText: 'OK'
+                                });
+        
                             } else {
                                 // Show error message
                                 showAlert('danger', response.message || 'Failed to delete kegiatan');

@@ -11,11 +11,18 @@
 
     <!-- Divider -->
     <hr class="sidebar-divider my-0">
-
+    @if(auth()->user()->isAdmin())
+        <!-- Nav Item - Dashboard -->
+        <li class="nav-item {{ request()->is('dashboard') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('dashboard') }}">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
 
     <!-- Divider -->
     <hr class="sidebar-divider">
-
+    @endif
     <!-- Heading -->
     <div class="sidebar-heading">
         Management
@@ -121,15 +128,13 @@
         </a>
     </li>
 
-    <!-- Divider -->
-    <hr class="sidebar-divider">
-
-    <!-- Heading -->
+ 
+    <!-- 
     <div class="sidebar-heading">
         Reports
     </div>
 
-    <!-- Nav Item - Charts - Only for Admin -->
+ 
     <li class="nav-item">
         <a class="nav-link" href="#">
             <i class="fas fa-fw fa-chart-area"></i>
@@ -137,13 +142,14 @@
         </a>
     </li>
 
-    <!-- Nav Item - Reports - Only for Admin -->
+
     <li class="nav-item">
         <a class="nav-link" href="#">
             <i class="fas fa-fw fa-file-pdf"></i>
             <span>Reports</span>
         </a>
     </li>
+    -->
     @endif
 
     <!-- Divider -->

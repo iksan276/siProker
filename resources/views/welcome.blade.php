@@ -821,7 +821,7 @@
                 @if (Route::has('login'))
                     <div class="flex items-center gap-4 mb-4 mt-4">
                         @auth
-                            <a href="{{ url('/users') }}" class="btn btn-primary">Dashboard</a>
+                            <a href="{{ url('/dashboard') }}" class="btn btn-primary">Dashboard</a>
                         @else
                             <a href="{{ route('login') }}" class="btn btn-outline" style="color: var(--primary); border-color: var(--primary);">Log in</a>
 

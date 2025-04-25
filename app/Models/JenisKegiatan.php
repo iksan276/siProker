@@ -40,4 +40,12 @@ class JenisKegiatan extends Model
     {
         return $this->belongsTo(User::class, 'UEdited', 'id');
     }
+    
+    /**
+     * Get the program rektors associated with this jenis kegiatan
+     */
+    public function programRektors()
+    {
+        return $this->hasMany(ProgramRektor::class, 'JenisKegiatanID', 'JenisKegiatanID');
+    }
 }
