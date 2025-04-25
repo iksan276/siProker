@@ -3,6 +3,8 @@
 namespace App\Exports;
 
 use App\Models\ProgramRektor;
+use App\Models\MetaAnggaran;
+use App\Models\Unit;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -30,6 +32,10 @@ class ProgramRektorsExport implements FromCollection, WithHeadings, WithMapping,
         
         return ProgramRektor::with([
             'programPengembangan.isuStrategis.pilar.renstra',
+            'indikatorKinerja', // Added indikatorKinerja relationship
+            'jenisKegiatan',
+            'satuan',
+            'penanggungJawab',
         ])->get();
     }
 
@@ -44,9 +50,19 @@ class ProgramRektorsExport implements FromCollection, WithHeadings, WithMapping,
             'Pilar',
             'Isu Strategis',
             'Program Pengembangan',
+            'Indikator Kinerja', // Added Indikator Kinerja column
             'Nama',
-            'Tahun',
-            'NA'
+            'Output',
+            'Outcome',
+            'Jenis Kegiatan',
+            'Meta Anggaran',
+            'Jumlah Kegiatan',
+            'Satuan',
+            'Harga Satuan',
+            'Total',
+            'Penanggung Jawab',
+            'Pelaksana',
+            'Status'
         ];
     }
 
@@ -64,6 +80,18 @@ class ProgramRektorsExport implements FromCollection, WithHeadings, WithMapping,
         $pilar = $isuStrategis->pilar;
         $renstra = $pilar->renstra;
 
+        // Get meta anggaran names
+        $metaAnggaranIds = explode(',', $programRektor->MetaAnggaranID);
+        $metaAnggaranNames = MetaAnggaran::whereIn('MetaAnggaranID', $metaAnggaranIds)
+            ->pluck('Nama')
+            ->implode(', ');
+        
+        // Get pelaksana names
+        $pelaksanaIds = explode(',', $programRektor->PelaksanaID);
+        $pelaksanaNames = Unit::whereIn('UnitID', $pelaksanaIds)
+            ->pluck('Nama')
+            ->implode(', ');
+
         // Format NA status
         $naStatus = ($programRektor->NA == 'Y') ? 'Non Aktif' : 'Aktif';
 
@@ -73,13 +101,23 @@ class ProgramRektorsExport implements FromCollection, WithHeadings, WithMapping,
             $pilar->Nama,
             $isuStrategis->Nama,
             $programPengembangan->Nama,
+            $programRektor->indikatorKinerja->Nama, // Added Indikator Kinerja
             $programRektor->Nama,
-            $programRektor->Tahun,
+            $programRektor->Output,
+            $programRektor->Outcome,
+            $programRektor->jenisKegiatan->Nama,
+            $metaAnggaranNames,
+            $programRektor->JumlahKegiatan,
+            $programRektor->satuan->Nama,
+            $programRektor->HargaSatuan,
+            $programRektor->Total,
+            $programRektor->penanggungJawab->Nama,
+            $pelaksanaNames,
             $naStatus
         ];
     }
 
-    /**
+     /**
      * @param Worksheet $sheet
      */
     public function styles(Worksheet $sheet)
@@ -110,8 +148,12 @@ class ProgramRektorsExport implements FromCollection, WithHeadings, WithMapping,
         
         // Center specific columns
         $sheet->getStyle('A2:A' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // No
-        $sheet->getStyle('G2:G' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // Tahun
-        $sheet->getStyle('H2:H' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // NA
+        $sheet->getStyle('L2:L' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // Jumlah Kegiatan
+        $sheet->getStyle('M2:M' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // Satuan
+        $sheet->getStyle('R2:R' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // Status
+        
+        // Format currency columns
+        $sheet->getStyle('N2:O' . $highestRow)->getNumberFormat()->setFormatCode('#,##0');
         
         // Add borders to all cells
         $sheet->getStyle('A1:' . $highestColumn . $highestRow)->applyFromArray([

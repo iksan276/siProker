@@ -3,8 +3,6 @@
 namespace App\Exports;
 
 use App\Models\IndikatorKinerja;
-use App\Models\MetaAnggaran;
-use App\Models\Unit;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -30,10 +28,7 @@ class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMappi
             return $this->indikatorKinerjas;
         }
         
-        return IndikatorKinerja::with([
-            'programRektor.programPengembangan.isuStrategis.pilar.renstra',
-            'satuan'
-        ])->get();
+        return IndikatorKinerja::with(['satuan'])->get();
     }
 
     /**
@@ -43,19 +38,15 @@ class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMappi
     {
         return [
             'No',
-            'Renstra',
-            'Pilar',
-            'Isu Strategis',
-            'Program Pengembangan',
-            'Program Rektor',
             'Nama',
-            'Bobot',
             'Satuan',
-            'Harga Satuan',
-            'Jumlah',
-            'Meta Anggaran',
-            'Unit Terkait',
-            'NA'
+            'Baseline',
+            'Tahun 1',
+            'Tahun 2',
+            'Tahun 3',
+            'Tahun 4',
+            'Mendukung IKU PT / Kriteria Akreditasi',
+            'Status'
         ];
     }
 
@@ -68,39 +59,22 @@ class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMappi
         static $rowNumber = 0;
         $rowNumber++;
 
-        $programRektor = $indikatorKinerja->programRektor;
-        $programPengembangan = $programRektor->programPengembangan;
-        $isuStrategis = $programPengembangan->isuStrategis;
-        $pilar = $isuStrategis->pilar;
-        $renstra = $pilar->renstra;
-
-        // Get Meta Anggaran names
-        $metaAnggaranIds = explode(',', $indikatorKinerja->MetaAnggaranID);
-        $metaAnggarans = MetaAnggaran::whereIn('MetaAnggaranID', $metaAnggaranIds)->pluck('Nama')->toArray();
-        $metaAnggaranText = implode(', ', $metaAnggarans);
-
-        // Get Unit Terkait names
-        $unitIds = explode(',', $indikatorKinerja->UnitTerkaitID);
-        $units = Unit::whereIn('UnitID', $unitIds)->pluck('Nama')->toArray();
-        $unitText = implode(', ', $units);
-
         // Format NA status
         $naStatus = ($indikatorKinerja->NA == 'Y') ? 'Non Aktif' : 'Aktif';
+        
+        // Format MendukungIKU status
+        $mendukungIKUStatus = ($indikatorKinerja->MendukungIKU == 'Y') ? 'Ya' : 'Tidak';
 
         return [
             $rowNumber,
-            $renstra->Nama,
-            $pilar->Nama,
-            $isuStrategis->Nama,
-            $programPengembangan->Nama,
-            $programRektor->Nama,
             $indikatorKinerja->Nama,
-            $indikatorKinerja->Bobot . '%',
             $indikatorKinerja->satuan->Nama,
-            'Rp ' . number_format($indikatorKinerja->HargaSatuan, 0, ',', '.'),
-            number_format($indikatorKinerja->Jumlah, 0, ',', '.'),
-            $metaAnggaranText,
-            $unitText,
+            $indikatorKinerja->Baseline,
+            $indikatorKinerja->Tahun1,
+            $indikatorKinerja->Tahun2,
+            $indikatorKinerja->Tahun3,
+            $indikatorKinerja->Tahun4,
+            $mendukungIKUStatus,
             $naStatus
         ];
     }
@@ -136,10 +110,9 @@ class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMappi
         
         // Center specific columns
         $sheet->getStyle('A2:A' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // No
-        $sheet->getStyle('H2:H' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // Bobot
-        $sheet->getStyle('I2:I' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // Satuan
-        $sheet->getStyle('J2:K' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT); // Harga Satuan & Jumlah
-        $sheet->getStyle('N2:N' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // NA
+        $sheet->getStyle('C2:C' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // Satuan
+        $sheet->getStyle('E2:H' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // Tahun 1-4
+        $sheet->getStyle('I2:J' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // Mendukung IKU & NA
         
         // Add borders to all cells
         $sheet->getStyle('A1:' . $highestColumn . $highestRow)->applyFromArray([

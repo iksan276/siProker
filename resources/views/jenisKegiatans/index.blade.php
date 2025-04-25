@@ -2,8 +2,8 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2">Program Rektor Management</h1>
-<p class="mb-4">Manage all Program Rektor in the system.</p>
+<h1 class="h3 mb-2">Jenis Kegiatan Management</h1>
+<p class="mb-4">Manage all Jenis Kegiatan in the system.</p>
 
 <!-- Alert Container for AJAX responses -->
 <div id="alertContainer"></div>
@@ -11,50 +11,20 @@
 <!-- DataTales Card -->
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-primary">Program Rektor List</h6>
-        <div class="d-flex align-items-center">
-            <div class="mr-2">
-                <select id="programPengembanganFilter" class="form-control select2-filter">
-                    <option value="">-- Pilih Program Pengembangan --</option>
-                    @foreach($programPengembangans as $programPengembangan)
-                        <option value="{{ $programPengembangan->ProgramPengembanganID }}" {{ isset($selectedProgramPengembangan) && $selectedProgramPengembangan == $programPengembangan->ProgramPengembanganID ? 'selected' : '' }}>
-                            {{ $programPengembangan->Nama }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="mr-2">
-                <select id="indikatorKinerjaFilter" class="form-control select2-filter">
-                    <option value="">-- Pilih Indikator Kinerja --</option>
-                    @foreach($indikatorKinerjas as $indikatorKinerja)
-                        <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}" {{ isset($selectedIndikatorKinerja) && $selectedIndikatorKinerja == $indikatorKinerja->IndikatorKinerjaID ? 'selected' : '' }}>
-                            {{ $indikatorKinerja->Nama }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('program-rektors.create') }}" data-title="Tambah Program Rektor">
-                    <i class="fas fa-plus fa-sm"></i> Tambah Program Rektor
-                </button>
-                <a href="{{ route('program-rektors.export.excel', request()->query()) }}" class="btn btn-success btn-sm">
-                    <i class="fas fa-file-excel fa-sm"></i> Export Excel
-                </a>
-            </div>
+        <h6 class="m-0 font-weight-bold text-primary">Jenis Kegiatan List</h6>
+        <div>
+            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('jenis-kegiatans.create') }}" data-title="Tambah Jenis Kegiatan">
+                <i class="fas fa-plus fa-sm"></i> Tambah Jenis Kegiatan
+            </button>
         </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-bordered" id="programRektorTable" width="100%" cellspacing="0">
+            <table class="table table-bordered" id="jenisKegiatanTable" width="100%" cellspacing="0">
                 <thead>
                     <tr class="text-center text-dark">
                         <th style="white-space:nowrap">No</th>
-                        <th style="white-space:nowrap">Program Pengembangan</th>
-                        <th style="white-space:nowrap">Indikator Kinerja</th>
                         <th style="white-space:nowrap">Nama</th>
-                        <th style="white-space:nowrap">Jenis Kegiatan</th>
-                        <th style="white-space:nowrap">Total</th>
-                        <th style="white-space:nowrap">Penanggung Jawab</th>
                         <th style="white-space:nowrap">NA</th>
                         <th style="white-space:nowrap">Actions</th>
                     </tr>
@@ -70,46 +40,12 @@
 
 @push('scripts')
 <script>
-    var programRektorTable;
+    var jenisKegiatanTable;
     var isFiltering = false;
     
     $(document).ready(function () {
         // Initialize DataTable with AJAX source
         initDataTable();
-        
-        // Handle filter change for Program Pengembangan
-        $('#programPengembanganFilter').on('change', function() {
-            var programPengembanganID = $(this).val();
-            
-            // Set filtering flag to true
-            isFiltering = true;
-            
-            // Update URL without page refresh
-            updateUrlParameter('programPengembanganID', programPengembanganID);
-            
-            // Reload DataTable with new filter
-            programRektorTable.ajax.reload(function() {
-                // Reset filtering flag after data is loaded
-                isFiltering = false;
-            });
-        });
-        
-        // Handle filter change for Indikator Kinerja
-        $('#indikatorKinerjaFilter').on('change', function() {
-            var indikatorKinerjaID = $(this).val();
-            
-            // Set filtering flag to true
-            isFiltering = true;
-            
-            // Update URL without page refresh
-            updateUrlParameter('indikatorKinerjaID', indikatorKinerjaID);
-            
-            // Reload DataTable with new filter
-            programRektorTable.ajax.reload(function() {
-                // Reset filtering flag after data is loaded
-                isFiltering = false;
-            });
-        });
         
         // Handle form submission within modal
         $(document).on('submit', '.modal-form', function(e) {
@@ -136,7 +72,7 @@
                         showAlert('success', response.message || 'Operation completed successfully');
                         
                         // Reload DataTable
-                        programRektorTable.ajax.reload();
+                        jenisKegiatanTable.ajax.reload();
                     } else {
                         // Display error message
                         showAlert('danger', response.message || 'An error occurred');
@@ -167,10 +103,10 @@
         });
         
         // Handle delete button click
-        $(document).on('click', '.delete-program-rektor', function(e) {
+        $(document).on('click', '.delete-jenis-kegiatan', function(e) {
             e.preventDefault();
-            var programId = $(this).data('id');
-            var deleteUrl = "{{ route('program-rektors.destroy', ':id') }}".replace(':id', programId);
+            var jenisKegiatanId = $(this).data('id');
+            var deleteUrl = "{{ route('jenis-kegiatans.destroy', ':id') }}".replace(':id', jenisKegiatanId);
             
             // Show confirmation dialog
             Swal.fire({
@@ -194,13 +130,13 @@
                         success: function(response) {
                             if (response.success) {
                                 // Show success message
-                                showAlert('success', response.message || 'Program Rektor berhasil dihapus');
+                                showAlert('success', response.message || 'Jenis Kegiatan berhasil dihapus');
                                 
                                 // Reload DataTable
-                                programRektorTable.ajax.reload();
+                                jenisKegiatanTable.ajax.reload();
                             } else {
                                 // Show error message
-                                showAlert('danger', response.message || 'Failed to delete program rektor');
+                                showAlert('danger', response.message || 'Failed to delete jenis kegiatan');
                             }
                         },
                         error: function(xhr) {
@@ -219,25 +155,21 @@
     
     function initDataTable() {
         // Destroy existing DataTable if it exists
-        if ($.fn.DataTable.isDataTable('#programRektorTable')) {
-            $('#programRektorTable').DataTable().destroy();
+        if ($.fn.DataTable.isDataTable('#jenisKegiatanTable')) {
+            $('#jenisKegiatanTable').DataTable().destroy();
         }
         
         // Initialize DataTable with AJAX
-        programRektorTable = $('#programRektorTable').DataTable({
+        jenisKegiatanTable = $('#jenisKegiatanTable').DataTable({
             processing: true,
             serverSide: false, // We're handling the data ourselves
             ajax: {
-                url: '{{ route('program-rektors.index') }}',
+                url: '{{ route('jenis-kegiatans.index') }}',
                 type: 'GET',
-                data: function(d) {
-                    d.programPengembanganID = $('#programPengembanganFilter').val();
-                    d.indikatorKinerjaID = $('#indikatorKinerjaFilter').val();
-                },
                 // Show processing only during filtering
                 beforeSend: function() {
                     if (!isFiltering) {
-                        $('#programRektorTable_processing').hide();
+                        $('#jenisKegiatanTable_processing').hide();
                     }
                 }
             },
@@ -251,18 +183,7 @@
                         return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
                     }
                 },
-                { data: 'program_pengembangan' },
-                { data: 'indikator_kinerja' },
                 { data: 'nama' },
-                { data: 'jenis_kegiatan' },
-                { 
-                    data: 'total', 
-                    className: 'text-right',
-                    render: function(data) {
-                        return '<span style="white-space:nowrap">' + data + '</span>';
-                    }
-                },
-                { data: 'penanggung_jawab' },
                 { 
                     data: 'na', 
                     className: 'text-center text-dark',
@@ -299,30 +220,18 @@
             // Override the default processing display behavior
             preDrawCallback: function() {
                 if (!isFiltering) {
-                    $('#programRektorTable_processing').hide();
+                    $('#jenisKegiatanTable_processing').hide();
                 }
                 return true;
             }
         });
         
         // Additional override to hide processing indicator for pagination, sorting, etc.
-        $('#programRektorTable').on('page.dt search.dt order.dt', function() {
+        $('#jenisKegiatanTable').on('page.dt search.dt order.dt', function() {
             if (!isFiltering) {
-                $('#programRektorTable_processing').hide();
+                $('#jenisKegiatanTable_processing').hide();
             }
         });
-    }
-    
-    function updateUrlParameter(key, value) {
-        var url = new URL(window.location.href);
-        
-        if (value) {
-            url.searchParams.set(key, value);
-        } else {
-            url.searchParams.delete(key);
-        }
-        
-        window.history.pushState({}, '', url.toString());
     }
     
     function initEventHandlers() {
@@ -351,10 +260,10 @@
         });
         
         // Re-initialize delete confirmation for dynamically added buttons
-        $('.delete-program-rektor').off('click').on('click', function(e) {
+        $('.delete-jenis-kegiatan').off('click').on('click', function(e) {
             e.preventDefault();
-            var programId = $(this).data('id');
-            var deleteUrl = "{{ route('program-rektors.destroy', ':id') }}".replace(':id', programId);
+            var jenisKegiatanId = $(this).data('id');
+            var deleteUrl = "{{ route('jenis-kegiatans.destroy', ':id') }}".replace(':id', jenisKegiatanId);
             
             // Show confirmation dialog
             Swal.fire({
@@ -378,13 +287,13 @@
                         success: function(response) {
                             if (response.success) {
                                 // Show success message
-                                showAlert('success', response.message || 'Program Rektor berhasil dihapus');
+                                showAlert('success', response.message || 'Jenis Kegiatan berhasil dihapus');
                                 
                                 // Reload DataTable
-                                programRektorTable.ajax.reload();
+                                jenisKegiatanTable.ajax.reload();
                             } else {
                                 // Show error message
-                                showAlert('danger', response.message || 'Failed to delete program rektor');
+                                showAlert('danger', response.message || 'Failed to delete jenis kegiatan');
                             }
                         },
                         error: function(xhr) {
@@ -423,7 +332,7 @@
     // Initial data load - hide processing indicator if not filtering
     $(document).ajaxStart(function() {
         if (!isFiltering) {
-            $('#programRektorTable_processing').hide();
+            $('#jenisKegiatanTable_processing').hide();
         }
     });
     
@@ -431,7 +340,7 @@
     $(window).on('load', function() {
         if (!isFiltering) {
             setTimeout(function() {
-                $('#programRektorTable_processing').hide();
+                $('#jenisKegiatanTable_processing').hide();
             }, 200);
         }
     });

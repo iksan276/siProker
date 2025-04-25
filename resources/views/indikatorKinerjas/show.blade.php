@@ -1,12 +1,8 @@
 <div class="table-responsive">
     <table class="table table-bordered">
         <tr>
-            <th>ID</th>
+            <th width="30%">ID</th>
             <td>{{ $indikatorKinerja->IndikatorKinerjaID }}</td>
-        </tr>
-        <tr>
-            <th>Program Rektor</th>
-            <td>{!! nl2br($indikatorKinerja->programRektor->Nama) !!}</td>
         </tr>
         <tr>
             <th>Nama</th>
@@ -17,31 +13,33 @@
             <td>{{ $indikatorKinerja->satuan->Nama }}</td>
         </tr>
         <tr>
-            <th>Bobot</th>
-            <td>{{ $indikatorKinerja->Bobot }}%</td>
+            <th>Baseline</th>
+            <td>{{ $indikatorKinerja->Baseline }}</td>
         </tr>
         <tr>
-            <th>Harga Satuan</th>
-            <td>Rp{{ number_format($indikatorKinerja->HargaSatuan, 0, ',', '.') }}</td>
+            <th>{{ $yearLabels[0] ?? '2025' }}</th>
+            <td>{{ $indikatorKinerja->Tahun1 }}</td>
         </tr>
         <tr>
-            <th>Jumlah</th>
-            <td>{{ number_format($indikatorKinerja->Jumlah, 0, ',', '.') }}</td>
+            <th>{{ $yearLabels[1] ?? '2026' }}</th>
+            <td>{{ $indikatorKinerja->Tahun2 }}</td>
         </tr>
         <tr>
-            <th>Meta Anggaran</th>
+            <th>{{ $yearLabels[2] ?? '2027' }}</th>
+            <td>{{ $indikatorKinerja->Tahun3 }}</td>
+        </tr>
+        <tr>
+            <th>{{ $yearLabels[3] ?? '2028' }}</th>
+            <td>{{ $indikatorKinerja->Tahun4 }}</td>
+        </tr>
+        <tr>
+            <th>Mendukung IKU PT / Kriteria Akreditasi</th>
             <td>
-                @foreach($metaAnggarans as $metaAnggaran)
-                    <span class="badge badge-primary">{{ $metaAnggaran->Nama }}</span>
-                @endforeach
-            </td>
-        </tr>
-        <tr>
-            <th>Unit Terkait</th>
-            <td>
-                @foreach($unitTerkaits as $unitTerkait)
-                    <span class="badge badge-info">{{ $unitTerkait->Nama }}</span>
-                @endforeach
+                @if($indikatorKinerja->MendukungIKU == 'Y')
+                    <span class="badge badge-success">Ya</span>
+                @else
+                    <span class="badge badge-danger">Tidak</span>
+                @endif
             </td>
         </tr>
         <tr>
@@ -55,6 +53,22 @@
                     <span class="badge badge-success">Aktif</span>
                 @endif
             </td>
+        </tr>
+        <tr>
+            <th>Dibuat Pada</th>
+            <td>{{ $indikatorKinerja->DCreated ? date('d-m-Y H:i:s', strtotime($indikatorKinerja->DCreated)) : '-' }}</td>
+        </tr>
+        <tr>
+            <th>Dibuat Oleh</th>
+            <td>{{ $indikatorKinerja->createdBy ? $indikatorKinerja->createdBy->name : '-' }}</td>
+        </tr>
+        <tr>
+            <th>Diubah Pada</th>
+            <td>{{ $indikatorKinerja->DEdited ? date('d-m-Y H:i:s', strtotime($indikatorKinerja->DEdited)) : '-' }}</td>
+        </tr>
+        <tr>
+            <th>Diubah Oleh</th>
+            <td>{{ $indikatorKinerja->editedBy ? $indikatorKinerja->editedBy->name : '-' }}</td>
         </tr>
     </table>
 </div>

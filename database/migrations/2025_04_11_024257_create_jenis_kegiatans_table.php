@@ -11,24 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('indikator_kinerjas', function (Blueprint $table) {
-            $table->id('IndikatorKinerjaID');
-            $table->unsignedBigInteger('ProgramRektorID');
-            $table->unsignedBigInteger('SatuanID');
+        Schema::create('jenis_kegiatans', function (Blueprint $table) {
+            $table->id('JenisKegiatanID');
             $table->text('Nama');
-            $table->integer('Bobot');
-            $table->integer('HargaSatuan');
-            $table->integer('Jumlah');
-            $table->text('MetaAnggaranID'); // Comma-separated IDs
-            $table->text('UnitTerkaitID');
             $table->enum('NA', ['Y', 'N'])->default('N');
             $table->dateTime('DCreated')->nullable();
             $table->unsignedBigInteger('UCreated')->nullable();
             $table->dateTime('DEdited')->nullable();
             $table->unsignedBigInteger('UEdited')->nullable();
             
-            $table->foreign('ProgramRektorID')->references('ProgramRektorID')->on('program_rektors');
-            $table->foreign('SatuanID')->references('SatuanID')->on('satuans');
             $table->foreign('UCreated')->references('id')->on('users');
             $table->foreign('UEdited')->references('id')->on('users');
         });
@@ -39,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('indikator_kinerjas');
+        Schema::dropIfExists('jenis_kegiatans');
     }
 };

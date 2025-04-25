@@ -3,79 +3,71 @@
 namespace App\Http\Controllers;
 
 use App\Models\IndikatorKinerja;
-use App\Models\ProgramRektor;
 use App\Models\Satuan;
-use App\Models\MetaAnggaran;
-use App\Models\Unit;
 use App\Models\User;
+use App\Models\Renstra;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\IndikatorKinerjasExport;
 use Illuminate\Database\QueryException;
+use Carbon\Carbon;
 
 class IndikatorKinerjaController extends Controller
 {
     public function index(Request $request)
     {
-        // Get all program rektors and units for filters
-        $programRektors = ProgramRektor::where('NA', 'N')->get();
-        $units = Unit::where('NA', 'N')->get();
+        // Get all active renstras for filters
+        $renstras = Renstra::where('NA', 'N')->orderBy('PeriodeMulai', 'desc')->get();
         
-        // Base query
-        $indikatorKinerjasQuery = IndikatorKinerja::with(['programRektor', 'satuan', 'createdBy', 'editedBy']);
+        // Get the latest active renstra as default
+        $defaultRenstra = $renstras->first();
         
-        // Apply filter if programRektorID is provided
-        if ($request->has('programRektorID') && $request->programRektorID) {
-            $indikatorKinerjasQuery->where('ProgramRektorID', $request->programRektorID);
-        }
+        // Get selected renstra or use default
+        $selectedRenstraID = $request->renstraID ?? ($defaultRenstra ? $defaultRenstra->RenstraID : null);
+        $selectedRenstra = $selectedRenstraID ? Renstra::find($selectedRenstraID) : $defaultRenstra;
         
-        // Apply filter if unitIDs are provided (multiple units)
-        if ($request->has('unitIDs') && !empty($request->unitIDs)) {
-            $unitIDs = $request->unitIDs;
-            $indikatorKinerjasQuery->where(function($query) use ($unitIDs) {
-                foreach ($unitIDs as $unitID) {
-                    $query->orWhere('UnitTerkaitID', $unitID)
-                          ->orWhere('UnitTerkaitID', 'LIKE', $unitID.',%')
-                          ->orWhere('UnitTerkaitID', 'LIKE', '%,'.$unitID)
-                          ->orWhere('UnitTerkaitID', 'LIKE', '%,'.$unitID.',%');
-                }
-            });
-        }
+        // Get all satuans for form
+        $satuans = Satuan::where('NA', 'N')->get();
         
-        // Get the filtered results
+        // Base query - don't filter by RenstraID
+        $indikatorKinerjasQuery = IndikatorKinerja::with(['satuan', 'createdBy', 'editedBy']);
+        
+        // Get all results without filtering by RenstraID
         $indikatorKinerjas = $indikatorKinerjasQuery->orderBy('IndikatorKinerjaID', 'desc')->get();
         
-        // Get the selected filter values (for re-populating the selects)
-        $selectedProgramRektor = $request->programRektorID;
-        $selectedUnitIDs = $request->unitIDs ?? [];
+        // Generate year labels based on selected renstra
+        $yearLabels = [];
+        if ($selectedRenstra) {
+            $startYear = (int)$selectedRenstra->PeriodeMulai;
+            $endYear = (int)$selectedRenstra->PeriodeSelesai;
+            
+            for ($year = $startYear; $year <= $endYear; $year++) {
+                $yearLabels[] = $year;
+            }
+        } else {
+            // Default year labels if no renstra is selected (2025-2028)
+            $yearLabels = [2025, 2026, 2027, 2028];
+        }
         
         // If it's an AJAX request, return JSON data for DataTable
         if ($request->ajax()) {
             $data = [];
             foreach ($indikatorKinerjas as $index => $indikatorKinerja) {
-                // Get meta anggarans
-                $metaAnggarans = MetaAnggaran::whereIn('MetaAnggaranID', explode(',', $indikatorKinerja->MetaAnggaranID))->pluck('Nama')->toArray();
-                $metaAnggaranHtml = '<ul class="mb-0">';
-                foreach ($metaAnggarans as $metaAnggaran) {
-                    $metaAnggaranHtml .= '<li>' . $metaAnggaran . '</li>';
-                }
-                $metaAnggaranHtml .= '</ul>';
-                
-                // Get unit terkaits
-                $unitTerkaits = Unit::whereIn('UnitID', explode(',', $indikatorKinerja->UnitTerkaitID))->pluck('Nama')->toArray();
-                $unitTerkaitHtml = '<ul class="mb-0">';
-                foreach ($unitTerkaits as $unitTerkait) {
-                    $unitTerkaitHtml .= '<li>' . $unitTerkait . '</li>';
-                }
-                $unitTerkaitHtml .= '</ul>';
-                
                 // NA badge
                 $naBadge = '';
                 if ($indikatorKinerja->NA == 'Y') {
                     $naBadge = '<span class="badge badge-danger">Non Aktif</span>';
                 } else if ($indikatorKinerja->NA == 'N') {
                     $naBadge = '<span class="badge badge-success">Aktif</span>';
+                }
+                
+                // MendukungIKU badge
+                $mendukungIKUBadge = '';
+                if ($indikatorKinerja->MendukungIKU == 'Y') {
+                    $mendukungIKUBadge = '<span class="badge badge-success">Ya</span>';
+                } else if ($indikatorKinerja->MendukungIKU == 'N') {
+                    $mendukungIKUBadge = '<span class="badge badge-danger">Tidak</span>';
                 }
                 
                 // Actions buttons
@@ -96,101 +88,75 @@ class IndikatorKinerjaController extends Controller
                 $data[] = [
                     'DT_RowClass' => $rowClass,
                     'no' => $index + 1,
-                    'program_rektor' => nl2br($indikatorKinerja->programRektor->Nama),
                     'nama' => nl2br($indikatorKinerja->Nama),
-                    'bobot' => number_format($indikatorKinerja->Bobot , 0, ',', '.') . '%',
                     'satuan' => $indikatorKinerja->satuan->Nama,
-                    'harga_satuan' => 'Rp ' . number_format($indikatorKinerja->HargaSatuan, 0, ',', '.'),
-                    'jumlah' => number_format($indikatorKinerja->Jumlah, 0, ',', '.'),
-                    'meta_anggaran' => $metaAnggaranHtml,
-                    'unit_terkait' => $unitTerkaitHtml,
+                    'baseline' => $indikatorKinerja->Baseline,
+                    'tahun1' => $indikatorKinerja->Tahun1,
+                    'tahun2' => $indikatorKinerja->Tahun2,
+                    'tahun3' => $indikatorKinerja->Tahun3,
+                    'tahun4' => $indikatorKinerja->Tahun4,
+                    'mendukung_iku' => $mendukungIKUBadge,
                     'na' => $naBadge,
                     'actions' => $actions
                 ];
             }
             
             return response()->json([
-                'data' => $data
+                'data' => $data,
+                'yearLabels' => $yearLabels
             ]);
         }
         
-        return view('indikatorKinerjas.index', compact('indikatorKinerjas', 'programRektors', 'units', 'selectedProgramRektor', 'selectedUnitIDs'));
+        return view('indikatorKinerjas.index', compact('indikatorKinerjas', 'satuans', 'renstras', 'selectedRenstraID', 'yearLabels'));
     }
 
     public function exportExcel(Request $request)
     {
-        // Base query with all necessary relationships
-        $indikatorKinerjasQuery = IndikatorKinerja::with([
-            'programRektor.programPengembangan.isuStrategis.pilar.renstra',
-            'satuan',
-            'createdBy', 
-            'editedBy'
-        ]);
-        
-        // Apply filter if programRektorID is provided
-        if ($request->has('programRektorID') && $request->programRektorID) {
-            $indikatorKinerjasQuery->where('ProgramRektorID', $request->programRektorID);
-        }
-        
-        // Apply filter if unitID is provided
-        if ($request->has('unitID') && $request->unitID) {
-            $unitID = $request->unitID;
-            $indikatorKinerjasQuery->where(function($query) use ($unitID) {
-                $query->where('UnitTerkaitID', $unitID)
-                      ->orWhere('UnitTerkaitID', 'LIKE', $unitID.',%')
-                      ->orWhere('UnitTerkaitID', 'LIKE', '%,'.$unitID)
-                      ->orWhere('UnitTerkaitID', 'LIKE', '%,'.$unitID.',%');
-            });
-        }
-        
-        // Get the filtered results
-        $indikatorKinerjas = $indikatorKinerjasQuery->orderBy('IndikatorKinerjaID', 'desc')->get();
+        // Get all indikator kinerjas without filtering by RenstraID
+        $indikatorKinerjas = IndikatorKinerja::with(['satuan', 'createdBy', 'editedBy', 'renstra'])
+            ->orderBy('IndikatorKinerjaID', 'desc')
+            ->get();
         
         return Excel::download(new IndikatorKinerjasExport($indikatorKinerjas), 'indikator_kinerjas.xlsx');
     }
 
     public function create()
     {
-        $programRektors = ProgramRektor::where('NA', 'N')->get();
         $satuans = Satuan::where('NA', 'N')->get();
-        $metaAnggarans = MetaAnggaran::where('NA', 'N')->get();
-        $units = Unit::where('NA', 'N')->get();
         $users = User::all();
         
+        // Get the year labels from the session or use default
+        $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028]);
+        
         if (request()->ajax()) {
-            return view('indikatorKinerjas.create', compact('programRektors', 'satuans', 'metaAnggarans', 'units', 'users'))->render();
+            return view('indikatorKinerjas.create', compact('satuans', 'users', 'yearLabels'))->render();
         }
-        return view('indikatorKinerjas.create', compact('programRektors', 'satuans', 'metaAnggarans', 'units', 'users'));
+        return view('indikatorKinerjas.create', compact('satuans', 'users', 'yearLabels'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'ProgramRektorID' => 'required|exists:program_rektors,ProgramRektorID',
             'SatuanID' => 'required|exists:satuans,SatuanID',
             'Nama' => 'required|string',
-            'Bobot' => 'required|numeric',
-            'HargaSatuan' => 'required|numeric',
-            'Jumlah' => 'required|numeric',
-            'MetaAnggaranID' => 'required|array',
-            'UnitTerkaitID' => 'required|array',
+            'Baseline' => 'nullable|string',
+            'Tahun1' => 'nullable|numeric',
+            'Tahun2' => 'nullable|numeric',
+            'Tahun3' => 'nullable|numeric',
+            'Tahun4' => 'nullable|numeric',
+            'MendukungIKU' => 'required|in:Y,N',
             'NA' => 'required|in:Y,N',
         ]);
 
-        // Clean numeric inputs from formatting
-        $bobot = str_replace('.', '', $request->Bobot);
-        $hargaSatuan = str_replace('.', '', $request->HargaSatuan);
-        $jumlah = str_replace('.', '', $request->Jumlah);
-
         $indikatorKinerja = new IndikatorKinerja();
-        $indikatorKinerja->ProgramRektorID = $request->ProgramRektorID;
         $indikatorKinerja->SatuanID = $request->SatuanID;
         $indikatorKinerja->Nama = $request->Nama;
-        $indikatorKinerja->Bobot = $bobot;
-        $indikatorKinerja->HargaSatuan = $hargaSatuan;
-        $indikatorKinerja->Jumlah = $jumlah;
-        $indikatorKinerja->MetaAnggaranID = implode(',', $request->MetaAnggaranID);
-        $indikatorKinerja->UnitTerkaitID = implode(',', $request->UnitTerkaitID);
+        $indikatorKinerja->Baseline = $request->Baseline;
+        $indikatorKinerja->Tahun1 = $request->Tahun1;
+        $indikatorKinerja->Tahun2 = $request->Tahun2;
+        $indikatorKinerja->Tahun3 = $request->Tahun3;
+        $indikatorKinerja->Tahun4 = $request->Tahun4;
+        $indikatorKinerja->MendukungIKU = $request->MendukungIKU;
         $indikatorKinerja->NA = $request->NA;
         $indikatorKinerja->DCreated = now();
         $indikatorKinerja->UCreated = Auth::id();
@@ -204,31 +170,30 @@ class IndikatorKinerjaController extends Controller
 
     public function show($id)
     {
-        $indikatorKinerja = IndikatorKinerja::findOrFail($id);
-        $metaAnggarans = MetaAnggaran::whereIn('MetaAnggaranID', explode(',', $indikatorKinerja->MetaAnggaranID))->get();
-        $unitTerkaits = Unit::whereIn('UnitID', explode(',', $indikatorKinerja->UnitTerkaitID))->get();
+        $indikatorKinerja = IndikatorKinerja::with('renstra')->findOrFail($id);
+        
+        // Get the year labels from the session or use default
+        $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028]);
         
         if (request()->ajax()) {
-            return view('indikatorKinerjas.show', compact('indikatorKinerja', 'metaAnggarans', 'unitTerkaits'))->render();
+            return view('indikatorKinerjas.show', compact('indikatorKinerja', 'yearLabels'))->render();
         }
-        return view('indikatorKinerjas.show', compact('indikatorKinerja', 'metaAnggarans', 'unitTerkaits'));
+        return view('indikatorKinerjas.show', compact('indikatorKinerja', 'yearLabels'));
     }
 
     public function edit($id)
     {
         $indikatorKinerja = IndikatorKinerja::findOrFail($id);
-        $programRektors = ProgramRektor::all();
         $satuans = Satuan::all();
-        $metaAnggarans = MetaAnggaran::all();
-        $units = Unit::all();
         $users = User::all();
-        $selectedMetaAnggarans = explode(',', $indikatorKinerja->MetaAnggaranID);
-        $selectedUnitTerkaits = explode(',', $indikatorKinerja->UnitTerkaitID);
+        
+        // Get the year labels from the session or use default
+        $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028]);
         
         if (request()->ajax()) {
-            return view('indikatorKinerjas.edit', compact('indikatorKinerja', 'programRektors', 'satuans', 'metaAnggarans', 'units', 'users', 'selectedMetaAnggarans', 'selectedUnitTerkaits'))->render();
+            return view('indikatorKinerjas.edit', compact('indikatorKinerja', 'satuans', 'users', 'yearLabels'))->render();
         }
-        return view('indikatorKinerjas.edit', compact('indikatorKinerja', 'programRektors', 'satuans', 'metaAnggarans', 'units', 'users', 'selectedMetaAnggarans', 'selectedUnitTerkaits'));
+        return view('indikatorKinerjas.edit', compact('indikatorKinerja', 'satuans', 'users', 'yearLabels'));
     }
 
     public function update(Request $request, $id)
@@ -236,30 +201,25 @@ class IndikatorKinerjaController extends Controller
         $indikatorKinerja = IndikatorKinerja::findOrFail($id);
         
         $request->validate([
-            'ProgramRektorID' => 'required|exists:program_rektors,ProgramRektorID',
             'SatuanID' => 'required|exists:satuans,SatuanID',
             'Nama' => 'required|string',
-            'Bobot' => 'required|numeric',
-            'HargaSatuan' => 'required|numeric',
-            'Jumlah' => 'required|numeric',
-            'MetaAnggaranID' => 'required|array',
-            'UnitTerkaitID' => 'required|array',
+            'Baseline' => 'nullable|string',
+            'Tahun1' => 'nullable|numeric',
+            'Tahun2' => 'nullable|numeric',
+            'Tahun3' => 'nullable|numeric',
+            'Tahun4' => 'nullable|numeric',
+            'MendukungIKU' => 'required|in:Y,N',
             'NA' => 'required|in:Y,N',
         ]);
 
-        // Clean numeric inputs from formatting
-        $bobot = str_replace('.', '', $request->Bobot);
-        $hargaSatuan = str_replace('.', '', $request->HargaSatuan);
-        $jumlah = str_replace('.', '', $request->Jumlah);
-
-        $indikatorKinerja->ProgramRektorID = $request->ProgramRektorID;
         $indikatorKinerja->SatuanID = $request->SatuanID;
         $indikatorKinerja->Nama = $request->Nama;
-        $indikatorKinerja->Bobot = $bobot;
-        $indikatorKinerja->HargaSatuan = $hargaSatuan;
-        $indikatorKinerja->Jumlah = $jumlah;
-        $indikatorKinerja->MetaAnggaranID = implode(',', $request->MetaAnggaranID);
-        $indikatorKinerja->UnitTerkaitID = implode(',', $request->UnitTerkaitID);
+        $indikatorKinerja->Baseline = $request->Baseline;
+        $indikatorKinerja->Tahun1 = $request->Tahun1;
+        $indikatorKinerja->Tahun2 = $request->Tahun2;
+        $indikatorKinerja->Tahun3 = $request->Tahun3;
+        $indikatorKinerja->Tahun4 = $request->Tahun4;
+        $indikatorKinerja->MendukungIKU = $request->MendukungIKU;
         $indikatorKinerja->NA = $request->NA;
         $indikatorKinerja->DEdited = now();
         $indikatorKinerja->UEdited = Auth::id();
@@ -288,12 +248,12 @@ class IndikatorKinerjaController extends Controller
                 if (request()->ajax()) {
                     return response()->json([
                         'success' => false, 
-                        'message' => 'Tidak dapat menghapus  indikator kinerja ini karena dirujuk oleh baris di table lain.'
+                        'message' => 'Tidak dapat menghapus indikator kinerja ini karena dirujuk oleh baris di table lain.'
                     ], 422);
                 }
                 
                 return redirect()->route('indikator-kinerjas.index')
-                    ->with('error', 'Tidak dapat menghapus  indikator kinerja ini karena dirujuk oleh baris di table lain.');
+                    ->with('error', 'Tidak dapat menghapus indikator kinerja ini karena dirujuk oleh baris di table lain.');
             }
             
             // For other database errors
@@ -307,5 +267,28 @@ class IndikatorKinerjaController extends Controller
             return redirect()->route('indikator-kinerjas.index')
                 ->with('error', 'Database error occurred: ' . $e->getMessage());
         }
+    }
+    
+    public function getRenstraYears($id)
+    {
+        $renstra = Renstra::findOrFail($id);
+        
+        // Generate year labels based on renstra
+        $yearLabels = [];
+        $startYear = (int)$renstra->PeriodeMulai;
+        $endYear = (int)$renstra->PeriodeSelesai;
+        
+        for ($year = $startYear; $year <= $endYear; $year++) {
+            $yearLabels[] = $year;
+        }
+        
+        // Store year labels in session for use in other views
+        session(['yearLabels' => $yearLabels]);
+        
+        return response()->json([
+            'success' => true,
+            'yearLabels' => $yearLabels,
+            'renstra' => $renstra
+        ]);
     }
 }

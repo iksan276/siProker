@@ -13,6 +13,7 @@ use App\Http\Controllers\IndikatorKinerjaController;
 use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\MetaAnggaranController;
 use App\Http\Controllers\UnitAnggaranController;
+use App\Http\Controllers\JenisKegiatanController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -73,9 +74,15 @@ Route::middleware('auth')->group(function () {
         // Indikator Kinerja routes
         Route::resource('indikator-kinerjas', IndikatorKinerjaController::class);
         Route::get('/indikator-kinerjas/export/excel', [IndikatorKinerjaController::class, 'exportExcel'])->name('indikator-kinerjas.export.excel');
+        Route::get('indikator-kinerjas/renstra-years/{id}', [IndikatorKinerjaController::class,'getRenstraYears'])->name('indikator-kinerjas.renstra-years');
+
+
 
         // Kegiatan routes
         Route::get('/kegiatans/export/excel', [KegiatanController::class, 'exportExcel'])->name('kegiatans.export.excel');
+
+        // Jenis Kegiatan Routes
+        Route::resource('jenis-kegiatans', JenisKegiatanController::class);
     });
 });
 

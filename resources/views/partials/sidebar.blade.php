@@ -56,19 +56,11 @@
         </a>
     </li>
 
-    <!-- Nav Item - Program Pengembangan - Only for Admin -->
-    <li class="nav-item {{ request()->is('program-pengembangans*') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('program-pengembangans.index') }}">
-            <i class="fas fa-fw fa-project-diagram"></i>
-            <span>Program Pengembangan</span>
-        </a>
-    </li>
-
-    <!-- Nav Item - Program Rektor - Only for Admin -->
-    <li class="nav-item {{ request()->is('program-rektors*') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('program-rektors.index') }}">
-            <i class="fas fa-fw fa-tasks"></i>
-            <span>Program Rektor</span>
+     <!-- Nav Item - Jenis Kegiatan - Only for Admin -->
+     <li class="nav-item {{ request()->is('jenis-kegiatans*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('jenis-kegiatans.index') }}">
+            <i class="fas fa-fw fa-list-alt"></i>
+            <span>Jenis Kegiatan</span>
         </a>
     </li>
 
@@ -101,6 +93,23 @@
         <a class="nav-link" href="{{ route('indikator-kinerjas.index') }}">
             <i class="fas fa-fw fa-chart-line"></i>
             <span>Indikator Kinerja</span>
+        </a>
+    </li>
+
+       <!-- Nav Item - Program Pengembangan - Only for Admin -->
+       <li class="nav-item {{ request()->is('program-pengembangans*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('program-pengembangans.index') }}">
+            <i class="fas fa-fw fa-project-diagram"></i>
+            <span>Program Pengembangan</span>
+        </a>
+    </li>
+
+
+    <!-- Nav Item - Program Rektor - Only for Admin -->
+    <li class="nav-item {{ request()->is('program-rektors*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('program-rektors.index') }}">
+            <i class="fas fa-fw fa-tasks"></i>
+            <span>Program Rektor</span>
         </a>
     </li>
 

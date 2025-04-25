@@ -11,14 +11,14 @@ class IndikatorKinerja extends Model
     public $timestamps = false;
     
     protected $fillable = [
-        'ProgramRektorID',
         'SatuanID',
         'Nama',
-        'Bobot',
-        'HargaSatuan',
-        'Jumlah',
-        'MetaAnggaranID',
-        'UnitTerkaitID',
+        'Baseline',
+        'Tahun1',
+        'Tahun2',
+        'Tahun3',
+        'Tahun4',
+        'MendukungIKU',
         'NA',
         'DCreated',
         'UCreated',
@@ -32,20 +32,9 @@ class IndikatorKinerja extends Model
         return 'IndikatorKinerjaID';
     }
     
-    public function programRektor()
-    {
-        return $this->belongsTo(ProgramRektor::class, 'ProgramRektorID', 'ProgramRektorID');
-    }
-    
     public function satuan()
     {
         return $this->belongsTo(Satuan::class, 'SatuanID', 'SatuanID');
-    }
-    
-    public function unitTerkait()
-    {
-        $ids = explode(',', $this->UnitTerkaitID);
-        return Unit::whereIn('UnitID', $ids)->get();
     }
     
     public function createdBy()
@@ -61,12 +50,5 @@ class IndikatorKinerja extends Model
     public function kegiatans()
     {
         return $this->hasMany(Kegiatan::class, 'IndikatorKinerjaID', 'IndikatorKinerjaID');
-    }
-    
-    public function metaAnggarans()
-    {
-        // Get the meta anggaran IDs as an array
-        $ids = explode(',', $this->MetaAnggaranID);
-        return MetaAnggaran::whereIn('MetaAnggaranID', $ids)->get();
     }
 }

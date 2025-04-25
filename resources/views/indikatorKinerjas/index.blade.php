@@ -14,27 +14,17 @@
         <h6 class="m-0 font-weight-bold text-primary">Indikator Kinerja List</h6>
         <div class="d-flex align-items-center">
             <div class="mr-2">
-                <select id="programRektorFilter" class="form-control select2-filter">
-                    <option value="">-- Pilih Program Rektor --</option>
-                    @foreach($programRektors as $programRektor)
-                        <option value="{{ $programRektor->ProgramRektorID }}" {{ isset($selectedProgramRektor) && $selectedProgramRektor == $programRektor->ProgramRektorID ? 'selected' : '' }}>
-                            {{ $programRektor->Nama }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="mr-2">
-                <select id="unitFilter" name="unitIDs[]" class="form-control select2-filter select2-multiple" multiple>
-                    <option value="">-- Pilih Unit Terkait --</option>
-                    @foreach($units as $unit)
-                        <option value="{{ $unit->UnitID }}" {{ isset($selectedUnitIDs) && in_array($unit->UnitID, $selectedUnitIDs) ? 'selected' : '' }}>
-                            {{ $unit->Nama }}
+                <select id="renstraFilter" class="form-control select2-filter">
+                    <option value="">-- Pilih Renstra (Untuk Label Tahun) --</option>
+                    @foreach($renstras as $renstra)
+                        <option value="{{ $renstra->RenstraID }}" {{ isset($selectedRenstraID) && $selectedRenstraID == $renstra->RenstraID ? 'selected' : '' }}>
+                            {{ $renstra->Nama }} ({{ $renstra->PeriodeMulai }} - {{ $renstra->PeriodeSelesai }})
                         </option>
                     @endforeach
                 </select>
             </div>
             <div>
-               <a href="{{ route('indikator-kinerjas.export.excel', request()->query()) }}" class="btn btn-success btn-sm">
+               <a href="{{ route('indikator-kinerjas.export.excel') }}" class="btn btn-success btn-sm">
                     <i class="fas fa-file-excel fa-sm"></i> Export Excel
                 </a>
                 <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('indikator-kinerjas.create') }}" data-title="Tambah Indikator Kinerja">
@@ -49,14 +39,14 @@
                 <thead>
                     <tr class="text-center text-dark">
                         <th style="white-space:nowrap">No</th>
-                        <th style="white-space:nowrap">Program Rektor</th>
                         <th style="white-space:nowrap">Nama</th>
-                        <th style="white-space:nowrap">Bobot</th>
                         <th style="white-space:nowrap">Satuan</th>
-                        <th style="white-space:nowrap">Harga Satuan</th>
-                        <th style="white-space:nowrap">Jumlah</th>
-                        <th style="white-space:nowrap">Meta Anggaran</th>
-                        <th style="white-space:nowrap">Unit Terkait</th>
+                        <th style="white-space:nowrap">Baseline</th>
+                        <th style="white-space:nowrap" id="tahun1Header">{{ $yearLabels[0] ?? '2025' }}</th>
+                        <th style="white-space:nowrap" id="tahun2Header">{{ $yearLabels[1] ?? '2026' }}</th>
+                        <th style="white-space:nowrap" id="tahun3Header">{{ $yearLabels[2] ?? '2027' }}</th>
+                        <th style="white-space:nowrap" id="tahun4Header">{{ $yearLabels[3] ?? '2028' }}</th>
+                        <th style="white-space:nowrap">Mendukung IKU</th>
                         <th style="white-space:nowrap">NA</th>
                         <th style="white-space:nowrap">Actions</th>
                     </tr>
@@ -80,127 +70,60 @@
 <script>
     var indikatorKinerjaTable;
     var isFiltering = false;
+      $defaultYearLabels = ['2025', '2026', '2027', '2028'];
+        // Then in the view:
+     var yearLabels = @json($yearLabels ?? $defaultYearLabels);
     
     $(document).ready(function () {
         // Initialize DataTable with AJAX source
         initDataTable();
         
-        // Handle Program Rektor filter change
-        $('#programRektorFilter').on('change', function() {
-            var programRektorID = $(this).val();
+        // Update year headers based on initial yearLabels
+        updateYearHeaders();
+        
+        // Handle Renstra filter change
+        $('#renstraFilter').on('change', function() {
+            var renstraID = $(this).val();
             
             // Set filtering flag to true
             isFiltering = true;
             
             // Update URL without page refresh
-            updateUrlParameter('programRektorID', programRektorID);
+            updateUrlParameter('renstraID', renstraID);
             
-            // Preserve the unit filter if it exists
-            var unitIDs = $('#unitFilter').val();
-            if (unitIDs && unitIDs.length > 0) {
-                for (var i = 0; i < unitIDs.length; i++) {
-                    updateUrlParameter('unitIDs[]', unitIDs[i]);
-                }
-            }
-            
-            // Reload DataTable with new filter
-            indikatorKinerjaTable.ajax.reload(function() {
-                // Reset filtering flag after data is loaded
-                isFiltering = false;
-            });
-        });
-        
-        // Handle Unit filter change
-        $('#unitFilter').on('change', function() {
-            var unitIDs = $(this).val();
-            
-            // Set filtering flag to true
-            isFiltering = true;
-            
-            // Update URL without page refresh
-            var url = new URL(window.location.href);
-            
-            // Remove all existing unitIDs parameters
-            var params = url.searchParams;
-            params.delete('unitIDs[]');
-            
-            // Add new unitIDs parameters if any are selected
-            if (unitIDs && unitIDs.length > 0) {
-                for (var i = 0; i < unitIDs.length; i++) {
-                    params.append('unitIDs[]', unitIDs[i]);
-                }
-            }
-            
-            // Preserve the program rektor filter if it exists
-            var programRektorID = $('#programRektorFilter').val();
-            if (programRektorID) {
-                params.set('programRektorID', programRektorID);
-            }
-            
-            // Update URL
-            window.history.pushState({}, '', url.toString());
-            
-            // Reload DataTable with new filter
-            indikatorKinerjaTable.ajax.reload(function() {
-                // Reset filtering flag after data is loaded
-                isFiltering = false;
-            });
-        });
-        
-        // Handle form submission within modal
-        $(document).on('submit', '.modal-form', function(e) {
-            e.preventDefault();
-            var form = $(this);
-            var url = form.attr('action');
-            var method = form.attr('method');
-            var data = form.serialize();
-            
-            $.ajax({
-                url: url,
-                type: method,
-                data: data,
-                beforeSend: function() {
-                    // Disable submit button and show loading indicator with smaller spinner
-                    form.find('button[type="submit"]').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="width: 1rem; height: 1rem; border-width: 0.15em;"></span> <small>Processing...</small>');
-                },
-
-                success: function(response) {
-                    if (response.success) {
-                        // Close modal
-                        $('#mainModal').modal('hide');
-                        
-                        // Show success message
-                        showAlert('success', response.message || 'Operation completed successfully');
-                        
-                        // Reload DataTable
-                        indikatorKinerjaTable.ajax.reload();
-                    } else {
-                        // Display error message
-                        showAlert('danger', response.message || 'An error occurred');
-                    }
-                },
-                error: function(xhr) {
-                    // Handle validation errors
-                    var errors = xhr.responseJSON?.errors;
-                    var errorMessage = '';
-                    
-                    if (errors) {
-                        for (var field in errors) {
-                            errorMessage += errors[field][0] + '<br>';
+            // If a renstra is selected, fetch its year labels
+            if (renstraID) {
+                $.ajax({
+                    url: "{{ route('indikator-kinerjas.renstra-years', ':id') }}".replace(':id', renstraID),
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            yearLabels = response.yearLabels;
+                            updateYearHeaders();
+                            
+                            // Reload DataTable with new year labels
+                            indikatorKinerjaTable.ajax.reload(function() {
+                                // Reset filtering flag after data is loaded
+                                isFiltering = false;
+                            });
                         }
-                    } else if (xhr.responseJSON?.message) {
-                        errorMessage = xhr.responseJSON.message;
-                    } else {
-                        errorMessage = 'An error occurred';
+                    },
+                    error: function(xhr) {
+                        console.error('Error fetching renstra years:', xhr);
+                        isFiltering = false;
                     }
-                    
-                    showAlert('danger', errorMessage);
-                },
-                complete: function() {
-                    // Re-enable submit button
-                    form.find('button[type="submit"]').prop('disabled', false).html('Save');
-                }
-            });
+                });
+            } else {
+                // Reset to default year labels (2025-2028)
+                yearLabels = ['2025', '2026', '2027', '2028'];
+                updateYearHeaders();
+                
+                // Reload DataTable with default year labels
+                indikatorKinerjaTable.ajax.reload(function() {
+                    // Reset filtering flag after data is loaded
+                    isFiltering = false;
+                });
+            }
         });
         
         // Handle delete button click
@@ -254,6 +177,22 @@
         });
     });
     
+    function updateYearHeaders() {
+        // Update table headers with year labels
+        if (yearLabels.length >= 1) {
+            $('#tahun1Header').text(yearLabels[0]);
+        }
+        if (yearLabels.length >= 2) {
+            $('#tahun2Header').text(yearLabels[1]);
+        }
+        if (yearLabels.length >= 3) {
+            $('#tahun3Header').text(yearLabels[2]);
+        }
+        if (yearLabels.length >= 4) {
+            $('#tahun4Header').text(yearLabels[3]);
+        }
+    }
+    
     function initDataTable() {
         // Destroy existing DataTable if it exists
         if ($.fn.DataTable.isDataTable('#indikatorKinerjaTable')) {
@@ -268,14 +207,21 @@
                 url: '{{ route('indikator-kinerjas.index') }}',
                 type: 'GET',
                 data: function(d) {
-                    d.programRektorID = $('#programRektorFilter').val();
-                    d.unitIDs = $('#unitFilter').val();
+                    d.renstraID = $('#renstraFilter').val();
                 },
                 // Show processing only during filtering
                 beforeSend: function() {
                     if (!isFiltering) {
                         $('#indikatorKinerjaTable_processing').hide();
                     }
+                },
+                dataSrc: function(json) {
+                    // Update year labels if provided in response
+                    if (json.yearLabels) {
+                        yearLabels = json.yearLabels;
+                        updateYearHeaders();
+                    }
+                    return json.data;
                 }
             },
             columns: [
@@ -288,14 +234,18 @@
                         return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
                     }
                 },
-                { data: 'program_rektor' },
                 { data: 'nama' },
-                { data: 'bobot', className: 'text-center' },
                 { data: 'satuan', className: 'text-center', width: '1px' },
-                { data: 'harga_satuan', className: 'text-center' },
-                { data: 'jumlah', className: 'text-center' },
-                { data: 'meta_anggaran' },
-                { data: 'unit_terkait' },
+                { data: 'baseline', className: 'text-center' },
+                { data: 'tahun1', className: 'text-center' },
+                { data: 'tahun2', className: 'text-center' },
+                { data: 'tahun3', className: 'text-center' },
+                { data: 'tahun4', className: 'text-center' },
+                { 
+                    data: 'mendukung_iku', 
+                    className: 'text-center',
+                    width: '1px'
+                },
                 { 
                     data: 'na', 
                     className: 'text-center text-dark',
@@ -362,6 +312,10 @@
             var url = $(this).data('url');
             var title = $(this).data('title');
             
+            // Add current year labels to the URL as a query parameter
+            var yearLabelsParam = encodeURIComponent(JSON.stringify(yearLabels));
+            url += (url.includes('?') ? '&' : '?') + 'yearLabels=' + yearLabelsParam;
+            
             $('#mainModalLabel').text(title);
             $('#mainModal .modal-body').html('<div class="text-center"><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>');
             $('#mainModal').modal('show');
@@ -414,13 +368,6 @@
                 $('#indikatorKinerjaTable_processing').hide();
             }, 200);
         }
-    });
-    
-    // Additional styling for multiple selects
-    $('.select2-multiple').next('.select2-container').find('.select2-selection--multiple').css({
-        'border': '1px solid #d1d3e2',
-        'border-radius': '0.35rem',
-        'min-height': '34px'
     });
 </script>
 @endpush
