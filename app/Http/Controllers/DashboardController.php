@@ -7,7 +7,7 @@ use App\Models\IndikatorKinerja;
 use App\Models\IsuStrategis;
 use App\Models\JenisKegiatan;
 use App\Models\Kegiatan;
-use App\Models\MetaAnggaran;
+use App\Models\MataAnggaran;
 use App\Models\Pilar;
 use App\Models\ProgramPengembangan;
 use App\Models\ProgramRektor;
@@ -26,7 +26,7 @@ class DashboardController extends Controller
             'isuStrategisCount' => IsuStrategis::count(),
             'jenisKegiatanCount' => JenisKegiatan::count(),
             'kegiatanCount' => Kegiatan::count(),
-            'metaAnggaranCount' => MetaAnggaran::count(),
+            'mataAnggaranCount' => MataAnggaran::count(),
             'pilarCount' => Pilar::count(),
             'programPengembanganCount' => ProgramPengembangan::count(),
             'programRektorCount' => ProgramRektor::count(),

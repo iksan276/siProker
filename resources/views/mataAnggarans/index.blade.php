@@ -2,8 +2,8 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2 text-gray-800">Meta Anggaran Management</h1>
-<p class="mb-4">Manage all Meta Anggaran in the system.</p>
+<h1 class="h3 mb-2 text-gray-800">Mata Anggaran Management</h1>
+<p class="mb-4">Manage all Mata Anggaran in the system.</p>
 
 <!-- Alert Container for AJAX responses -->
 <div id="alertContainer"></div>
@@ -11,16 +11,16 @@
 <!-- DataTales Card -->
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-primary">Meta Anggaran List</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Mata Anggaran List</h6>
         <div>
-            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('meta-anggarans.create') }}" data-title="Tambah Meta Anggaran">
-                <i class="fas fa-plus fa-sm"></i> Tambah Meta Anggaran
+            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('meta-anggarans.create') }}" data-title="Tambah Mata Anggaran">
+                <i class="fas fa-plus fa-sm"></i> Tambah Mata Anggaran
             </button>
         </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-bordered" id="metaAnggaranTable" width="100%" cellspacing="0">
+            <table class="table table-bordered" id="mataAnggaranTable" width="100%" cellspacing="0">
                 <thead>
                     <tr class="text-center text-dark">
                         <th style="white-space:nowrap">No</th>
@@ -30,27 +30,27 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($metaAnggarans as $index => $metaAnggaran)
-                    <tr class="{{ $metaAnggaran->NA == 'Y' ? 'bg-light text-muted' : '' }}">
+                    @foreach($mataAnggarans as $index => $mataAnggaran)
+                    <tr class="{{ $mataAnggaran->NA == 'Y' ? 'bg-light text-muted' : '' }}">
                         <td style="white-space:nowrap;width:1px" class="text-center">{{ $index + 1 }}</td>
-                        <td>{{ $metaAnggaran->Nama }}</td>
+                        <td>{{ $mataAnggaran->Nama }}</td>
                         <td class="text-center text-dark" style="white-space:nowrap;width:1px">
-                            @if($metaAnggaran->NA == 'Y')
+                            @if($mataAnggaran->NA == 'Y')
                                 <span class="badge badge-danger">Non Aktif</span>
                             @endif
 
-                            @if($metaAnggaran->NA == 'N')
+                            @if($mataAnggaran->NA == 'N')
                                 <span class="badge badge-success">Aktif</span>
                             @endif
                         </td>
                         <td class="text-center" style="white-space:nowrap;width:1px">
-                            <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('meta-anggarans.show', $metaAnggaran->MetaAnggaranID) }}" data-title="Detail Meta Anggaran">
+                            <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('meta-anggarans.show', $mataAnggaran->MataAnggaranID) }}" data-title="Detail Mata Anggaran">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('meta-anggarans.edit', $metaAnggaran->MetaAnggaranID) }}" data-title="Edit Meta Anggaran">
+                            <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('meta-anggarans.edit', $mataAnggaran->MataAnggaranID) }}" data-title="Edit Mata Anggaran">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button type="button" class="btn btn-danger btn-square btn-sm delete-meta" data-id="{{ $metaAnggaran->MetaAnggaranID }}">
+                            <button type="button" class="btn btn-danger btn-square btn-sm delete-meta" data-id="{{ $mataAnggaran->MataAnggaranID }}">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -75,7 +75,7 @@
     
     $(document).ready(function () {
         // Initialize DataTable
-        metaTable = $('#metaAnggaranTable').DataTable({
+        metaTable = $('#mataAnggaranTable').DataTable({
             responsive: true,
             processing: true,
             language: {
@@ -179,7 +179,7 @@
         
                             } else {
                                 // Show error message
-                                showAlert('danger', response.message || 'Failed to delete meta anggaran');
+                                showAlert('danger', response.message || 'Failed to delete mata anggaran');
                             }
                         },
                         error: function(xhr) {
@@ -204,14 +204,14 @@
             dataType: 'html',
             success: function(response) {
                 // Extract the table HTML from the response
-                var newTableHtml = $(response).find('#metaAnggaranTable tbody').html();
+                var newTableHtml = $(response).find('#mataAnggaranTable tbody').html();
                 
                 // Clear the current table and add the new data
                 metaTable.clear().destroy();
-                $('#metaAnggaranTable tbody').html(newTableHtml);
+                $('#mataAnggaranTable tbody').html(newTableHtml);
                 
                 // Reinitialize DataTable with the same settings as initial load
-                metaTable = $('#metaAnggaranTable').DataTable({
+                metaTable = $('#mataAnggaranTable').DataTable({
                     responsive: true,
                     processing: true,
                     language: {

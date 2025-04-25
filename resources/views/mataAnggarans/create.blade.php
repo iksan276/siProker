@@ -1,4 +1,4 @@
-<form action="{{ route('meta-anggarans.store') }}" method="POST" class="modal-form" id="metaAnggaranForm">
+<form action="{{ route('meta-anggarans.store') }}" method="POST" class="modal-form" id="mataAnggaranForm">
     @csrf
     <div class="form-group">
         <label for="Nama">Nama</label>
@@ -22,7 +22,7 @@
 </form>
 
 <script>
-document.getElementById('metaAnggaranForm').addEventListener('submit', function(event) {
+document.getElementById('mataAnggaranForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent the form from traditional submission
     
     // Validate empty fields

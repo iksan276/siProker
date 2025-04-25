@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('Output');
             $table->text('Outcome');
             $table->unsignedBigInteger('JenisKegiatanID');
-            $table->text('MetaAnggaranID'); // Storing as comma-separated values
+            $table->text('MataAnggaranID'); // Storing as comma-separated values
             $table->integer('JumlahKegiatan');
             $table->unsignedBigInteger('SatuanID');
             $table->integer('HargaSatuan');

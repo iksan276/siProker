@@ -54,10 +54,10 @@
         </div>
         <div class="col-sm-6">
             <div class="form-group">
-                <label for="MetaAnggaranID" class="d-block">Meta Anggaran</label>
-                <select name="MetaAnggaranID[]" id="MetaAnggaranID" class="form-control select2" multiple>
-                    @foreach($metaAnggarans as $metaAnggaran)
-                        <option value="{{ $metaAnggaran->MetaAnggaranID }}">{{ $metaAnggaran->Nama }}</option>
+                <label for="MataAnggaranID" class="d-block">Mata Anggaran</label>
+                <select name="MataAnggaranID[]" id="MataAnggaranID" class="form-control select2" multiple>
+                    @foreach($mataAnggarans as $mataAnggaran)
+                        <option value="{{ $mataAnggaran->MataAnggaranID }}">{{ $mataAnggaran->Nama }}</option>
                     @endforeach
                 </select>
             </div>
@@ -190,7 +190,7 @@ document.getElementById('programRektorForm').addEventListener('submit', function
     const output = document.getElementById('Output').value.trim();
     const outcome = document.getElementById('Outcome').value.trim();
     const jenisKegiatanID = document.getElementById('JenisKegiatanID').value.trim();
-    const metaAnggaranID = $('#MetaAnggaranID').val();
+    const mataAnggaranID = $('#MataAnggaranID').val();
     const jumlahKegiatan = document.getElementById('JumlahKegiatan').value.trim();
     const satuanID = document.getElementById('SatuanID').value.trim();
     const hargaSatuan = document.getElementById('HargaSatuan').value.trim();
@@ -226,8 +226,8 @@ document.getElementById('programRektorForm').addEventListener('submit', function
         emptyFields.push('Jenis Kegiatan harus dipilih');
     }
     
-    if (!metaAnggaranID || metaAnggaranID.length === 0) {
-        emptyFields.push('Meta Anggaran harus dipilih');
+    if (!mataAnggaranID || mataAnggaranID.length === 0) {
+        emptyFields.push('Mata Anggaran harus dipilih');
     }
     
     if (!jumlahKegiatan) {

@@ -17,7 +17,7 @@ class ProgramRektor extends Model
         'Output',
         'Outcome',
         'JenisKegiatanID',
-        'MetaAnggaranID',
+        'MataAnggaranID',
         'JumlahKegiatan',
         'SatuanID',
         'HargaSatuan',
@@ -56,14 +56,14 @@ class ProgramRektor extends Model
         return $this->belongsTo(Unit::class, 'PenanggungJawabID', 'UnitID');
     }
     
-    public function getMetaAnggaransAttribute()
+    public function getMataAnggaransAttribute()
     {
-        if (empty($this->MetaAnggaranID)) {
+        if (empty($this->MataAnggaranID)) {
             return collect();
         }
         
-        $ids = explode(',', $this->MetaAnggaranID);
-        return MetaAnggaran::whereIn('MetaAnggaranID', $ids)->get();
+        $ids = explode(',', $this->MataAnggaranID);
+        return MataAnggaran::whereIn('MataAnggaranID', $ids)->get();
     }
     
     public function getPelaksanasAttribute()

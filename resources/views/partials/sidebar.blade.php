@@ -87,11 +87,11 @@
         </a>
     </li>
 
-    <!-- Nav Item - Meta Anggaran - Only for Admin -->
+    <!-- Nav Item - Mata Anggaran - Only for Admin -->
     <li class="nav-item {{ request()->is('meta-anggarans*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('meta-anggarans.index') }}">
             <i class="fas fa-fw fa-money-bill"></i>
-            <span>Meta Anggaran</span>
+            <span>Mata Anggaran</span>
         </a>
     </li>
 

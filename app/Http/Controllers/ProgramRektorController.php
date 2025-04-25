@@ -6,7 +6,7 @@ use App\Models\ProgramRektor;
 use App\Models\ProgramPengembangan;
 use App\Models\IndikatorKinerja;
 use App\Models\JenisKegiatan;
-use App\Models\MetaAnggaran;
+use App\Models\MataAnggaran;
 use App\Models\Satuan;
 use App\Models\Unit;
 use App\Models\User;
@@ -79,16 +79,16 @@ class ProgramRektorController extends Controller
                     $naStatus = '<span class="badge badge-success">Aktif</span>';
                 }
                 
-                // Get meta anggaran names and format as ul/li
-                $metaAnggaranIds = explode(',', $program->MetaAnggaranID);
-                $metaAnggaranItems = MetaAnggaran::whereIn('MetaAnggaranID', $metaAnggaranIds)->pluck('Nama')->toArray();
-                $metaAnggaranHtml = '';
-                if (count($metaAnggaranItems) > 0) {
-                    $metaAnggaranHtml = '<ul class=" mb-0">';
-                    foreach ($metaAnggaranItems as $item) {
-                        $metaAnggaranHtml .= '<li>' . $item . '</li>';
+                // Get mata anggaran names and format as ul/li
+                $mataAnggaranIds = explode(',', $program->MataAnggaranID);
+                $mataAnggaranItems = MataAnggaran::whereIn('MataAnggaranID', $mataAnggaranIds)->pluck('Nama')->toArray();
+                $mataAnggaranHtml = '';
+                if (count($mataAnggaranItems) > 0) {
+                    $mataAnggaranHtml = '<ul class=" mb-0">';
+                    foreach ($mataAnggaranItems as $item) {
+                        $mataAnggaranHtml .= '<li>' . $item . '</li>';
                     }
-                    $metaAnggaranHtml .= '</ul>';
+                    $mataAnggaranHtml .= '</ul>';
                 }
                 
                 // Get pelaksana names and format as ul/li
@@ -113,7 +113,7 @@ class ProgramRektorController extends Controller
                     'jumlah_kegiatan' => number_format($program->JumlahKegiatan, 0, ',', '.'),
                     'satuan' => $program->satuan->Nama,
                     'harga_satuan' => 'Rp ' . number_format($program->HargaSatuan, 0, ',', '.'),
-                    'meta_anggaran' => $metaAnggaranHtml,
+                    'mata_anggaran' => $mataAnggaranHtml,
                     'total' => 'Rp ' . number_format($program->Total, 0, ',', '.'),
                     'penanggung_jawab' => $program->penanggungJawab->Nama,
                     'pelaksana' => $pelaksanaHtml,
@@ -138,7 +138,7 @@ class ProgramRektorController extends Controller
         $programPengembangans = ProgramPengembangan::where('NA', 'N')->get();
         $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get();
         $jenisKegiatans = JenisKegiatan::where('NA', 'N')->get();
-        $metaAnggarans = MetaAnggaran::where('NA', 'N')->get();
+        $mataAnggarans = MataAnggaran::where('NA', 'N')->get();
         $satuans = Satuan::where('NA', 'N')->get();
         $units = Unit::where('NA', 'N')->get();
         $users = User::all();
@@ -148,7 +148,7 @@ class ProgramRektorController extends Controller
                 'programPengembangans', 
                 'indikatorKinerjas',
                 'jenisKegiatans', 
-                'metaAnggarans', 
+                'mataAnggarans', 
                 'satuans', 
                 'units', 
                 'users'
@@ -159,7 +159,7 @@ class ProgramRektorController extends Controller
             'programPengembangans', 
             'indikatorKinerjas',
             'jenisKegiatans', 
-            'metaAnggarans', 
+            'mataAnggarans', 
             'satuans', 
             'units', 
             'users'
@@ -204,7 +204,7 @@ class ProgramRektorController extends Controller
             'Output' => 'required|string',
             'Outcome' => 'required|string',
             'JenisKegiatanID' => 'required|exists:jenis_kegiatans,JenisKegiatanID',
-            'MetaAnggaranID' => 'required|array',
+            'MataAnggaranID' => 'required|array',
             'JumlahKegiatan' => 'required|integer',
             'SatuanID' => 'required|exists:satuans,SatuanID',
             'HargaSatuan' => 'required|integer',
@@ -221,7 +221,7 @@ class ProgramRektorController extends Controller
         $programRektor->Output = $request->Output;
         $programRektor->Outcome = $request->Outcome;
         $programRektor->JenisKegiatanID = $request->JenisKegiatanID;
-        $programRektor->MetaAnggaranID = implode(',', $request->MetaAnggaranID);
+        $programRektor->MataAnggaranID = implode(',', $request->MataAnggaranID);
         $programRektor->JumlahKegiatan = $request->JumlahKegiatan;
         $programRektor->SatuanID = $request->SatuanID;
         $programRektor->HargaSatuan = $request->HargaSatuan;
@@ -250,18 +250,18 @@ class ProgramRektorController extends Controller
             'penanggungJawab',
         ]);
         
-        // Get meta anggaran names
-        $metaAnggaranIds = explode(',', $programRektor->MetaAnggaranID);
-        $metaAnggarans = MetaAnggaran::whereIn('MetaAnggaranID', $metaAnggaranIds)->get();
+        // Get mata anggaran names
+        $mataAnggaranIds = explode(',', $programRektor->MataAnggaranID);
+        $mataAnggarans = MataAnggaran::whereIn('MataAnggaranID', $mataAnggaranIds)->get();
         
         // Get pelaksana names
         $pelaksanaIds = explode(',', $programRektor->PelaksanaID);
         $pelaksanas = Unit::whereIn('UnitID', $pelaksanaIds)->get();
         
         if (request()->ajax()) {
-            return view('programRektors.show', compact('programRektor', 'metaAnggarans', 'pelaksanas'))->render();
+            return view('programRektors.show', compact('programRektor', 'mataAnggarans', 'pelaksanas'))->render();
         }
-        return view('programRektors.show', compact('programRektor', 'metaAnggarans', 'pelaksanas'));
+        return view('programRektors.show', compact('programRektor', 'mataAnggarans', 'pelaksanas'));
     }
 
     public function edit(ProgramRektor $programRektor)
@@ -269,13 +269,13 @@ class ProgramRektorController extends Controller
         $programPengembangans = ProgramPengembangan::where('NA', 'N')->get();
         $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get();
         $jenisKegiatans = JenisKegiatan::where('NA', 'N')->get();
-        $metaAnggarans = MetaAnggaran::where('NA', 'N')->get();
+        $mataAnggarans = MataAnggaran::where('NA', 'N')->get();
         $satuans = Satuan::where('NA', 'N')->get();
         $units = Unit::where('NA', 'N')->get();
         $users = User::all();
         
         // Convert comma-separated IDs to arrays for select2 multiple
-        $selectedMetaAnggarans = explode(',', $programRektor->MetaAnggaranID);
+        $selectedMataAnggarans = explode(',', $programRektor->MataAnggaranID);
         $selectedPelaksanas = explode(',', $programRektor->PelaksanaID);
         
         if (request()->ajax()) {
@@ -284,11 +284,11 @@ class ProgramRektorController extends Controller
                 'programPengembangans', 
                 'indikatorKinerjas',
                 'jenisKegiatans', 
-                'metaAnggarans', 
+                'mataAnggarans', 
                 'satuans', 
                 'units', 
                 'users',
-                'selectedMetaAnggarans',
+                'selectedMataAnggarans',
                 'selectedPelaksanas'
             ))->render();
         }
@@ -298,11 +298,11 @@ class ProgramRektorController extends Controller
             'programPengembangans', 
             'indikatorKinerjas',
             'jenisKegiatans', 
-            'metaAnggarans', 
+            'mataAnggarans', 
             'satuans', 
             'units', 
             'users',
-            'selectedMetaAnggarans',
+            'selectedMataAnggarans',
             'selectedPelaksanas'
         ));
     }
@@ -315,7 +315,7 @@ class ProgramRektorController extends Controller
             'Output' => 'required|string',
             'Outcome' => 'required|string',
             'JenisKegiatanID' => 'required|exists:jenis_kegiatans,JenisKegiatanID',
-            'MetaAnggaranID' => 'required|array',
+            'MataAnggaranID' => 'required|array',
             'JumlahKegiatan' => 'required|integer',
             'SatuanID' => 'required|exists:satuans,SatuanID',
             'HargaSatuan' => 'required|integer',
@@ -331,7 +331,7 @@ class ProgramRektorController extends Controller
         $programRektor->Output = $request->Output;
         $programRektor->Outcome = $request->Outcome;
         $programRektor->JenisKegiatanID = $request->JenisKegiatanID;
-        $programRektor->MetaAnggaranID = implode(',', $request->MetaAnggaranID);
+        $programRektor->MataAnggaranID = implode(',', $request->MataAnggaranID);
         $programRektor->JumlahKegiatan = $request->JumlahKegiatan;
         $programRektor->SatuanID = $request->SatuanID;
         $programRektor->HargaSatuan = $request->HargaSatuan;

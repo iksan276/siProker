@@ -2,20 +2,20 @@
     <table class="table table-bordered">
         <tr>
             <th>ID</th>
-            <td>{{ $metaAnggaran->MetaAnggaranID }}</td>
+            <td>{{ $mataAnggaran->MataAnggaranID }}</td>
         </tr>
         <tr>
             <th>Nama</th>
-            <td>{{ $metaAnggaran->Nama }}</td>
+            <td>{{ $mataAnggaran->Nama }}</td>
         </tr>
         <tr>
             <th>Status</th>
             <td>
-                @if($metaAnggaran->NA == 'Y')
+                @if($mataAnggaran->NA == 'Y')
                     <span class="badge badge-danger">Non Aktif</span>
                 @endif
 
-                @if($metaAnggaran->NA == 'N')
+                @if($mataAnggaran->NA == 'N')
                     <span class="badge badge-success">Aktif</span>
                 @endif
             </td>

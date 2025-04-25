@@ -25,11 +25,11 @@
             <td>{{ $programRektor->jenisKegiatan->Nama }}</td>
         </tr>
         <tr>
-            <th>Meta Anggaran</th>
+            <th>Mata Anggaran</th>
             <td>
                 <ul class="mb-0 pl-3">
-                    @foreach($metaAnggarans as $metaAnggaran)
-                        <li>{{ $metaAnggaran->Nama }}</li>
+                    @foreach($mataAnggarans as $mataAnggaran)
+                        <li>{{ $mataAnggaran->Nama }}</li>
                     @endforeach
                 </ul>
             </td>

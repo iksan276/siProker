@@ -1,17 +1,17 @@
-<form action="{{ route('meta-anggarans.update', $metaAnggaran->MetaAnggaranID) }}" method="POST" class="modal-form" id="metaAnggaranEditForm">
+<form action="{{ route('meta-anggarans.update', $mataAnggaran->MataAnggaranID) }}" method="POST" class="modal-form" id="mataAnggaranEditForm">
     @csrf
     @method('PUT')
     <div class="form-group">
         <label for="Nama">Nama</label>
-        <input type="text" name="Nama" id="Nama" class="form-control" value="{{ $metaAnggaran->Nama }}">
+        <input type="text" name="Nama" id="Nama" class="form-control" value="{{ $mataAnggaran->Nama }}">
     </div>
     <div class="row">
     <div class="col-sm-4">
     <div class="form-group">
         <label for="NA">Status</label>
         <select name="NA" id="NA" class="form-control">
-            <option value="Y" {{ $metaAnggaran->NA == 'Y' ? 'selected' : '' }}>Non Aktif</option>
-            <option value="N" {{ $metaAnggaran->NA == 'N' ? 'selected' : '' }}>Aktif</option>
+            <option value="Y" {{ $mataAnggaran->NA == 'Y' ? 'selected' : '' }}>Non Aktif</option>
+            <option value="N" {{ $mataAnggaran->NA == 'N' ? 'selected' : '' }}>Aktif</option>
         </select>
     </div>
     </div>
@@ -23,7 +23,7 @@
 </form>
 
 <script>
-document.getElementById('metaAnggaranEditForm').addEventListener('submit', function(event) {
+document.getElementById('mataAnggaranEditForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent the form from traditional submission
     
     // Validate empty fields

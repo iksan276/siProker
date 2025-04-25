@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('meta_anggarans', function (Blueprint $table) {
-            $table->id('MetaAnggaranID');
+        Schema::create('mata_anggarans', function (Blueprint $table) {
+            $table->id('MataAnggaranID');
             $table->string('Nama', 255);
             $table->enum('NA', ['Y', 'N'])->default('N');
             $table->dateTime('DCreated')->nullable();
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('meta_anggarans');
+        Schema::dropIfExists('mata_anggarans');
     }
 };

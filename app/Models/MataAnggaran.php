@@ -4,10 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MetaAnggaran extends Model
+class MataAnggaran extends Model
 {
-    protected $table = 'meta_anggarans';
-    protected $primaryKey = 'MetaAnggaranID';
+    protected $table = 'mata_anggarans';
+    protected $primaryKey = 'MataAnggaranID';
     public $timestamps = false;
     
     protected $fillable = [
@@ -22,7 +22,7 @@ class MetaAnggaran extends Model
     // Add this method to tell Laravel which column to use for route model binding
     public function getRouteKeyName()
     {
-        return 'MetaAnggaranID';
+        return 'MataAnggaranID';
     }
     
     public function createdBy()

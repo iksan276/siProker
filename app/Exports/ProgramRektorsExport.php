@@ -3,7 +3,7 @@
 namespace App\Exports;
 
 use App\Models\ProgramRektor;
-use App\Models\MetaAnggaran;
+use App\Models\MataAnggaran;
 use App\Models\Unit;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -55,7 +55,7 @@ class ProgramRektorsExport implements FromCollection, WithHeadings, WithMapping,
             'Output',
             'Outcome',
             'Jenis Kegiatan',
-            'Meta Anggaran',
+            'Mata Anggaran',
             'Jumlah Kegiatan',
             'Satuan',
             'Harga Satuan',
@@ -80,9 +80,9 @@ class ProgramRektorsExport implements FromCollection, WithHeadings, WithMapping,
         $pilar = $isuStrategis->pilar;
         $renstra = $pilar->renstra;
 
-        // Get meta anggaran names
-        $metaAnggaranIds = explode(',', $programRektor->MetaAnggaranID);
-        $metaAnggaranNames = MetaAnggaran::whereIn('MetaAnggaranID', $metaAnggaranIds)
+        // Get mata anggaran names
+        $mataAnggaranIds = explode(',', $programRektor->MataAnggaranID);
+        $mataAnggaranNames = MataAnggaran::whereIn('MataAnggaranID', $mataAnggaranIds)
             ->pluck('Nama')
             ->implode(', ');
         
@@ -106,7 +106,7 @@ class ProgramRektorsExport implements FromCollection, WithHeadings, WithMapping,
             $programRektor->Output,
             $programRektor->Outcome,
             $programRektor->jenisKegiatan->Nama,
-            $metaAnggaranNames,
+            $mataAnggaranNames,
             $programRektor->JumlahKegiatan,
             $programRektor->satuan->Nama,
             $programRektor->HargaSatuan,

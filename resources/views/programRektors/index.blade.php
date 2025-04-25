@@ -53,7 +53,7 @@
                         <th style="white-space:nowrap">Indikator Kinerja</th>
                         <th style="white-space:nowrap">Nama</th>
                         <th style="white-space:nowrap">Jenis Kegiatan</th>
-                        <th style="white-space:nowrap">Meta Anggaran</th>
+                        <th style="white-space:nowrap">Mata Anggaran</th>
                         <th style="white-space:nowrap">Jumlah Kegiatan</th>
                         <th style="white-space:nowrap">Satuan</th>
                         <th style="white-space:nowrap">Harga Satuan</th>
@@ -267,7 +267,7 @@
                 { data: 'nama' },
                 { data: 'jenis_kegiatan' },
                 { 
-                    data: 'meta_anggaran',
+                    data: 'mata_anggaran',
                     orderable: false,
                     render: function(data) {
                         return data;

@@ -38,7 +38,7 @@ class KegiatanController extends Controller
         if ($request->ajax()) {
             $data = [];
             foreach ($kegiatans as $index => $kegiatan) {
-                // Match the exact styling from the Meta Anggaran page, but without td tags
+                // Match the exact styling from the Mata Anggaran page, but without td tags
                 $actions = '
                     <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('kegiatans.show', $kegiatan->KegiatanID).'" data-title="Detail Kegiatan">
                         <i class="fas fa-eye"></i>

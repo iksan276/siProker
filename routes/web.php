@@ -11,7 +11,7 @@ use App\Http\Controllers\SatuanController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\IndikatorKinerjaController;
 use App\Http\Controllers\KegiatanController;
-use App\Http\Controllers\MetaAnggaranController;
+use App\Http\Controllers\MataAnggaranController;
 use App\Http\Controllers\UnitAnggaranController;
 use App\Http\Controllers\JenisKegiatanController;
 use App\Http\Controllers\DashboardController;
@@ -72,8 +72,8 @@ Route::middleware('auth')->group(function () {
         // Unit routes
         Route::resource('units', UnitController::class);
         
-        // Meta Anggaran routes
-        Route::resource('meta-anggarans', MetaAnggaranController::class);
+        // Mata Anggaran routes
+        Route::resource('meta-anggarans', MataAnggaranController::class);
         
         // Indikator Kinerja routes
         Route::resource('indikator-kinerjas', IndikatorKinerjaController::class);
