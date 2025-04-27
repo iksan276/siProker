@@ -33,7 +33,7 @@
     <!-- Master Tree -->
     @php
         $masterActive = request()->is('users*') || request()->is('renstras*') || request()->is('satuans*') || 
-                        request()->is('meta-anggarans*') || request()->is('jenis-kegiatans*');
+                        request()->is('meta-anggarans*') || request()->is('jenis-kegiatans*') || request()->is('units*');
     @endphp
     <li class="nav-item {{ $masterActive ? 'active' : '' }}">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMaster"
@@ -58,6 +58,10 @@
                 <a class="collapse-item {{ request()->is('jenis-kegiatans*') ? 'active' : '' }}" href="{{ route('jenis-kegiatans.index') }}">
                     <i class="fas fa-fw fa-list-alt"></i> Jenis Kegiatan
                 </a>
+                <a class="collapse-item {{ request()->is('units*') ? 'active' : '' }}" href="{{ route('units.index') }}">
+                    <i class="fas fa-fw fa-building"></i> Unit
+                </a>
+
             </div>
         </div>
     </li>

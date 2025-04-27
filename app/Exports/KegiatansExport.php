@@ -29,7 +29,13 @@ class KegiatansExport implements FromCollection, WithHeadings, WithMapping, With
             return $this->kegiatans;
         }
         
-        return Kegiatan::with(['indikatorKinerja'])->get();
+        return Kegiatan::with([
+            'programRektor', 
+            'programRektor.programPengembangan', 
+            'programRektor.programPengembangan.isuStrategis', 
+            'programRektor.programPengembangan.isuStrategis.pilar',
+            'programRektor.programPengembangan.isuStrategis.pilar.renstra'
+        ])->get();
     }
 
     /**
@@ -39,8 +45,12 @@ class KegiatansExport implements FromCollection, WithHeadings, WithMapping, With
     {
         return [
             'No',
-            'Indikator Kinerja',
-            'Nama',
+            'Renstra',
+            'Pilar',
+            'Isu Strategis',
+            'Program Pengembangan',
+            'Program Rektor',
+            'Nama Kegiatan',
             'Tanggal Mulai',
             'Tanggal Selesai',
             'Rincian Kegiatan'
@@ -56,11 +66,19 @@ class KegiatansExport implements FromCollection, WithHeadings, WithMapping, With
         static $rowNumber = 0;
         $rowNumber++;
 
-        $indikatorKinerja = $kegiatan->indikatorKinerja;
+        $programRektor = $kegiatan->programRektor;
+        $programPengembangan = $programRektor ? $programRektor->programPengembangan : null;
+        $isuStrategis = $programPengembangan ? $programPengembangan->isuStrategis : null;
+        $pilar = $isuStrategis ? $isuStrategis->pilar : null;
+        $renstra = $pilar ? $pilar->renstra : null;
 
         return [
             $rowNumber,
-            $indikatorKinerja->Nama,
+            $renstra ? $renstra->Nama : 'N/A',
+            $pilar ? $pilar->Nama : 'N/A',
+            $isuStrategis ? $isuStrategis->Nama : 'N/A',
+            $programPengembangan ? $programPengembangan->Nama : 'N/A',
+            $programRektor ? $programRektor->Nama : 'N/A',
             $kegiatan->Nama,
             Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y H:i'),
             Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y H:i'),
@@ -101,7 +119,7 @@ class KegiatansExport implements FromCollection, WithHeadings, WithMapping, With
         $sheet->getStyle('A2:A' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         
         // Center the date columns
-        $sheet->getStyle('D2:E' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('H2:I' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         
         // Add borders to all cells
         $sheet->getStyle('A1:' . $highestColumn . $highestRow)->applyFromArray([

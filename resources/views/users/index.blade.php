@@ -3,7 +3,7 @@
 @section('content')
 <!-- Page Heading -->
 <h1 class="h3 mb-2">User</h1>
-<p class="mb-4">Kelola Master user.</p>
+<p class="mb-4">Kelola Master User.</p>
 
 <!-- Alert Container for AJAX responses -->
 <div id="alertContainer"></div>

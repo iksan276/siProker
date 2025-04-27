@@ -2,11 +2,11 @@
     @csrf
     @method('PUT')
     <div class="form-group">
-        <label for="IndikatorKinerjaID">Indikator Kinerja</label>
-        <select name="IndikatorKinerjaID" id="IndikatorKinerjaID" class="form-control select2" >
+        <label for="ProgramRektorID">Program Rektor</label>
+        <select name="ProgramRektorID" id="ProgramRektorID" class="form-control select2" >
         <option value="" disabled selected></option>
-            @foreach($indikatorKinerjas as $indikatorKinerja)
-                <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}" {{ $kegiatan->IndikatorKinerjaID == $indikatorKinerja->IndikatorKinerjaID ? 'selected' : '' }}>{{ $indikatorKinerja->Nama }}</option>
+            @foreach($programRektors as $programRektor)
+                <option value="{{ $programRektor->ProgramRektorID }}" {{ $kegiatan->ProgramRektorID == $programRektor->ProgramRektorID ? 'selected' : '' }}>{{ $programRektor->Nama }}</option>
             @endforeach
         </select>
     </div>
@@ -61,7 +61,7 @@ document.getElementById('kegiatanEditForm').addEventListener('submit', function(
     event.preventDefault(); // Prevent the form from traditional submission
     
     // Validate empty fields
-    const indikatorKinerjaID = document.getElementById('IndikatorKinerjaID').value.trim();
+    const programRektorID = document.getElementById('ProgramRektorID').value.trim();
     const nama = document.getElementById('Nama').value.trim();
     const tanggalMulai = document.getElementById('TanggalMulai').value.trim();
     const tanggalSelesai = document.getElementById('TanggalSelesai').value.trim();
@@ -71,8 +71,8 @@ document.getElementById('kegiatanEditForm').addEventListener('submit', function(
     let emptyFields = [];
     
     // Check each field and add to error messages if empty
-    if (!indikatorKinerjaID) {
-        emptyFields.push('Indikator Kinerja harus dipilih');
+    if (!programRektorID) {
+        emptyFields.push('Program Rektor harus dipilih');
     }
     
     if (!nama) {
@@ -119,7 +119,6 @@ document.getElementById('kegiatanEditForm').addEventListener('submit', function(
         return false;
     }
     
-
 });
 
 // Run validation on page load

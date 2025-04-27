@@ -1,13 +1,13 @@
 <form action="{{ route('kegiatans.store') }}" method="POST" class="modal-form" id="kegiatanForm">
     @csrf
     <div class="form-group">
-        <label for="IndikatorKinerjaID">Indikator Kinerja</label>
-        <select name="IndikatorKinerjaID" id="IndikatorKinerjaID" class="form-control select2" >
-            <option value="" disabled {{ !isset($selectedIndikator) ? 'selected' : '' }}></option>
-            @foreach($indikatorKinerjas as $indikatorKinerja)
-                <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}" 
-                    {{ (isset($selectedIndikator) && $selectedIndikator->IndikatorKinerjaID == $indikatorKinerja->IndikatorKinerjaID) ? 'selected' : '' }}>
-                    {{ $indikatorKinerja->Nama }}
+        <label for="ProgramRektorID">Program Rektor</label>
+        <select name="ProgramRektorID" id="ProgramRektorID" class="form-control select2" >
+            <option value="" disabled {{ !isset($selectedProgramRektor) ? 'selected' : '' }}></option>
+            @foreach($programRektors as $programRektor)
+                <option value="{{ $programRektor->ProgramRektorID }}" 
+                    {{ (isset($selectedProgramRektor) && $selectedProgramRektor->ProgramRektorID == $programRektor->ProgramRektorID) ? 'selected' : '' }}>
+                    {{ $programRektor->Nama }}
                 </option>
             @endforeach
         </select>
@@ -63,7 +63,7 @@ document.getElementById('kegiatanForm').addEventListener('submit', function(even
     event.preventDefault(); // Prevent the form from traditional submission
     
     // Validate empty fields
-    const indikatorKinerjaID = document.getElementById('IndikatorKinerjaID').value.trim();
+    const programRektorID = document.getElementById('ProgramRektorID').value.trim();
     const nama = document.getElementById('Nama').value.trim();
     const tanggalMulai = document.getElementById('TanggalMulai').value.trim();
     const tanggalSelesai = document.getElementById('TanggalSelesai').value.trim();
@@ -73,8 +73,8 @@ document.getElementById('kegiatanForm').addEventListener('submit', function(even
     let emptyFields = [];
     
     // Check each field and add to error messages if empty
-    if (!indikatorKinerjaID) {
-        emptyFields.push('Indikator Kinerja harus dipilih');
+    if (!programRektorID) {
+        emptyFields.push('Program Rektor harus dipilih');
     }
     
     if (!nama) {

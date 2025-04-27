@@ -14,11 +14,11 @@
         <h6 class="m-0 font-weight-bold text-primary">Kegiatan List</h6>
         <div class="d-flex align-items-center">
           <div class="mr-2">
-                <select id="indikatorKinerjaFilter" class="form-control select2-filter">
-                    <option value="">-- Pilih Indikator Kinerja --</option>
-                    @foreach($indikatorKinerjas as $indikatorKinerja)
-                        <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}" {{ isset($selectedIndikatorKinerja) && $selectedIndikatorKinerja == $indikatorKinerja->IndikatorKinerjaID ? 'selected' : '' }}>
-                            {{ $indikatorKinerja->Nama }}
+                <select id="programRektorFilter" class="form-control select2-filter">
+                    <option value="">-- Pilih Program Rektor --</option>
+                    @foreach($programRektors as $programRektor)
+                        <option value="{{ $programRektor->ProgramRektorID }}" {{ isset($selectedProgramRektor) && $selectedProgramRektor == $programRektor->ProgramRektorID ? 'selected' : '' }}>
+                            {{ $programRektor->Nama }}
                         </option>
                     @endforeach
                 </select>
@@ -39,7 +39,7 @@
                 <thead>
                     <tr class="text-center text-dark">
                         <th style="white-space:nowrap">No</th>
-                        <th style="white-space:nowrap">Indikator Kinerja</th>
+                        <th style="white-space:nowrap">Program Rektor</th>
                         <th style="white-space:nowrap">Nama</th>
                         <th style="white-space:nowrap">Tanggal Mulai</th>
                         <th style="white-space:nowrap">Tanggal Selesai</th>
@@ -66,14 +66,14 @@
         initDataTable();
         
         // Handle filter change
-        $('#indikatorKinerjaFilter').on('change', function() {
-            var indikatorKinerjaID = $(this).val();
+        $('#programRektorFilter').on('change', function() {
+            var programRektorID = $(this).val();
             
             // Set filtering flag to true
             isFiltering = true;
             
             // Update URL without page refresh
-            updateUrlParameter('indikatorKinerjaID', indikatorKinerjaID);
+            updateUrlParameter('programRektorID', programRektorID);
             
             // Reload DataTable with new filter
             kegiatanTable.ajax.reload(function() {
@@ -154,7 +154,7 @@
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Iya, yakin',
-cancelButtonText: 'Batal'
+                cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Perform AJAX delete
@@ -211,7 +211,7 @@ cancelButtonText: 'Batal'
                 url: '{{ route('kegiatans.index') }}',
                 type: 'GET',
                 data: function(d) {
-                    d.indikatorKinerjaID = $('#indikatorKinerjaFilter').val();
+                    d.programRektorID = $('#programRektorFilter').val();
                 },
                 // Show processing only during filtering
                 beforeSend: function() {
@@ -230,7 +230,7 @@ cancelButtonText: 'Batal'
                         return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
                     }
                 },
-                { data: 'indikator_kinerja' },
+                { data: 'program_rektor' },
                 { data: 'nama' },
                 { data: 'tanggal_mulai', className: 'text-center' },
                 { data: 'tanggal_selesai', className: 'text-center' },

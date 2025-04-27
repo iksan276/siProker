@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\QueryException;
 use App\Models\Kegiatan;
-use App\Models\IndikatorKinerja;
+use App\Models\ProgramRektor;
 
 class PilarController extends Controller
 {
@@ -166,8 +166,8 @@ class PilarController extends Controller
                     foreach ($program->programRektors as $rektor) {
                         if ($rektor->NA == 'Y') continue; // Skip non-active rektor programs
                         
-                        // Get kegiatan count directly from program rektor's IndikatorKinerjaID
-                        $kegiatanCount = Kegiatan::where('IndikatorKinerjaID', $rektor->IndikatorKinerjaID)
+                        // Get kegiatan count directly from program rektor's ProgramRektorID
+                        $kegiatanCount = Kegiatan::where('ProgramRektorID', $rektor->ProgramRektorID)
                                         ->where('UCreated', $userId)
                                         ->count();
                         
@@ -186,7 +186,7 @@ class PilarController extends Controller
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <button class="btn btn-primary btn-square btn-sm load-modal" 
-                                    data-url="' . route('kegiatans.create') . '?indikator=' . $rektor->IndikatorKinerjaID . '" 
+                                    data-url="' . route('kegiatans.create') . '?program_rektor=' . $rektor->ProgramRektorID . '" 
                                     data-title="Tambah Kegiatan">
                                     <i class="fas fa-plus"></i>
                                 </button>',
@@ -197,7 +197,7 @@ class PilarController extends Controller
                         $treeData[] = $rektorNode;
                         
                         // Add Kegiatan directly under Program Rektor
-                        $kegiatans = Kegiatan::where('IndikatorKinerjaID', $rektor->IndikatorKinerjaID)
+                        $kegiatans = Kegiatan::where('ProgramRektorID', $rektor->ProgramRektorID)
                             ->where('UCreated', $userId)
                             ->get();
                             

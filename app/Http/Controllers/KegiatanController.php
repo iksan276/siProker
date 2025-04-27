@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kegiatan;
-use App\Models\IndikatorKinerja;
+use App\Models\ProgramRektor;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,22 +17,22 @@ class KegiatanController extends Controller
 
     public function index(Request $request)
     {
-        // Get all active indikator kinerjas for the filter
-        $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get();
+        // Get all active program rektors for the filter
+        $programRektors = ProgramRektor::where('NA', 'N')->get();
         
         // Base query
-        $kegiatansQuery = Kegiatan::with(['indikatorKinerja', 'createdBy', 'editedBy']);
+        $kegiatansQuery = Kegiatan::with(['programRektor', 'createdBy', 'editedBy']);
         
-        // Apply filter if indikatorKinerjaID is provided
-        if ($request->has('indikatorKinerjaID') && $request->indikatorKinerjaID) {
-            $kegiatansQuery->where('IndikatorKinerjaID', $request->indikatorKinerjaID);
+        // Apply filter if programRektorID is provided
+        if ($request->has('programRektorID') && $request->programRektorID) {
+            $kegiatansQuery->where('ProgramRektorID', $request->programRektorID);
         }
         
         // Get the filtered results
         $kegiatans = $kegiatansQuery->orderBy('KegiatanID', 'desc')->get();
         
         // Get the selected filter value (for re-populating the select)
-        $selectedIndikatorKinerja = $request->indikatorKinerjaID;
+        $selectedProgramRektor = $request->programRektorID;
         
         // If it's an AJAX request, return JSON data for DataTable
         if ($request->ajax()) {
@@ -53,7 +53,7 @@ class KegiatanController extends Controller
                 
                 $data[] = [
                     'no' => $index + 1,
-                    'indikator_kinerja' => nl2br($kegiatan->indikatorKinerja->Nama),
+                    'program_rektor' => nl2br($kegiatan->programRektor->Nama),
                     'nama' => nl2br($kegiatan->Nama),
                     'tanggal_mulai' => \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y H:i'),
                     'tanggal_selesai' => \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y H:i'),
@@ -67,17 +67,23 @@ class KegiatanController extends Controller
             ]);
         }
         
-        return view('kegiatans.index', compact('kegiatans', 'indikatorKinerjas', 'selectedIndikatorKinerja'));
+        return view('kegiatans.index', compact('kegiatans', 'programRektors', 'selectedProgramRektor'));
     }
     
     public function exportExcel(Request $request)
     {
-        // Base query with only indikatorKinerja relationship
-        $kegiatansQuery = Kegiatan::with(['indikatorKinerja']);
+        // Base query with program rektor relationship
+        $kegiatansQuery = Kegiatan::with([
+            'programRektor', 
+            'programRektor.programPengembangan', 
+            'programRektor.programPengembangan.isuStrategis', 
+            'programRektor.programPengembangan.isuStrategis.pilar',
+            'programRektor.programPengembangan.isuStrategis.pilar.renstra'
+        ]);
         
-        // Apply filter if indikatorKinerjaID is provided
-        if ($request->has('indikatorKinerjaID') && $request->indikatorKinerjaID) {
-            $kegiatansQuery->where('IndikatorKinerjaID', $request->indikatorKinerjaID);
+        // Apply filter if programRektorID is provided
+        if ($request->has('programRektorID') && $request->programRektorID) {
+            $kegiatansQuery->where('ProgramRektorID', $request->programRektorID);
         }
         
         // Get the filtered results
@@ -88,26 +94,26 @@ class KegiatanController extends Controller
 
     public function create(Request $request)
     {
-        $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get();
+        $programRektors = ProgramRektor::where('NA', 'N')->get();
         $users = User::all();
         
-        // Get the pre-selected indikator if provided
-        $selectedIndikator = null;
-        if ($request->has('indikator')) {
-            $selectedIndikator = IndikatorKinerja::find($request->indikator);
+        // Get the pre-selected program rektor if provided
+        $selectedProgramRektor = null;
+        if ($request->has('program_rektor')) {
+            $selectedProgramRektor = ProgramRektor::find($request->program_rektor);
         }
         
         if (request()->ajax()) {
-            return view('kegiatans.create', compact('indikatorKinerjas', 'users', 'selectedIndikator'))->render();
+            return view('kegiatans.create', compact('programRektors', 'users', 'selectedProgramRektor'))->render();
         }
-        return view('kegiatans.create', compact('indikatorKinerjas', 'users', 'selectedIndikator'));
+        return view('kegiatans.create', compact('programRektors', 'users', 'selectedProgramRektor'));
     }
     
 
     public function store(Request $request)
     {
         $request->validate([
-            'IndikatorKinerjaID' => 'required|exists:indikator_kinerjas,IndikatorKinerjaID',
+            'ProgramRektorID' => 'required|exists:program_rektors,ProgramRektorID',
             'Nama' => 'required|string',
             'TanggalMulai' => 'required|date',
             'TanggalSelesai' => 'required|date|after_or_equal:TanggalMulai',
@@ -115,7 +121,7 @@ class KegiatanController extends Controller
         ]);
 
         $kegiatan = new Kegiatan();
-        $kegiatan->IndikatorKinerjaID = $request->IndikatorKinerjaID;
+        $kegiatan->ProgramRektorID = $request->ProgramRektorID;
         $kegiatan->Nama = $request->Nama;
         $kegiatan->TanggalMulai = $request->TanggalMulai;
         $kegiatan->TanggalSelesai = $request->TanggalSelesai;
@@ -132,7 +138,15 @@ class KegiatanController extends Controller
 
     public function show($id)
     {
-        $kegiatan = Kegiatan::with(['indikatorKinerja', 'createdBy', 'editedBy'])->findOrFail($id);
+        $kegiatan = Kegiatan::with([
+            'programRektor', 
+            'programRektor.programPengembangan', 
+            'programRektor.programPengembangan.isuStrategis', 
+            'programRektor.programPengembangan.isuStrategis.pilar',
+            'programRektor.programPengembangan.isuStrategis.pilar.renstra',
+            'createdBy', 
+            'editedBy'
+        ])->findOrFail($id);
         
         if (request()->ajax()) {
             return view('kegiatans.show', compact('kegiatan'))->render();
@@ -143,13 +157,13 @@ class KegiatanController extends Controller
     public function edit($id)
     {
         $kegiatan = Kegiatan::findOrFail($id);
-        $indikatorKinerjas = IndikatorKinerja::all();
+        $programRektors = ProgramRektor::where('NA', 'N')->get();
         $users = User::all();
         
         if (request()->ajax()) {
-            return view('kegiatans.edit', compact('kegiatan', 'indikatorKinerjas', 'users'))->render();
+            return view('kegiatans.edit', compact('kegiatan', 'programRektors', 'users'))->render();
         }
-        return view('kegiatans.edit', compact('kegiatan', 'indikatorKinerjas', 'users'));
+        return view('kegiatans.edit', compact('kegiatan', 'programRektors', 'users'));
     }
 
     public function update(Request $request, $id)
@@ -157,14 +171,14 @@ class KegiatanController extends Controller
         $kegiatan = Kegiatan::findOrFail($id);
         
         $request->validate([
-            'IndikatorKinerjaID' => 'required|exists:indikator_kinerjas,IndikatorKinerjaID',
+            'ProgramRektorID' => 'required|exists:program_rektors,ProgramRektorID',
             'Nama' => 'required|string',
             'TanggalMulai' => 'required|date',
             'TanggalSelesai' => 'required|date|after_or_equal:TanggalMulai',
             'RincianKegiatan' => 'required|string',
         ]);
 
-        $kegiatan->IndikatorKinerjaID = $request->IndikatorKinerjaID;
+        $kegiatan->ProgramRektorID = $request->ProgramRektorID;
         $kegiatan->Nama = $request->Nama;
         $kegiatan->TanggalMulai = $request->TanggalMulai;
         $kegiatan->TanggalSelesai = $request->TanggalSelesai;
@@ -196,12 +210,12 @@ class KegiatanController extends Controller
                 if (request()->ajax()) {
                     return response()->json([
                         'success' => false, 
-                        'message' => 'Tidak dapat menghapus  kegiatan ini karena dirujuk oleh baris di table lain.'
+                        'message' => 'Tidak dapat menghapus kegiatan ini karena dirujuk oleh baris di table lain.'
                     ], 422);
                 }
                 
                 return redirect()->route('kegiatans.index')
-                    ->with('error', 'Tidak dapat menghapus  kegiatan ini karena dirujuk oleh baris di table lain.');
+                    ->with('error', 'Tidak dapat menghapus kegiatan ini karena dirujuk oleh baris di table lain.');
             }
             
             // For other database errors

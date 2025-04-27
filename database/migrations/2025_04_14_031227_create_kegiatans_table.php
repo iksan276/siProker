@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('kegiatans', function (Blueprint $table) {
             $table->id('KegiatanID');
-            $table->unsignedBigInteger('IndikatorKinerjaID');
+            $table->unsignedBigInteger('ProgramRektorID'); // Changed from IndikatorKinerjaID to ProgramRektorID
             $table->text('Nama');
             $table->dateTime('TanggalMulai');
             $table->dateTime('TanggalSelesai');
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->dateTime('DEdited')->nullable();
             $table->unsignedBigInteger('UEdited')->nullable();
             
-            $table->foreign('IndikatorKinerjaID')->references('IndikatorKinerjaID')->on('indikator_kinerjas');
+            $table->foreign('ProgramRektorID')->references('ProgramRektorID')->on('program_rektors');
             $table->foreign('UCreated')->references('id')->on('users');
             $table->foreign('UEdited')->references('id')->on('users');
         });

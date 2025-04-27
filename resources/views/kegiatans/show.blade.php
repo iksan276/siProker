@@ -5,8 +5,24 @@
             <td>{{ $kegiatan->KegiatanID }}</td>
         </tr>
         <tr>
-            <th>Indikator Kinerja</th>
-            <td>{!! nl2br($kegiatan->indikatorKinerja->Nama) !!}</td>
+            <th>Renstra</th>
+            <td>{{ $kegiatan->programRektor->programPengembangan->isuStrategis->pilar->renstra->Nama ?? 'N/A' }}</td>
+        </tr>
+        <tr>
+            <th>Pilar</th>
+            <td>{{ $kegiatan->programRektor->programPengembangan->isuStrategis->pilar->Nama ?? 'N/A' }}</td>
+        </tr>
+        <tr>
+            <th>Isu Strategis</th>
+            <td>{{ $kegiatan->programRektor->programPengembangan->isuStrategis->Nama ?? 'N/A' }}</td>
+        </tr>
+        <tr>
+            <th>Program Pengembangan</th>
+            <td>{{ $kegiatan->programRektor->programPengembangan->Nama ?? 'N/A' }}</td>
+        </tr>
+        <tr>
+            <th>Program Rektor</th>
+            <td>{!! nl2br($kegiatan->programRektor->Nama) !!}</td>
         </tr>
         <tr>
             <th>Nama</th>
