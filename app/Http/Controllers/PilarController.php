@@ -353,4 +353,28 @@ class PilarController extends Controller
                 ->with('error', 'Database error occurred: ' . $e->getMessage());
         }
     }
+
+ 
+    /**
+ * Get pilars by Renstra ID for AJAX requests
+ *
+ * @param  \Illuminate\Http\Request  $request
+ * @return \Illuminate\Http\JsonResponse
+ */
+public function getByRenstra(Request $request)
+{
+    $renstraID = $request->input('renstraID');
+    
+    if (!$renstraID) {
+        return response()->json(['pilars' => []]);
+    }
+    
+    $pilars = Pilar::where('RenstraID', $renstraID)
+        ->where('NA', 'N')
+        ->orderBy('Nama')
+        ->get();
+    
+    return response()->json(['pilars' => $pilars]);
+}
+
 }

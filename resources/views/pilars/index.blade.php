@@ -61,13 +61,15 @@
     var selectedRenstraId = getCookie('selected_renstra') || "{{ $selectedRenstra ?? '' }}";
     
     $(document).ready(function () {
-        // Initialize DataTable with AJAX source
-        initDataTable();
+        // Initialize Select2 for the filter
         
         // Set the filter value from cookie if available
         if (selectedRenstraId) {
-            $('#renstraFilter').val(selectedRenstraId);
+            $('#renstraFilter').val(selectedRenstraId).trigger('change');
         }
+        
+        // Initialize DataTable with AJAX source
+        initDataTable();
         
         // Handle filter change
         $('#renstraFilter').on('change', function() {
@@ -247,7 +249,7 @@
                 url: '{{ route('pilars.index') }}',
                 type: 'GET',
                 data: function(d) {
-                    d.renstraID = $('#renstraFilter').val();
+                    d.renstraID = selectedRenstraId; // Use the global variable
                 },
                 // Show processing only during filtering
                 beforeSend: function() {
@@ -491,6 +493,26 @@
             setTimeout(function() {
                 $('#pilarTable_processing').hide();
             }, 200);
+        }
+    });
+
+    // Apply the stored Renstra filter value when the page is loaded or refreshed
+    $(window).on('pageshow', function(event) {
+        // This event fires when the page is shown, including when navigating back to it
+        if (event.originalEvent.persisted) {
+            // Page was loaded from cache (e.g., back button)
+            var storedRenstraId = getCookie('selected_renstra');
+            if (storedRenstraId) {
+                selectedRenstraId = storedRenstraId;
+                
+                // Set the select value and trigger change
+                if ($('#renstraFilter').val() !== storedRenstraId) {
+                    $('#renstraFilter').val(storedRenstraId).trigger('change');
+                }
+                
+                // Update URL parameter
+                updateUrlParameter('renstraID', storedRenstraId);
+            }
         }
     });
 </script>

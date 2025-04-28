@@ -29,13 +29,7 @@
 
 <script>
 $(document).ready(function() {
-    // Initialize Select2
-    $('#RenstraID').select2({
-        placeholder: "Pilih Renstra",
-        dropdownParent: $('#mainModal .modal-body'),
-        width: '100%'
-    });
-    
+
     // Get the selected value from cookie if not already set
     if (!$('#RenstraID').val()) {
         var cookieValue = getCookie('selected_renstra');
@@ -92,5 +86,7 @@ document.getElementById('pilarForm').addEventListener('submit', function(event) 
         return false;
     }
     
+    // If validation passes, let the form submission continue via AJAX
+    // (This is handled by the event handler in index.blade.php)
 });
 </script>
