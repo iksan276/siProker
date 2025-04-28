@@ -44,6 +44,9 @@ Route::middleware('auth')->group(function () {
     
     // Pilar routes - accessible by all users
     Route::resource('pilars', PilarController::class);
+    Route::get('/api/pilars-by-renstra', 'App\Http\Controllers\ApiController@getPilarsByRenstra')->name('api.pilars-by-renstra');
+
+    
     Route::resource('kegiatans', KegiatanController::class);
     Route::resource('program-rektors', ProgramRektorController::class);
     

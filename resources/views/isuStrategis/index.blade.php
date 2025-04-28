@@ -19,12 +19,38 @@
         </div>
     </div>
     <div class="card-body">
+        <!-- Filters -->
+    
+                <div class="form-group">
+                    <label for="renstraFilter">Filter Renstra:</label>
+                    <select id="renstraFilter" class="form-control select2-filter">
+                        <option value="">-- Pilih Renstra --</option>
+                        @foreach($renstras as $renstra)
+                            <option value="{{ $renstra->RenstraID }}" {{ isset($selectedRenstra) && $selectedRenstra == $renstra->RenstraID ? 'selected' : '' }}>
+                                {{ $renstra->Nama }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+          
+                <div class="form-group mb-5">
+                    <label for="pilarFilter">Filter Pilar:</label>
+                    <select id="pilarFilter" class="form-control select2-filter" {{ empty($selectedRenstra) ? 'disabled' : '' }}>
+                        <option value="">-- Pilih Pilar --</option>
+                        @foreach($pilars as $pilar)
+                            <option value="{{ $pilar->PilarID }}" {{ isset($selectedPilar) && $selectedPilar == $pilar->PilarID ? 'selected' : '' }}>
+                                {{ $pilar->Nama }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+        
+        
         <div class="table-responsive">
             <table class="table table-bordered" id="isuStrategisTable" width="100%" cellspacing="0">
                 <thead>
                     <tr class="text-center text-dark">
                         <th style="white-space:nowrap">No</th>
-                        <th style="white-space:nowrap">Pilar</th>
                         <th style="white-space:nowrap">Nama</th>
                         <th style="white-space:nowrap">NA</th>
                         <th style="white-space:nowrap">Actions</th>
@@ -34,7 +60,6 @@
                     @foreach($isuStrategis as $index => $isu)
                     <tr class="{{ $isu->NA == 'Y' ? 'bg-light text-muted' : '' }}">
                         <td class="text-center" style="white-space:nowrap;width:1px">{{ $index + 1 }}</td>
-                        <td>{!! nl2br($isu->pilar->Nama) !!}</td>
                         <td>{!! nl2br($isu->Nama) !!}</td>
                         <td class="text-center" style="white-space:nowrap;width:1px">
                             @if($isu->NA == 'Y')
@@ -44,7 +69,7 @@
                             @endif
                         </td>
                         <td class="text-center" style="white-space:nowrap;width:1px">
-                            <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('isu-strategis.show', $isu->IsuID) }}" data-title="Detail Isu Strategis">
+                        <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('isu-strategis.show', $isu->IsuID) }}" data-title="Detail Isu Strategis">
                                 <i class="fas fa-eye"></i>
                             </button>
                             <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('isu-strategis.edit', $isu->IsuID) }}" data-title="Edit Isu Strategis">
@@ -72,15 +97,178 @@
 @push('scripts')
 <script>
     let isuStrategisTable;
+    var isFiltering = false;
+    var selectedRenstraId = getCookie('selected_renstra') || "{{ $selectedRenstra ?? '' }}";
+    var selectedPilarId = getCookie('selected_pilar') || "{{ $selectedPilar ?? '' }}";
     
     $(document).ready(function () {
+        // Set the filter values from cookies if available
+        if (selectedRenstraId) {
+            $('#renstraFilter').val(selectedRenstraId).trigger('change');
+            loadPilarsForRenstra(selectedRenstraId, selectedPilarId);
+        }
+        
+        if (selectedPilarId) {
+            $('#pilarFilter').val(selectedPilarId).trigger('change');
+        }
+        
         // Initialize DataTable
-        isuStrategisTable = $('#isuStrategisTable').DataTable({
-            responsive: true,
-            processing: true,
-            language: {
-                processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>'
+        initDataTable();
+        
+        // Handle renstra filter change
+// Handle renstra filter change
+$('#renstraFilter').on('change', function() {
+    var renstraID = $(this).val();
+    
+    // Store selected Renstra ID in global variable and cookie
+    selectedRenstraId = renstraID;
+    
+    // Reset pilar filter
+    $('#pilarFilter').empty().append('<option value="">-- Pilih Pilar --</option>');
+    $('#pilarFilter').val('').prop('disabled', true);
+    
+    // Clear pilar selection if renstra is cleared
+    if (!renstraID) {
+        selectedPilarId = '';
+        eraseCookie('selected_renstra');
+        eraseCookie('selected_pilar');
+        updateUrlParameter('renstraID', null);
+        updateUrlParameter('pilarID', null);
+        
+        // Reload DataTable with no filters
+        isFiltering = true;
+        isuStrategisTable.ajax.reload(function() {
+            isFiltering = false;
+        });
+        return;
+    }
+    
+    // If renstra is selected, store it and enable pilar filter
+    setCookie('selected_renstra', renstraID, 30);
+    updateUrlParameter('renstraID', renstraID);
+    isFiltering = true;
+    
+    // Load pilars for selected renstra via AJAX
+    $.ajax({
+        url: "{{ route('api.pilars-by-renstra') }}",
+        type: 'GET',
+        data: {
+            renstraID: renstraID
+        },
+        success: function(response) {
+            // Enable pilar filter
+            $('#pilarFilter').prop('disabled', false);
+            
+            // Populate pilar filter with options
+            if (response.pilars && response.pilars.length > 0) {
+                $.each(response.pilars, function(index, pilar) {
+                    $('#pilarFilter').append('<option value="' + pilar.PilarID + '">' + pilar.Nama + '</option>');
+                });
+                
+                // If there was a previously selected pilar for this renstra, select it
+                if (selectedPilarId) {
+                    // Check if the previously selected pilar exists in the new options
+                    var pilarExists = false;
+                    $.each(response.pilars, function(index, pilar) {
+                        if (pilar.PilarID == selectedPilarId) {
+                            pilarExists = true;
+                            return false; // Break the loop
+                        }
+                    });
+                    
+                    if (pilarExists) {
+                        $('#pilarFilter').val(selectedPilarId);
+                    } else {
+                        // If pilar doesn't exist for this renstra, clear the selection
+                        selectedPilarId = '';
+                        eraseCookie('selected_pilar');
+                        updateUrlParameter('pilarID', null);
+                    }
+                }
             }
+            
+            // Reload DataTable with new filter
+            isuStrategisTable.ajax.reload(function() {
+                isFiltering = false;
+            });
+        },
+        error: function() {
+            // Reset filtering flag
+            isFiltering = false;
+            showAlert('danger', 'Failed to load pilars');
+        }
+    });
+});
+
+
+// Add this new function to load pilars
+function loadPilarsForRenstra(renstraID, selectedPilarId) {
+    // Enable pilar filter first
+    $('#pilarFilter').prop('disabled', false);
+    
+    $.ajax({
+        url: "{{ route('api.pilars-by-renstra') }}",
+        type: 'GET',
+        data: {
+            renstraID: renstraID
+        },
+        success: function(response) {
+            // Clear existing options
+            $('#pilarFilter').empty().append('<option value="">-- Pilih Pilar --</option>');
+            
+            // Populate pilar filter with options
+            if (response.pilars && response.pilars.length > 0) {
+                $.each(response.pilars, function(index, pilar) {
+                    $('#pilarFilter').append('<option value="' + pilar.PilarID + '">' + pilar.Nama + '</option>');
+                });
+                
+                // If there was a previously selected pilar, select it
+                if (selectedPilarId) {
+                    // Check if the previously selected pilar exists in the new options
+                    var pilarExists = false;
+                    $.each(response.pilars, function(index, pilar) {
+                        if (pilar.PilarID == selectedPilarId) {
+                            pilarExists = true;
+                            return false; // Break the loop
+                        }
+                    });
+                    
+                    if (pilarExists) {
+                        $('#pilarFilter').val(selectedPilarId);
+                    }
+                }
+            }
+        },
+        error: function() {
+            showAlert('danger', 'Failed to load pilars');
+        }
+    });
+}
+
+
+        // Handle pilar filter change
+        $('#pilarFilter').on('change', function() {
+            var pilarID = $(this).val();
+            
+            // Store selected Pilar ID in global variable and cookie
+            selectedPilarId = pilarID;
+            if (pilarID) {
+                setCookie('selected_pilar', pilarID, 30); // Store for 30 days
+            } else {
+                eraseCookie('selected_pilar');
+            }
+            
+            // Set filtering flag to true
+            isFiltering = true;
+            
+            // Update URL without page refresh
+            updateUrlParameter('pilarID', pilarID);
+            
+            // Reload DataTable with new filter
+            isuStrategisTable.ajax.reload(function() {
+                // Reset filtering flag after data is loaded
+                isFiltering = false;
+            });
         });
         
         // Handle form submission within modal
@@ -109,7 +297,7 @@
                         showAlert('success', response.message || 'Operation completed successfully');
                         
                         // Reload only the DataTable
-                        reloadTable();
+                        isuStrategisTable.ajax.reload();
                     } else {
                         // Display error message
                         showAlert('danger', response.message || 'An error occurred');
@@ -134,7 +322,7 @@
                 },
                 complete: function() {
                     // Re-enable submit button
-                    form.find('button[type="submit"]').prop('disabled', false).html('Save');
+                    form.find('button[type="submit"]').prop('disabled', false).html('Simpan');
                 }
             });
         });
@@ -154,7 +342,7 @@
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Iya, yakin',
-cancelButtonText: 'Batal'
+                cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Perform AJAX delete
@@ -167,9 +355,8 @@ cancelButtonText: 'Batal'
                         },
                         success: function(response) {
                             if (response.success) {
-                           
                                 // Reload only the DataTable
-                                reloadTable();
+                                isuStrategisTable.ajax.reload();
                                 Swal.fire({
                                     title: 'Terhapus!',
                                     text: response.message || 'Item has been successfully deleted.',
@@ -177,7 +364,6 @@ cancelButtonText: 'Batal'
                                     confirmButtonColor: '#3085d6',
                                     confirmButtonText: 'OK'
                                 });
-        
                             } else {
                                 // Show error message
                                 showAlert('danger', response.message || 'Failed to delete Isu Strategis');
@@ -197,67 +383,231 @@ cancelButtonText: 'Batal'
         });
     });
     
-    // Function to reload DataTable
-    function reloadTable() {
-        $.ajax({
-            url: "{{ route('isu-strategis.index') }}",
-            type: 'GET',
-            dataType: 'html',
-            success: function(response) {
-                // Extract the table HTML from the response
-                var newTableHtml = $(response).find('#isuStrategisTable tbody').html();
-                
-                // Clear the current table and add the new data
-                isuStrategisTable.clear().destroy();
-                $('#isuStrategisTable tbody').html(newTableHtml);
-                
-                // Reinitialize DataTable with the same settings as initial load
-                isuStrategisTable = $('#isuStrategisTable').DataTable({
-                    responsive: true,
-                    processing: true,
-                    language: {
-                        processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>'
-                    },
-                    columnDefs: [
-                        // No column (index 0)
-                        { 
-                            targets: 0,
-                            className: 'text-center',
-                            width: '1px',
-                            orderable: true,
-                            render: function(data, type, row, meta) {
-                                return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
-                            }
-                        },
-                        // NA column (index 3)
-                                             // NA column (index 3)
-                                             { 
-                            targets: 3,
-                            className: 'text-center',
-                            width: '1px',
-                            render: function(data, type, row, meta) {
-                                return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
-                            }
-                        },
-                        // Actions column (index 4)
-                        { 
-                            targets: 4,
-                            className: 'text-center',
-                            width: '1px',
-                            orderable: false,
-                            render: function(data, type, row, meta) {
-                                return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
-                            }
-                        }
-                    ]
-                });
+    // Cookie functions
+    function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    }
+    
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+    
+    function eraseCookie(name) {   
+        document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    }
+    
+    function initDataTable() {
+        // Destroy existing DataTable if it exists
+        if ($.fn.DataTable.isDataTable('#isuStrategisTable')) {
+            $('#isuStrategisTable').DataTable().destroy();
+        }
+        
+        // Initialize DataTable with AJAX
+        isuStrategisTable = $('#isuStrategisTable').DataTable({
+            processing: true,
+            serverSide: false, // We're handling the data ourselves
+            ajax: {
+                url: '{{ route('isu-strategis.index') }}',
+                type: 'GET',
+                data: function(d) {
+                    d.renstraID = selectedRenstraId; // Use the global variable
+                    d.pilarID = selectedPilarId; // Use the global variable
+                    d.wantsJson = true;
+                },
+                // Show processing only during filtering
+                beforeSend: function() {
+                    if (!isFiltering) {
+                        $('#isuStrategisTable_processing').hide();
+                    }
+                }
             },
-            error: function() {
-                showAlert('danger', 'Failed to reload data');
+            columns: [
+                { 
+                    data: 'no', 
+                    className: 'text-center',
+                    width: '1px',
+                    orderable: false,
+                    render: function(data) {
+                        return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
+                    }
+                },
+                { data: 'nama' },
+                { 
+                    data: 'na', 
+                    className: 'text-center',
+                    width: '1px',
+                    render: function(data) {
+                        return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
+                    }
+                },
+                { 
+                    data: 'actions', 
+                    className: 'text-center',
+                    width: '1px',
+                    orderable: false,
+                    render: function(data) {
+                        return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
+                    }
+                }
+            ],
+            responsive: true,
+            drawCallback: function() {
+                // Re-initialize event handlers for dynamic content
+                initEventHandlers();
+            },
+            // Apply row class for inactive items
+            createdRow: function(row, data, dataIndex) {
+                if (data.row_class) {
+                    $(row).addClass(data.row_class);
+                }
+            },
+            // Hide processing indicator for all operations except filtering
+            language: {
+                processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>'
+            },
+            // Override the default processing display behavior
+            preDrawCallback: function() {
+                if (!isFiltering) {
+                    $('#isuStrategisTable_processing').hide();
+                }
+                return true;
+            }
+        });
+        
+        // Additional override to hide processing indicator for pagination, sorting, etc.
+        $('#isuStrategisTable').on('page.dt search.dt order.dt', function() {
+            if (!isFiltering) {
+                $('#isuStrategisTable_processing').hide();
             }
         });
     }
-
+    
+    function updateUrlParameter(key, value) {
+        var url = new URL(window.location.href);
+        
+        if (value) {
+            url.searchParams.set(key, value);
+        } else {
+            url.searchParams.delete(key);
+        }
+        
+        window.history.pushState({}, '', url.toString());
+    }
+    
+    function initEventHandlers() {
+        // Re-initialize modal loading for dynamically added buttons
+        $('.load-modal').off('click').on('click', function(e) {
+            e.preventDefault();
+            var url = $(this).data('url');
+            var title = $(this).data('title');
+            
+            // Add selected filter IDs to the URL if they exist
+            if (selectedRenstraId) {
+                url = addOrUpdateQueryParam(url, 'renstraID', selectedRenstraId);
+            }
+            
+            if (selectedPilarId) {
+                url = addOrUpdateQueryParam(url, 'pilarID', selectedPilarId);
+            }
+            
+            $('#mainModalLabel').text(title);
+            $('#mainModal .modal-body').html('<div class="text-center"><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>');
+            $('#mainModal').modal('show');
+            
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                    $('#mainModal .modal-body').html(response);
+                },
+                error: function(xhr) {
+                    console.error('AJAX Error:', xhr);
+                    $('#mainModal .modal-body').html('<div class="alert alert-danger">Error loading content</div>');
+                }
+            });
+        });
+        
+        // Re-initialize delete confirmation for dynamically added buttons
+        $('.delete-isu').off('click').on('click', function(e) {
+            e.preventDefault();
+            var isuId = $(this).data('id');
+            var deleteUrl = "{{ route('isu-strategis.destroy', ':id') }}".replace(':id', isuId);
+            
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Menghapus data?',
+                text: "Kamu yakin menghapus baris ini?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Iya, yakin',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Perform AJAX delete
+                    $.ajax({
+                        url: deleteUrl,
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            _method: 'DELETE'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                // Show success message
+                                showAlert('success', response.message || 'Isu Strategis berhasil dihapus');
+                                
+                                // Reload DataTable
+                                isuStrategisTable.ajax.reload();
+                            } else {
+                                // Show error message
+                                showAlert('danger', response.message || 'Failed to delete Isu Strategis');
+                            }
+                        },
+                        error: function(xhr) {
+                            // Handle error response
+                            var message = 'An error occurred';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            }
+                            showAlert('danger', message);
+                        }
+                    });
+                }
+            });
+        });
+    }
+    
+    // Function to add or update query parameter in URL
+    function addOrUpdateQueryParam(url, key, value) {
+        // Check if URL already has parameters
+        if (url.indexOf('?') !== -1) {
+            // Check if the specific parameter already exists
+            var regex = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+            if (url.match(regex)) {
+                return url.replace(regex, '$1' + key + '=' + value + '$2');
+            } else {
+                return url + '&' + key + '=' + value;
+            }
+        } else {
+            return url + '?' + key + '=' + value;
+        }
+    }
+    
     // Function to show alert messages
     function showAlert(type, message) {
         var alertHtml = `
@@ -276,5 +626,57 @@ cancelButtonText: 'Batal'
             $('.alert').alert('close');
         }, 5000);
     }
+    
+    // Initial data load - hide processing indicator if not filtering
+    $(document).ajaxStart(function() {
+        if (!isFiltering) {
+            $('#isuStrategisTable_processing').hide();
+        }
+    });
+    
+    // Make sure processing indicator is hidden when page loads
+    $(window).on('load', function() {
+        if (!isFiltering) {
+            setTimeout(function() {
+                $('#isuStrategisTable_processing').hide();
+            }, 200);
+        }
+    });
+
+    // Apply the stored filter values when the page is loaded or refreshed
+    $(window).on('pageshow', function(event) {
+        // This event fires when the page is shown, including when navigating back to it
+        if (event.originalEvent.persisted) {
+            // Page was loaded from cache (e.g., back button)
+            var storedRenstraId = getCookie('selected_renstra');
+            var storedPilarId = getCookie('selected_pilar');
+            
+            if (storedRenstraId) {
+                selectedRenstraId = storedRenstraId;
+                
+                // Set the select value and trigger change
+                if ($('#renstraFilter').val() !== storedRenstraId) {
+                    $('#renstraFilter').val(storedRenstraId).trigger('change');
+                }
+                
+                // Update URL parameter
+                updateUrlParameter('renstraID', storedRenstraId);
+            }
+            
+            if (storedPilarId) {
+                selectedPilarId = storedPilarId;
+                
+                // Set the select value and trigger change after renstra is loaded
+                setTimeout(function() {
+                    if ($('#pilarFilter').val() !== storedPilarId) {
+                        $('#pilarFilter').val(storedPilarId).trigger('change');
+                    }
+                    
+                    // Update URL parameter
+                    updateUrlParameter('pilarID', storedPilarId);
+                }, 500);
+            }
+        }
+    });
 </script>
 @endpush
