@@ -814,9 +814,8 @@
         <!-- Navigation -->
         <nav class="fixed top-0 left-0 w-full bg-white bg-opacity-90 backdrop-blur-md shadow-sm z-50">
             <div class="container flex justify-between items-center py-4">
-                <a href="#" class="text-2xl font-bold text-gray-900">
-                    <span style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">SIPROKER</span>
-                </a>
+            <img src="{{ asset('asset/itp.png') }}" alt="Logo" style="width: 50px;" >
+       
                 
                 @if (Route::has('login'))
                     <div class="flex items-center gap-4 mb-4 mt-4">
