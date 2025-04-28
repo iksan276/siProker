@@ -13,7 +13,7 @@ class RenstraController extends Controller
     public function index()
     {
         $renstras = Renstra::with(['createdBy', 'editedBy'])
-        ->orderBy('DCreated', 'desc')
+        ->orderBy('RenstraID', 'asc')
         ->get();
         return view('renstras.index', compact('renstras'));
     }

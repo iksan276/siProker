@@ -2,8 +2,8 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2">Program Rektor Management</h1>
-<p class="mb-4">Manage all Program Rektor in the system.</p>
+<h1 class="h3 mb-2">Program Rektor</h1>
+<p class="mb-4">Kelola Master Program Rektor.</p>
 
 <!-- Alert Container for AJAX responses -->
 <div id="alertContainer"></div>

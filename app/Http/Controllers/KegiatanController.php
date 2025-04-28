@@ -29,7 +29,7 @@ class KegiatanController extends Controller
         }
         
         // Get the filtered results
-        $kegiatans = $kegiatansQuery->orderBy('KegiatanID', 'desc')->get();
+        $kegiatans = $kegiatansQuery->orderBy('KegiatanID', 'asc')->get();
         
         // Get the selected filter value (for re-populating the select)
         $selectedProgramRektor = $request->programRektorID;

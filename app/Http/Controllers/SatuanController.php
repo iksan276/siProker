@@ -13,7 +13,7 @@ class SatuanController extends Controller
     public function index()
     {
         $satuans = Satuan::with(['createdBy', 'editedBy'])
-            ->orderBy('SatuanID', 'desc')
+            ->orderBy('SatuanID', 'asc')
             ->get();
         return view('satuans.index', compact('satuans'));
     }

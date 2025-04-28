@@ -13,7 +13,7 @@ class UnitController extends Controller
     public function index()
     {
         $units = Unit::with(['createdBy', 'editedBy'])
-            ->orderBy('UnitID', 'desc')
+            ->orderBy('UnitID', 'asc')
             ->get();
         return view('units.index', compact('units'));
     }

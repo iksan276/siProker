@@ -2,8 +2,8 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2 text-gray-800">Mata Anggaran Management</h1>
-<p class="mb-4">Manage all Mata Anggaran in the system.</p>
+<h1 class="h3 mb-2 text-gray-800">Mata Anggaran</h1>
+<p class="mb-4">Kelola Master Mata Anggaran.</p>
 
 <!-- Alert Container for AJAX responses -->
 <div id="alertContainer"></div>

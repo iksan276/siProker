@@ -34,7 +34,7 @@ class IndikatorKinerjaController extends Controller
         $indikatorKinerjasQuery = IndikatorKinerja::with(['satuan', 'createdBy', 'editedBy']);
         
         // Get all results without filtering by RenstraID
-        $indikatorKinerjas = $indikatorKinerjasQuery->orderBy('IndikatorKinerjaID', 'desc')->get();
+        $indikatorKinerjas = $indikatorKinerjasQuery->orderBy('IndikatorKinerjaID', 'asc')->get();
         
         // Generate year labels based on selected renstra
         $yearLabels = [];

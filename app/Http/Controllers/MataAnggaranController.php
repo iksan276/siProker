@@ -13,7 +13,7 @@ class MataAnggaranController extends Controller
     public function index()
     {
         $mataAnggarans = MataAnggaran::with(['createdBy', 'editedBy'])
-            ->orderBy('MataAnggaranID', 'desc')
+            ->orderBy('MataAnggaranID', 'asc')
             ->get();
         return view('mataAnggarans.index', compact('mataAnggarans'));
     }

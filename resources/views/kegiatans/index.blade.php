@@ -2,8 +2,8 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2">Kegiatan Management</h1>
-<p class="mb-4">Manage all Kegiatan in the system.</p>
+<h1 class="h3 mb-2">Kegiatan</h1>
+<p class="mb-4">Kelola Master Kegiatan.</p>
 
 <!-- Alert Container for AJAX responses -->
 <div id="alertContainer"></div>

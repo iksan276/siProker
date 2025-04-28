@@ -17,7 +17,7 @@ class JenisKegiatanController extends Controller
         $jenisKegiatansQuery = JenisKegiatan::with(['createdBy', 'editedBy']);
         
         // Get the filtered results
-        $jenisKegiatans = $jenisKegiatansQuery->orderBy('DCreated', 'desc')->get();
+        $jenisKegiatans = $jenisKegiatansQuery->orderBy('JenisKegiatanID', 'asc')->get();
         
         // If it's an AJAX request, return JSON data for DataTable
         if ($request->ajax()) {

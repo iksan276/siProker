@@ -45,7 +45,7 @@ class ProgramRektorController extends Controller
         }
         
         // Get the filtered results
-        $programRektors = $programRektorsQuery->orderBy('DCreated', 'desc')->get();
+        $programRektors = $programRektorsQuery->orderBy('ProgramRektorID', 'asc')->get();
         
         // Get the selected filter values
         $selectedProgramPengembangan = $request->programPengembanganID;

@@ -2,8 +2,8 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2">Program Pengembangan Management</h1>
-<p class="mb-4">Manage all Program Pengembangan in the system.</p>
+<h1 class="h3 mb-2">Program Pengembangan (PP)</h1>
+<p class="mb-4">Kelola Master Program Pengembangan (PP).</p>
 
 <!-- Alert Container for AJAX responses -->
 <div id="alertContainer"></div>
@@ -13,7 +13,7 @@
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
         <h6 class="m-0 font-weight-bold text-primary">Program Pengembangan List</h6>
         <div>
-            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('program-pengembangans.create') }}" data-title="Tambah Program Pengembangan">
+            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('program-pengembangans.create') }}" data-title="Tambah Program Pengembangan (PP)">
                 <i class="fas fa-plus fa-sm"></i> Tambah Program Pengembangan
             </button>
         </div>
@@ -45,10 +45,10 @@
                             @endif
                         </td>
                         <td class="text-center" style="white-space:nowrap;width:1px">
-                            <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('program-pengembangans.show', $program->ProgramPengembanganID) }}" data-title="Detail Program Pengembangan">
+                            <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('program-pengembangans.show', $program->ProgramPengembanganID) }}" data-title="Detail Program Pengembangan (PP)">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('program-pengembangans.edit', $program->ProgramPengembanganID) }}" data-title="Edit Program Pengembangan">
+                            <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('program-pengembangans.edit', $program->ProgramPengembanganID) }}" data-title="Edit Program Pengembangan (PP)">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button type="button" class="btn btn-danger btn-square btn-sm delete-program" data-id="{{ $program->ProgramPengembanganID }}">

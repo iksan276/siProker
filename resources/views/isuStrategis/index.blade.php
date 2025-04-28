@@ -2,8 +2,8 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2">Isu Strategis Management</h1>
-<p class="mb-4">Manage all Isu Strategis in the system.</p>
+<h1 class="h3 mb-2">Isu Strategis</h1>
+<p class="mb-4">Kelola Master Isu Strategis.</p>
 
 <!-- Alert Container for AJAX responses -->
 <div id="alertContainer"></div>

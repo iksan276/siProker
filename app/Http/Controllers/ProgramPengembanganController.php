@@ -14,7 +14,7 @@ class ProgramPengembanganController extends Controller
     public function index()
     {
         $programPengembangans = ProgramPengembangan::with(['isuStrategis', 'createdBy', 'editedBy'])
-        ->orderBy('DCreated', 'desc')
+        ->orderBy('ProgramPengembanganID', 'asc')
         ->get();
         return view('programPengembangans.index', compact('programPengembangans'));
     }

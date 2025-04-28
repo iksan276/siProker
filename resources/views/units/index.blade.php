@@ -2,8 +2,8 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2">Unit Management</h1>
-<p class="mb-4">Manage all Units in the system.</p>
+<h1 class="h3 mb-2">Unit</h1>
+<p class="mb-4">Kelola Master Unit.</p>
 
 <!-- Alert Container for AJAX responses -->
 <div id="alertContainer"></div>

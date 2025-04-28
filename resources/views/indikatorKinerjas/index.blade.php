@@ -2,8 +2,8 @@
 
 @section('content')
 <!-- Page Heading -->
-<h1 class="h3 mb-2">Indikator Kinerja Management</h1>
-<p class="mb-4">Manage all Indikator Kinerja in the system.</p>
+<h1 class="h3 mb-2">Indikator Kinerja</h1>
+<p class="mb-4">Kelola Master Indikator Kinerja.</p>
 
 <!-- Alert Container for AJAX responses -->
 <div id="alertContainer"></div>

@@ -13,7 +13,7 @@
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
         <h6 class="m-0 font-weight-bold text-primary">Renstra List</h6>
         <div>
-            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('renstras.create') }}" data-title="Tambah Renstra">
+            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('renstras.create') }}" data-title="Tambah Rencana Strategi (Renstra)">
                 <i class="fas fa-plus fa-sm"></i> Tambah Rencana Strategi (Renstra)
             </button>
         </div>
@@ -47,10 +47,10 @@
                             @endif
                         </td>
                         <td style="white-space:nowrap;width:1px" class="text-center">
-                            <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('renstras.show', $renstra->RenstraID) }}" data-title="Detail Renstra">
+                            <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('renstras.show', $renstra->RenstraID) }}" data-title="Detail Rencana Strategi (Renstra)">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('renstras.edit', $renstra->RenstraID) }}" data-title="Edit Renstra">
+                            <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('renstras.edit', $renstra->RenstraID) }}" data-title="Edit Rencana Strategi (Renstra)">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button type="button" class="btn btn-danger btn-square btn-sm delete-renstra" data-id="{{ $renstra->RenstraID }}">

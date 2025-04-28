@@ -27,7 +27,7 @@ class PilarController extends Controller
         }
         
         // Get the filtered results
-        $pilars = $pilarsQuery->orderBy('DCreated', 'desc')->get();
+        $pilars = $pilarsQuery->orderBy('PilarID', 'asc')->get();
         
         // Get the selected filter value (for re-populating the select)
         $selectedRenstra = $request->renstraID;

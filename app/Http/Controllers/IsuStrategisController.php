@@ -14,7 +14,7 @@ class IsuStrategisController extends Controller
     public function index()
     {
         $isuStrategis = IsuStrategis::with(['pilar', 'createdBy', 'editedBy'])
-            ->orderBy('IsuID', 'desc')
+            ->orderBy('IsuID', 'asc')
             ->get();
         return view('isuStrategis.index', compact('isuStrategis'));
     }
