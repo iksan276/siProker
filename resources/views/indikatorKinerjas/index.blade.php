@@ -13,16 +13,7 @@
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
         <h6 class="m-0 font-weight-bold text-primary">Indikator Kinerja List</h6>
         <div class="d-flex align-items-center">
-            <div class="mr-2">
-                <select id="renstraFilter" class="form-control select2-filter">
-                    <option value="">-- Pilih Renstra (Untuk Label Tahun) --</option>
-                    @foreach($renstras as $renstra)
-                        <option value="{{ $renstra->RenstraID }}" {{ isset($selectedRenstraID) && $selectedRenstraID == $renstra->RenstraID ? 'selected' : '' }}>
-                            {{ $renstra->Nama }} ({{ $renstra->PeriodeMulai }} - {{ $renstra->PeriodeSelesai }})
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+          
             <div>
                <a href="{{ route('indikator-kinerjas.export.excel') }}" class="btn btn-success btn-sm">
                     <i class="fas fa-file-excel fa-sm"></i> Export Excel
@@ -34,6 +25,17 @@
         </div>
     </div>
     <div class="card-body">
+    <div class="form-group mb-5">
+    <label for="renstraFilter">Filter Renstra:</label>
+                <select id="renstraFilter" class="form-control select2-filter">
+                    <option value="">-- Pilih Renstra (Untuk Label Tahun) --</option>
+                    @foreach($renstras as $renstra)
+                        <option value="{{ $renstra->RenstraID }}" {{ isset($selectedRenstraID) && $selectedRenstraID == $renstra->RenstraID ? 'selected' : '' }}>
+                            {{ $renstra->Nama }} ({{ $renstra->PeriodeMulai }} - {{ $renstra->PeriodeSelesai }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
         <div class="table-responsive">
             <table class="table table-bordered" id="indikatorKinerjaTable" width="100%" cellspacing="0">
                 <thead>

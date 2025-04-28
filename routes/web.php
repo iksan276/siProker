@@ -45,7 +45,9 @@ Route::middleware('auth')->group(function () {
     // Pilar routes - accessible by all users
     Route::resource('pilars', PilarController::class);
     Route::get('/api/pilars-by-renstra', 'App\Http\Controllers\ApiController@getPilarsByRenstra')->name('api.pilars-by-renstra');
-
+// Add this line with the other API routes
+    Route::get('/api/isus-by-pilar', 'App\Http\Controllers\ApiController@getIsusByPilar')->name('api.isus-by-pilar');
+    Route::get('/api/programs-by-isu', 'App\Http\Controllers\ApiController@getProgramsByIsu')->name('api.programs-by-isu');
     
     Route::resource('kegiatans', KegiatanController::class);
     Route::resource('program-rektors', ProgramRektorController::class);
