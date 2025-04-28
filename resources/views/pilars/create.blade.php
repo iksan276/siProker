@@ -2,10 +2,10 @@
     @csrf
     <div class="form-group">
         <label for="RenstraID">Renstra</label>
-        <select name="RenstraID" id="RenstraID" class="form-control select2" >
-        <option value="" disabled selected></option>
+        <select name="RenstraID" id="RenstraID" class="form-control select2">
+            <option value="" disabled selected></option>
             @foreach($renstras as $renstra)
-                <option value="{{ $renstra->RenstraID }}">{{ $renstra->Nama }}</option>
+                <option value="{{ $renstra->RenstraID }}" {{ isset($selectedRenstra) && $selectedRenstra == $renstra->RenstraID ? 'selected' : '' }}>{{ $renstra->Nama }}</option>
             @endforeach
         </select>
     </div>
@@ -13,15 +13,14 @@
         <label for="Nama">Nama</label>
         <textarea name="Nama" id="Nama" class="form-control" rows="3"></textarea>
     </div>
-        <div class="form-group">
+    <div class="form-group">
         <label for="NA">NA</label>
-        <select name="NA" id="NA" class="form-control" >
-        <option value="Y">Non Aktif</option>
-        <option value="N" selected>Aktif</option>
+        <select name="NA" id="NA" class="form-control">
+            <option value="Y">Non Aktif</option>
+            <option value="N" selected>Aktif</option>
         </select>
     </div>
    
-  
     <div class="modal-footer">
         <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
         <button class="btn btn-primary" type="submit">Simpan</button>
@@ -29,6 +28,35 @@
 </form>
 
 <script>
+$(document).ready(function() {
+    // Initialize Select2
+    $('#RenstraID').select2({
+        placeholder: "Pilih Renstra",
+        dropdownParent: $('#mainModal .modal-body'),
+        width: '100%'
+    });
+    
+    // Get the selected value from cookie if not already set
+    if (!$('#RenstraID').val()) {
+        var cookieValue = getCookie('selected_renstra');
+        if (cookieValue) {
+            $('#RenstraID').val(cookieValue).trigger('change');
+        }
+    }
+    
+    // Cookie function
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+});
+
 document.getElementById('pilarForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent the form from traditional submission
     

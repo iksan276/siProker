@@ -245,11 +245,15 @@ class PilarController extends Controller
         $renstras = Renstra::where('NA', 'N')->get();
         $users = User::all();
         
+        // Get the selected Renstra from the request
+        $selectedRenstra = request('renstraID');
+        
         if (request()->ajax()) {
-            return view('pilars.create', compact('renstras', 'users'))->render();
+            return view('pilars.create', compact('renstras', 'users', 'selectedRenstra'))->render();
         }
-        return view('pilars.create', compact('renstras', 'users'));
+        return view('pilars.create', compact('renstras', 'users', 'selectedRenstra'));
     }
+
 
     public function store(Request $request)
     {

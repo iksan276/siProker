@@ -561,48 +561,51 @@
         }
         
         // Add a visual indicator for current network status in the navbar
-        const addNetworkIndicator = () => {
-            const navbar = document.querySelector('.navbar-nav');
-            if (navbar) {
-                const indicator = document.createElement('li');
-                indicator.className = 'nav-item dropdown no-arrow mx-1';
-                indicator.innerHTML = `
-                    <a class="nav-link dropdown-toggle" href="#" id="networkIndicator" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-wifi fa-fw"></i>
-                        <span id="network-indicator-status" class="badge badge-success badge-counter">Online</span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                         aria-labelledby="networkIndicator">
-                        <div class="dropdown-header">Status Jaringan</div>
-                        <div class="dropdown-item">
-                            <div class="small" id="connection-status-detail">Koneksi internet tersedia</div>
-                        </div>
-                        <div class="dropdown-item">
-                            <button class="btn btn-sm btn-primary btn-block" onclick="checkInternetConnection()">
-                                <i class="fas fa-sync-alt fa-sm"></i> Periksa Koneksi
-                            </button>
-                        </div>
+       // Add a visual indicator for current network status in the navbar
+const addNetworkIndicator = () => {
+    // Use the dedicated check-internet div instead of inserting before user dropdown
+    const checkInternetDiv = document.querySelector('.check-internet');
+    if (checkInternetDiv) {
+        // Clear any existing content
+        checkInternetDiv.innerHTML = `
+            <div style="margin-top:13px">
+                <a class="nav-link" href="#" id="networkIndicator" role="button"
+                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-wifi fa-fw mr-1" style="font-size:12px"></i>
+                    <span id="network-indicator-status" class="badge badge-success badge-counter ml-1" style="font-size:8px">Online</span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                     aria-labelledby="networkIndicator">
+                    <div class="dropdown-header">Status Jaringan</div>
+                    <div class="dropdown-item">
+                        <div class="small" id="connection-status-detail">Koneksi internet tersedia</div>
                     </div>
-                `;
-                navbar.appendChild(indicator);
-                
-                // Make the checkInternetConnection function globally accessible
-                window.checkInternetConnection = checkInternetConnection;
-                
-                // Update indicator based on current status
-                updateNetworkIndicator(navigator.onLine);
-                
-                // Listen for online/offline events to update the indicator
-                window.addEventListener('online', function() {
-                    updateNetworkIndicator(true);
-                });
-                
-                window.addEventListener('offline', function() {
-                    updateNetworkIndicator(false);
-                });
-            }
-        };
+                    <div class="dropdown-item">
+                        <button class="btn btn-sm btn-primary btn-block" onclick="checkInternetConnection()">
+                            <i class="fas fa-sync-alt fa-sm"></i> Periksa Koneksi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Make the checkInternetConnection function globally accessible
+        window.checkInternetConnection = checkInternetConnection;
+        
+        // Update indicator based on current status
+        updateNetworkIndicator(navigator.onLine);
+        
+        // Listen for online/offline events to update the indicator
+        window.addEventListener('online', function() {
+            updateNetworkIndicator(true);
+        });
+        
+        window.addEventListener('offline', function() {
+            updateNetworkIndicator(false);
+        });
+    }
+};
+
         
         // Update the network indicator in the navbar
         function updateNetworkIndicator(isOnline) {

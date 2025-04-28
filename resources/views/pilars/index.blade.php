@@ -12,33 +12,32 @@
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
         <h6 class="m-0 font-weight-bold text-primary">Pilar List</h6>
-        <div class="d-flex align-items-center">
-            <div class="mr-2">
-                <select id="renstraFilter" class="form-control select2-filter">
-                    <option value="">-- Pilih Renstra --</option>
-                    @foreach($renstras as $renstra)
-                        <option value="{{ $renstra->RenstraID }}" {{ isset($selectedRenstra) && $selectedRenstra == $renstra->RenstraID ? 'selected' : '' }}>
-                            {{ $renstra->Nama }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            @if(auth()->user()->isAdmin())
-            <div>
-                <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('pilars.create') }}" data-title="Tambah Pilar">
-                    <i class="fas fa-plus fa-sm"></i> Tambah Pilar
-                </button>
-            </div>
-            @endif
+        @if(auth()->user()->isAdmin())
+        <div>
+            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('pilars.create') }}" data-title="Tambah Pilar">
+                <i class="fas fa-plus fa-sm"></i> Tambah Pilar
+            </button>
         </div>
+        @endif
     </div>
     <div class="card-body">
+        <!-- Move filter here and make it full width -->
+        <div class="form-group">
+            <label for="renstraFilter">Filter Renstra:</label>
+            <select id="renstraFilter" class="form-control select2-filter">
+                <option value="">-- Pilih Renstra --</option>
+                @foreach($renstras as $renstra)
+                    <option value="{{ $renstra->RenstraID }}" {{ isset($selectedRenstra) && $selectedRenstra == $renstra->RenstraID ? 'selected' : '' }}>
+                        {{ $renstra->Nama }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
         <div class="table-responsive">
             <table class="table table-bordered" id="pilarTable" width="100%" cellspacing="0">
                 <thead>
                     <tr class="text-center text-dark">
                         <th style="white-space:nowrap">No</th>
-                        <th style="white-space:nowrap">Renstra</th>
                         <th style="white-space:nowrap">Nama</th>
                         <th style="white-space:nowrap">NA</th>
                         @if(auth()->user()->isAdmin())
@@ -59,14 +58,26 @@
 <script>
     var pilarTable;
     var isFiltering = false;
+    var selectedRenstraId = getCookie('selected_renstra') || "{{ $selectedRenstra ?? '' }}";
     
     $(document).ready(function () {
         // Initialize DataTable with AJAX source
         initDataTable();
         
+        // Set the filter value from cookie if available
+        if (selectedRenstraId) {
+            $('#renstraFilter').val(selectedRenstraId);
+        }
+        
         // Handle filter change
         $('#renstraFilter').on('change', function() {
             var renstraID = $(this).val();
+            
+            // Store selected Renstra ID in global variable
+            selectedRenstraId = renstraID;
+            
+            // Store in cookie for persistence
+            setCookie('selected_renstra', renstraID, 30); // Store for 30 days
             
             // Set filtering flag to true
             isFiltering = true;
@@ -152,7 +163,7 @@
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Iya, yakin',
-cancelButtonText: 'Batal'
+                cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Perform AJAX delete
@@ -196,6 +207,32 @@ cancelButtonText: 'Batal'
         @endif
     });
     
+    // Cookie functions
+    function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    }
+    
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+    
+    function eraseCookie(name) {   
+        document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    }
+    
     function initDataTable() {
         // Destroy existing DataTable if it exists
         if ($.fn.DataTable.isDataTable('#pilarTable')) {
@@ -229,7 +266,6 @@ cancelButtonText: 'Batal'
                         return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
                     }
                 },
-                { data: 'renstra' },
                 { data: 'nama' },
                 { 
                     data: 'na', 
@@ -302,6 +338,11 @@ cancelButtonText: 'Batal'
             var url = $(this).data('url');
             var title = $(this).data('title');
             
+            // Add selected Renstra ID to the URL if it exists
+            if (selectedRenstraId) {
+                url = addOrUpdateQueryParam(url, 'renstraID', selectedRenstraId);
+            }
+            
             $('#mainModalLabel').text(title);
             $('#mainModal .modal-body').html('<div class="text-center"><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>');
             $('#mainModal').modal('show');
@@ -311,7 +352,35 @@ cancelButtonText: 'Batal'
                 type: 'GET',
                 success: function(response) {
                     $('#mainModal .modal-body').html(response);
-                    initModalSelect2();
+                    
+                    // Initialize Select2
+                    if (typeof initModalSelect2 === 'function') {
+                        initModalSelect2();
+                    }
+                    
+                    // Set the Renstra field value with a more robust approach
+                    if (selectedRenstraId && $('#RenstraID').length) {
+                        // First destroy and reinitialize Select2 to ensure clean state
+                        if ($('#RenstraID').hasClass('select2-hidden-accessible')) {
+                            $('#RenstraID').select2('destroy');
+                        }
+                        
+                        // Set the value directly on the DOM element
+                        $('#RenstraID').val(selectedRenstraId);
+                        
+                        // Reinitialize Select2
+                        $('#RenstraID').select2({
+                            placeholder: "Pilih Renstra",
+                            allowClear: true,
+                            dropdownParent: $('#mainModal .modal-body'),
+                            width: '100%'
+                        });
+                        
+                        // Force a change event after initialization
+                        setTimeout(function() {
+                            $('#RenstraID').trigger('change.select2');
+                        }, 200);
+                    }
                 },
                 error: function(xhr) {
                     console.error('AJAX Error:', xhr);
@@ -336,7 +405,7 @@ cancelButtonText: 'Batal'
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Iya, yakin',
-cancelButtonText: 'Batal'
+                cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Perform AJAX delete
@@ -372,6 +441,22 @@ cancelButtonText: 'Batal'
             });
         });
         @endif
+    }
+    
+    // Function to add or update query parameter in URL
+    function addOrUpdateQueryParam(url, key, value) {
+        // Check if URL already has parameters
+        if (url.indexOf('?') !== -1) {
+            // Check if the specific parameter already exists
+            var regex = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+            if (url.match(regex)) {
+                return url.replace(regex, '$1' + key + '=' + value + '$2');
+            } else {
+                return url + '&' + key + '=' + value;
+            }
+        } else {
+            return url + '?' + key + '=' + value;
+        }
     }
     
     // Function to show alert messages
@@ -410,5 +495,3 @@ cancelButtonText: 'Batal'
     });
 </script>
 @endpush
-
-              
