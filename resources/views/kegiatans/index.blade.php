@@ -88,7 +88,6 @@
                 <thead>
                     <tr class="text-center text-dark">
                         <th style="white-space:nowrap">No</th>
-                        <th style="white-space:nowrap">Program Rektor</th>
                         <th style="white-space:nowrap">Nama</th>
                         <th style="white-space:nowrap">Tanggal Mulai</th>
                         <th style="white-space:nowrap">Tanggal Selesai</th>
@@ -785,7 +784,6 @@
                         return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
                     }
                 },
-                { data: 'program_rektor' },
                 { data: 'nama' },
                 { data: 'tanggal_mulai', className: 'text-center' },
                 { data: 'tanggal_selesai', className: 'text-center' },
