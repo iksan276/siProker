@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>{{ $title ?? 'Admin Panel' }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Load jQuery first -->
     <script src="{{ asset('sb-admin/vendor/jquery/jquery.min.js') }}"></script>
     
