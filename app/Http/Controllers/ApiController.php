@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Pilar;
 use App\Models\IsuStrategis;
 use App\Models\ProgramPengembangan;
+use App\Models\ProgramRektor;
 
 class ApiController extends Controller
 {
@@ -35,4 +36,17 @@ class ApiController extends Controller
                                        ->get();
         return response()->json(['programs' => $programs]);
     }
+
+
+    public function getProgramRektor(Request $request)
+    {
+        $programPengembanganID = $request->programPengembanganID;
+        
+        $programRektors = ProgramRektor::where('ProgramPengembanganID', $programPengembanganID)
+                                ->where('NA', 'N')
+                                ->get();
+        
+        return response()->json(['programRektors' => $programRektors]);
+    }
+
 }

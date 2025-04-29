@@ -1,11 +1,12 @@
 <form action="{{ route('program-rektors.store') }}" method="POST" class="modal-form" id="programRektorForm">
     @csrf
+    
     <div class="form-group">
         <label for="ProgramPengembanganID">Program Pengembangan</label>
         <select name="ProgramPengembanganID" id="ProgramPengembanganID" class="form-control select2">
             <option value="" disabled selected></option>
             @foreach($programPengembangans as $program)
-                <option value="{{ $program->ProgramPengembanganID }}">{{ $program->Nama }}</option>
+                <option value="{{ $program->ProgramPengembanganID }}" {{ isset($selectedProgramPengembangan) && $selectedProgramPengembangan == $program->ProgramPengembanganID ? 'selected' : '' }}>{{ $program->Nama }}</option>
             @endforeach
         </select>
     </div>
@@ -15,7 +16,7 @@
         <select name="IndikatorKinerjaID" id="IndikatorKinerjaID" class="form-control select2">
             <option value="" disabled selected></option>
             @foreach($indikatorKinerjas as $indikatorKinerja)
-                <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}">{{ $indikatorKinerja->Nama }}</option>
+                <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}" {{ isset($selectedIndikatorKinerja) && $selectedIndikatorKinerja == $indikatorKinerja->IndikatorKinerjaID ? 'selected' : '' }}>{{ $indikatorKinerja->Nama }}</option>
             @endforeach
         </select>
     </div>
@@ -27,7 +28,7 @@
     
     <div class="row">
         <div class="col-sm-6">
-        <div class="form-group">
+            <div class="form-group">
                 <label for="Output">Output</label>
                 <textarea name="Output" id="Output" class="form-control" rows="3"></textarea>
             </div>
@@ -136,6 +137,36 @@
 </form>
 
 <script>
+$(document).ready(function() {
+    // Get the selected values from cookies if not already set
+ 
+    if (!$('#ProgramPengembanganID').val()) {
+        var programPengembanganCookie = getCookie('selected_program_pengembangan');
+        if (programPengembanganCookie) {
+            $('#ProgramPengembanganID').val(programPengembanganCookie).trigger('change');
+        }
+    }
+    
+    if (!$('#IndikatorKinerjaID').val()) {
+        var indikatorKinerjaCookie = getCookie('selected_indikator_kinerja');
+        if (indikatorKinerjaCookie) {
+            $('#IndikatorKinerjaID').val(indikatorKinerjaCookie).trigger('change');
+        }
+    }
+      
+    // Cookie function
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+});
+
 function validateNumericInput(input, errorId) {
     const errorElement = document.getElementById(errorId);
     const submitBtn = document.getElementById('submitBtn');
@@ -184,7 +215,7 @@ document.getElementById('programRektorForm').addEventListener('submit', function
     
     // Validate empty fields
     const programPengembanganID = document.getElementById('ProgramPengembanganID').value.trim();
-    const indikatorKinerjaID = document.getElementById('IndikatorKinerjaID').value.trim(); // Added validation
+    const indikatorKinerjaID = document.getElementById('IndikatorKinerjaID').value.trim();
     const nama = document.getElementById('Nama').value.trim();
     const output = document.getElementById('Output').value.trim();
     const outcome = document.getElementById('Outcome').value.trim();
@@ -248,8 +279,9 @@ document.getElementById('programRektorForm').addEventListener('submit', function
     if (!pelaksanaID || pelaksanaID.length === 0) {
         emptyFields.push('Pelaksana harus dipilih');
     }
-     // If there are empty fields, show the error message
-     if (emptyFields.length > 0) {
+    
+    // If there are empty fields, show the error message
+    if (emptyFields.length > 0) {
         const errorList = '<ul style="text-align:left;margin-left:40px;margin-right:50px" class="text-danger">' + 
             emptyFields.map(error => `<li>${error}</li>`).join('') + 
             '</ul>';
@@ -264,6 +296,8 @@ document.getElementById('programRektorForm').addEventListener('submit', function
         return false;
     }
     
- 
+    // If validation passes, let the form submission continue via AJAX
+    // (This is handled by the event handler in index.blade.php)
 });
 </script>
+

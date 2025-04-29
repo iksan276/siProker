@@ -48,6 +48,8 @@ Route::middleware('auth')->group(function () {
 // Add this line with the other API routes
     Route::get('/api/isus-by-pilar', 'App\Http\Controllers\ApiController@getIsusByPilar')->name('api.isus-by-pilar');
     Route::get('/api/programs-by-isu', 'App\Http\Controllers\ApiController@getProgramsByIsu')->name('api.programs-by-isu');
+    Route::get('/api/programs-by-rektor', 'App\Http\Controllers\ApiController@getProgramRektor')->name('api.programs-by-rektor');
+
     
     Route::resource('kegiatans', KegiatanController::class);
     Route::resource('program-rektors', ProgramRektorController::class);

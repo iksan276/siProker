@@ -10,6 +10,9 @@ use App\Models\MataAnggaran;
 use App\Models\Satuan;
 use App\Models\Unit;
 use App\Models\User;
+use App\Models\Renstra;
+use App\Models\Pilar;
+use App\Models\IsuStrategis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -20,12 +23,24 @@ class ProgramRektorController extends Controller
 {
     public function index(Request $request)
     {
+        // Get all active renstras for the filter
+        $renstras = Renstra::where('NA', 'N')->get();
+        
+        // Get all active pilars for the filter
+        $pilars = Pilar::where('NA', 'N')->get();
+        
+        // Get all active isu strategis for the filter
+        $isuStrategis = IsuStrategis::where('NA', 'N')->get();
+        
         // Get all program pengembangans for the filter
         $programPengembangans = ProgramPengembangan::where('NA', 'N')->get();
         
+        // Get all indikator kinerjas for the filter
+        $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get();
+        
         // Base query
         $programRektorsQuery = ProgramRektor::with([
-            'programPengembangan', 
+            'programPengembangan.isuStrategis.pilar.renstra', 
             'indikatorKinerja', 
             'jenisKegiatan', 
             'satuan', 
@@ -33,6 +48,81 @@ class ProgramRektorController extends Controller
             'createdBy', 
             'editedBy'
         ]);
+        
+        // Apply filter if renstraID is provided
+        if ($request->has('renstraID') && $request->renstraID) {
+            // Filter pilars by renstraID
+            $pilarIds = Pilar::where('RenstraID', $request->renstraID)
+                ->where('NA', 'N')
+                ->pluck('PilarID');
+                
+            // Filter isu strategis by pilar IDs
+            $isuIds = IsuStrategis::whereIn('PilarID', $pilarIds)
+                ->where('NA', 'N')
+                ->pluck('IsuID');
+                
+            // Filter program pengembangans by isu IDs
+            $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
+                ->where('NA', 'N')
+                ->pluck('ProgramPengembanganID');
+                
+            $programRektorsQuery->whereIn('ProgramPengembanganID', $programIds);
+            
+            // Update pilars list based on selected renstra
+            $pilars = Pilar::where('RenstraID', $request->renstraID)
+                ->where('NA', 'N')
+                ->get();
+                
+            // Update isu strategis list based on filtered pilars
+            $isuStrategis = IsuStrategis::whereIn('PilarID', $pilarIds)
+                ->where('NA', 'N')
+                ->get();
+                
+            // Update program pengembangans list based on filtered isus
+            $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
+                ->where('NA', 'N')
+                ->get();
+        }
+        
+        // Apply filter if pilarID is provided
+        if ($request->has('pilarID') && $request->pilarID) {
+            // Filter isu strategis by pilarID
+            $isuIds = IsuStrategis::where('PilarID', $request->pilarID)
+                ->where('NA', 'N')
+                ->pluck('IsuID');
+                
+            // Filter program pengembangans by isu IDs
+            $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
+                ->where('NA', 'N')
+                ->pluck('ProgramPengembanganID');
+                
+            $programRektorsQuery->whereIn('ProgramPengembanganID', $programIds);
+            
+            // Update isu strategis list based on selected pilar
+            $isuStrategis = IsuStrategis::where('PilarID', $request->pilarID)
+                ->where('NA', 'N')
+                ->get();
+                
+            // Update program pengembangans list based on filtered isus
+            $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
+                ->where('NA', 'N')
+                ->get();
+        }
+        
+        // Apply filter if isuID is provided
+        if ($request->has('isuID') && $request->isuID) {
+            // Filter program pengembangans by isuID
+            $programIds = ProgramPengembangan::where('IsuID', $request->isuID)
+                ->where('NA', 'N')
+                ->pluck('ProgramPengembanganID');
+                
+            $programRektorsQuery->whereIn('ProgramPengembanganID', $programIds);
+            
+            // Update program pengembangans list based on selected isu
+            $programPengembangans = ProgramPengembangan::where('IsuID', $request->isuID)
+                ->where('NA', 'N')
+                ->get();
+        }
         
         // Apply filter if programPengembanganID is provided
         if ($request->has('programPengembanganID') && $request->programPengembanganID) {
@@ -47,12 +137,12 @@ class ProgramRektorController extends Controller
         // Get the filtered results
         $programRektors = $programRektorsQuery->orderBy('ProgramRektorID', 'asc')->get();
         
-        // Get the selected filter values
+        // Get the selected filter values (for re-populating the selects)
+        $selectedRenstra = $request->renstraID;
+        $selectedPilar = $request->pilarID;
+        $selectedIsu = $request->isuID;
         $selectedProgramPengembangan = $request->programPengembanganID;
         $selectedIndikatorKinerja = $request->indikatorKinerjaID;
-        
-        // Get all indikator kinerjas for the filter
-        $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get();
         
         // If it's an AJAX request, return JSON data for DataTable
         if ($request->ajax()) {
@@ -121,8 +211,6 @@ class ProgramRektorController extends Controller
                     'actions' => $actions,
                     'row_class' => $program->NA == 'Y' ? 'bg-light text-muted' : ''
                 ];
-
-                
             }
             
             return response()->json([
@@ -130,11 +218,27 @@ class ProgramRektorController extends Controller
             ]);
         }
         
-        return view('programRektors.index', compact('programRektors', 'programPengembangans', 'indikatorKinerjas', 'selectedProgramPengembangan', 'selectedIndikatorKinerja'));
+        return view('programRektors.index', compact(
+            'programRektors', 
+            'renstras', 
+            'pilars', 
+            'isuStrategis', 
+            'programPengembangans', 
+            'indikatorKinerjas', 
+            'selectedRenstra', 
+            'selectedPilar', 
+            'selectedIsu', 
+            'selectedProgramPengembangan', 
+            'selectedIndikatorKinerja'
+        ));
     }
 
     public function create()
     {
+        // Get all active renstras, pilars, and isu strategis
+        $renstras = Renstra::where('NA', 'N')->get();
+        $pilars = Pilar::where('NA', 'N')->get();
+        $isuStrategis = IsuStrategis::where('NA', 'N')->get();
         $programPengembangans = ProgramPengembangan::where('NA', 'N')->get();
         $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get();
         $jenisKegiatans = JenisKegiatan::where('NA', 'N')->get();
@@ -143,26 +247,85 @@ class ProgramRektorController extends Controller
         $units = Unit::where('NA', 'N')->get();
         $users = User::all();
         
+        // Get the selected filters from the request
+        $selectedRenstra = request('renstraID');
+        $selectedPilar = request('pilarID');
+        $selectedIsu = request('isuID');
+        $selectedProgramPengembangan = request('programPengembanganID');
+        
+        // If renstra is selected, filter pilars
+        if ($selectedRenstra) {
+            $pilars = Pilar::where('RenstraID', $selectedRenstra)
+                ->where('NA', 'N')
+                ->get();
+                
+            // Filter isu strategis by pilars from selected renstra
+            $pilarIds = $pilars->pluck('PilarID')->toArray();
+            $isuStrategis = IsuStrategis::whereIn('PilarID', $pilarIds)
+                ->where('NA', 'N')
+                ->get();
+                
+            // Filter program pengembangans by isu strategis from selected pilars
+            $isuIds = $isuStrategis->pluck('IsuID')->toArray();
+            $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
+                ->where('NA', 'N')
+                ->get();
+        }
+        
+        // If pilar is selected, filter isu strategis
+        if ($selectedPilar) {
+            $isuStrategis = IsuStrategis::where('PilarID', $selectedPilar)
+                ->where('NA', 'N')
+                ->get();
+                
+            // Filter program pengembangans by isu strategis from selected pilar
+            $isuIds = $isuStrategis->pluck('IsuID')->toArray();
+            $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
+                ->where('NA', 'N')
+                ->get();
+        }
+        
+        // If isu strategis is selected, filter program pengembangans
+        if ($selectedIsu) {
+            $programPengembangans = ProgramPengembangan::where('IsuID', $selectedIsu)
+                ->where('NA', 'N')
+                ->get();
+        }
+        
         if (request()->ajax()) {
             return view('programRektors.create', compact(
+                'renstras',
+                'pilars',
+                'isuStrategis',
                 'programPengembangans', 
                 'indikatorKinerjas',
                 'jenisKegiatans', 
                 'mataAnggarans', 
-                'satuans', 
+                'satuans',
                 'units', 
-                'users'
+                'users',
+                'selectedRenstra',
+                'selectedPilar',
+                'selectedIsu',
+                'selectedProgramPengembangan'
             ))->render();
         }
         
         return view('programRektors.create', compact(
+            'renstras',
+            'pilars',
+            'isuStrategis',
             'programPengembangans', 
             'indikatorKinerjas',
             'jenisKegiatans', 
             'mataAnggarans', 
             'satuans', 
             'units', 
-            'users'
+            'users',
+            'selectedRenstra',
+            'selectedPilar',
+            'selectedIsu',
+            'selectedProgramPengembangan'
         ));
     }
 
@@ -178,6 +341,51 @@ class ProgramRektorController extends Controller
             'createdBy', 
             'editedBy'
         ]);
+        
+        // Apply filter if renstraID is provided
+        if ($request->has('renstraID') && $request->renstraID) {
+            // Filter pilars by renstraID
+            $pilarIds = Pilar::where('RenstraID', $request->renstraID)
+                ->where('NA', 'N')
+                ->pluck('PilarID');
+                
+            // Filter isu strategis by pilar IDs
+            $isuIds = IsuStrategis::whereIn('PilarID', $pilarIds)
+                ->where('NA', 'N')
+                ->pluck('IsuID');
+                
+            // Filter program pengembangans by isu IDs
+            $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
+                ->where('NA', 'N')
+                ->pluck('ProgramPengembanganID');
+                
+            $programRektorsQuery->whereIn('ProgramPengembanganID', $programIds);
+        }
+        
+        // Apply filter if pilarID is provided
+        if ($request->has('pilarID') && $request->pilarID) {
+            // Filter isu strategis by pilarID
+            $isuIds = IsuStrategis::where('PilarID', $request->pilarID)
+                ->where('NA', 'N')
+                ->pluck('IsuID');
+                
+            // Filter program pengembangans by isu IDs
+            $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
+                ->where('NA', 'N')
+                ->pluck('ProgramPengembanganID');
+                
+            $programRektorsQuery->whereIn('ProgramPengembanganID', $programIds);
+        }
+        
+        // Apply filter if isuID is provided
+        if ($request->has('isuID') && $request->isuID) {
+            // Filter program pengembangans by isuID
+            $programIds = ProgramPengembangan::where('IsuID', $request->isuID)
+                ->where('NA', 'N')
+                ->pluck('ProgramPengembanganID');
+                
+            $programRektorsQuery->whereIn('ProgramPengembanganID', $programIds);
+        }
         
         // Apply filter if programPengembanganID is provided
         if ($request->has('programPengembanganID') && $request->programPengembanganID) {
@@ -243,7 +451,7 @@ class ProgramRektorController extends Controller
     {
         // Load relationships
         $programRektor->load([
-            'programPengembangan',
+            'programPengembangan.isuStrategis.pilar.renstra',
             'indikatorKinerja',
             'jenisKegiatan',
             'satuan',
@@ -266,6 +474,10 @@ class ProgramRektorController extends Controller
 
     public function edit(ProgramRektor $programRektor)
     {
+        // Get all active renstras, pilars, and isu strategis
+        $renstras = Renstra::where('NA', 'N')->get();
+        $pilars = Pilar::where('NA', 'N')->get();
+        $isuStrategis = IsuStrategis::where('NA', 'N')->get();
         $programPengembangans = ProgramPengembangan::where('NA', 'N')->get();
         $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get();
         $jenisKegiatans = JenisKegiatan::where('NA', 'N')->get();
@@ -274,6 +486,36 @@ class ProgramRektorController extends Controller
         $units = Unit::where('NA', 'N')->get();
         $users = User::all();
         
+        // Load the program's relationships to get the hierarchy
+        $programRektor->load('programPengembangan.isuStrategis.pilar.renstra');
+        
+        // Get the selected values from the loaded relationships
+        $selectedRenstra = $programRektor->programPengembangan->isuStrategis->pilar->renstra->RenstraID;
+        $selectedPilar = $programRektor->programPengembangan->isuStrategis->pilar->PilarID;
+        $selectedIsu = $programRektor->programPengembangan->isuStrategis->IsuID;
+        $selectedProgramPengembangan = $programRektor->ProgramPengembanganID;
+        
+        // Filter pilars by selected renstra
+        if ($selectedRenstra) {
+            $pilars = Pilar::where('RenstraID', $selectedRenstra)
+                ->where('NA', 'N')
+                ->get();
+        }
+        
+        // Filter isu strategis by selected pilar
+        if ($selectedPilar) {
+            $isuStrategis = IsuStrategis::where('PilarID', $selectedPilar)
+                ->where('NA', 'N')
+                ->get();
+        }
+        
+        // Filter program pengembangans by selected isu
+        if ($selectedIsu) {
+            $programPengembangans = ProgramPengembangan::where('IsuID', $selectedIsu)
+                ->where('NA', 'N')
+                ->get();
+        }
+        
         // Convert comma-separated IDs to arrays for select2 multiple
         $selectedMataAnggarans = explode(',', $programRektor->MataAnggaranID);
         $selectedPelaksanas = explode(',', $programRektor->PelaksanaID);
@@ -281,6 +523,9 @@ class ProgramRektorController extends Controller
         if (request()->ajax()) {
             return view('programRektors.edit', compact(
                 'programRektor',
+                'renstras',
+                'pilars',
+                'isuStrategis',
                 'programPengembangans', 
                 'indikatorKinerjas',
                 'jenisKegiatans', 
@@ -288,6 +533,10 @@ class ProgramRektorController extends Controller
                 'satuans', 
                 'units', 
                 'users',
+                'selectedRenstra',
+                'selectedPilar',
+                'selectedIsu',
+                'selectedProgramPengembangan',
                 'selectedMataAnggarans',
                 'selectedPelaksanas'
             ))->render();
@@ -295,6 +544,9 @@ class ProgramRektorController extends Controller
         
         return view('programRektors.edit', compact(
             'programRektor',
+            'renstras',
+            'pilars',
+            'isuStrategis',
             'programPengembangans', 
             'indikatorKinerjas',
             'jenisKegiatans', 
@@ -302,10 +554,15 @@ class ProgramRektorController extends Controller
             'satuans', 
             'units', 
             'users',
+            'selectedRenstra',
+            'selectedPilar',
+            'selectedIsu',
+            'selectedProgramPengembangan',
             'selectedMataAnggarans',
             'selectedPelaksanas'
         ));
     }
+
     public function update(Request $request, ProgramRektor $programRektor)
     {
         $request->validate([

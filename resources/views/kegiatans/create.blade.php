@@ -1,40 +1,46 @@
 <form action="{{ route('kegiatans.store') }}" method="POST" class="modal-form" id="kegiatanForm">
     @csrf
+        
     <div class="form-group">
         <label for="ProgramRektorID">Program Rektor</label>
-        <select name="ProgramRektorID" id="ProgramRektorID" class="form-control select2" >
-            <option value="" disabled {{ !isset($selectedProgramRektor) ? 'selected' : '' }}></option>
+        <select name="ProgramRektorID" id="ProgramRektorID" class="form-control select2">
+            <option value="" disabled {{ !isset($selectedProgramRektorObj) ? 'selected' : '' }}></option>
             @foreach($programRektors as $programRektor)
                 <option value="{{ $programRektor->ProgramRektorID }}" 
-                    {{ (isset($selectedProgramRektor) && $selectedProgramRektor->ProgramRektorID == $programRektor->ProgramRektorID) ? 'selected' : '' }}>
+                    {{ (isset($selectedProgramRektor) && $selectedProgramRektor == $programRektor->ProgramRektorID) || 
+                       (isset($selectedProgramRektorObj) && $selectedProgramRektorObj->ProgramRektorID == $programRektor->ProgramRektorID) ? 'selected' : '' }}>
                     {{ $programRektor->Nama }}
                 </option>
             @endforeach
         </select>
     </div>
+    
     <div class="form-group">
         <label for="Nama">Nama</label>
         <textarea name="Nama" id="Nama" class="form-control" rows="3"></textarea>
     </div>
+    
     <div class="row">
-    <div class="col-sm-6">
-    <div class="form-group">
-        <label for="TanggalMulai">Tanggal Mulai</label>
-        <input type="datetime-local" name="TanggalMulai" id="TanggalMulai" class="form-control " onchange="validateDates()">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="TanggalMulai">Tanggal Mulai</label>
+                <input type="datetime-local" name="TanggalMulai" id="TanggalMulai" class="form-control" onchange="validateDates()">
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="TanggalSelesai">Tanggal Selesai</label>
+                <input type="datetime-local" name="TanggalSelesai" id="TanggalSelesai" class="form-control" onchange="validateDates()">
+                <small id="dateError" class="text-danger" style="display: none;">Tanggal Selesai harus lebih besar atau sama dengan Tanggal Mulai.</small>
+            </div>
+        </div>
     </div>
-    </div>
-    <div class="col-sm-6">
-    <div class="form-group">
-        <label for="TanggalSelesai">Tanggal Selesai</label>
-        <input type="datetime-local" name="TanggalSelesai" id="TanggalSelesai" class="form-control " onchange="validateDates()">
-        <small id="dateError" class="text-danger" style="display: none;">Tanggal Selesai harus lebih besar atau sama dengan Tanggal Mulai.</small>
-    </div>
-    </div>
-    </div>
+    
     <div class="form-group">
         <label for="RincianKegiatan">Rincian Kegiatan</label>
-        <textarea name="RincianKegiatan" id="RincianKegiatan" class="form-control" rows="4" ></textarea>
+        <textarea name="RincianKegiatan" id="RincianKegiatan" class="form-control" rows="4"></textarea>
     </div>
+    
     <div class="modal-footer">
         <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
         <button class="btn btn-primary" type="submit" id="submitBtn">Simpan</button>
@@ -42,6 +48,34 @@
 </form>
 
 <script>
+$(document).ready(function() {
+    // Get the selected values from cookies if not already set
+    
+    
+    if (!$('#ProgramRektorID').val()) {
+        var programRektorCookie = getCookie('selected_program_rektor');
+        if (programRektorCookie) {
+            $('#ProgramRektorID').val(programRektorCookie).trigger('change');
+        }
+    }
+    
+ 
+  
+    
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+    
+  
+});
+
 function validateDates() {
     const tanggalMulai = new Date(document.getElementById('TanggalMulai').value);
     const tanggalSelesai = new Date(document.getElementById('TanggalSelesai').value);

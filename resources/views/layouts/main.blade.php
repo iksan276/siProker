@@ -76,12 +76,12 @@
         }
     }
 
-    #programPengembanganFilter + .select2-container,
+    /* #programPengembanganFilter + .select2-container,
     #programRektorFilter + .select2-container,
     #unitFilter + .select2-container,
     #indikatorKinerjaFilter + .select2-container {
         max-width: 200px !important;
-    }
+    } */
 
     /* Network Disconnection Overlay Styles */
     #network-overlay {
