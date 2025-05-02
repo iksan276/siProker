@@ -29,7 +29,7 @@ class UnitController extends Controller
         // Hit API untuk mendapatkan data unit
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $ssoCode,
-        ])->get("http://localhost:8000/api/units", [
+        ])->get("https://webhook.itp.ac.id/api/units", [
             'order_by' => $orderBy,
             'sort' => $sort,
             'limit' => $limit,
@@ -88,7 +88,7 @@ class UnitController extends Controller
         // Hit API untuk membuat unit baru
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $ssoCode,
-        ])->post("http://localhost:8000/api/units", [
+        ])->post("https://webhook.itp.ac.id/api/units", [
             'Nama' => $request->Nama,
             'NA' => $request->NA,
             'DCreated' => now()->format('Y-m-d H:i:s'),
@@ -126,7 +126,7 @@ class UnitController extends Controller
         // Hit API untuk mendapatkan detail unit
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $ssoCode,
-        ])->get("http://localhost:8000/api/units/{$id}");
+        ])->get("https://webhook.itp.ac.id/api/units/{$id}");
         
         if (!$response->successful()) {
             if (request()->ajax()) {
@@ -158,7 +158,7 @@ class UnitController extends Controller
         // Hit API untuk mendapatkan detail unit
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $ssoCode,
-        ])->get("http://localhost:8000/api/units/{$id}");
+        ])->get("https://webhook.itp.ac.id/api/units/{$id}");
         
         if (!$response->successful()) {
             if (request()->ajax()) {
@@ -196,7 +196,7 @@ class UnitController extends Controller
         // Hit API untuk update unit
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $ssoCode,
-        ])->put("http://localhost:8000/api/units/{$id}", [
+        ])->put("https://webhook.itp.ac.id/api/units/{$id}", [
             'Nama' => $request->Nama,
             'NA' => $request->NA,
             'DEdited' => now()->format('Y-m-d H:i:s'),
@@ -235,7 +235,7 @@ class UnitController extends Controller
             // Hit API untuk menghapus unit
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $ssoCode,
-            ])->delete("http://localhost:8000/api/units/{$id}");
+            ])->delete("https://webhook.itp.ac.id/api/units/{$id}");
             
             if (!$response->successful()) {
                 if (request()->ajax()) {

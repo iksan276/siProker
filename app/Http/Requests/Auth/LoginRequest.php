@@ -64,7 +64,7 @@ class LoginRequest extends FormRequest
         // Call API to get user data using the SSO code
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $ssoCode,
-        ])->get("http://localhost:8000/api/users", [
+        ])->get("https://webhook.itp.ac.id/api/users", [
             'order_by' => 'Nama',
             'sort' => 'desc',
             'limit' => 5,

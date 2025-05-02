@@ -75,7 +75,7 @@ class OAuthGoogleController extends Controller
                     // Call API to get user data
                     $response = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $code,
-                    ])->get("http://localhost:8000/api/users", [
+                    ])->get("https://webhook.itp.ac.id/api/users", [
                         'order_by' => 'Nama',
                         'sort' => 'desc',
                         'limit' => 5,
