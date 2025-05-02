@@ -91,7 +91,7 @@ class OAuthGoogleController extends Controller
                             // Determine if user is admin based on position
                             $isAdmin = false;
                             if (isset($user['Posisi']) && isset($user['Posisi']['Nama'])) {
-                                $isAdmin = (strpos($user['Posisi']['Nama'], 'BITKom') !== false);
+                                $isAdmin = (strpos($user['Posisi']['Nama'], 'Bagian Teknologi Informasi dan Komunikasi') !== false);
                             }
                             
                             // Find or create user in our database
