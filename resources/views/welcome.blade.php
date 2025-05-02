@@ -824,9 +824,9 @@
                         @else
                             <a href="{{ route('login') }}" class="btn btn-outline" style="color: var(--primary); border-color: var(--primary);">Log in</a>
 
-                            @if (Route::has('register'))
+                            <!-- @if (Route::has('register'))
                                 <a href="{{ route('register') }}" class="btn btn-primary">Register</a>
-                            @endif
+                            @endif -->
                         @endauth
                     </div>
                 @endif
@@ -1065,8 +1065,8 @@
                 <p class="cta-description animate-fade-up" data-delay="0.1">
                     Bergabunglah dengan SIPROKER dan rasakan kemudahan dalam mengelola program kerja dosen. Tingkatkan produktivitas dan kualitas program kerja Anda sekarang juga!
                 </p>
-                <a href="{{ route('register') }}" class="btn btn-dark animate-fade-up" data-delay="0.2">
-                    <i class="fas fa-user-plus mr-2"></i> Daftar Sekarang
+                <a href="{{ route('login') }}" class="btn btn-dark animate-fade-up" data-delay="0.2">
+                    <i class="fas fa-user-plus mr-2"></i> Masuk Sekarang
                 </a>
             </div>
         </section>

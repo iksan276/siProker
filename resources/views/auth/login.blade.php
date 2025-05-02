@@ -16,7 +16,7 @@
     <!-- Custom styles for this template-->
     <link href="{{ asset('sb-admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
     <style>
-          .bg-login-image {
+        .bg-login-image {
             background-image: url('https://img.freepik.com/free-vector/business-team-discussing-ideas-startup_74855-4380.jpg');
             background-size: cover;
             background-position: center;
@@ -31,6 +31,53 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(79, 70, 229, 0.1) 100%);
+        }
+        
+        .btn-email {
+            background-color: #ffffff;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .btn-email:hover {
+            background-color: #f7fafc;
+            color: #2d3748;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .btn-email i {
+            margin-right: 10px;
+            font-size: 1.2em;
+            color: #4299e1;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .divider span {
+            padding: 0 10px;
+            color: #718096;
+            font-size: 0.875rem;
+        }
+        
+        .login-options {
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -57,6 +104,22 @@
                                             {{ session('status') }}
                                         </div>
                                     @endif
+
+                                    <!-- Login Options -->
+                                    <div class="login-options">
+                                        <a href="https://layanan.itp.ac.id/validasi/oauth-google/23" class="btn btn-email btn-user btn-block">
+                                        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 48 48">
+                                                        <path fill="#fbc02d" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12	s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20	s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
+                                                        <path fill="#e53935" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039	l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
+                                                        <path fill="#4caf50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36	c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
+                                                        <path fill="#1565c0" d="M43.611,20.083L43.595,20L42,20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571	c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
+                                                    </svg> Login with Email
+                                        </a>
+                                    </div>
+                                    
+                                    <div class="divider">
+                                        <span>OR</span>
+                                    </div>
 
                                     <form class="user" method="POST" action="{{ route('login') }}">
                                         @csrf
@@ -89,7 +152,7 @@
                                             Login
                                         </button>
                                     </form>
-                                    <hr>
+                                    <!-- <hr>
                                     @if (Route::has('password.request'))
                                         <div class="text-center">
                                             <a class="small" href="{{ route('password.request') }}">Forgot Password?</a>
@@ -99,7 +162,7 @@
                                         <div class="text-center">
                                             <a class="small" href="{{ route('register') }}">Create an Account!</a>
                                         </div>
-                                    @endif
+                                    @endif -->
                                 </div>
                             </div>
                         </div>
@@ -118,5 +181,40 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{{ asset('sb-admin/js/sb-admin-2.min.js') }}"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        // Check for SweetAlert messages
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(session('swal_error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: "{{ session('swal_error') }}",
+                    confirmButtonColor: '#3085d6'
+                });
+            @endif
+            
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: "{{ session('error') }}",
+                    confirmButtonColor: '#3085d6'
+                });
+            @endif
+            
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: "{{ session('success') }}",
+                    confirmButtonColor: '#3085d6'
+                });
+            @endif
+        });
+        </script>
 </body>
 </html>

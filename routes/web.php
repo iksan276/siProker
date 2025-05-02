@@ -16,6 +16,7 @@ use App\Http\Controllers\UnitAnggaranController;
 use App\Http\Controllers\JenisKegiatanController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\OAuthGoogleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,8 @@ Route::get('/', function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+Route::get('/auth/oauth_google', [OAuthGoogleController::class, 'authenticate']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

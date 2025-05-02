@@ -6,17 +6,26 @@
 <p class="mb-4">Kelola Master Unit.</p>
 
 <!-- Alert Container for AJAX responses -->
-<div id="alertContainer"></div>
+<div id="alertContainer">
+    @if(isset($error))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ $error }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    @endif
+</div>
 
 <!-- DataTales Card -->
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
         <h6 class="m-0 font-weight-bold text-primary">Unit List</h6>
-        <div>
+        <!-- <div>
             <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('units.create') }}" data-title="Tambah Unit">
                 <i class="fas fa-plus fa-sm"></i> Tambah Unit
             </button>
-        </div>
+        </div> -->
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -26,36 +35,38 @@
                         <th style="white-space:nowrap">No</th>
                         <th style="white-space:nowrap">Nama</th>
                         <th style="white-space:nowrap">NA</th>
-                        <th style="white-space:nowrap">Actions</th>
+                        <!-- <th style="white-space:nowrap">Actions</th> -->
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($units as $index => $unit)
-                    <tr class="{{ $unit->NA == 'Y' ? 'bg-light text-muted' : '' }}">
-                        <td style="white-space:nowrap;width:1px" class="text-center">{{ $index + 1 }}</td>
-                        <td>{{ $unit->Nama }}</td>
-                        <td class="text-center text-dark" style="white-space:nowrap;width:1px">
-                            @if($unit->NA == 'Y')
-                                <span class="badge badge-danger">Non Aktif</span>
-                            @endif
+                    @if(isset($units) && is_array($units))
+                        @foreach($units as $index => $unit)
+                        <tr class="{{ isset($unit['NA']) && $unit['NA'] == 'Y' ? 'bg-light text-muted' : '' }}">
+                            <td style="white-space:nowrap;width:1px" class="text-center">{{ $index + 1 }}</td>
+                            <td>{{ $unit['Nama'] ?? 'N/A' }}</td>
+                            <td class="text-center text-dark" style="white-space:nowrap;width:1px">
+                                @if(isset($unit['NA']) && $unit['NA'] == 'Y')
+                                    <span class="badge badge-danger">Non Aktif</span>
+                                @endif
 
-                            @if($unit->NA == 'N')
-                                <span class="badge badge-success">Aktif</span>
-                            @endif
-                        </td>
-                        <td class="text-center" style="white-space:nowrap;width:1px">
-                            <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('units.show', $unit->UnitID) }}" data-title="Detail Unit">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('units.edit', $unit->UnitID) }}" data-title="Edit Unit">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button type="button" class="btn btn-danger btn-square btn-sm delete-unit" data-id="{{ $unit->UnitID }}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    @endforeach
+                                @if(isset($unit['NA']) && $unit['NA'] == 'N')
+                                    <span class="badge badge-success">Aktif</span>
+                                @endif
+                            </td>
+                            <!-- <td class="text-center" style="white-space:nowrap;width:1px">
+                                <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('units.show', $unit['UnitID'] ?? $unit['ID'] ?? 0) }}" data-title="Detail Unit">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('units.edit', $unit['UnitID'] ?? $unit['ID'] ?? 0) }}" data-title="Edit Unit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-square btn-sm delete-unit" data-id="{{ $unit['UnitID'] ?? $unit['ID'] ?? 0 }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td> -->
+                        </tr>
+                        @endforeach
+                    @endif
                 </tbody>
             </table>
         </div>
@@ -66,7 +77,7 @@
 <form id="deleteForm" method="POST" style="display: none;">
     @csrf
     @method('DELETE')
-</form>
+    </form>
 @endsection
 
 @push('scripts')
@@ -154,7 +165,7 @@
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Iya, yakin',
-cancelButtonText: 'Batal'
+                cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Perform AJAX delete
