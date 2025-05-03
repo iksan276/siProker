@@ -15,6 +15,7 @@ use App\Models\Pilar;
 use App\Models\IsuStrategis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ProgramRektorsExport;
 use Illuminate\Database\QueryException;
@@ -44,7 +45,6 @@ class ProgramRektorController extends Controller
             'indikatorKinerja', 
             'jenisKegiatan', 
             'satuan', 
-            'penanggungJawab', 
             'createdBy', 
             'editedBy'
         ]);
@@ -144,6 +144,27 @@ class ProgramRektorController extends Controller
         $selectedProgramPengembangan = $request->programPengembanganID;
         $selectedIndikatorKinerja = $request->indikatorKinerjaID;
         
+        // Ambil SSO code dari session untuk API
+        $ssoCode = session('sso_code');
+        
+        if (!$ssoCode) {
+            return redirect('/login')->with('error', 'Sesi login telah berakhir. Silakan login kembali.');
+        }
+        
+        // Hit API untuk mendapatkan data unit
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $ssoCode,
+        ])->get("https://webhook.itp.ac.id/api/units", [
+            'order_by' => 'Nama',
+            'sort' => 'asc',
+            'limit' => 100
+        ]);
+        
+        $units = [];
+        if ($response->successful()) {
+            $units = $response->json();
+        }
+        
         // If it's an AJAX request, return JSON data for DataTable
         if ($request->ajax()) {
             $data = [];
@@ -181,9 +202,15 @@ class ProgramRektorController extends Controller
                     $mataAnggaranHtml .= '</ul>';
                 }
                 
-                // Get pelaksana names and format as ul/li
+                // Get pelaksana names from API data and format as ul/li
                 $pelaksanaIds = explode(',', $program->PelaksanaID);
-                $pelaksanaItems = Unit::whereIn('UnitID', $pelaksanaIds)->pluck('Nama')->toArray();
+                $pelaksanaItems = [];
+                foreach ($units as $unit) {
+                    if (in_array($unit['UnitID'], $pelaksanaIds)) {
+                        $pelaksanaItems[] = $unit['Nama'];
+                    }
+                }
+                
                 $pelaksanaHtml = '';
                 if (count($pelaksanaItems) > 0) {
                     $pelaksanaHtml = '<ul class=" mb-0">';
@@ -191,6 +218,15 @@ class ProgramRektorController extends Controller
                         $pelaksanaHtml .= '<li>' . $item . '</li>';
                     }
                     $pelaksanaHtml .= '</ul>';
+                }
+                
+                // Find penanggung jawab name from API data
+                $penanggungJawabNama = '';
+                foreach ($units as $unit) {
+                    if ($unit['UnitID'] == $program->PenanggungJawabID) {
+                        $penanggungJawabNama = $unit['Nama'];
+                        break;
+                    }
                 }
                 
                 // In the index method, modify the data array construction:
@@ -205,7 +241,7 @@ class ProgramRektorController extends Controller
                     'harga_satuan' => 'Rp ' . number_format($program->HargaSatuan, 0, ',', '.'),
                     'mata_anggaran' => $mataAnggaranHtml,
                     'total' => 'Rp ' . number_format($program->Total, 0, ',', '.'),
-                    'penanggung_jawab' => $program->penanggungJawab->Nama,
+                    'penanggung_jawab' => $penanggungJawabNama,
                     'pelaksana' => $pelaksanaHtml,
                     'na' => $naStatus,
                     'actions' => $actions,
@@ -229,7 +265,8 @@ class ProgramRektorController extends Controller
             'selectedPilar', 
             'selectedIsu', 
             'selectedProgramPengembangan', 
-            'selectedIndikatorKinerja'
+            'selectedIndikatorKinerja',
+            'units'
         ));
     }
 
@@ -244,8 +281,36 @@ class ProgramRektorController extends Controller
         $jenisKegiatans = JenisKegiatan::where('NA', 'N')->get();
         $mataAnggarans = MataAnggaran::where('NA', 'N')->get();
         $satuans = Satuan::where('NA', 'N')->get();
-        $units = Unit::where('NA', 'N')->get();
         $users = User::all();
+        
+        // Ambil SSO code dari session untuk API
+        $ssoCode = session('sso_code');
+        
+        if (!$ssoCode) {
+            if (request()->ajax()) {
+                return response()->json(['error' => 'Sesi login telah berakhir. Silakan login kembali.'], 401);
+            }
+            return redirect('/login')->with('error', 'Sesi login telah berakhir. Silakan login kembali.');
+        }
+        
+        // Hit API untuk mendapatkan data unit
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $ssoCode,
+        ])->get("https://webhook.itp.ac.id/api/units", [
+            'order_by' => 'Nama',
+            'sort' => 'asc',
+            'limit' => 100
+        ]);
+        
+        $units = [];
+        if ($response->successful()) {
+            $units = $response->json();
+        } else {
+            if (request()->ajax()) {
+                return response()->json(['error' => 'Gagal mengambil data unit dari API: ' . $response->status()], 500);
+            }
+            return redirect()->route('program-rektors.index')->with('error', 'Gagal mengambil data unit dari API: ' . $response->status());
+        }
         
         // Get the selected filters from the request
         $selectedRenstra = request('renstraID');
@@ -337,7 +402,6 @@ class ProgramRektorController extends Controller
             'indikatorKinerja',
             'jenisKegiatan',
             'satuan',
-            'penanggungJawab',
             'createdBy', 
             'editedBy'
         ]);
@@ -400,6 +464,44 @@ class ProgramRektorController extends Controller
         // Get the filtered results
         $programRektors = $programRektorsQuery->orderBy('DCreated', 'desc')->get();
         
+        // Ambil SSO code dari session untuk API
+        $ssoCode = session('sso_code');
+        
+        if ($ssoCode) {
+            // Hit API untuk mendapatkan data unit
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $ssoCode,
+            ])->get("https://webhook.itp.ac.id/api/units", [
+                'order_by' => 'Nama',
+                'sort' => 'asc',
+                'limit' => 100
+            ]);
+            
+            if ($response->successful()) {
+                $units = $response->json();
+                // Attach unit data to program rektors
+                foreach ($programRektors as $program) {
+                    // Find penanggung jawab
+                    foreach ($units as $unit) {
+                        if ($unit['UnitID'] == $program->PenanggungJawabID) {
+                            $program->penanggungJawabNama = $unit['Nama'];
+                            break;
+                        }
+                    }
+                    
+                    // Find pelaksana
+                    $pelaksanaIds = explode(',', $program->PelaksanaID);
+                    $pelaksanaNames = [];
+                    foreach ($units as $unit) {
+                        if (in_array($unit['UnitID'], $pelaksanaIds)) {
+                            $pelaksanaNames[] = $unit['Nama'];
+                        }
+                    }
+                    $program->pelaksanaNames = $pelaksanaNames;
+                }
+            }
+        }
+        
         return Excel::download(new ProgramRektorsExport($programRektors), 'program_rektors.xlsx');
     }
 
@@ -417,10 +519,57 @@ class ProgramRektorController extends Controller
             'SatuanID' => 'required|exists:satuans,SatuanID',
             'HargaSatuan' => 'required|integer',
             'Total' => 'required|integer',
-            'PenanggungJawabID' => 'required|exists:units,UnitID',
+            'PenanggungJawabID' => 'required',
             'PelaksanaID' => 'required|array',
             'NA' => 'required|in:Y,N',
         ]);
+
+        // Verify that the PenanggungJawabID and PelaksanaID exist in the API
+        $ssoCode = session('sso_code');
+        
+        if (!$ssoCode) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Sesi login telah berakhir. Silakan login kembali.'], 401);
+            }
+            return redirect('/login')->with('error', 'Sesi login telah berakhir. Silakan login kembali.');
+        }
+        
+        // Hit API untuk mendapatkan data unit
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $ssoCode,
+        ])->get("https://webhook.itp.ac.id/api/units", [
+            'order_by' => 'Nama',
+            'sort' => 'asc',
+            'limit' => 100
+        ]);
+        
+        if (!$response->successful()) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Gagal mengambil data unit dari API: ' . $response->status()], 500);
+            }
+            return redirect()->route('program-rektors.index')->with('error', 'Gagal mengambil data unit dari API: ' . $response->status());
+        }
+        
+        $units = $response->json();
+        $unitIds = array_column($units, 'UnitID');
+        
+        // Verify PenanggungJawabID exists
+        if (!in_array($request->PenanggungJawabID, $unitIds)) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Penanggung jawab yang dipilih tidak valid.'], 422);
+            }
+            return redirect()->back()->withInput()->withErrors(['PenanggungJawabID' => 'Penanggung jawab yang dipilih tidak valid.']);
+        }
+        
+        // Verify all PelaksanaID exist
+        foreach ($request->PelaksanaID as $pelaksanaId) {
+            if (!in_array($pelaksanaId, $unitIds)) {
+                if ($request->ajax()) {
+                    return response()->json(['success' => false, 'message' => 'Salah satu pelaksana yang dipilih tidak valid.'], 422);
+                }
+                return redirect()->back()->withInput()->withErrors(['PelaksanaID' => 'Salah satu pelaksana yang dipilih tidak valid.']);
+            }
+        }
 
         $programRektor = new ProgramRektor();
         $programRektor->ProgramPengembanganID = $request->ProgramPengembanganID;
@@ -455,21 +604,62 @@ class ProgramRektorController extends Controller
             'indikatorKinerja',
             'jenisKegiatan',
             'satuan',
-            'penanggungJawab',
         ]);
         
         // Get mata anggaran names
         $mataAnggaranIds = explode(',', $programRektor->MataAnggaranID);
         $mataAnggarans = MataAnggaran::whereIn('MataAnggaranID', $mataAnggaranIds)->get();
         
-        // Get pelaksana names
+        // Ambil SSO code dari session untuk API
+        $ssoCode = session('sso_code');
+        
+        if (!$ssoCode) {
+            if (request()->ajax()) {
+                return response()->json(['error' => 'Sesi login telah berakhir. Silakan login kembali.'], 401);
+            }
+            return redirect('/login')->with('error', 'Sesi login telah berakhir. Silakan login kembali.');
+        }
+        
+        // Hit API untuk mendapatkan data unit
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $ssoCode,
+        ])->get("https://webhook.itp.ac.id/api/units", [
+            'order_by' => 'Nama',
+            'sort' => 'asc',
+            'limit' => 100
+        ]);
+        
+        if (!$response->successful()) {
+            if (request()->ajax()) {
+                return response()->json(['error' => 'Gagal mengambil data unit dari API: ' . $response->status()], 500);
+            }
+            return redirect()->route('program-rektors.index')->with('error', 'Gagal mengambil data unit dari API: ' . $response->status());
+        }
+        
+        $units = $response->json();
+        
+        // Get penanggung jawab from API data
+        $penanggungJawab = null;
+        foreach ($units as $unit) {
+            if ($unit['UnitID'] == $programRektor->PenanggungJawabID) {
+                $penanggungJawab = $unit;
+                break;
+            }
+        }
+        
+        // Get pelaksana from API data
         $pelaksanaIds = explode(',', $programRektor->PelaksanaID);
-        $pelaksanas = Unit::whereIn('UnitID', $pelaksanaIds)->get();
+        $pelaksanas = [];
+        foreach ($units as $unit) {
+            if (in_array($unit['UnitID'], $pelaksanaIds)) {
+                $pelaksanas[] = $unit;
+            }
+        }
         
         if (request()->ajax()) {
-            return view('programRektors.show', compact('programRektor', 'mataAnggarans', 'pelaksanas'))->render();
+            return view('programRektors.show', compact('programRektor', 'mataAnggarans', 'penanggungJawab', 'pelaksanas'))->render();
         }
-        return view('programRektors.show', compact('programRektor', 'mataAnggarans', 'pelaksanas'));
+        return view('programRektors.show', compact('programRektor', 'mataAnggarans', 'penanggungJawab', 'pelaksanas'));
     }
 
     public function edit(ProgramRektor $programRektor)
@@ -483,8 +673,35 @@ class ProgramRektorController extends Controller
         $jenisKegiatans = JenisKegiatan::where('NA', 'N')->get();
         $mataAnggarans = MataAnggaran::where('NA', 'N')->get();
         $satuans = Satuan::where('NA', 'N')->get();
-        $units = Unit::where('NA', 'N')->get();
         $users = User::all();
+        
+        // Ambil SSO code dari session untuk API
+        $ssoCode = session('sso_code');
+        
+        if (!$ssoCode) {
+            if (request()->ajax()) {
+                return response()->json(['error' => 'Sesi login telah berakhir. Silakan login kembali.'], 401);
+            }
+            return redirect('/login')->with('error', 'Sesi login telah berakhir. Silakan login kembali.');
+        }
+        
+        // Hit API untuk mendapatkan data unit
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $ssoCode,
+        ])->get("https://webhook.itp.ac.id/api/units", [
+            'order_by' => 'Nama',
+            'sort' => 'asc',
+            'limit' => 100
+        ]);
+        
+        if (!$response->successful()) {
+            if (request()->ajax()) {
+                return response()->json(['error' => 'Gagal mengambil data unit dari API: ' . $response->status()], 500);
+            }
+            return redirect()->route('program-rektors.index')->with('error', 'Gagal mengambil data unit dari API: ' . $response->status());
+        }
+        
+        $units = $response->json();
         
         // Load the program's relationships to get the hierarchy
         $programRektor->load('programPengembangan.isuStrategis.pilar.renstra');
@@ -577,10 +794,57 @@ class ProgramRektorController extends Controller
             'SatuanID' => 'required|exists:satuans,SatuanID',
             'HargaSatuan' => 'required|integer',
             'Total' => 'required|integer',
-            'PenanggungJawabID' => 'required|exists:units,UnitID',
+            'PenanggungJawabID' => 'required',
             'PelaksanaID' => 'required|array',
             'NA' => 'required|in:Y,N',
         ]);
+
+        // Verify that the PenanggungJawabID and PelaksanaID exist in the API
+        $ssoCode = session('sso_code');
+        
+        if (!$ssoCode) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Sesi login telah berakhir. Silakan login kembali.'], 401);
+            }
+            return redirect('/login')->with('error', 'Sesi login telah berakhir. Silakan login kembali.');
+        }
+        
+        // Hit API untuk mendapatkan data unit
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $ssoCode,
+        ])->get("https://webhook.itp.ac.id/api/units", [
+            'order_by' => 'Nama',
+            'sort' => 'asc',
+            'limit' => 100
+        ]);
+        
+        if (!$response->successful()) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Gagal mengambil data unit dari API: ' . $response->status()], 500);
+            }
+            return redirect()->route('program-rektors.index')->with('error', 'Gagal mengambil data unit dari API: ' . $response->status());
+        }
+        
+        $units = $response->json();
+        $unitIds = array_column($units, 'UnitID');
+        
+        // Verify PenanggungJawabID exists
+        if (!in_array($request->PenanggungJawabID, $unitIds)) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Penanggung jawab yang dipilih tidak valid.'], 422);
+            }
+            return redirect()->back()->withInput()->withErrors(['PenanggungJawabID' => 'Penanggung jawab yang dipilih tidak valid.']);
+        }
+        
+        // Verify all PelaksanaID exist
+        foreach ($request->PelaksanaID as $pelaksanaId) {
+            if (!in_array($pelaksanaId, $unitIds)) {
+                if ($request->ajax()) {
+                    return response()->json(['success' => false, 'message' => 'Salah satu pelaksana yang dipilih tidak valid.'], 422);
+                }
+                return redirect()->back()->withInput()->withErrors(['PelaksanaID' => 'Salah satu pelaksana yang dipilih tidak valid.']);
+            }
+        }
 
         $programRektor->ProgramPengembanganID = $request->ProgramPengembanganID;
         $programRektor->IndikatorKinerjaID = $request->IndikatorKinerjaID;
