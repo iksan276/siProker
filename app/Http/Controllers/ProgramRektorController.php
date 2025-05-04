@@ -311,11 +311,7 @@ class ProgramRektorController extends Controller
             'order_by' => 'Nama',
             'sort' => 'asc',
             'limit' => 100
-            ])->get("https://webhook.itp.ac.id/api/units", [
-                'order_by' => 'Nama',
-                'sort' => 'asc',
-                'limit' => 100
-            ]);
+        ]);
             
             $units = [];
             if ($response->successful()) {
