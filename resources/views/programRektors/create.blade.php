@@ -106,7 +106,9 @@
                 <select name="PenanggungJawabID" id="PenanggungJawabID" class="form-control select2">
                     <option value="" disabled selected></option>
                     @foreach($units as $unit)
-                        <option value="{{ $unit['UnitID'] }}">{{ $unit['Nama'] }}</option>
+                        @if(isset($unit['UnitID']) && isset($unit['Nama']))
+                            <option value="{{ $unit['UnitID'] }}">{{ $unit['Nama'] }}</option>
+                        @endif
                     @endforeach
                 </select>
             </div>
@@ -116,7 +118,9 @@
                 <label for="PelaksanaID" class="d-block">Pelaksana</label>
                 <select name="PelaksanaID[]" id="PelaksanaID" class="form-control select2" multiple>
                     @foreach($units as $unit)
-                        <option value="{{ $unit['UnitID'] }}">{{ $unit['Nama'] }}</option>
+                        @if(isset($unit['UnitID']) && isset($unit['Nama']))
+                            <option value="{{ $unit['UnitID'] }}">{{ $unit['Nama'] }}</option>
+                        @endif
                     @endforeach
                 </select>
             </div>
