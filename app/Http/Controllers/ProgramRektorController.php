@@ -312,92 +312,81 @@ class ProgramRektorController extends Controller
             'sort' => 'asc',
             'limit' => 100
         ]);
+        
+        $units = [];
+        if ($response->successful()) {
+            // Get the JSON data from the response
+            $responseData = $response->json();
             
-            $units = [];
-            if ($response->successful()) {
-                $units = $response->json();
-                
-                // Verify that each unit has the required keys
-                foreach ($units as $key => $unit) {
-                    if (!isset($unit['UnitID']) || !isset($unit['Nama'])) {
-                        // If UnitID or Nama is missing, remove this unit from the array
-                        unset($units[$key]);
-                    }
+            // Check if the response has the expected structure
+            if (is_array($responseData) && isset($responseData['data'])) {
+                $units = $responseData['data'];
+            } elseif (is_array($responseData)) {
+                // If the data is directly in the response without a 'data' key
+                $units = $responseData;
+            }
+            
+            // Verify that each unit has the required keys
+            $validUnits = [];
+            foreach ($units as $unit) {
+                if (isset($unit['UnitID']) && isset($unit['Nama'])) {
+                    $validUnits[] = $unit;
                 }
-                
-                // Re-index the array after potential removals
-                $units = array_values($units);
-            } else {
-                if (request()->ajax()) {
-                    return response()->json(['error' => 'Gagal mengambil data unit dari API: ' . $response->status()], 500);
-                }
-                return redirect()->route('program-rektors.index')->with('error', 'Gagal mengambil data unit dari API: ' . $response->status());
             }
-            
-            // Get the selected filters from the request
-            $selectedRenstra = request('renstraID');
-            $selectedPilar = request('pilarID');
-            $selectedIsu = request('isuID');
-            $selectedProgramPengembangan = request('programPengembanganID');
-            
-            // If renstra is selected, filter pilars
-            if ($selectedRenstra) {
-                $pilars = Pilar::where('RenstraID', $selectedRenstra)
-                    ->where('NA', 'N')
-                    ->get();
-                    
-                // Filter isu strategis by pilars from selected renstra
-                $pilarIds = $pilars->pluck('PilarID')->toArray();
-                $isuStrategis = IsuStrategis::whereIn('PilarID', $pilarIds)
-                    ->where('NA', 'N')
-                    ->get();
-                    
-                // Filter program pengembangans by isu strategis from selected pilars
-                $isuIds = $isuStrategis->pluck('IsuID')->toArray();
-                $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
-                    ->where('NA', 'N')
-                    ->get();
-            }
-            
-            // If pilar is selected, filter isu strategis
-            if ($selectedPilar) {
-                $isuStrategis = IsuStrategis::where('PilarID', $selectedPilar)
-                    ->where('NA', 'N')
-                    ->get();
-                    
-                // Filter program pengembangans by isu strategis from selected pilar
-                $isuIds = $isuStrategis->pluck('IsuID')->toArray();
-                $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
-                    ->where('NA', 'N')
-                    ->get();
-            }
-            
-            // If isu strategis is selected, filter program pengembangans
-            if ($selectedIsu) {
-                $programPengembangans = ProgramPengembangan::where('IsuID', $selectedIsu)
-                    ->where('NA', 'N')
-                    ->get();
-            }
-            
+            $units = $validUnits;
+        } else {
             if (request()->ajax()) {
-                return view('programRektors.create', compact(
-                    'renstras',
-                    'pilars',
-                    'isuStrategis',
-                    'programPengembangans', 
-                    'indikatorKinerjas',
-                    'jenisKegiatans', 
-                    'mataAnggarans', 
-                    'satuans',
-                    'units', 
-                    'users',
-                    'selectedRenstra',
-                    'selectedPilar',
-                    'selectedIsu',
-                    'selectedProgramPengembangan'
-                ))->render();
+                return response()->json(['error' => 'Gagal mengambil data unit dari API: ' . $response->status()], 500);
             }
-            
+            return redirect()->route('program-rektors.index')->with('error', 'Gagal mengambil data unit dari API: ' . $response->status());
+        }
+        
+        // Get the selected filters from the request
+        $selectedRenstra = request('renstraID');
+        $selectedPilar = request('pilarID');
+        $selectedIsu = request('isuID');
+        $selectedProgramPengembangan = request('programPengembanganID');
+        
+        // If renstra is selected, filter pilars
+        if ($selectedRenstra) {
+            $pilars = Pilar::where('RenstraID', $selectedRenstra)
+                ->where('NA', 'N')
+                ->get();
+                
+            // Filter isu strategis by pilars from selected renstra
+            $pilarIds = $pilars->pluck('PilarID')->toArray();
+            $isuStrategis = IsuStrategis::whereIn('PilarID', $pilarIds)
+                ->where('NA', 'N')
+                ->get();
+                
+            // Filter program pengembangans by isu strategis from selected pilars
+            $isuIds = $isuStrategis->pluck('IsuID')->toArray();
+            $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
+                ->where('NA', 'N')
+                ->get();
+        }
+        
+        // If pilar is selected, filter isu strategis
+        if ($selectedPilar) {
+            $isuStrategis = IsuStrategis::where('PilarID', $selectedPilar)
+                ->where('NA', 'N')
+                ->get();
+                
+            // Filter program pengembangans by isu strategis from selected pilar
+            $isuIds = $isuStrategis->pluck('IsuID')->toArray();
+            $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
+                ->where('NA', 'N')
+                ->get();
+        }
+        
+        // If isu strategis is selected, filter program pengembangans
+        if ($selectedIsu) {
+            $programPengembangans = ProgramPengembangan::where('IsuID', $selectedIsu)
+                ->where('NA', 'N')
+                ->get();
+        }
+        
+        if (request()->ajax()) {
             return view('programRektors.create', compact(
                 'renstras',
                 'pilars',
@@ -406,15 +395,33 @@ class ProgramRektorController extends Controller
                 'indikatorKinerjas',
                 'jenisKegiatans', 
                 'mataAnggarans', 
-                'satuans', 
+                'satuans',
                 'units', 
                 'users',
                 'selectedRenstra',
                 'selectedPilar',
                 'selectedIsu',
                 'selectedProgramPengembangan'
-            ));
+            ))->render();
         }
+        
+        return view('programRektors.create', compact(
+            'renstras',
+            'pilars',
+            'isuStrategis',
+            'programPengembangans', 
+            'indikatorKinerjas',
+            'jenisKegiatans', 
+            'mataAnggarans', 
+            'satuans', 
+            'units', 
+            'users',
+            'selectedRenstra',
+            'selectedPilar',
+            'selectedIsu',
+            'selectedProgramPengembangan'
+        ));
+    }
     
         public function exportExcel(Request $request)
         {
