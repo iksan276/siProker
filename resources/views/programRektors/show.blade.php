@@ -52,14 +52,14 @@
         </tr>
         <tr>
             <th>Penanggung Jawab</th>
-            <td>{{ $programRektor->penanggungJawab->Nama }}</td>
+            <td>{{ $penanggungJawab['Nama'] }}</td>
         </tr>
         <tr>
             <th>Pelaksana</th>
             <td>
                 <ul class="mb-0 pl-3">
                     @foreach($pelaksanas as $pelaksana)
-                        <li>{{ $pelaksana->Nama }}</li>
+                        <li>{{ $pelaksana['Nama'] }}</li>
                     @endforeach
                 </ul>
             </td>

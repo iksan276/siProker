@@ -106,7 +106,7 @@
                 <select name="PenanggungJawabID" id="PenanggungJawabID" class="form-control select2">
                     <option value="" disabled selected></option>
                     @foreach($units as $unit)
-                        <option value="{{ $unit->UnitID }}">{{ $unit->Nama }}</option>
+                        <option value="{{ $unit['UnitID'] }}">{{ $unit['Nama'] }}</option>
                     @endforeach
                 </select>
             </div>
@@ -116,7 +116,7 @@
                 <label for="PelaksanaID" class="d-block">Pelaksana</label>
                 <select name="PelaksanaID[]" id="PelaksanaID" class="form-control select2" multiple>
                     @foreach($units as $unit)
-                        <option value="{{ $unit->UnitID }}">{{ $unit->Nama }}</option>
+                        <option value="{{ $unit['UnitID'] }}">{{ $unit['Nama'] }}</option>
                     @endforeach
                 </select>
             </div>
@@ -300,4 +300,3 @@ document.getElementById('programRektorForm').addEventListener('submit', function
     // (This is handled by the event handler in index.blade.php)
 });
 </script>
-

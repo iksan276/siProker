@@ -101,7 +101,7 @@
                 <label for="PenanggungJawabID">Penanggung Jawab</label>
                 <select name="PenanggungJawabID" id="PenanggungJawabID" class="form-control select2">
                     @foreach($units as $unit)
-                        <option value="{{ $unit->UnitID }}" {{ $programRektor->PenanggungJawabID == $unit->UnitID ? 'selected' : '' }}>{{ $unit->Nama }}</option>
+                        <option value="{{ $unit['UnitID'] }}" {{ $programRektor->PenanggungJawabID == $unit['UnitID'] ? 'selected' : '' }}>{{ $unit['Nama'] }}</option>
                     @endforeach
                 </select>
             </div>
@@ -111,7 +111,7 @@
                 <label for="PelaksanaID" class="d-block">Pelaksana</label>
                 <select name="PelaksanaID[]" id="PelaksanaID" class="form-control select2" multiple>
                     @foreach($units as $unit)
-                        <option value="{{ $unit->UnitID }}" {{ in_array($unit->UnitID, $selectedPelaksanas) ? 'selected' : '' }}>{{ $unit->Nama }}</option>
+                        <option value="{{ $unit['UnitID'] }}" {{ in_array($unit['UnitID'], $selectedPelaksanas) ? 'selected' : '' }}>{{ $unit['Nama'] }}</option>
                     @endforeach
                 </select>
             </div>
@@ -264,7 +264,5 @@ document.getElementById('programRektorEditForm').addEventListener('submit', func
         });
         return false;
     }
-    
-  
 });
 </script>
