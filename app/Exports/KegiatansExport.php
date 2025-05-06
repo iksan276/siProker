@@ -80,8 +80,8 @@ class KegiatansExport implements FromCollection, WithHeadings, WithMapping, With
             $programPengembangan ? $programPengembangan->Nama : 'N/A',
             $programRektor ? $programRektor->Nama : 'N/A',
             $kegiatan->Nama,
-            Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y H:i'),
-            Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y H:i'),
+            Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y'),
+            Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y'),
             $kegiatan->RincianKegiatan
         ];
     }

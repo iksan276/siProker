@@ -11,11 +11,104 @@
 
     <!-- Custom fonts for this template-->
     <link href="{{ asset('sb-admin/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
     <!-- Custom styles for this template-->
     <link href="{{ asset('sb-admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
     <style>
+        body {
+            font-family: "Poppins" !important;
+        }
+        
+        /* Background and Particle Styles from welcome.blade.php */
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #3b82f6;
+            --primary-lighter: #93c5fd;
+            --primary-lightest: #dbeafe;
+            --secondary: #7c3aed;
+            --secondary-dark: #6d28d9;
+            --secondary-light: #8b5cf6;
+        }
+        
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, var(--primary-lightest) 0%, #f8fafc 100%) !important;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .particles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, var(--secondary-light) 100%);
+            opacity: 0.3;
+            animation: float 15s infinite ease-in-out;
+        }
+        
+        .particle:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+        
+        .particle:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 20%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+        
+        .particle:nth-child(3) {
+            width: 120px;
+            height: 120px;
+            bottom: 15%;
+            left: 15%;
+            animation-delay: 4s;
+        }
+        
+        .particle:nth-child(4) {
+            width: 50px;
+            height: 50px;
+            bottom: 10%;
+            right: 20%;
+            animation-delay: 6s;
+        }
+        
+        .particle:nth-child(5) {
+            width: 70px;
+            height: 70px;
+            top: 50%;
+            left: 30%;
+            animation-delay: 8s;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+        }
+        
+        /* Original login styles */
         .bg-login-image {
             background-image: url('https://img.freepik.com/free-vector/business-team-discussing-ideas-startup_74855-4380.jpg');
             background-size: cover;
@@ -79,10 +172,44 @@
         .login-options {
             margin-bottom: 20px;
         }
+        
+        /* Card styling enhancements */
+        .card {
+            border: none;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border: none;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+        }
     </style>
 </head>
 
 <body class="bg-gradient-primary">
+    <!-- Particles Background -->
+    <div class="particles-container">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
     <div class="container">
         <!-- Outer Row -->
         <div class="row justify-content-center">
@@ -215,6 +342,26 @@
                 });
             @endif
         });
-        </script>
+        
+        // Animate particles
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add random movement to particles
+            const particles = document.querySelectorAll('.particle');
+            
+            particles.forEach(particle => {
+                // Add some randomness to the initial position
+                const randomX = Math.random() * 20 - 10; // -10 to 10
+                const randomY = Math.random() * 20 - 10; // -10 to 10
+                
+                // Apply the random position
+                const currentTransform = window.getComputedStyle(particle).transform;
+                particle.style.transform = `translate(${randomX}px, ${randomY}px)`;
+                
+                // Add random animation duration for more natural movement
+                const randomDuration = 15 + Math.random() * 10; // 15-25s
+                particle.style.animationDuration = `${randomDuration}s`;
+            });
+        });
+    </script>
 </body>
 </html>

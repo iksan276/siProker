@@ -18,7 +18,8 @@
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <!-- Tambahkan TreeGrid CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-treegrid/0.2.0/css/jquery.treegrid.min.css">
-    <style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+      <style>
       /* Apply dark text color to all text elements */
       body, p, h1, h2, h3, h4, h5, h6, input, select, textarea, 
     table, th, td, label, .card-title, .form-control {
@@ -76,13 +77,6 @@
             width: 25% !important;
         }
     }
-
-    /* #programPengembanganFilter + .select2-container,
-    #programRektorFilter + .select2-container,
-    #unitFilter + .select2-container,
-    #indikatorKinerjaFilter + .select2-container {
-        max-width: 200px !important;
-    } */
 
     /* Network Disconnection Overlay Styles */
     #network-overlay {
@@ -181,9 +175,298 @@
         margin-top: 10px;
         color: #858796 !important;
     }
+
+    body,
+    .daterangepicker {
+        font-family: "Poppins" !important;
+    }
+
+    /* Page Transition Splashscreen Styles */
+    #page-transition-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #fff;
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .page-transition-content {
+        text-align: center;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .page-transition-spinner {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .spinner-ring {
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 4px solid transparent;
+        border-top-color: #4e73df;
+        animation: spin 1.5s linear infinite;
+        top: 0;
+        left: 0;
+    }
+
+    .spinner-ring:nth-child(2) {
+        width: 130px;
+        height: 130px;
+        border-top-color: #36b9cc;
+        animation-duration: 1.75s;
+        animation-direction: reverse;
+        top: 10px;
+        left: 10px;
+    }
+
+    .spinner-ring:nth-child(3) {
+        width: 110px;
+        height: 110px;
+        border-top-color: #1cc88a;
+        animation-duration: 2s;
+        top: 20px;
+        left: 20px;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .logo-pulse {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: logo-pulse 2s ease-in-out infinite;
+    }
+
+    .page-transition-progress {
+        width: 200px;
+        height: 4px;
+        background-color: #e2e8f0;
+        border-radius: 2px;
+        margin: 20px auto 0;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #4e73df, #36b9cc, #1cc88a);
+        background-size: 200% 200%;
+        animation: progress-animation 2s ease-out forwards, gradient-animation 3s ease infinite;
+    }
+
+    @keyframes progress-animation {
+        0% { width: 0%; }
+        100% { width: 100%; }
+    }
+
+    .page-transition-text {
+        margin-top: 15px;
+        font-size: 16px;
+        font-weight: 500;
+        color: #4e73df;
+        opacity: 0;
+        animation: fade-in 0.5s ease-out 0.5s forwards;
+    }
+
+    @keyframes fade-in {
+        0% { opacity: 0; transform: translateY(10px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-transition-dots {
+        display: inline-block;
+    }
+
+    .page-transition-dots span {
+        display: inline-block;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background-color: #4e73df;
+        margin: 0 2px;
+        opacity: 0;
+    }
+
+    .page-transition-dots span:nth-child(1) {
+        animation: dot-animation 1.5s infinite 0.2s;
+    }
+
+    .page-transition-dots span:nth-child(2) {
+        animation: dot-animation 1.5s infinite 0.4s;
+    }
+
+    .page-transition-dots span:nth-child(3) {
+        animation: dot-animation 1.5s infinite 0.6s;
+    }
+
+    @keyframes dot-animation {
+        0% { opacity: 0; transform: translateY(0); }
+        50% { opacity: 1; transform: translateY(-5px); }
+        100% { opacity: 0; transform: translateY(0); }
+    }
+
+    @keyframes logo-pulse {
+        0% { transform: translate(-50%, -50%) scale(1); }
+        50% { transform: translate(-50%, -50%) scale(1.05); }
+        100% { transform: translate(-50%, -50%) scale(1); }
+    }
+    
+    /* Background gradient and particles */
+    .page-gradient-bg {
+        background: linear-gradient(135deg, #dbeafe 0%, #f8fafc 100%);
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+
+    /* Particles container and styling */
+    .particles-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .particle {
+        position: absolute;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(147, 197, 253, 0.3) 0%, rgba(255, 255, 255, 0.3) 100%);
+        opacity: 1;
+        animation: float 15s infinite ease-in-out;
+    }
+
+    .particle:nth-child(1) {
+        width: 80px;
+        height: 80px;
+        top: 100px;
+        right: 10px;
+        animation-delay: 0s;
+    }
+
+    .particle:nth-child(2) {
+        width: 60px;
+        height: 60px;
+        top: 110px;
+        right: 100px;
+        animation-delay: 2s;
+    }
+
+    .particle:nth-child(3) {
+        width: 120px;
+        height: 120px;
+        top: 50px;
+        left: 100px;
+        animation-delay: 4s;
+    }
+
+    .particle:nth-child(4) {
+        width: 50px;
+        height: 50px;
+        top: 50px;
+        left: 200px;
+        animation-delay: 6s;
+    }
+
+    .particle:nth-child(5) {
+        width: 70px;
+        height: 70px;
+        top: 50%;
+        left: 30%;
+        animation-delay: 8s;
+    }
+
+    @keyframes float {
+        0% {
+            transform: translateY(0) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-20px) rotate(5deg);
+        }
+        100% {
+            transform: translateY(0) rotate(0deg);
+        }
+    }
+
+    /* Modify splashscreen to have transparent background */
+    #page-transition-overlay {
+        background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+        backdrop-filter: blur(5px); /* Add blur effect to see content behind */
+    }
+
+    .page-transition-content {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 30px;
+        border-radius: 10px;
+    }
+    
+    /* Content wrapper background */
+    #content {
+        background: linear-gradient(135deg, #dbeafe 0%, #f8fafc 100%) !important;
+        position: relative;
+    }
     </style>
 </head>
 <body id="page-top">
+    <!-- Page Transition Splash
+    Page Transition Splashscreen -->
+    <div id="page-transition-overlay">
+        <div class="page-transition-content">
+            <div class="page-transition-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="logo-pulse">
+                    <i class="fas fa-university" style="font-size: 40px; color: #4e73df;"></i>
+                </div>
+            </div>
+            <div class="page-transition-progress">
+                <div class="progress-bar"></div>
+            </div>
+            <div class="page-transition-text">
+                Memuat Halaman
+                <div class="page-transition-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Network Disconnection Overlay -->
     <div id="network-overlay">
         <div class="network-content">
@@ -201,10 +484,20 @@
         </div>
     </div>
 
+
+
     <div id="wrapper">
         @include('partials.sidebar')
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
+                        <!-- Particles container -->
+            <div class="particles-container">
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+            </div>
                 @include('partials.topbar')
                 <div class="container-fluid">
                     @yield('content')
@@ -225,7 +518,6 @@
     <script src="{{ asset('sb-admin/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
     <!-- Page level plugins -->
     <script src="{{ asset('sb-admin/vendor/chart.js/Chart.min.js') }}"></script>
-
     <script src="{{ asset('sb-admin/js/demo/chart-area-demo.js') }}"></script>
     <script src="{{ asset('sb-admin/js/demo/chart-pie-demo.js') }}"></script>
     
@@ -239,6 +531,69 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-treegrid/0.2.0/js/jquery.treegrid.min.js"></script>
 
     <script>
+    // Page Transition Splashscreen Script
+    (function() {
+        const pageTransitionOverlay = document.getElementById('page-transition-overlay');
+        
+        // Function to hide the splashscreen
+        function hideSplashscreen() {
+            pageTransitionOverlay.style.opacity = '0';
+            setTimeout(() => {
+                pageTransitionOverlay.style.visibility = 'hidden';
+            }, 500); // Match the transition duration
+        }
+        
+        // Hide splashscreen after page is fully loaded
+        window.addEventListener('load', function() {
+            setTimeout(hideSplashscreen, 1000); // Add a small delay for better UX
+        });
+        
+        // Show splashscreen on page navigation, but only for actual navigation links
+        // not for parent menu items that toggle submenus
+        document.addEventListener('click', function(e) {
+            // Check if the clicked element is a link that navigates to a new page
+            const link = e.target.closest('a');
+            
+            if (link && 
+                link.href && 
+                !link.href.startsWith('#') && 
+                !link.href.includes('javascript:') && 
+                !link.target && 
+                !link.classList.contains('no-transition') && 
+                link.hostname === window.location.hostname) {
+                
+                // Skip parent menu items that have submenu (they have collapse class or data-toggle="collapse")
+                if (link.classList.contains('collapse-item') || 
+                    (!link.classList.contains('nav-link') || !link.hasAttribute('data-toggle'))) {
+                    
+                    // Show the splashscreen only for actual navigation links
+                    pageTransitionOverlay.style.visibility = 'visible';
+                    pageTransitionOverlay.style.opacity = '1';
+                    
+                    // Update the loading text to show the destination
+                    const pageTitle = link.getAttribute('data-page-title') || link.textContent.trim() || 'halaman berikutnya';
+                    document.querySelector('.page-transition-text').innerHTML = 
+                        'Memuat ' + pageTitle + 
+                        '<div class="page-transition-dots"><span></span><span></span><span></span></div>';
+                    
+                    // Reset the progress bar animation
+                    const progressBar = document.querySelector('.progress-bar');
+                    progressBar.style.animation = 'none';
+                    progressBar.offsetHeight; // Trigger reflow
+                    progressBar.style.animation = 'progress-animation 2s ease-out forwards, gradient-animation 3s ease infinite';
+                }
+            }
+        });
+        
+        // Handle browser back/forward navigation
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                // Page was loaded from cache (back/forward navigation)
+                hideSplashscreen();
+            }
+        });
+    })();
+
     $(document).ready(function() {
         // Setup AJAX CSRF token
         $.ajaxSetup({
@@ -477,7 +832,8 @@
             // Monitor AJAX errors as potential network issues
             $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
                 // If we get network-related errors, check the connection
-                if (jqxhr.status === 0 || jqxhr.status === 502 || jqxhr.status === 503 || jqxhr.status === 504) {
+                           // If we get network-related errors, check the connection
+                           if (jqxhr.status === 0 || jqxhr.status === 502 || jqxhr.status === 503 || jqxhr.status === 504) {
                     checkInternetConnection();
                 }
             });
@@ -562,51 +918,49 @@
         }
         
         // Add a visual indicator for current network status in the navbar
-       // Add a visual indicator for current network status in the navbar
-const addNetworkIndicator = () => {
-    // Use the dedicated check-internet div instead of inserting before user dropdown
-    const checkInternetDiv = document.querySelector('.check-internet');
-    if (checkInternetDiv) {
-        // Clear any existing content
-        checkInternetDiv.innerHTML = `
-            <div style="margin-top:13px">
-                <a class="nav-link" href="#" id="networkIndicator" role="button"
-                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-wifi fa-fw mr-1" style="font-size:12px"></i>
-                    <span id="network-indicator-status" class="badge badge-success badge-counter ml-1" style="font-size:8px">Online</span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                     aria-labelledby="networkIndicator">
-                    <div class="dropdown-header">Status Jaringan</div>
-                    <div class="dropdown-item">
-                        <div class="small" id="connection-status-detail">Koneksi internet tersedia</div>
+        const addNetworkIndicator = () => {
+            // Use the dedicated check-internet div instead of inserting before user dropdown
+            const checkInternetDiv = document.querySelector('.check-internet');
+            if (checkInternetDiv) {
+                // Clear any existing content
+                checkInternetDiv.innerHTML = `
+                    <div style="margin-top:13px">
+                        <a class="nav-link" href="#" id="networkIndicator" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-wifi fa-fw mr-1" style="font-size:12px"></i>
+                            <span id="network-indicator-status" class="badge badge-success badge-counter ml-1" style="font-size:8px">Online</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                             aria-labelledby="networkIndicator">
+                            <div class="dropdown-header">Status Jaringan</div>
+                            <div class="dropdown-item">
+                                <div class="small" id="connection-status-detail">Koneksi internet tersedia</div>
+                            </div>
+                            <div class="dropdown-item">
+                                <button class="btn btn-sm btn-primary btn-block" onclick="checkInternetConnection()">
+                                    <i class="fas fa-sync-alt fa-sm"></i> Periksa Koneksi
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="dropdown-item">
-                        <button class="btn btn-sm btn-primary btn-block" onclick="checkInternetConnection()">
-                            <i class="fas fa-sync-alt fa-sm"></i> Periksa Koneksi
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Make the checkInternetConnection function globally accessible
-        window.checkInternetConnection = checkInternetConnection;
-        
-        // Update indicator based on current status
-        updateNetworkIndicator(navigator.onLine);
-        
-        // Listen for online/offline events to update the indicator
-        window.addEventListener('online', function() {
-            updateNetworkIndicator(true);
-        });
-        
-        window.addEventListener('offline', function() {
-            updateNetworkIndicator(false);
-        });
-    }
-};
-
+                `;
+                
+                // Make the checkInternetConnection function globally accessible
+                window.checkInternetConnection = checkInternetConnection;
+                
+                // Update indicator based on current status
+                updateNetworkIndicator(navigator.onLine);
+                
+                // Listen for online/offline events to update the indicator
+                window.addEventListener('online', function() {
+                    updateNetworkIndicator(true);
+                });
+                
+                window.addEventListener('offline', function() {
+                    updateNetworkIndicator(false);
+                });
+            }
+        };
         
         // Update the network indicator in the navbar
         function updateNetworkIndicator(isOnline) {
@@ -634,6 +988,96 @@ const addNetworkIndicator = () => {
             showOverlay();
             networkStatusEl.textContent = "Tidak ada koneksi internet saat memuat halaman.";
         }
+    })();
+    </script>
+
+    <!-- AJAX Page Loading Enhancement -->
+    <script>
+    // Enhance navigation with AJAX for smoother transitions
+    (function() {
+        // Only apply AJAX navigation to internal links that aren't explicitly excluded
+        $(document).on('click', 'a:not(.no-ajax):not([href^="#"]):not([href^="javascript"]):not([href^="mailto"]):not([href^="tel"]):not([target="_blank"])', function(e) {
+            // Only intercept links to the same domain
+            if (this.hostname === window.location.hostname) {
+                const $link = $(this);
+                const href = $link.attr('href');
+                
+                // Skip parent menu items that have submenu (they have collapse class or data-toggle="collapse")
+                if ($link.hasClass('nav-link') && $link.attr('data-toggle') === 'collapse') {
+                    return; // Let the default behavior handle this (expand/collapse)
+                }
+                
+                // For sidebar menu items with submenu, don't show splashscreen
+                if ($link.closest('.nav-item').find('.collapse').length > 0 && !$link.hasClass('collapse-item')) {
+                    return; // This is a parent menu item with submenu
+                }
+                
+                const pageTitle = $link.data('page-title') || $link.text().trim() || 'Halaman';
+                
+                // Show the splashscreen with the appropriate title
+                const pageTransitionOverlay = document.getElementById('page-transition-overlay');
+                pageTransitionOverlay.style.visibility = 'visible';
+                pageTransitionOverlay.style.opacity = '1';
+                
+                document.querySelector('.page-transition-text').innerHTML = 
+                    'Memuat ' + pageTitle + 
+                    '<div class="page-transition-dots"><span></span><span></span><span></span></div>';
+                
+                // Reset the progress bar animation
+                const progressBar = document.querySelector('.progress-bar');
+                progressBar.style.animation = 'none';
+                progressBar.offsetHeight; // Trigger reflow
+                progressBar.style.animation = 'progress-animation 2s ease-out forwards, gradient-animation 3s ease infinite';
+                
+                // Update browser history
+                window.history.pushState({path: href}, '', href);
+                
+                // Scroll to top
+                window.scrollTo(0, 0);
+                
+                e.preventDefault();
+                
+                // Load the new page content
+                setTimeout(() => {
+                    window.location.href = href;
+                }, 500);
+            }
+        });
+        
+        // Handle browser back/forward navigation
+        window.addEventListener('popstate', function(event) {
+            if (event.state && event.state.path) {
+                // Show the splashscreen
+                const pageTransitionOverlay = document.getElementById('page-transition-overlay');
+                pageTransitionOverlay.style.visibility = 'visible';
+                pageTransitionOverlay.style.opacity = '1';
+                
+                document.querySelector('.page-transition-text').innerHTML = 
+                    'Kembali ke halaman sebelumnya' + 
+                    '<div class="page-transition-dots"><span></span><span></span><span></span></div>';
+                
+                // Reset the progress bar animation
+                const progressBar = document.querySelector('.progress-bar');
+                progressBar.style.animation = 'none';
+                progressBar.offsetHeight; // Trigger reflow
+                progressBar.style.animation = 'progress-animation 2s ease-out forwards, gradient-animation 3s ease infinite';
+                
+                // Load the page
+                setTimeout(() => {
+                    window.location.href = event.state.path;
+                }, 500);
+            }
+        });
+        
+        // Add class to all parent menu items to help identify them
+        $(document).ready(function() {
+            // Mark all sidebar menu items that have submenus
+            $('.sidebar .nav-item').each(function() {
+                if ($(this).find('.collapse').length > 0) {
+                    $(this).find('> .nav-link').addClass('has-submenu');
+                }
+            });
+        });
     })();
     </script>
 </body>

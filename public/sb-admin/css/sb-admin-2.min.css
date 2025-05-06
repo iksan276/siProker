@@ -94,7 +94,7 @@ h4,
 h5,
 h6 {
     margin-top: 0;
-    margin-bottom: .5rem
+    margin-bottom: .5rem;
 }
 
 p {
@@ -242,7 +242,7 @@ th {
 label {
     display: inline-block;
     margin-bottom: .5rem;
-    font-weight:bolder;
+    font-weight:600;
     color:#000000
 }
 
@@ -390,7 +390,8 @@ h6 {
     margin-bottom: .5rem;
     font-weight: 400;
     line-height: 1.2;
-    color:#000000
+    color:#000000;
+    font-weight:500;
 }
 
 .h1,
@@ -5004,7 +5005,8 @@ input[type=submit].btn-block {
     background-color: #fff;
     background-clip: border-box;
     border: 1px solid #e3e6f0;
-    border-radius: .35rem
+    border-radius: .35rem;
+    border-left: 5px solid #4268d6
 }
 
 .card>hr {

@@ -30,11 +30,11 @@
         </tr>
         <tr>
             <th>Tanggal Mulai</th>
-            <td>{{ \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y H:i') }}</td>
+            <td>{{ \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y') }}</td>
         </tr>
         <tr>
             <th>Tanggal Selesai</th>
-            <td>{{ \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y H:i') }}</td>
+            <td>{{ \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y') }}</td>
         </tr>
         <tr>
             <th>Rincian Kegiatan</th>

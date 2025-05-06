@@ -24,13 +24,13 @@
         <div class="col-sm-6">
             <div class="form-group">
                 <label for="TanggalMulai">Tanggal Mulai</label>
-                <input type="datetime-local" name="TanggalMulai" id="TanggalMulai" class="form-control" onchange="validateDates()">
+                <input type="date" name="TanggalMulai" id="TanggalMulai" class="form-control" onchange="validateDates()">
             </div>
         </div>
         <div class="col-sm-6">
             <div class="form-group">
                 <label for="TanggalSelesai">Tanggal Selesai</label>
-                <input type="datetime-local" name="TanggalSelesai" id="TanggalSelesai" class="form-control" onchange="validateDates()">
+                <input type="date" name="TanggalSelesai" id="TanggalSelesai" class="form-control" onchange="validateDates()">
                 <small id="dateError" class="text-danger" style="display: none;">Tanggal Selesai harus lebih besar atau sama dengan Tanggal Mulai.</small>
             </div>
         </div>
