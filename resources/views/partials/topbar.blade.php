@@ -78,9 +78,7 @@
 
 <!-- Add CSS for SIPROKER title animation -->
 <style>
-    .siproker-title {
-        padding-left: 15px;
-    }
+
     
     .siproker-text {
         font-size: 24px;
