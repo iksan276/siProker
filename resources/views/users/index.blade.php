@@ -51,12 +51,12 @@
                                 @endif
                         </td>
                         <td class="text-center" style="white-space:nowrap;width:1px">
-                            <a href="#" class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('users.show', $u->id) }}" data-title="View User">
+                            <button class="btn btn-info btn-square btn-sm load-modal" data-url="{{ route('users.show', $u->id) }}" data-title="View User">
                                 <i class="fas fa-eye"></i>
-                            </a>
-                            <a href="#" class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('users.edit', $u->id) }}" data-title="Edit User">
+                            </button>
+                            <button class="btn btn-warning btn-square btn-sm load-modal" data-url="{{ route('users.edit', $u->id) }}" data-title="Edit User">
                                 <i class="fas fa-edit"></i>
-                            </a>
+                            </button>
                             <button type="button" class="btn btn-danger btn-square btn-sm delete-user" data-id="{{ $u->id }}">
                                 <i class="fas fa-trash"></i>
                             </button>
