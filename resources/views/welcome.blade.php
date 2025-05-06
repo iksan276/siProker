@@ -837,7 +837,7 @@
         <section class="hero">
             <div class="container grid grid-cols-2">
                 <div class="hero-content animate-fade-up" data-delay="0">
-                    <h1 class="hero-title">SIPROKER</h1>
+                    <h1 class="hero-title">SIPROKER 344</h1>
                     <h2 class="hero-subtitle">Sistem Informasi Program Kerja Dosen</h2>
                     <p class="hero-description">
                         Platform terintegrasi untuk mengelola, memantau, dan mengevaluasi program kerja dosen secara efisien dan transparan. Tingkatkan produktivitas dan kualitas program kerja Anda dengan SIPROKER.
