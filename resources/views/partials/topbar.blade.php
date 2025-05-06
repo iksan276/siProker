@@ -1,6 +1,11 @@
 <!-- Topbar -->
 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
+    <!-- SIPROKER Title with Animation -->
+    <div class="siproker-title mr-auto">
+        <span class="siproker-text">SIPROKER</span>
+    </div>
+
     <!-- Sidebar Toggle (Topbar) -->
     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
         <i class="fa fa-bars"></i>
@@ -69,3 +74,50 @@
     </ul>
 </nav>
 <!-- End of Topbar -->
+
+<!-- Add CSS for SIPROKER title animation -->
+<style>
+    .siproker-title {
+        padding-left: 15px;
+    }
+    
+    .siproker-text {
+        font-size: 24px;
+        font-weight: bold;
+       background-size: 200% 200%;
+        color: transparent;
+        -webkit-background-clip: text;
+        background-clip: text;
+        animation: gradient-animation 3s ease infinite, pulse 2s infinite;
+        text-shadow: 0 0 5px rgba(78, 115, 223, 0.1);
+        letter-spacing: 1px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+    }
+    
+    @keyframes gradient-animation {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>
