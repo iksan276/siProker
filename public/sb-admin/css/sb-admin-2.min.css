@@ -242,6 +242,7 @@ th {
 label {
     display: inline-block;
     margin-bottom: .5rem;
+    font-weight:bolder;
     color:#000000
 }
 
