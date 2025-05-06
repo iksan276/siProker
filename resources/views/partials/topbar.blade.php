@@ -1,15 +1,16 @@
 <!-- Topbar -->
 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
+    <!-- Sidebar Toggle (Topbar) -->
+    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-auto">
+        <i class="fa fa-bars"></i>
+    </button>
     <!-- SIPROKER Title with Animation -->
-    <div class="siproker-title mr-auto">
+    <div class="siproker-title mr-3">
         <span class="siproker-text">SIPROKER</span>
     </div>
 
-    <!-- Sidebar Toggle (Topbar) -->
-    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-        <i class="fa fa-bars"></i>
-    </button>
+
 
     <!-- Topbar Search -->
 
