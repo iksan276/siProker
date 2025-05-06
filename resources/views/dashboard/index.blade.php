@@ -4,10 +4,47 @@
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-    <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-        <i class="fas fa-download fa-sm text-white-50"></i> Generate Report
-    </a> -->
+    <button class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" data-toggle="modal" data-target="#filterModal">
+        <i class="fas fa-filter fa-sm text-white-50"></i> Filter Data
+    </button>
 </div>
+
+<!-- Filter Summary -->
+@if($renstraId || $pilarId || $isuId || $programPengembanganId || $jenisKegiatanId || $year != date('Y'))
+<div class="card mb-4 py-3 border-left-info">
+    <div class="card-body">
+        <h5 class="font-weight-bold text-info mb-2">Active Filters:</h5>
+        <div class="d-flex flex-wrap">
+            @if($year != date('Y'))
+                <span class="badge badge-info mr-2 mb-2 p-2">Year: {{ $year }}</span>
+            @endif
+            
+            @if($renstraId)
+                <span class="badge badge-info mr-2 mb-2 p-2">Renstra: {{ $renstras->where('RenstraID', $renstraId)->first()->Nama }}</span>
+            @endif
+            
+            @if($pilarId)
+                <span class="badge badge-info mr-2 mb-2 p-2">Pilar: {{ $pilars->where('PilarID', $pilarId)->first()->Nama }}</span>
+            @endif
+            
+            @if($isuId)
+                <span class="badge badge-info mr-2 mb-2 p-2">Isu Strategis: {{ $isuStrategis->where('IsuID', $isuId)->first()->Nama }}</span>
+            @endif
+            
+            @if($programPengembanganId)
+                <span class="badge badge-info mr-2 mb-2 p-2">Program Pengembangan: {{ $programPengembangans->where('ProgramPengembanganID', $programPengembanganId)->first()->Nama }}</span>
+            @endif
+            
+            @if($jenisKegiatanId)
+                <span class="badge badge-info mr-2 mb-2 p-2">Jenis Kegiatan: {{ $jenisKegiatans->where('JenisKegiatanID', $jenisKegiatanId)->first()->Nama }}</span>
+            @endif
+        </div>
+        <a href="{{ route('dashboard') }}" class="btn btn-sm btn-outline-secondary mt-2">
+            <i class="fas fa-times"></i> Clear Filters
+        </a>
+    </div>
+</div>
+@endif
 
 <!-- Content Row -->
 <div class="row">
@@ -95,7 +132,7 @@
         <div class="card shadow mb-4">
             <!-- Card Header - Dropdown -->
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">Kegiatan Bulanan ({{ date('Y') }})</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Kegiatan Bulanan ({{ $year }})</h6>
                 <div class="dropdown no-arrow">
                     <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -103,11 +140,10 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
                         aria-labelledby="dropdownMenuLink">
-                        <div class="dropdown-header">Dropdown Header:</div>
-                        <a class="dropdown-item" href="#">Action</a>
-                        <a class="dropdown-item" href="#">Another action</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Something else here</a>
+                        <div class="dropdown-header">Year:</div>
+                        @foreach($years as $y)
+                            <a class="dropdown-item" href="{{ route('dashboard', array_merge(request()->except('year'), ['year' => $y])) }}">{{ $y }}</a>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -133,11 +169,10 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
                         aria-labelledby="dropdownMenuLink">
-                        <div class="dropdown-header">Dropdown Header:</div>
-                        <a class="dropdown-item" href="#">Action</a>
-                        <a class="dropdown-item" href="#">Another action</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Something else here</a>
+                        <div class="dropdown-header">Renstra:</div>
+                        @foreach($renstras as $r)
+                            <a class="dropdown-item" href="{{ route('dashboard', array_merge(request()->except('renstra_id'), ['renstra_id' => $r->RenstraID])) }}">{{ $r->Nama }}</a>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -147,7 +182,7 @@
                     <canvas id="pilarPieChart"></canvas>
                 </div>
                 <div class="mt-4 text-center small">
-                    @foreach($pilars as $index => $pilar)
+                    @foreach($pilars->take(10) as $index => $pilar)
                     <span class="mr-2">
                         <i class="fas fa-circle" style="color: {{ 'hsl(' . (($index * 30) % 360) . ', 70%, 50%)' }}"></i> {{ $pilar->Nama }}
                     </span>
@@ -173,11 +208,10 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
                         aria-labelledby="dropdownMenuLink">
-                        <div class="dropdown-header">Dropdown Header:</div>
-                        <a class="dropdown-item" href="#">Action</a>
-                        <a class="dropdown-item" href="#">Another action</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Something else here</a>
+                        <div class="dropdown-header">Program Pengembangan:</div>
+                        @foreach($programPengembangans->take(10) as $pp)
+                            <a class="dropdown-item" href="{{ route('dashboard', array_merge(request()->except('program_pengembangan_id'), ['program_pengembangan_id' => $pp->ProgramPengembanganID])) }}">{{ $pp->Nama }}</a>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -233,6 +267,101 @@
     </div>
 </div>
 
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">Filter Dashboard Data</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('dashboard') }}" method="GET">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="year">Year</label>
+                                <select class="form-control" id="year" name="year">
+                                    @foreach($years as $y)
+                                        <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="renstra_id">Renstra</label>
+                                <select class="form-control" id="renstra_id" name="renstra_id">
+                                    <option value="">All Renstras</option>
+                                    @foreach($renstras as $renstra)
+                                        <option value="{{ $renstra->RenstraID }}" {{ $renstraId == $renstra->RenstraID ? 'selected' : '' }}>
+                                            {{ $renstra->Nama }} ({{ $renstra->PeriodeMulai }} - {{ $renstra->PeriodeSelesai }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="pilar_id">Pilar</label>
+                                <select class="form-control" id="pilar_id" name="pilar_id">
+                                    <option value="">All Pilars</option>
+                                    @foreach($pilars as $pilar)
+                                        <option value="{{ $pilar->PilarID }}" {{ $pilarId == $pilar->PilarID ? 'selected' : '' }}>
+                                            {{ $pilar->Nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="isu_id">Isu Strategis</label>
+                                <select class="form-control" id="isu_id" name="isu_id">
+                                    <option value="">All Isu Strategis</option>
+                                    @foreach($isuStrategis as $isu)
+                                        <option value="{{ $isu->IsuID }}" {{ $isuId == $isu->IsuID ? 'selected' : '' }}>
+                                            {{ $isu->Nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="program_pengembangan_id">Program Pengembangan</label>
+                                <select class="form-control" id="program_pengembangan_id" name="program_pengembangan_id">
+                                    <option value="">All Program Pengembangan</option>
+                                    @foreach($programPengembangans as $program)
+                                        <option value="{{ $program->ProgramPengembanganID }}" {{ $programPengembanganId == $program->ProgramPengembanganID ? 'selected' : '' }}>
+                                            {{ $program->Nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="jenis_kegiatan_id">Jenis Kegiatan</label>
+                                <select class="form-control" id="jenis_kegiatan_id" name="jenis_kegiatan_id">
+                                    <option value="">All Jenis Kegiatan</option>
+                                    @foreach($jenisKegiatans as $jenisKegiatan)
+                                        <option value="{{ $jenisKegiatan->JenisKegiatanID }}" {{ $jenisKegiatanId == $jenisKegiatan->JenisKegiatanID ? 'selected' : '' }}>
+                                            {{ $jenisKegiatan->Nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="{{ route('dashboard') }}" class="btn btn-secondary">Clear Filters</a>
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -291,7 +420,6 @@
                     ticks: {
                         maxTicksLimit: 5,
                         padding: 10,
-                        // Include a dollar sign in the ticks
                         callback: function(value, index, values) {
                             return value;
                         }
@@ -450,6 +578,82 @@
             },
         }
     });
+
+    // Cascade dropdown filters
+    $(document).ready(function() {
+        // When Renstra changes, update Pilar options
+        $('#renstra_id').change(function() {
+            var renstraId = $(this).val();
+            if (renstraId) {
+                $.ajax({
+                    url: "{{ route('api.pilars-by-renstra') }}",
+                    type: "GET",
+                    data: { renstra_id: renstraId },
+                    success: function(data) {
+                        $('#pilar_id').empty();
+                        $('#pilar_id').append('<option value="">All Pilars</option>');
+                        $.each(data, function(key, value) {
+                            $('#pilar_id').append('<option value="' + value.PilarID + '">' + value.Nama + '</option>');
+                        });
+                        // Reset dependent dropdowns
+                        $('#isu_id').empty().append('<option value="">All Isu Strategis</option>');
+                        $('#program_pengembangan_id').empty().append('<option value="">All Program Pengembangan</option>');
+                    }
+                });
+            } else {
+                $('#pilar_id').empty();
+                $('#pilar_id').append('<option value="">All Pilars</option>');
+                $('#isu_id').empty().append('<option value="">All Isu Strategis</option>');
+                $('#program_pengembangan_id').empty().append('<option value="">All Program Pengembangan</option>');
+            }
+        });
+
+        // When Pilar changes, update Isu Strategis options
+        $('#pilar_id').change(function() {
+            var pilarId = $(this).val();
+            if (pilarId) {
+                $.ajax({
+                    url: "{{ route('api.isus-by-pilar') }}",
+                    type: "GET",
+                    data: { pilar_id: pilarId },
+                    success: function(data) {
+                        $('#isu_id').empty();
+                        $('#isu_id').append('<option value="">All Isu Strategis</option>');
+                        $.each(data, function(key, value) {
+                            $('#isu_id').append('<option value="' + value.IsuID + '">' + value.Nama + '</option>');
+                        });
+                        // Reset dependent dropdown
+                        $('#program_pengembangan_id').empty().append('<option value="">All Program Pengembangan</option>');
+                    }
+                });
+            } else {
+                $('#isu_id').empty();
+                $('#isu_id').append('<option value="">All Isu Strategis</option>');
+                $('#program_pengembangan_id').empty().append('<option value="">All Program Pengembangan</option>');
+            }
+        });
+
+        // When Isu Strategis changes, update Program Pengembangan options
+        $('#isu_id').change(function() {
+            var isuId = $(this).val();
+            if (isuId) {
+                $.ajax({
+                    url: "{{ route('api.programs-by-isu') }}",
+                    type: "GET",
+                    data: { isu_id: isuId },
+                    success: function(data) {
+                        $('#program_pengembangan_id').empty();
+                        $('#program_pengembangan_id').append('<option value="">All Program Pengembangan</option>');
+                        $.each(data, function(key, value) {
+                            $('#program_pengembangan_id').append('<option value="' + value.ProgramPengembanganID + '">' + value.Nama + '</option>');
+                        });
+                    }
+                });
+            } else {
+                $('#program_pengembangan_id').empty();
+                $('#program_pengembangan_id').append('<option value="">All Program Pengembangan</option>');
+            }
+        });
+    });
 </script>
 @endpush
-

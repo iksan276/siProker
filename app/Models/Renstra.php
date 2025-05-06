@@ -41,4 +41,56 @@ class Renstra extends Model
     {
         return $query->where('NA', 'N');
     }
+    
+    // Get count of pilars
+    public function getPilarCountAttribute()
+    {
+        return $this->pilars()->count();
+    }
+    
+    // Get count of isu strategis
+    public function getIsuStrategisCountAttribute()
+    {
+        return IsuStrategis::whereHas('pilar', function($query) {
+            $query->where('RenstraID', $this->RenstraID);
+        })->count();
+    }
+    
+    // Get count of program pengembangan
+    public function getProgramPengembanganCountAttribute()
+    {
+        return ProgramPengembangan::whereHas('isuStrategis.pilar', function($query) {
+            $query->where('RenstraID', $this->RenstraID);
+        })->count();
+    }
+    
+    // Get count of program rektor
+    public function getProgramRektorCountAttribute()
+    {
+        return ProgramRektor::whereHas('programPengembangan.isuStrategis.pilar', function($query) {
+            $query->where('RenstraID', $this->RenstraID);
+        })->count();
+    }
+    
+    // Get count of kegiatan
+    public function getKegiatanCountAttribute()
+    {
+        return Kegiatan::whereHas('programRektor.programPengembangan.isuStrategis.pilar', function($query) {
+            $query->where('RenstraID', $this->RenstraID);
+        })->count();
+    }
+    
+    // Get years covered by this renstra
+    public function getYearsAttribute()
+    {
+        $years = [];
+        $start = (int)$this->PeriodeMulai;
+        $end = (int)$this->PeriodeSelesai;
+        
+        for ($i = $start; $i <= $end; $i++) {
+            $years[] = $i;
+        }
+        
+        return $years;
+    }
 }

@@ -39,4 +39,50 @@ class Pilar extends Model
     {
         return $this->belongsTo(User::class, 'UEdited', 'id');
     }
+    
+    // Scope for active records
+    public function scopeActive($query)
+    {
+        return $query->where('NA', 'N');
+    }
+    
+    // Scope for filtering by renstra
+    public function scopeByRenstra($query, $renstraId)
+    {
+        if (!$renstraId) {
+            return $query;
+        }
+        
+        return $query->where('RenstraID', $renstraId);
+    }
+    
+    // Get count of isu strategis
+    public function getIsuStrategisCountAttribute()
+    {
+        return $this->isuStrategis()->count();
+    }
+    
+    // Get count of program pengembangan
+    public function getProgramPengembanganCountAttribute()
+    {
+        return ProgramPengembangan::whereHas('isuStrategis', function($query) {
+            $query->where('PilarID', $this->PilarID);
+        })->count();
+    }
+    
+    // Get count of program rektor
+    public function getProgramRektorCountAttribute()
+    {
+        return ProgramRektor::whereHas('programPengembangan.isuStrategis', function($query) {
+            $query->where('PilarID', $this->PilarID);
+        })->count();
+    }
+    
+    // Get count of kegiatan
+    public function getKegiatanCountAttribute()
+    {
+        return Kegiatan::whereHas('programRektor.programPengembangan.isuStrategis', function($query) {
+            $query->where('PilarID', $this->PilarID);
+        })->count();
+    }
 }

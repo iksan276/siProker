@@ -46,20 +46,20 @@ class Kegiatan extends Model
     // Helper method to get indikator kinerja through program rektor
     public function indikatorKinerja()
     {
-        return $this->programRektor ? $this->programRektor->indikatorKinerja() : null;
+        return $this->programRektor ? $this->programRektor->indikatorKinerja : null;
     }
     
     // Helper method to get program pengembangan through program rektor
     public function programPengembangan()
     {
-        return $this->programRektor ? $this->programRektor->programPengembangan() : null;
+        return $this->programRektor ? $this->programRektor->programPengembangan : null;
     }
     
     // Helper method to get isu strategis through program rektor -> program pengembangan
     public function isuStrategis()
     {
         return $this->programRektor && $this->programRektor->programPengembangan ? 
-               $this->programRektor->programPengembangan->isuStrategis() : null;
+               $this->programRektor->programPengembangan->isuStrategis : null;
     }
     
     // Helper method to get pilar through program rektor -> program pengembangan -> isu strategis
@@ -67,7 +67,7 @@ class Kegiatan extends Model
     {
         return $this->programRektor && $this->programRektor->programPengembangan && 
                $this->programRektor->programPengembangan->isuStrategis ? 
-               $this->programRektor->programPengembangan->isuStrategis->pilar() : null;
+               $this->programRektor->programPengembangan->isuStrategis->pilar : null;
     }
     
     // Helper method to get renstra through program rektor -> program pengembangan -> isu strategis -> pilar
@@ -76,6 +76,87 @@ class Kegiatan extends Model
         return $this->programRektor && $this->programRektor->programPengembangan && 
                $this->programRektor->programPengembangan->isuStrategis && 
                $this->programRektor->programPengembangan->isuStrategis->pilar ? 
-               $this->programRektor->programPengembangan->isuStrategis->pilar->renstra() : null;
+               $this->programRektor->programPengembangan->isuStrategis->pilar->renstra : null;
+    }
+    
+    // Scope for filtering by year
+    public function scopeForYear($query, $year)
+    {
+        if (!$year) {
+            return $query;
+        }
+        
+        return $query->whereYear('TanggalMulai', $year)
+                     ->orWhereYear('TanggalSelesai', $year);
+    }
+    
+    // Scope for filtering by program rektor
+    public function scopeByProgramRektor($query, $programRektorId)
+    {
+        if (!$programRektorId) {
+            return $query;
+        }
+        
+        return $query->where('ProgramRektorID', $programRektorId);
+    }
+    
+    // Scope for filtering by program pengembangan
+    public function scopeByProgramPengembangan($query, $programPengembanganId)
+    {
+        if (!$programPengembanganId) {
+            return $query;
+        }
+        
+        return $query->whereHas('programRektor', function($q) use ($programPengembanganId) {
+            $q->where('ProgramPengembanganID', $programPengembanganId);
+        });
+    }
+    
+    // Scope for filtering by isu strategis
+    public function scopeByIsuStrategis($query, $isuId)
+    {
+        if (!$isuId) {
+            return $query;
+        }
+        
+        return $query->whereHas('programRektor.programPengembangan', function($q) use ($isuId) {
+            $q->where('IsuID', $isuId);
+        });
+    }
+    
+    // Scope for filtering by pilar
+    public function scopeByPilar($query, $pilarId)
+    {
+        if (!$pilarId) {
+            return $query;
+        }
+        
+        return $query->whereHas('programRektor.programPengembangan.isuStrategis', function($q) use ($pilarId) {
+            $q->where('PilarID', $pilarId);
+        });
+    }
+    
+    // Scope for filtering by renstra
+    public function scopeByRenstra($query, $renstraId)
+    {
+        if (!$renstraId) {
+            return $query;
+        }
+        
+        return $query->whereHas('programRektor.programPengembangan.isuStrategis.pilar', function($q) use ($renstraId) {
+            $q->where('RenstraID', $renstraId);
+        });
+    }
+    
+    // Scope for filtering by jenis kegiatan
+    public function scopeByJenisKegiatan($query, $jenisKegiatanId)
+    {
+        if (!$jenisKegiatanId) {
+            return $query;
+        }
+        
+        return $query->whereHas('programRektor', function($q) use ($jenisKegiatanId) {
+            $q->where('JenisKegiatanID', $jenisKegiatanId);
+        });
     }
 }

@@ -51,6 +51,11 @@ class ProgramRektor extends Model
         return $this->belongsTo(Satuan::class, 'SatuanID', 'SatuanID');
     }
     
+    public function kegiatans()
+    {
+        return $this->hasMany(Kegiatan::class, 'ProgramRektorID', 'ProgramRektorID');
+    }
+    
     /**
      * Get penanggung jawab from API
      */
@@ -95,5 +100,90 @@ class ProgramRektor extends Model
     public function editedBy()
     {
         return $this->belongsTo(User::class, 'UEdited', 'id');
+    }
+    
+    // Scope for active records
+    public function scopeActive($query)
+    {
+        return $query->where('NA', 'N');
+    }
+    
+    // Scope for filtering by program pengembangan
+    public function scopeByProgramPengembangan($query, $programPengembanganId)
+    {
+        if (!$programPengembanganId) {
+            return $query;
+        }
+        
+        return $query->where('ProgramPengembanganID', $programPengembanganId);
+    }
+    
+    // Scope for filtering by jenis kegiatan
+    public function scopeByJenisKegiatan($query, $jenisKegiatanId)
+    {
+        if (!$jenisKegiatanId) {
+            return $query;
+        }
+        
+        return $query->where('JenisKegiatanID', $jenisKegiatanId);
+    }
+    
+    // Scope for filtering by indikator kinerja
+    public function scopeByIndikatorKinerja($query, $indikatorKinerjaId)
+    {
+        if (!$indikatorKinerjaId) {
+            return $query;
+        }
+        
+        return $query->where('IndikatorKinerjaID', $indikatorKinerjaId);
+    }
+    
+    // Scope for filtering by isu strategis through program pengembangan
+    public function scopeByIsuStrategis($query, $isuId)
+    {
+        if (!$isuId) {
+            return $query;
+        }
+        
+        return $query->whereHas('programPengembangan', function($q) use ($isuId) {
+            $q->where('IsuID', $isuId);
+        });
+    }
+    
+    // Scope for filtering by pilar through program pengembangan -> isu strategis
+    public function scopeByPilar($query, $pilarId)
+    {
+        if (!$pilarId) {
+            return $query;
+        }
+        
+        return $query->whereHas('programPengembangan.isuStrategis', function($q) use ($pilarId) {
+            $q->where('PilarID', $pilarId);
+        });
+    }
+    
+    // Scope for filtering by renstra through program pengembangan -> isu strategis -> pilar
+    public function scopeByRenstra($query, $renstraId)
+    {
+        if (!$renstraId) {
+            return $query;
+        }
+        
+        return $query->whereHas('programPengembangan.isuStrategis.pilar', function($q) use ($renstraId) {
+            $q->where('RenstraID', $renstraId);
+        });
+    }
+    
+    // Scope for filtering by year through kegiatans
+    public function scopeForYear($query, $year)
+    {
+        if (!$year) {
+            return $query;
+        }
+        
+        return $query->whereHas('kegiatans', function($q) use ($year) {
+            $q->whereYear('TanggalMulai', $year)
+              ->orWhereYear('TanggalSelesai', $year);
+        });
     }
 }

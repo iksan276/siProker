@@ -48,4 +48,22 @@ class JenisKegiatan extends Model
     {
         return $this->hasMany(ProgramRektor::class, 'JenisKegiatanID', 'JenisKegiatanID');
     }
+    
+    // Scope for active records
+    public function scopeActive($query)
+    {
+        return $query->where('NA', 'N');
+    }
+    
+    // Scope for filtering by program pengembangan
+    public function scopeByProgramPengembangan($query, $programPengembanganId)
+    {
+        if (!$programPengembanganId) {
+            return $query;
+        }
+        
+        return $query->whereHas('programRektors', function($q) use ($programPengembanganId) {
+            $q->where('ProgramPengembanganID', $programPengembanganId);
+        });
+    }
 }

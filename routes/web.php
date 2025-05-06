@@ -33,10 +33,18 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Replace the existing dashboard route with our new controller
+// Dashboard route with filtering
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+// API routes for dashboard filters
+Route::middleware('auth')->prefix('api')->group(function() {
+    Route::get('/pilars-by-renstra', 'App\Http\Controllers\ApiController@getPilarsByRenstra')->name('api.pilars-by-renstra');
+    Route::get('/isus-by-pilar', 'App\Http\Controllers\ApiController@getIsusByPilar')->name('api.isus-by-pilar');
+    Route::get('/programs-by-isu', 'App\Http\Controllers\ApiController@getProgramsByIsu')->name('api.programs-by-isu');
+    Route::get('/programs-by-rektor', 'App\Http\Controllers\ApiController@getProgramRektor')->name('api.programs-by-rektor');
+});
 
 Route::get('/auth/oauth_google', [OAuthGoogleController::class, 'authenticate']);
 
@@ -47,12 +55,6 @@ Route::middleware('auth')->group(function () {
     
     // Pilar routes - accessible by all users
     Route::resource('pilars', PilarController::class);
-    Route::get('/api/pilars-by-renstra', 'App\Http\Controllers\ApiController@getPilarsByRenstra')->name('api.pilars-by-renstra');
-// Add this line with the other API routes
-    Route::get('/api/isus-by-pilar', 'App\Http\Controllers\ApiController@getIsusByPilar')->name('api.isus-by-pilar');
-    Route::get('/api/programs-by-isu', 'App\Http\Controllers\ApiController@getProgramsByIsu')->name('api.programs-by-isu');
-    Route::get('/api/programs-by-rektor', 'App\Http\Controllers\ApiController@getProgramRektor')->name('api.programs-by-rektor');
-
     
     Route::resource('kegiatans', KegiatanController::class);
     Route::resource('program-rektors', ProgramRektorController::class);
