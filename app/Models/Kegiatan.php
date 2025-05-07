@@ -43,6 +43,17 @@ class Kegiatan extends Model
         return $this->belongsTo(User::class, 'UEdited', 'id');
     }
     
+    // Relationships with SubKegiatan and RAB
+    public function subKegiatans()
+    {
+        return $this->hasMany(SubKegiatan::class, 'KegiatanID', 'KegiatanID');
+    }
+    
+    public function rabs()
+    {
+        return $this->hasMany(RAB::class, 'KegiatanID', 'KegiatanID');
+    }
+    
     // Helper method to get indikator kinerja through program rektor
     public function indikatorKinerja()
     {
@@ -77,6 +88,23 @@ class Kegiatan extends Model
                $this->programRektor->programPengembangan->isuStrategis && 
                $this->programRektor->programPengembangan->isuStrategis->pilar ? 
                $this->programRektor->programPengembangan->isuStrategis->pilar->renstra : null;
+    }
+    
+    // Helper method to get total RAB amount
+    public function getTotalRABAmount()
+    {
+        $directRABs = $this->rabs()->whereNull('SubKegiatanID')->sum('Jumlah');
+        $subKegiatanRABs = $this->subKegiatans()->with('rabs')->get()->sum(function($subKegiatan) {
+            return $subKegiatan->rabs->sum('Jumlah');
+        });
+        
+        return $directRABs + $subKegiatanRABs;
+    }
+    
+    // Helper method to get formatted total RAB amount
+    public function getFormattedTotalRABAmountAttribute()
+    {
+        return 'Rp ' . number_format($this->getTotalRABAmount(), 0, ',', '.');
     }
     
     // Scope for filtering by year

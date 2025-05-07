@@ -16,6 +16,7 @@
     <link href="{{ asset('custom/select2.css') }}" rel="stylesheet" />
     <!-- SweetAlert2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
     <!-- Tambahkan TreeGrid CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-treegrid/0.2.0/css/jquery.treegrid.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -529,70 +530,72 @@
 
     <!-- Di bagian scripts setelah jQuery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-treegrid/0.2.0/js/jquery.treegrid.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
     <script>
-    // Page Transition Splashscreen Script
-    (function() {
-        const pageTransitionOverlay = document.getElementById('page-transition-overlay');
+  // Page Transition Splashscreen Script
+(function() {
+    const pageTransitionOverlay = document.getElementById('page-transition-overlay');
+    
+    // Function to hide the splashscreen
+    function hideSplashscreen() {
+        pageTransitionOverlay.style.opacity = '0';
+        setTimeout(() => {
+            pageTransitionOverlay.style.visibility = 'hidden';
+        }, 500); // Match the transition duration
+    }
+    
+    // Hide splashscreen after page is fully loaded
+    window.addEventListener('load', function() {
+        setTimeout(hideSplashscreen, 1000); // Add a small delay for better UX
+    });
+    
+    // Show splashscreen on page navigation, but only for sidebar navigation links
+    document.addEventListener('click', function(e) {
+        // Check if the clicked element is a sidebar link
+        const link = e.target.closest('#accordionSidebar a');
         
-        // Function to hide the splashscreen
-        function hideSplashscreen() {
-            pageTransitionOverlay.style.opacity = '0';
-            setTimeout(() => {
-                pageTransitionOverlay.style.visibility = 'hidden';
-            }, 500); // Match the transition duration
-        }
-        
-        // Hide splashscreen after page is fully loaded
-        window.addEventListener('load', function() {
-            setTimeout(hideSplashscreen, 1000); // Add a small delay for better UX
-        });
-        
-        // Show splashscreen on page navigation, but only for actual navigation links
-        // not for parent menu items that toggle submenus
-        document.addEventListener('click', function(e) {
-            // Check if the clicked element is a link that navigates to a new page
-            const link = e.target.closest('a');
+        if (link && 
+            link.href && 
+            !link.href.startsWith('#') && 
+            !link.href.includes('javascript:') && 
+            !link.target && 
+            !link.classList.contains('no-transition') && 
+            link.hostname === window.location.hostname) {
             
-            if (link && 
-                link.href && 
-                !link.href.startsWith('#') && 
-                !link.href.includes('javascript:') && 
-                !link.target && 
-                !link.classList.contains('no-transition') && 
-                link.hostname === window.location.hostname) {
+            // Skip parent menu items that have submenu (they have collapse class or data-toggle="collapse")
+            if (link.classList.contains('collapse-item') || 
+                (!link.classList.contains('nav-link') || !link.hasAttribute('data-toggle'))) {
                 
-                // Skip parent menu items that have submenu (they have collapse class or data-toggle="collapse")
-                if (link.classList.contains('collapse-item') || 
-                    (!link.classList.contains('nav-link') || !link.hasAttribute('data-toggle'))) {
-                    
-                    // Show the splashscreen only for actual navigation links
-                    pageTransitionOverlay.style.visibility = 'visible';
-                    pageTransitionOverlay.style.opacity = '1';
-                    
-                    // Update the loading text to show the destination
-                    const pageTitle = link.getAttribute('data-page-title') || link.textContent.trim() || 'halaman berikutnya';
-                    document.querySelector('.page-transition-text').innerHTML = 
-                        'Memuat ' + pageTitle + 
-                        '<div class="page-transition-dots"><span></span><span></span><span></span></div>';
-                    
-                    // Reset the progress bar animation
-                    const progressBar = document.querySelector('.progress-bar');
-                    progressBar.style.animation = 'none';
-                    progressBar.offsetHeight; // Trigger reflow
-                    progressBar.style.animation = 'progress-animation 2s ease-out forwards, gradient-animation 3s ease infinite';
-                }
+                // Show the splashscreen only for actual navigation links
+                pageTransitionOverlay.style.visibility = 'visible';
+                pageTransitionOverlay.style.opacity = '1';
+                
+                // Update the loading text to show the destination
+                const pageTitle = link.getAttribute('data-page-title') || link.textContent.trim() || 'halaman berikutnya';
+                document.querySelector('.page-transition-text').innerHTML = 
+                    'Memuat ' + pageTitle + 
+                    '<div class="page-transition-dots"><span></span><span></span><span></span></div>';
+                
+                // Reset the progress bar animation
+                const progressBar = document.querySelector('.progress-bar');
+                progressBar.style.animation = 'none';
+                progressBar.offsetHeight; // Trigger reflow
+                progressBar.style.animation = 'progress-animation 2s ease-out forwards, gradient-animation 3s ease infinite';
             }
-        });
-        
-        // Handle browser back/forward navigation
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                // Page was loaded from cache (back/forward navigation)
-                hideSplashscreen();
-            }
-        });
-    })();
+        }
+    });
+    
+    // Handle browser back/forward navigation
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            // Page was loaded from cache (back/forward navigation)
+            hideSplashscreen();
+        }
+    });
+})();
+
 
     $(document).ready(function() {
         // Setup AJAX CSRF token
@@ -993,92 +996,93 @@
 
     <!-- AJAX Page Loading Enhancement -->
     <script>
-    // Enhance navigation with AJAX for smoother transitions
-    (function() {
-        // Only apply AJAX navigation to internal links that aren't explicitly excluded
-        $(document).on('click', 'a:not(.no-ajax):not([href^="#"]):not([href^="javascript"]):not([href^="mailto"]):not([href^="tel"]):not([target="_blank"])', function(e) {
-            // Only intercept links to the same domain
-            if (this.hostname === window.location.hostname) {
-                const $link = $(this);
-                const href = $link.attr('href');
-                
-                // Skip parent menu items that have submenu (they have collapse class or data-toggle="collapse")
-                if ($link.hasClass('nav-link') && $link.attr('data-toggle') === 'collapse') {
-                    return; // Let the default behavior handle this (expand/collapse)
-                }
-                
-                // For sidebar menu items with submenu, don't show splashscreen
-                if ($link.closest('.nav-item').find('.collapse').length > 0 && !$link.hasClass('collapse-item')) {
-                    return; // This is a parent menu item with submenu
-                }
-                
-                const pageTitle = $link.data('page-title') || $link.text().trim() || 'Halaman';
-                
-                // Show the splashscreen with the appropriate title
-                const pageTransitionOverlay = document.getElementById('page-transition-overlay');
-                pageTransitionOverlay.style.visibility = 'visible';
-                pageTransitionOverlay.style.opacity = '1';
-                
-                document.querySelector('.page-transition-text').innerHTML = 
-                    'Memuat ' + pageTitle + 
-                    '<div class="page-transition-dots"><span></span><span></span><span></span></div>';
-                
-                // Reset the progress bar animation
-                const progressBar = document.querySelector('.progress-bar');
-                progressBar.style.animation = 'none';
-                progressBar.offsetHeight; // Trigger reflow
-                progressBar.style.animation = 'progress-animation 2s ease-out forwards, gradient-animation 3s ease infinite';
-                
-                // Update browser history
-                window.history.pushState({path: href}, '', href);
-                
-                // Scroll to top
-                window.scrollTo(0, 0);
-                
-                e.preventDefault();
-                
-                // Load the new page content
-                setTimeout(() => {
-                    window.location.href = href;
-                }, 500);
+  // Enhance navigation with AJAX for smoother transitions
+(function() {
+    // Only apply AJAX navigation to sidebar links
+    $(document).on('click', '#accordionSidebar a:not(.no-ajax):not([href^="#"]):not([href^="javascript"]):not([href^="mailto"]):not([href^="tel"]):not([target="_blank"])', function(e) {
+        // Only intercept links to the same domain
+        if (this.hostname === window.location.hostname) {
+            const $link = $(this);
+            const href = $link.attr('href');
+            
+            // Skip parent menu items that have submenu (they have collapse class or data-toggle="collapse")
+            if ($link.hasClass('nav-link') && $link.attr('data-toggle') === 'collapse') {
+                return; // Let the default behavior handle this (expand/collapse)
+            }
+            
+            // For sidebar menu items with submenu, don't show splashscreen
+            if ($link.closest('.nav-item').find('.collapse').length > 0 && !$link.hasClass('collapse-item')) {
+                return; // This is a parent menu item with submenu
+            }
+            
+            const pageTitle = $link.data('page-title') || $link.text().trim() || 'Halaman';
+            
+            // Show the splashscreen with the appropriate title
+            const pageTransitionOverlay = document.getElementById('page-transition-overlay');
+            pageTransitionOverlay.style.visibility = 'visible';
+            pageTransitionOverlay.style.opacity = '1';
+            
+            document.querySelector('.page-transition-text').innerHTML = 
+                'Memuat ' + pageTitle + 
+                '<div class="page-transition-dots"><span></span><span></span><span></span></div>';
+            
+            // Reset the progress bar animation
+            const progressBar = document.querySelector('.progress-bar');
+            progressBar.style.animation = 'none';
+            progressBar.offsetHeight; // Trigger reflow
+            progressBar.style.animation = 'progress-animation 2s ease-out forwards, gradient-animation 3s ease infinite';
+            
+            // Update browser history
+            window.history.pushState({path: href}, '', href);
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+            
+            e.preventDefault();
+            
+            // Load the new page content
+            setTimeout(() => {
+                window.location.href = href;
+            }, 500);
+        }
+    });
+    
+    // Handle browser back/forward navigation
+    window.addEventListener('popstate', function(event) {
+        if (event.state && event.state.path) {
+            // Show the splashscreen
+            const pageTransitionOverlay = document.getElementById('page-transition-overlay');
+            pageTransitionOverlay.style.visibility = 'visible';
+            pageTransitionOverlay.style.opacity = '1';
+            
+            document.querySelector('.page-transition-text').innerHTML = 
+                'Kembali ke halaman sebelumnya' + 
+                '<div class="page-transition-dots"><span></span><span></span><span></span></div>';
+            
+            // Reset the progress bar animation
+            const progressBar = document.querySelector('.progress-bar');
+            progressBar.style.animation = 'none';
+            progressBar.offsetHeight; // Trigger reflow
+            progressBar.style.animation = 'progress-animation 2s ease-out forwards, gradient-animation 3s ease infinite';
+            
+            // Load the page
+            setTimeout(() => {
+                window.location.href = event.state.path;
+            }, 500);
+        }
+    });
+    
+    // Add class to all parent menu items to help identify them
+    $(document).ready(function() {
+        // Mark all sidebar menu items that have submenus
+        $('.sidebar .nav-item').each(function() {
+            if ($(this).find('.collapse').length > 0) {
+                $(this).find('> .nav-link').addClass('has-submenu');
             }
         });
-        
-        // Handle browser back/forward navigation
-        window.addEventListener('popstate', function(event) {
-            if (event.state && event.state.path) {
-                // Show the splashscreen
-                const pageTransitionOverlay = document.getElementById('page-transition-overlay');
-                pageTransitionOverlay.style.visibility = 'visible';
-                pageTransitionOverlay.style.opacity = '1';
-                
-                document.querySelector('.page-transition-text').innerHTML = 
-                    'Kembali ke halaman sebelumnya' + 
-                    '<div class="page-transition-dots"><span></span><span></span><span></span></div>';
-                
-                // Reset the progress bar animation
-                const progressBar = document.querySelector('.progress-bar');
-                progressBar.style.animation = 'none';
-                progressBar.offsetHeight; // Trigger reflow
-                progressBar.style.animation = 'progress-animation 2s ease-out forwards, gradient-animation 3s ease infinite';
-                
-                // Load the page
-                setTimeout(() => {
-                    window.location.href = event.state.path;
-                }, 500);
-            }
-        });
-        
-        // Add class to all parent menu items to help identify them
-        $(document).ready(function() {
-            // Mark all sidebar menu items that have submenus
-            $('.sidebar .nav-item').each(function() {
-                if ($(this).find('.collapse').length > 0) {
-                    $(this).find('> .nav-link').addClass('has-submenu');
-                }
-            });
-        });
-    })();
+    });
+})();
+
     </script>
 </body>
 </html>

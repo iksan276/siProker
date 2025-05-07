@@ -44,11 +44,17 @@ Route::middleware('auth')->prefix('api')->group(function() {
     Route::get('/isus-by-pilar', 'App\Http\Controllers\ApiController@getIsusByPilar')->name('api.isus-by-pilar');
     Route::get('/programs-by-isu', 'App\Http\Controllers\ApiController@getProgramsByIsu')->name('api.programs-by-isu');
     Route::get('/programs-by-rektor', 'App\Http\Controllers\ApiController@getProgramRektor')->name('api.programs-by-rektor');
+    Route::get('/sub-kegiatans-by-kegiatan', 'App\Http\Controllers\ApiController@getSubKegiatansByKegiatan')->name('api.sub-kegiatans-by-kegiatan');
 });
 
 Route::get('/auth/oauth_google', [OAuthGoogleController::class, 'authenticate']);
 
 Route::middleware('auth')->group(function () {
+    Route::resource('sub-kegiatans', SubKegiatanController::class);
+    
+    // RAB routes
+    Route::resource('rabs', RABController::class);
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

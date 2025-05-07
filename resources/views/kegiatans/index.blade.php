@@ -3,7 +3,7 @@
 @section('content')
 <!-- Page Heading -->
 <h1 class="h3 mb-2">Kegiatan</h1>
-<p class="mb-4">Kelola Master Kegiatan.</p>
+<p class="mb-4">Kelola Kegiatan dalam tampilan hierarki.</p>
 
 <!-- Alert Container for AJAX responses -->
 <div id="alertContainer"></div>
@@ -11,7 +11,7 @@
 <!-- DataTales Card -->
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-primary">Kegiatan List</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Kegiatan Hierarki</h6>
         <div>
             <a href="{{ route('kegiatans.export.excel', request()->query()) }}" class="btn btn-success btn-sm">
                 <i class="fas fa-file-excel fa-sm"></i> Export Excel
@@ -84,19 +84,16 @@
         </div>
         
         <div class="table-responsive">
-            <table class="table table-bordered" id="kegiatanTable" width="100%" cellspacing="0">
+            <table class="table table-bordered" id="kegiatanTreeTable" width="100%" cellspacing="0">
                 <thead>
                     <tr class="text-center text-dark">
                         <th style="white-space:nowrap">No</th>
                         <th style="white-space:nowrap">Nama</th>
-                        <th style="white-space:nowrap">Tanggal Mulai</th>
-                        <th style="white-space:nowrap">Tanggal Selesai</th>
-                        <th style="white-space:nowrap">Rincian Kegiatan</th>
                         <th style="white-space:nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- DataTable will populate this -->
+                    <!-- TreeTable will populate this -->
                 </tbody>
             </table>
         </div>
@@ -106,7 +103,7 @@
 
 @push('scripts')
 <script>
-    let kegiatanTable;
+    let kegiatanTreeTable;
     var isFiltering = false;
     var selectedRenstraId = getCookie('selected_renstra') || "{{ $selectedRenstra ?? '' }}";
     var selectedPilarId = getCookie('selected_pilar') || "{{ $selectedPilar ?? '' }}";
@@ -140,8 +137,8 @@
             $('#programRektorFilter').val(selectedProgramRektorId).trigger('change');
         }
         
-        // Initialize DataTable
-        initDataTable();
+        // Initialize TreeTable
+        initTreeTable();
         
         // Handle renstra filter change
         $('#renstraFilter').on('change', function() {
@@ -180,20 +177,14 @@
                 updateUrlParameter('programPengembanganID', null);
                 updateUrlParameter('programRektorID', null);
                 
-                // Reload DataTable with no filters
+                // Reload TreeTable with no filters
                 isFiltering = true;
-                kegiatanTable.ajax.reload(function() {
+                kegiatanTreeTable.ajax.reload(function() {
                     isFiltering = false;
                 });
                 return;
             }
             
-            // If renstra is selected, store it and enable pilar filter
-            setCookie('selected_renstra', renstraID, 30);
-            updateUrlParameter('renstraID', renstraID);
-            isFiltering = true;
-            
-            //
             // If renstra is selected, store it and enable pilar filter
             setCookie('selected_renstra', renstraID, 30);
             updateUrlParameter('renstraID', renstraID);
@@ -249,8 +240,8 @@
                         }
                     }
                     
-                    // Reload DataTable with new filter
-                    kegiatanTable.ajax.reload(function() {
+                    // Reload TreeTable with new filter
+                    kegiatanTreeTable.ajax.reload(function() {
                         isFiltering = false;
                     });
                 },
@@ -293,9 +284,9 @@
                 updateUrlParameter('programPengembanganID', null);
                 updateUrlParameter('programRektorID', null);
                 
-                // Reload DataTable with current filters
+                // Reload TreeTable with current filters
                 isFiltering = true;
-                kegiatanTable.ajax.reload(function() {
+                kegiatanTreeTable.ajax.reload(function() {
                     isFiltering = false;
                 });
                 return;
@@ -309,8 +300,8 @@
             // Load isu strategis for selected pilar via AJAX
             loadIsusForPilar(pilarID, selectedIsuId);
             
-            // Reload DataTable with new filter
-            kegiatanTable.ajax.reload(function() {
+            // Reload TreeTable with new filter
+            kegiatanTreeTable.ajax.reload(function() {
                 isFiltering = false;
             });
         });
@@ -340,9 +331,9 @@
                 updateUrlParameter('programPengembanganID', null);
                 updateUrlParameter('programRektorID', null);
                 
-                // Reload DataTable with current filters
+                // Reload TreeTable with current filters
                 isFiltering = true;
-                kegiatanTable.ajax.reload(function() {
+                kegiatanTreeTable.ajax.reload(function() {
                     isFiltering = false;
                 });
                 return;
@@ -356,8 +347,8 @@
             // Load program pengembangans for selected isu via AJAX
             loadProgramsForIsu(isuID, selectedProgramPengembanganId);
             
-            // Reload DataTable with new filter
-            kegiatanTable.ajax.reload(function() {
+            // Reload TreeTable with new filter
+            kegiatanTreeTable.ajax.reload(function() {
                 isFiltering = false;
             });
         });
@@ -381,9 +372,9 @@
                 updateUrlParameter('programPengembanganID', null);
                 updateUrlParameter('programRektorID', null);
                 
-                // Reload DataTable with current filters
+                // Reload TreeTable with current filters
                 isFiltering = true;
-                kegiatanTable.ajax.reload(function() {
+                kegiatanTreeTable.ajax.reload(function() {
                     isFiltering = false;
                 });
                 return;
@@ -397,8 +388,8 @@
             // Load program rektors for selected program pengembangan via AJAX
             loadProgramRektorsForProgram(programPengembanganID, selectedProgramRektorId);
             
-            // Reload DataTable with new filter
-            kegiatanTable.ajax.reload(function() {
+            // Reload TreeTable with new filter
+            kegiatanTreeTable.ajax.reload(function() {
                 isFiltering = false;
             });
         });
@@ -421,8 +412,8 @@
             // Set filtering flag to true
             isFiltering = true;
             
-            // Reload DataTable with new filter
-            kegiatanTable.ajax.reload(function() {
+            // Reload TreeTable with new filter
+            kegiatanTreeTable.ajax.reload(function() {
                 isFiltering = false;
             });
         });
@@ -451,8 +442,8 @@
                         // Show success message
                         showAlert('success', response.message || 'Operation completed successfully');
                         
-                        // Reload only the DataTable
-                        kegiatanTable.ajax.reload();
+                        // Reload only the TreeTable
+                        kegiatanTreeTable.ajax.reload();
                     } else {
                         // Display error message
                         showAlert('danger', response.message || 'An error occurred');
@@ -510,8 +501,8 @@
                         },
                         success: function(response) {
                             if (response.success) {
-                                // Reload only the DataTable
-                                kegiatanTable.ajax.reload();
+                                // Reload only the TreeTable
+                                kegiatanTreeTable.ajax.reload();
                                 Swal.fire({
                                     title: 'Terhapus!',
                                     text: response.message || 'Item has been successfully deleted.',
@@ -537,6 +528,173 @@
             });
         });
     });
+    
+    // Function to initialize the TreeTable
+    function initTreeTable() {
+        // Destroy existing DataTable if it exists
+        if ($.fn.DataTable.isDataTable('#kegiatanTreeTable')) {
+            $('#kegiatanTreeTable').DataTable().destroy();
+        }
+        
+        // Initialize TreeTable with AJAX
+        kegiatanTreeTable = $('#kegiatanTreeTable').DataTable({
+            processing: true,
+            serverSide: false, // We're handling the data ourselves
+            ajax: {
+                url: '{{ route('kegiatans.index') }}',
+                type: 'GET',
+                data: function(d) {
+                    d.renstraID = selectedRenstraId;
+                    d.pilarID = selectedPilarId;
+                    d.isuID = selectedIsuId;
+                    d.programPengembanganID = selectedProgramPengembanganId;
+                    d.programRektorID = selectedProgramRektorId;
+                    d.format = 'tree';
+                    d.wantsJson = true;
+                },
+                // Show processing only during filtering
+                beforeSend: function() {
+                    if (!isFiltering) {
+                        $('#kegiatanTreeTable_processing').hide();
+                    }
+                }
+            },
+            columns: [
+                { 
+                    data: 'no', 
+                    className: 'text-center',
+                    width: '1px',
+                    orderable: false,
+                    render: function(data) {
+                        return data ? '<span style="white-space:nowrap;width:1px">' + data + '</span>' : '';
+                    }
+                },
+                { 
+                    data: 'nama',
+                    render: function(data, type, row) {
+                        // Add indentation based on level
+                        var padding = row.level * 20;
+                        var icon = '';
+                        
+                        // Add appropriate icon based on type
+                        if (row.type === 'kegiatan') {
+                            icon = '<i class="fas fa-tasks text-primary mr-2"></i>';
+                        } else if (row.type === 'subkegiatan') {
+                            icon = '<i class="fas fa-clipboard-list text-info mr-2"></i>';
+                        } else if (row.type === 'rab') {
+                            icon = '<i class="fas fa-money-bill-wave text-success mr-2"></i>';
+                        }
+                        
+                        // Add expand/collapse icon if has children
+                        var expandIcon = '';
+                        if (row.has_children) {
+                            expandIcon = '<span class="tree-toggle mr-2" data-id="' + row.id + '">' +
+                                         '<i class="fas fa-chevron-right"></i></span>';
+                        } else {
+                            expandIcon = '<span class="mr-4"></span>';
+                        }
+                        
+                        return '<div class="d-flex align-items-center" style="padding-left: ' + padding + 'px;">' +
+                               expandIcon + icon + 
+                               '<span data-toggle="tooltip" title="' + row.tooltip + '">' + data + '</span></div>';
+                    }
+                },
+                { 
+                    data: 'actions', 
+                    className: 'text-center',
+                    width: '1px',
+                    orderable: false,
+                    render: function(data, type, row) {
+                        return data ? '<span style="white-space:nowrap;width:1px">' + data + '</span>' : '';
+                    }
+                }
+            ],
+            responsive: true,
+            drawCallback: function() {
+                // Re-initialize event handlers for dynamic content
+                initEventHandlers();
+                
+                // Initialize tooltips
+                $('[data-toggle="tooltip"]').tooltip();
+                
+                // Hide child rows initially
+                $('.tree-child').hide();
+            },
+            // Hide processing indicator for all operations except filtering
+            language: {
+                processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>'
+            },
+            // Override the default processing display behavior
+            preDrawCallback: function() {
+                if (!isFiltering) {
+                    $('#kegiatanTreeTable_processing').hide();
+                }
+                return true;
+            },
+            rowCallback: function(row, data) {
+                // Add classes to rows for tree structure
+                $(row).addClass('tree-item');
+                $(row).attr('data-id', data.id);
+                
+                if (data.parent) {
+                    $(row).addClass('tree-child');
+                    $(row).attr('data-parent', data.parent);
+                }
+                
+                // Add custom row class if specified
+                if (data.row_class) {
+                    $(row).addClass(data.row_class);
+                }
+            }
+        });
+        
+        // Additional override to hide processing indicator for pagination, sorting, etc.
+        $('#kegiatanTreeTable').on('page.dt search.dt order.dt', function() {
+            if (!isFiltering) {
+                $('#kegiatanTreeTable_processing').hide();
+            }
+        });
+        
+        // Handle tree toggle click
+        $('#kegiatanTreeTable').on('click', '.tree-toggle', function() {
+            var id = $(this).data('id');
+            var $icon = $(this).find('i');
+            var isExpanded = $icon.hasClass('fa-chevron-down');
+            
+            if (isExpanded) {
+                // Collapse this node and all its children
+                $icon.removeClass('fa-chevron-down').addClass('fa-chevron-right');
+                collapseNode(id);
+            } else {
+                // Expand just this node's immediate children
+                $icon.removeClass('fa-chevron-right').addClass('fa-chevron-down');
+                expandNode(id);
+            }
+        });
+    }
+    
+    // Function to expand a tree node
+    function expandNode(id) {
+        $('.tree-child[data-parent="' + id + '"]').show();
+    }
+    
+    // Function to collapse a tree node and all its children
+    function collapseNode(id) {
+        // Hide immediate children
+        var $children = $('.tree-child[data-parent="' + id + '"]');
+        $children.hide();
+        
+        // Also collapse any expanded children recursively
+        $children.each(function() {
+            var childId = $(this).data('id');
+            var $childIcon = $('.tree-toggle[data-id="' + childId + '"] i');
+            
+            if ($childIcon.hasClass('fa-chevron-down')) {
+                $childIcon.removeClass('fa-chevron-down').addClass('fa-chevron-right');
+                collapseNode(childId);
+            }
+        });
+    }
     
     // Function to load pilars for a renstra
     function loadPilarsForRenstra(renstraID, selectedPilarId) {
@@ -746,84 +904,6 @@
         document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     }
     
-    function initDataTable() {
-        // Destroy existing DataTable if it exists
-        if ($.fn.DataTable.isDataTable('#kegiatanTable')) {
-            $('#kegiatanTable').DataTable().destroy();
-        }
-        
-        // Initialize DataTable with AJAX
-        kegiatanTable = $('#kegiatanTable').DataTable({
-            processing: true,
-            serverSide: false, // We're handling the data ourselves
-            ajax: {
-                url: '{{ route('kegiatans.index') }}',
-                type: 'GET',
-                data: function(d) {
-                    d.renstraID = selectedRenstraId;
-                    d.pilarID = selectedPilarId;
-                    d.isuID = selectedIsuId;
-                    d.programPengembanganID = selectedProgramPengembanganId;
-                    d.programRektorID = selectedProgramRektorId;
-                    d.wantsJson = true;
-                },
-                // Show processing only during filtering
-                beforeSend: function() {
-                    if (!isFiltering) {
-                        $('#kegiatanTable_processing').hide();
-                    }
-                }
-            },
-            columns: [
-                { 
-                    data: 'no', 
-                    className: 'text-center',
-                    width: '1px',
-                    orderable: false,
-                    render: function(data) {
-                        return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
-                    }
-                },
-                { data: 'nama' },
-                { data: 'tanggal_mulai', className: 'text-center' },
-                { data: 'tanggal_selesai', className: 'text-center' },
-                { data: 'rincian_kegiatan' },
-                { 
-                    data: 'actions', 
-                    className: 'text-center',
-                    width: '1px',
-                    orderable: false,
-                    render: function(data) {
-                        return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
-                    }
-                }
-            ],
-            responsive: true,
-            drawCallback: function() {
-                // Re-initialize event handlers for dynamic content
-                initEventHandlers();
-            },
-            // Hide processing indicator for all operations except filtering
-            language: {
-                processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>'
-            },
-            // Override the default processing display behavior
-            preDrawCallback: function() {
-                if (!isFiltering) {
-                    $('#kegiatanTable_processing').hide();
-                }
-                return true;
-            }
-        });
-        
-        // Additional override to hide processing indicator for pagination, sorting, etc.
-        $('#kegiatanTable').on('page.dt search.dt order.dt', function() {
-            if (!isFiltering) {
-                $('#kegiatanTable_processing').hide();
-            }
-        });
-    }
-    
     function updateUrlParameter(key, value) {
         var url = new URL(window.location.href);
         
@@ -910,8 +990,8 @@
                         },
                         success: function(response) {
                             if (response.success) {
-                                // Reload DataTable
-                                kegiatanTable.ajax.reload();
+                                // Reload TreeTable
+                                kegiatanTreeTable.ajax.reload();
                                 Swal.fire({
                                     title: 'Terhapus!',
                                     text: response.message || 'Item has been successfully deleted.',
@@ -976,7 +1056,7 @@
     // Initial data load - hide processing indicator if not filtering
     $(document).ajaxStart(function() {
         if (!isFiltering) {
-            $('#kegiatanTable_processing').hide();
+            $('#kegiatanTreeTable_processing').hide();
         }
     });
     
@@ -984,7 +1064,7 @@
     $(window).on('load', function() {
         if (!isFiltering) {
             setTimeout(function() {
-                $('#kegiatanTable_processing').hide();
+                $('#kegiatanTreeTable_processing').hide();
             }, 200);
         }
     });
@@ -1070,4 +1150,36 @@
         }
     });
 </script>
+
+<style>
+    /* Tree view styling */
+    .tree-toggle {
+        cursor: pointer;
+        display: inline-block;
+        width: 20px;
+        text-align: center;
+    }
+    
+    .tree-toggle i {
+        transition: transform 0.2s;
+    }
+    
+    /* Hover effect for tree rows */
+    .tree-item:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+    
+    /* Different background colors for different levels */
+    .tree-item[data-level="0"] {
+        background-color: rgba(0, 123, 255, 0.03);
+    }
+    
+    .tree-item[data-level="1"] {
+        background-color: rgba(23, 162, 184, 0.03);
+    }
+    
+    .tree-item[data-level="2"] {
+        background-color: rgba(40, 167, 69, 0.03);
+    }
+</style>
 @endpush
