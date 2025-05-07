@@ -27,7 +27,7 @@
     <div class="card-body">
     <div class="form-group mb-5">
                 <select id="renstraFilter" class="form-control select2-filter">
-                    <option value="">-- Pilih Renstra (Untuk Label Tahun) --</option>
+                    <option value="">-- Pilih Renstra --</option>
                     @foreach($renstras as $renstra)
                         <option value="{{ $renstra->RenstraID }}" {{ isset($selectedRenstraID) && $selectedRenstraID == $renstra->RenstraID ? 'selected' : '' }}>
                             {{ $renstra->Nama }} ({{ $renstra->PeriodeMulai }} - {{ $renstra->PeriodeSelesai }})

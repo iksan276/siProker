@@ -664,83 +664,102 @@
     
     // Initialize Select2 for page elements (outside modal)
     function initPageSelect2() {
-        $('.select2-filter').each(function() {
-            // Skip if it's inside a modal
-            if ($(this).closest('.modal').length === 0) {
-                // Get placeholder text from the empty option if it exists
-                var placeholderText = "-- Pilih --"; // Default placeholder
-                $(this).find('option[value=""]').each(function() {
-                    placeholderText = $(this).text();
-                });
-                
-                // Destroy if already initialized
-                if ($(this).hasClass('select2-hidden-accessible')) {
-                    $(this).select2('destroy');
-                }
-                
-                // Initialize with basic settings
-                $(this).select2({
-                    width: '100%',
-                    placeholder: placeholderText,
-                    allowClear: true
-                });
-                
-                // Apply custom styling to all elements
-                var $container = $(this).next('.select2-container');
-                
-                // Style the selection container
-                $container.find('.select2-selection--single').css({
-                    'height': '34px',
-                    'padding': '0.15rem 0.75rem',
-                    'border': '1px solid #d1d3e2',
-                    'border-radius': '0.35rem'
-                });
-                
-                // Style the rendered text and center the placeholder
-                $container.find('.select2-selection__rendered').css({
-                    'line-height': '1.5',
-                    'padding-left': '0',
-                    'padding-top': '0.15rem',
-                    'padding-bottom': '0.15rem',
-                    'color': '#6e707e',
-                });
-                
-                // Style the dropdown arrow
-                $container.find('.select2-selection__arrow').css({
-                    'height': '34px'
-                });
-                
-                // Namespace the event handler to avoid affecting modals
-                var selectId = $(this).attr('id') || 'select-' + Math.random().toString(36).substring(2, 15);
-                $(this).attr('id', selectId);
-                
-                // Remove any previous event handlers
-                $(document).off('select2:open.' + selectId);
-                
-                // Add namespaced event handler
-                $(document).on('select2:open.' + selectId, function() {
-                    // Only target dropdowns that are not in modals
-                    $('.select2-dropdown').each(function() {
-                        if ($(this).closest('.modal').length === 0) {
-                            $(this).css({
-                                'font-size': '0.875rem'
-                            });
-                            
-                            $(this).find('.select2-search__field').css({
-                                'height': '28px',
-                                'padding': '2px 6px'
-                            });
-                            
-                            $(this).find('.select2-results__option').css({
-                                'padding': '4px 8px',
-                                'min-height': '28px'
-                            });
-                        }
-                    });
-                });
+    $('.select2-filter').each(function() {
+        // Skip if it's inside a modal
+        if ($(this).closest('.modal').length === 0) {
+            // Get placeholder text from the empty option if it exists
+            var placeholderText = "-- Pilih --"; // Default placeholder
+            $(this).find('option[value=""]').each(function() {
+                placeholderText = $(this).text();
+            });
+            
+            
+            // Destroy if already initialized
+            if ($(this).hasClass('select2-hidden-accessible')) {
+                $(this).select2('destroy');
             }
-        });
-    }
+            
+            // Initialize with basic settings and custom template
+            $(this).select2({
+                width: '100%',
+                placeholder: placeholderText,
+                allowClear: true,
+                templateSelection: function(data) {
+                    if (data.id && data.id !== '') {
+                        // Extract label from placeholder text like "--pilih renstra--"
+                        var label = '';
+                        if (placeholderText) {
+                            // Remove dashes and trim
+                            var cleanText = placeholderText.replace(/--/g, '').trim();
+                            // Remove "pilih " if it exists (case insensitive)
+                            var labelText = cleanText.replace(/^pilih\s+/i, '').trim();
+                            // Use the result as label
+                            label = labelText;
+                        }
+                        
+                        return $('<span><span class="text-primary small">' + label + ':</span> <span class="font-weight-bold text-dark">' + data.text + '</span></span>');
+                    }
+                    return data.text;
+                }
+            });
+            
+            // Apply custom styling to all elements
+            var $container = $(this).next('.select2-container');
+            
+            // Style the selection container
+            $container.find('.select2-selection--single').css({
+                'height': '34px',
+                'padding': '0.15rem 0.75rem',
+                'border': '1px solid #d1d3e2',
+                'border-radius': '0.35rem'
+            });
+            
+            // Style the rendered text and center the placeholder
+            $container.find('.select2-selection__rendered').css({
+                'line-height': '1.5',
+                'padding-left': '0',
+                'padding-top': '0.15rem',
+                'padding-bottom': '0.15rem',
+                'color': '#6e707e',
+            });
+            
+            // Style the dropdown arrow
+            $container.find('.select2-selection__arrow').css({
+                'height': '34px'
+            });
+            
+            // Namespace the event handler to avoid affecting modals
+            var selectId = $(this).attr('id') || 'select-' + Math.random().toString(36).substring(2, 15);
+            $(this).attr('id', selectId);
+            
+            // Remove any previous event handlers
+            $(document).off('select2:open.' + selectId);
+            
+            // Add namespaced event handler
+            $(document).on('select2:open.' + selectId, function() {
+                // Only target dropdowns that are not in modals
+                $('.select2-dropdown').each(function() {
+                    if ($(this).closest('.modal').length === 0) {
+                        $(this).css({
+                            'font-size': '0.875rem'
+                        });
+                        
+                        $(this).find('.select2-search__field').css({
+                            'height': '28px',
+                            'padding': '2px 6px'
+                        });
+                        
+                        $(this).find('.select2-results__option').css({
+                            'padding': '4px 8px',
+                            'min-height': '28px'
+                        });
+                    }
+                });
+            });
+        }
+    });
+}
+
     
     // Initialize Select2 for modal elements
     function initModalSelect2() {
