@@ -703,7 +703,6 @@
                     'padding-top': '0.15rem',
                     'padding-bottom': '0.15rem',
                     'color': '#6e707e',
-                    'text-align': 'center' // Center the text
                 });
                 
                 // Style the dropdown arrow

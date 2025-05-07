@@ -80,6 +80,15 @@ class RABController extends Controller
 
     public function store(Request $request)
     {
+        // Clean numeric inputs from formatting before validation
+        if ($request->has('Volume')) {
+            $request->merge(['Volume' => (int) str_replace('.', '', $request->Volume)]);
+        }
+        
+        if ($request->has('HargaSatuan')) {
+            $request->merge(['HargaSatuan' => (int) str_replace('.', '', $request->HargaSatuan)]);
+        }
+    
         $request->validate([
             'KegiatanID' => 'nullable|exists:kegiatans,KegiatanID',
             'SubKegiatanID' => 'nullable|exists:sub_kegiatans,SubKegiatanID',
@@ -89,7 +98,7 @@ class RABController extends Controller
             'HargaSatuan' => 'required|integer|min:0',
             'Status' => 'required|in:N,Y,T,R',
         ]);
-
+    
         // Ensure at least one of KegiatanID or SubKegiatanID is provided
         if (empty($request->KegiatanID) && empty($request->SubKegiatanID)) {
             if ($request->ajax()) {
@@ -100,10 +109,10 @@ class RABController extends Controller
             }
             return redirect()->back()->withErrors(['error' => 'Harus memilih Kegiatan atau Sub Kegiatan'])->withInput();
         }
-
+    
         // Calculate Jumlah
         $jumlah = $request->Volume * $request->HargaSatuan;
-
+    
         $rab = new RAB();
         $rab->KegiatanID = $request->KegiatanID;
         $rab->SubKegiatanID = $request->SubKegiatanID;
@@ -116,12 +125,13 @@ class RABController extends Controller
         $rab->DCreated = now();
         $rab->UCreated = Auth::id();
         $rab->save();
-
+    
         if ($request->ajax()) {
             return response()->json(['success' => true, 'message' => 'RAB berhasil ditambahkan', 'rab' => $rab]);
         }
         return redirect()->route('rabs.index')->with('success', 'RAB berhasil ditambahkan');
     }
+    
 
     public function show(RAB $rab)
     {
@@ -153,6 +163,15 @@ class RABController extends Controller
 
     public function update(Request $request, RAB $rab)
     {
+        // Clean numeric inputs from formatting before validation
+        if ($request->has('Volume')) {
+            $request->merge(['Volume' => (int) str_replace('.', '', $request->Volume)]);
+        }
+        
+        if ($request->has('HargaSatuan')) {
+            $request->merge(['HargaSatuan' => (int) str_replace('.', '', $request->HargaSatuan)]);
+        }
+    
         $request->validate([
             'KegiatanID' => 'nullable|exists:kegiatans,KegiatanID',
             'SubKegiatanID' => 'nullable|exists:sub_kegiatans,SubKegiatanID',
@@ -162,7 +181,7 @@ class RABController extends Controller
             'HargaSatuan' => 'required|integer|min:0',
             'Status' => 'required|in:N,Y,T,R',
         ]);
-
+    
         // Ensure at least one of KegiatanID or SubKegiatanID is provided
         if (empty($request->KegiatanID) && empty($request->SubKegiatanID)) {
             if ($request->ajax()) {
@@ -173,10 +192,10 @@ class RABController extends Controller
             }
             return redirect()->back()->withErrors(['error' => 'Harus memilih Kegiatan atau Sub Kegiatan'])->withInput();
         }
-
+    
         // Calculate Jumlah
         $jumlah = $request->Volume * $request->HargaSatuan;
-
+    
         $rab->KegiatanID = $request->KegiatanID;
         $rab->SubKegiatanID = $request->SubKegiatanID;
         $rab->Komponen = $request->Komponen;
@@ -188,12 +207,13 @@ class RABController extends Controller
         $rab->DEdited = now();
         $rab->UEdited = Auth::id();
         $rab->save();
-
+    
         if ($request->ajax()) {
             return response()->json(['success' => true, 'message' => 'RAB berhasil diupdate', 'rab' => $rab]);
         }
         return redirect()->route('rabs.index')->with('success', 'RAB berhasil diupdate');
     }
+    
 
     public function destroy(RAB $rab)
     {
