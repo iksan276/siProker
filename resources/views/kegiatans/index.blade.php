@@ -335,6 +335,7 @@
                     });
                     
                     // If there was a previously selected isu, select it
+                    // If there was a previously selected isu, select it
                     if (selectedIsuId) {
                         // Check if the previously selected isu exists in the new options
                         var isuExists = false;
@@ -693,6 +694,7 @@
                 updateUrlParameter('programPengembanganID', null);
                 updateUrlParameter('programRektorID', null);
                 
+                // Reload TreeTable with ren
                 // Reload TreeTable with renstra, pilar, and isu filters
                 isFiltering = true;
                 loadTreeData();
@@ -1097,7 +1099,6 @@
         });
     }
     
-    // Function to
     // Function to find all descendants of a node
     function findAllDescendants(nodeId) {
         var descendants = [];
@@ -1305,7 +1306,55 @@
                     
                     var nameCell = '<td>' + nameText + "&nbsp;&nbsp;" + expander + '</td>';
                     row.append(nameCell);
-                    row.append('<td class="text-center" style="white-space:nowrap;width:1px;">' + (item.actions || '') + '</td>');
+                    
+                    // Add action buttons based on node type
+                    var actions = '';
+                    
+                    if (item.type === 'kegiatan') {
+                        // Use the original actions for kegiatan
+                        actions = item.actions || '';
+                    } else if (item.type === 'subkegiatan') {
+                        // Add view, edit, and delete buttons for subkegiatan
+                        actions = '<button class="btn btn-info btn-square btn-sm load-modal" ' +
+                                  'data-url="' + "{{ route('sub-kegiatans.show', ':id') }}".replace(':id', item.id.replace('subkegiatan_', '')) + '" ' +
+                                  'data-title="Detail Sub Kegiatan">' +
+                                  '<i class="fas fa-eye"></i>' +
+                                  '</button> ' +
+                                  '<button class="btn btn-warning btn-square btn-sm load-modal" ' +
+                                  'data-url="' + "{{ route('sub-kegiatans.edit', ':id') }}".replace(':id', item.id.replace('subkegiatan_', '')) + '" ' +
+                                  'data-title="Edit Sub Kegiatan">' +
+                                  '<i class="fas fa-edit"></i>' +
+                                  '</button> ' +
+                                  '<button type="button" class="btn btn-danger btn-square btn-sm delete-sub-kegiatan" ' +
+                                  'data-id="' + item.id.replace('subkegiatan_', '') + '">' +
+                                  '<i class="fas fa-trash"></i>' +
+                                  '</button>';
+                    } else if (item.type === 'rab') {
+                        // Add view, edit, and delete buttons for RAB
+                        var rabId = '';
+                        if (item.id.startsWith('rab_sub_')) {
+                            rabId = item.id.replace('rab_sub_', '');
+                        } else {
+                            rabId = item.id.replace('rab_', '');
+                        }
+                        
+                        actions = '<button class="btn btn-info btn-square btn-sm load-modal" ' +
+                                  'data-url="' + "{{ route('rabs.show', ':id') }}".replace(':id', rabId) + '" ' +
+                                  'data-title="Detail RAB">' +
+                                  '<i class="fas fa-eye"></i>' +
+                                  '</button> ' +
+                                  '<button class="btn btn-warning btn-square btn-sm load-modal" ' +
+                                  'data-url="' + "{{ route('rabs.edit', ':id') }}".replace(':id', rabId) + '" ' +
+                                  'data-title="Edit RAB">' +
+                                  '<i class="fas fa-edit"></i>' +
+                                  '</button> ' +
+                                  '<button type="button" class="btn btn-danger btn-square btn-sm delete-rab" ' +
+                                  'data-id="' + rabId + '">' +
+                                  '<i class="fas fa-trash"></i>' +
+                                  '</button>';
+                    }
+                    
+                    row.append('<td class="text-center" style="white-space:nowrap;width:1px;">' + actions + '</td>');
                     
                     tableBody.append(row);
                 });
@@ -1387,6 +1436,7 @@
         $('tr[data-parent="' + nodeId + '"]').hide();
     }
 
+    // Function to initialize
     // Function to initialize event handlers for dynamic content
     function initEventHandlers() {
         // Handle modal loading

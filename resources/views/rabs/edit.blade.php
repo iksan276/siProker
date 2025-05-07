@@ -91,11 +91,7 @@
 <script>
     $(document).ready(function() {
         // Initialize select2
-        $('.select2').select2({
-            dropdownParent: $('#mainModal'),
-            width: '100%'
-        });
-        
+     
         // Format numbers with thousand separator
         $('.number-format').on('input', function() {
             var value = $(this).val().replace(/[^\d]/g, '');

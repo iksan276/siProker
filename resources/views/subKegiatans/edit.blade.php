@@ -48,12 +48,7 @@
 
 <script>
     $(document).ready(function() {
-        // Initialize select2
-        $('.select2').select2({
-            dropdownParent: $('#mainModal'),
-            width: '100%'
-        });
-        
+
         // Date validation
         $('#JadwalMulai, #JadwalSelesai').on('change', function() {
             var startDate = $('#JadwalMulai').val();
