@@ -21,8 +21,7 @@
     <div class="card-body">
         <!-- Filters -->
         <div class="form-group">
-            <label for="renstraFilter">Filter Renstra:</label>
-            <select id="renstraFilter" class="form-control select2-filter">
+           <select id="renstraFilter" class="form-control select2-filter">
                 <option value="">-- Pilih Renstra --</option>
                 @foreach($renstras as $renstra)
                     <option value="{{ $renstra->RenstraID }}" {{ isset($selectedRenstra) && $selectedRenstra == $renstra->RenstraID ? 'selected' : '' }}>
@@ -33,8 +32,7 @@
         </div>
         
         <div class="form-group">
-            <label for="pilarFilter">Filter Pilar:</label>
-            <select id="pilarFilter" class="form-control select2-filter" {{ empty($selectedRenstra) ? 'disabled' : '' }}>
+           <select id="pilarFilter" class="form-control select2-filter" {{ empty($selectedRenstra) ? 'disabled' : '' }}>
                 <option value="">-- Pilih Pilar --</option>
                 @foreach($pilars as $pilar)
                     <option value="{{ $pilar->PilarID }}" {{ isset($selectedPilar) && $selectedPilar == $pilar->PilarID ? 'selected' : '' }}>
@@ -45,7 +43,6 @@
         </div>
         
         <div class="form-group mb-5">
-            <label for="isuFilter">Filter Isu Strategis:</label>
             <select id="isuFilter" class="form-control select2-filter" {{ empty($selectedPilar) ? 'disabled' : '' }}>
                 <option value="">-- Pilih Isu Strategis --</option>
                 @foreach($isuStrategis as $isu)

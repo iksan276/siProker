@@ -26,7 +26,6 @@
     </div>
     <div class="card-body">
     <div class="form-group mb-5">
-    <label for="renstraFilter">Filter Renstra:</label>
                 <select id="renstraFilter" class="form-control select2-filter">
                     <option value="">-- Pilih Renstra (Untuk Label Tahun) --</option>
                     @foreach($renstras as $renstra)

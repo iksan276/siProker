@@ -22,8 +22,7 @@
     </div>
     <div class="card-body">
         <!-- Move filter here and make it full width -->
-        <div class="form-group">
-            <label for="renstraFilter">Filter Renstra:</label>
+        <div class="form-group mb-5">
             <select id="renstraFilter" class="form-control select2-filter">
                 <option value="">-- Pilih Renstra --</option>
                 @foreach($renstras as $renstra)

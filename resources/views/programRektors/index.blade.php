@@ -25,7 +25,6 @@
     <div class="card-body">
         <!-- Filters -->
         <div class="form-group">
-            <label for="renstraFilter">Filter Renstra:</label>
             <select id="renstraFilter" class="form-control select2-filter">
                 <option value="">-- Pilih Renstra --</option>
                 @foreach($renstras as $renstra)
@@ -37,7 +36,6 @@
         </div>
         
         <div class="form-group">
-            <label for="pilarFilter">Filter Pilar:</label>
             <select id="pilarFilter" class="form-control select2-filter" {{ empty($selectedRenstra) ? 'disabled' : '' }}>
                 <option value="">-- Pilih Pilar --</option>
                 @foreach($pilars as $pilar)
@@ -49,8 +47,7 @@
         </div>
         
         <div class="form-group">
-            <label for="isuFilter">Filter Isu Strategis:</label>
-            <select id="isuFilter" class="form-control select2-filter" {{ empty($selectedPilar) ? 'disabled' : '' }}>
+           <select id="isuFilter" class="form-control select2-filter" {{ empty($selectedPilar) ? 'disabled' : '' }}>
                 <option value="">-- Pilih Isu Strategis --</option>
                 @foreach($isuStrategis as $isu)
                     <option value="{{ $isu->IsuID }}" {{ isset($selectedIsu) && $selectedIsu == $isu->IsuID ? 'selected' : '' }}>
@@ -61,8 +58,7 @@
         </div>
         
         <div class="form-group">
-            <label for="programPengembanganFilter">Filter Program Pengembangan:</label>
-            <select id="programPengembanganFilter" class="form-control select2-filter" {{ empty($selectedIsu) ? 'disabled' : '' }}>
+           <select id="programPengembanganFilter" class="form-control select2-filter" {{ empty($selectedIsu) ? 'disabled' : '' }}>
                 <option value="">-- Pilih Program Pengembangan --</option>
                 @foreach($programPengembangans as $programPengembangan)
                     <option value="{{ $programPengembangan->ProgramPengembanganID }}" {{ isset($selectedProgramPengembangan) && $selectedProgramPengembangan == $programPengembangan->ProgramPengembanganID ? 'selected' : '' }}>
@@ -73,8 +69,7 @@
         </div>
         
         <div class="form-group mb-5">
-            <label for="indikatorKinerjaFilter">Filter Indikator Kinerja:</label>
-            <select id="indikatorKinerjaFilter" class="form-control select2-filter">
+          <select id="indikatorKinerjaFilter" class="form-control select2-filter">
                 <option value="">-- Pilih Indikator Kinerja --</option>
                 @foreach($indikatorKinerjas as $indikatorKinerja)
                     <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}" {{ isset($selectedIndikatorKinerja) && $selectedIndikatorKinerja == $indikatorKinerja->IndikatorKinerjaID ? 'selected' : '' }}>
