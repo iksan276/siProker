@@ -45,7 +45,7 @@
 
 @if($kegiatan->subKegiatans->count() > 0)
 <div class="mt-4">
-    <h5 class="font-weight-bold">Sub Kegiatan</h5>
+    <label class="font-weight-bold">Sub Kegiatan</label>
     <div class="table-responsive">
         <table class="table table-bordered">
             <thead>
@@ -115,7 +115,7 @@
 
 @if($kegiatan->rabs->whereNull('SubKegiatanID')->count() > 0)
 <div class="mt-4">
-    <h5 class="font-weight-bold">RAB Kegiatan</h5>
+    <label class="font-weight-bold">RAB Kegiatan</label>
     <div class="table-responsive">
         <table class="table table-bordered">
             <thead>
@@ -153,7 +153,7 @@
 @endif
 
 <div class="mt-4">
-    <h5 class="font-weight-bold">Total Anggaran</h5>
+    <label class="font-weight-bold">Total Anggaran</label>
     <div class="alert alert-info">
         <h4 class="mb-0">{{ $kegiatan->FormattedTotalRABAmount }}</h4>
     </div>

@@ -185,11 +185,11 @@ class KegiatanController extends Controller
         $selectedProgramRektor = $request->programRektorID;
         
         // If user is not admin, prepare tree grid data
-        if (!auth()->user()->isAdmin() && $request->format === 'tree') {
+        if (!auth()->user()->isAdmin()) {
             $userId = Auth::id();
             
             if ($request->ajax() && $request->wantsJson()) {
-                $treeData = $this->buildTreeData($kegiatans, $userId);
+                $treeData = $this->buildTreeData($kegiatans);
                 return response()->json([
                     'data' => $treeData
                 ]);
@@ -214,7 +214,7 @@ class KegiatanController extends Controller
         if ($request->ajax()) {
             // If format=tree is requested, return tree data
             if ($request->has('format') && $request->format === 'tree') {
-                $treeData = $this->buildTreeData($kegiatans, Auth::id());
+                $treeData = $this->buildTreeData($kegiatans);
                 return response()->json([
                     'data' => $treeData
                 ]);
@@ -227,7 +227,7 @@ class KegiatanController extends Controller
                     <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('kegiatans.show', $kegiatan->KegiatanID).'" data-title="Detail Kegiatan">
                         <i class="fas fa-eye"></i>
                     </button>
-                                        <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('kegiatans.edit', $kegiatan->KegiatanID).'" data-title="Edit Kegiatan">
+                    <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('kegiatans.edit', $kegiatan->KegiatanID).'" data-title="Edit Kegiatan">
                         <i class="fas fa-edit"></i>
                     </button>
                     <button type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" data-id="'.$kegiatan->KegiatanID.'">
@@ -267,110 +267,121 @@ class KegiatanController extends Controller
     }
     
    
-private function buildTreeData($kegiatans)
-{
-    $treeData = [];
-    $rowIndex = 1;
-    
-    foreach ($kegiatans as $kegiatan) {
-        // Create kegiatan node
-        $kegiatanNode = [
-            'id' => 'kegiatan_' . $kegiatan->KegiatanID,
-            'no' => $rowIndex++,
-            'nama' => $kegiatan->Nama,
-            'type' => 'kegiatan',
-            'parent' => null,
-            'level' => 0,
-            'has_children' => $kegiatan->subKegiatans->count() > 0 || $kegiatan->rabs->whereNull('SubKegiatanID')->count() > 0,
-            'actions' => '
-                <button class="btn btn-info btn-square btn-sm load-modal" 
-                    data-url="' . route('kegiatans.show', $kegiatan->KegiatanID) . '" 
-                    data-title="Detail Kegiatan">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="btn btn-warning btn-square btn-sm load-modal" 
-                    data-url="' . route('kegiatans.edit', $kegiatan->KegiatanID) . '" 
-                    data-title="Edit Kegiatan">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" 
-                    data-id="' . $kegiatan->KegiatanID . '">
-                    <i class="fas fa-trash"></i>
-                </button>',
-            'row_class' => '',
-            'tooltip' => 'Tanggal: ' . \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y') . ' s/d ' . 
-                         \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y')
-        ];
+    private function buildTreeData($kegiatans)
+    {
+        $treeData = [];
+        $rowIndex = 1;
         
-        $treeData[] = $kegiatanNode;
-        
-        // Add Sub Kegiatans
-        if ($kegiatan->subKegiatans->count() > 0) {
-            foreach ($kegiatan->subKegiatans as $subIndex => $subKegiatan) {
-                $statusBadge = '';
-                if ($subKegiatan->Status == 'N') {
-                    $statusBadge = '<span class="badge badge-warning">Menunggu</span>';
-                } elseif ($subKegiatan->Status == 'Y') {
-                    $statusBadge = '<span class="badge badge-success">Disetujui</span>';
-                } elseif ($subKegiatan->Status == 'T') {
-                    $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
-                } elseif ($subKegiatan->Status == 'R') {
-                    $statusBadge = '<span class="badge badge-info">Revisi</span>';
-                }
-                
-                $subKegiatanNode = [
-                    'id' => 'subkegiatan_' . $subKegiatan->SubKegiatanID,
-                    'no' => '',
-                    'nama' => $subKegiatan->Nama . ' ' . $statusBadge,
-                    'type' => 'subkegiatan',
-                    'parent' => 'kegiatan_' . $kegiatan->KegiatanID,
-                    'level' => 1,
-                    'has_children' => $subKegiatan->rabs->count() > 0,
-                    'actions' => '',
-                    'row_class' => '',
-                    'tooltip' => 'Jadwal: ' . \Carbon\Carbon::parse($subKegiatan->JadwalMulai)->format('d-m-Y') . ' s/d ' . 
-                                 \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('d-m-Y')
-                ];
-                
-                $treeData[] = $subKegiatanNode;
-                
-                // Add RABs for this Sub Kegiatan
-                if ($subKegiatan->rabs->count() > 0) {
-                    foreach ($subKegiatan->rabs as $rabIndex => $rab) {
-                        $statusBadge = '';
-                        if ($rab->Status == 'N') {
-                            $statusBadge = '<span class="badge badge-warning">Menunggu</span>';
-                        } elseif ($rab->Status == 'Y') {
-                            $statusBadge = '<span class="badge badge-success">Disetujui</span>';
-                        } elseif ($rab->Status == 'T') {
-                            $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
-                        } elseif ($rab->Status == 'R') {
-                            $statusBadge = '<span class="badge badge-info">Revisi</span>';
+        foreach ($kegiatans as $kegiatan) {
+            // Create kegiatan node
+            $kegiatanNode = [
+                'id' => 'kegiatan_' . $kegiatan->KegiatanID,
+                'no' => $rowIndex++,
+                'nama' => $kegiatan->Nama,
+                'type' => 'kegiatan',
+                'parent' => null,
+                'level' => 0,
+                'has_children' => $kegiatan->subKegiatans->count() > 0 || $kegiatan->rabs->whereNull('SubKegiatanID')->count() > 0,
+                'actions' => '
+                    <button class="btn btn-info btn-square btn-sm load-modal" 
+                        data-url="' . route('kegiatans.show', $kegiatan->KegiatanID) . '" 
+                        data-title="Detail Kegiatan">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-warning btn-square btn-sm load-modal" 
+                        data-url="' . route('kegiatans.edit', $kegiatan->KegiatanID) . '" 
+                        data-title="Edit Kegiatan">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" 
+                        data-id="' . $kegiatan->KegiatanID . '">
+                        <i class="fas fa-trash"></i>
+                    </button>',
+                'row_class' => '',
+                'tooltip' => 'Tanggal: ' . \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y') . ' s/d ' . 
+                            \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y')
+            ];
+            
+            $treeData[] = $kegiatanNode;
+            
+            // Add Sub Kegiatans
+            if ($kegiatan->subKegiatans->count() > 0) {
+                foreach ($kegiatan->subKegiatans as $subIndex => $subKegiatan) {
+                    $statusBadge = '';
+                    if ($subKegiatan->Status == 'N') {
+                        $statusBadge = '<span class="badge badge-warning">Menunggu</span>';
+                    } elseif ($subKegiatan->Status == 'Y') {
+                        $statusBadge = '<span class="badge badge-success">Disetujui</span>';
+                    } elseif ($subKegiatan->Status == 'T') {
+                        $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
+                    } elseif ($subKegiatan->Status == 'R') {
+                        $statusBadge = '<span class="badge badge-info">Revisi</span>';
+                    }
+                    
+                    $subKegiatanNode = [
+                        'id' => 'subkegiatan_' . $subKegiatan->SubKegiatanID,
+                        'no' => '',
+                        'nama' => $subKegiatan->Nama . ' ' . $statusBadge,
+                        'type' => 'subkegiatan',
+                        'parent' => 'kegiatan_' . $kegiatan->KegiatanID,
+                        'level' => 1,
+                        'has_children' => $subKegiatan->rabs->count() > 0,
+                        'actions' => '
+                            <button class="btn btn-info btn-square btn-sm load-modal" 
+                                data-url="' . route('sub-kegiatans.show', $subKegiatan->SubKegiatanID) . '" 
+                                data-title="Detail Sub Kegiatan">
+                                <i class="fas fa-eye"></i>
+                            </button>',
+                        'row_class' => '',
+                        'tooltip' => 'Jadwal: ' . \Carbon\Carbon::parse($subKegiatan->JadwalMulai)->format('d-m-Y') . ' s/d ' . 
+                                    \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('d-m-Y')
+                    ];
+                    
+                    $treeData[] = $subKegiatanNode;
+                    
+                    // Add RABs for this Sub Kegiatan
+                    if ($subKegiatan->rabs->count() > 0) {
+                        foreach ($subKegiatan->rabs as $rabIndex => $rab) {
+                            $statusBadge = '';
+                            if ($rab->Status == 'N') {
+                                $statusBadge = '<span class="badge badge-warning">Menunggu</span>';
+                            } elseif ($rab->Status == 'Y') {
+                                $statusBadge = '<span class="badge badge-success">Disetujui</span>';
+                            } elseif ($rab->Status == 'T') {
+                                $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
+                            } elseif ($rab->Status == 'R') {
+                                $statusBadge = '<span class="badge badge-info">Revisi</span>';
+                            }
+                            
+                            $total = $rab->Volume * $rab->HargaSatuan;
+                            
+                            $rabNode = [
+                                'id' => 'rab_sub_' . $rab->RABID,
+                                'no' => '',
+                                'nama' => $rab->Komponen . ' ' . $statusBadge,
+                                'type' => 'rab',
+                                'parent' => 'subkegiatan_' . $subKegiatan->SubKegiatanID,
+                                'level' => 2,
+                                'has_children' => false,
+                                'actions' => '
+                                    <button class="btn btn-info btn-square btn-sm load-modal" 
+                                        data-url="' . route('rabs.show', $rab->RABID) . '" 
+                                        data-title="Detail RAB">
+                                        <i class="fas fa-eye"></i>
+                                    </button>',
+                                'row_class' => '',
+                                'tooltip' => 'Volume: ' . number_format($rab->Volume, 0, ',', '.') . ' ' . 
+                                            ($rab->satuan ? $rab->satuan->Nama : '-') . ' x Rp ' . 
+                                            number_format($rab->HargaSatuan, 0, ',', '.') . ' = Rp ' . 
+                                            number_format($total, 0, ',', '.')
+                            ];
+                            
+                            $treeData[] = $rabNode;
                         }
-                        
-                        $total = $rab->Volume * $rab->HargaSatuan;
-                        
-                        $rabNode = [
-                            'id' => 'rab_sub_' . $rab->RABID,
-                            'no' => '',
-                            'nama' => $rab->Komponen . ' ' . $statusBadge,
-                            'type' => 'rab',
-                            'parent' => 'subkegiatan_' . $subKegiatan->SubKegiatanID,
-                            'level' => 2,
-                            'has_children' => false,
-                            'actions' => '',
-                            'row_class' => '',
-                            'tooltip' => 'Volume: ' . number_format($rab->Volume, 0, ',', '.') . ' ' . 
-                                         ($rab->satuan ? $rab->satuan->Nama : '-') . ' x Rp ' . 
-                                         number_format($rab->HargaSatuan, 0, ',', '.') . ' = Rp ' . 
-                                         number_format($total, 0, ',', '.')
-                        ];
-                        
-                        $treeData[] = $rabNode;
                     }
                 }
             }
-        } else {
+            
             // Add direct RABs for this Kegiatan (if no sub kegiatans)
             $directRabs = $kegiatan->rabs()->whereNull('SubKegiatanID')->get();
             
@@ -397,118 +408,129 @@ private function buildTreeData($kegiatans)
                         'parent' => 'kegiatan_' . $kegiatan->KegiatanID,
                         'level' => 1,
                         'has_children' => false,
-                        'actions' => '',
+                        'actions' => '
+                            <button class="btn btn-info btn-square btn-sm load-modal" 
+                                data-url="' . route('rabs.show', $rab->RABID) . '" 
+                                data-title="Detail RAB">
+                                <i class="fas fa-eye"></i>
+                            </button>',
                         'row_class' => '',
                         'tooltip' => 'Volume: ' . number_format($rab->Volume, 0, ',', '.') . ' ' . 
-                                     ($rab->satuan ? $rab->satuan->Nama : '-') . ' x Rp ' . 
-                                     number_format($rab->HargaSatuan, 0, ',', '.') . ' = Rp ' . 
-                                     number_format($total, 0, ',', '.')
+                                    ($rab->satuan ? $rab->satuan->Nama : '-') . ' x Rp ' . 
+                                    number_format($rab->HargaSatuan, 0, ',', '.') . ' = Rp ' . 
+                                    number_format($total, 0, ',', '.')
                     ];
                     
                     $treeData[] = $rabNode;
                 }
             }
         }
+        
+        return $treeData;
     }
     
-    return $treeData;
-}
 
 
     
     public function exportExcel(Request $request)
-    {
-        // Base query with program rektor relationship
-        $kegiatansQuery = Kegiatan::with([
-            'programRektor', 
-            'programRektor.programPengembangan', 
-            'programRektor.programPengembangan.isuStrategis', 
-            'programRektor.programPengembangan.isuStrategis.pilar',
-            'programRektor.programPengembangan.isuStrategis.pilar.renstra',
-            'subKegiatans',
-            'rabs'
-        ]);
-        
-        // Apply filter if renstraID is provided
-        if ($request->has('renstraID') && $request->renstraID) {
-            // Filter pilars by renstraID
-            $pilarIds = Pilar::where('RenstraID', $request->renstraID)
-                ->where('NA', 'N')
-                ->pluck('PilarID');
-                
-            // Filter isu strategis by pilar IDs
-            $isuIds = IsuStrategis::whereIn('PilarID', $pilarIds)
-                ->where('NA', 'N')
-                ->pluck('IsuID');
-                
-            // Filter program pengembangans by isu IDs
-            $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
-                ->where('NA', 'N')
-                ->pluck('ProgramPengembanganID');
-                
-            // Filter program rektors by program pengembangan IDs
-            $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
-                ->where('NA', 'N')
-                ->pluck('ProgramRektorID');
-                
-            $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
-        }
-        
-        // Apply filter if pilarID is provided
-        if ($request->has('pilarID') && $request->pilarID) {
-            // Filter isu strategis by pilarID
-            $isuIds = IsuStrategis::where('PilarID', $request->pilarID)
-                ->where('NA', 'N')
-                ->pluck('IsuID');
-                
-            // Filter program pengembangans by isu IDs
-            $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
-                ->where('NA', 'N')
-                ->pluck('ProgramPengembanganID');
-                
-            // Filter program rektors by program pengembangan IDs
-            $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
-                ->where('NA', 'N')
-                ->pluck('ProgramRektorID');
-                
-            $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
-        }
-        
-        // Apply filter if isuID is provided
-        if ($request->has('isuID') && $request->isuID) {
-            // Filter program pengembangans by isuID
-            $programIds = ProgramPengembangan::where('IsuID', $request->isuID)
-                ->where('NA', 'N')
-                ->pluck('ProgramPengembanganID');
-                
-            // Filter program rektors by program pengembangan IDs
-            $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
-                ->where('NA', 'N')
-                ->pluck('ProgramRektorID');
-                
-            $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
-        }
-        
-        // Apply filter if programPengembanganID is provided
-        if ($request->has('programPengembanganID') && $request->programPengembanganID) {
-            // Filter program rektors by program pengembangan ID
-            $programRektorIds = ProgramRektor::where('ProgramPengembanganID', $request->programPengembanganID)
-                ->where('NA', 'N')
-                ->pluck('ProgramRektorID');
-                
-            $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
-        }
-        
-        // Apply filter if programRektorID is provided
-        if ($request->has('programRektorID') && $request->programRektorID) {
-            $kegiatansQuery->where('ProgramRektorID', $request->programRektorID);
-        }
-        
-        // Get the filtered results
-        $kegiatans = $kegiatansQuery->orderBy('KegiatanID', 'desc')->get();
-        
-        return Excel::download(new KegiatansExport($kegiatans), 'kegiatans.xlsx');
+{
+    // Base query with program rektor relationship
+    $kegiatansQuery = Kegiatan::with([
+        'programRektor', 
+        'programRektor.programPengembangan', 
+        'programRektor.programPengembangan.isuStrategis', 
+        'programRektor.programPengembangan.isuStrategis.pilar',
+        'programRektor.programPengembangan.isuStrategis.pilar.renstra',
+        'subKegiatans.rabs.satuanRelation',
+        'rabs.satuanRelation'
+    ]);
+    
+    // Apply filter if renstraID is provided
+    if ($request->has('renstraID') && $request->renstraID) {
+        // Filter pilars by renstraID
+        $pilarIds = Pilar::where('RenstraID', $request->renstraID)
+            ->where('NA', 'N')
+            ->pluck('PilarID');
+            
+        // Filter isu strategis by pilar IDs
+        $isuIds = IsuStrategis::whereIn('PilarID', $pilarIds)
+            ->where('NA', 'N')
+            ->pluck('IsuID');
+            
+        // Filter program pengembangans by isu IDs
+        $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
+            ->where('NA', 'N')
+            ->pluck('ProgramPengembanganID');
+            
+        // Filter program rektors by program pengembangan IDs
+        $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
+            ->where('NA', 'N')
+            ->pluck('ProgramRektorID');
+            
+        $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
     }
+    
+    // Apply filter if pilarID is provided
+    if ($request->has('pilarID') && $request->pilarID) {
+        // Filter isu strategis by pilarID
+        $isuIds = IsuStrategis::where('PilarID', $request->pilarID)
+            ->where('NA', 'N')
+            ->pluck('IsuID');
+            
+        // Filter program pengembangans by isu IDs
+        $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
+            ->where('NA', 'N')
+            ->pluck('ProgramPengembanganID');
+            
+        // Filter program rektors by program pengembangan IDs
+        $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
+            ->where('NA', 'N')
+            ->pluck('ProgramRektorID');
+            
+        $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
+    }
+    
+    // Apply filter if isuID is provided
+    if ($request->has('isuID') && $request->isuID) {
+        // Filter program pengembangans by isuID
+        $programIds = ProgramPengembangan::where('IsuID', $request->isuID)
+            ->where('NA', 'N')
+            ->pluck('ProgramPengembanganID');
+            
+        // Filter program rektors by program pengembangan IDs
+        $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
+            ->where('NA', 'N')
+            ->pluck('ProgramRektorID');
+            
+        $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
+    }
+    
+    // Apply filter if programPengembanganID is provided
+    if ($request->has('programPengembanganID') && $request->programPengembanganID) {
+        // Filter program rektors by program pengembangan ID
+        $programRektorIds = ProgramRektor::where('ProgramPengembanganID', $request->programPengembanganID)
+            ->where('NA', 'N')
+            ->pluck('ProgramRektorID');
+            
+        $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
+    }
+    
+    // Apply filter if programRektorID is provided
+    if ($request->has('programRektorID') && $request->programRektorID) {
+        $kegiatansQuery->where('ProgramRektorID', $request->programRektorID);
+    }
+    
+    // Get the filtered results
+    $kegiatans = $kegiatansQuery->orderBy('KegiatanID', 'desc')->get();
+    
+    // Generate a more descriptive filename based on filters
+    $filename = 'kegiatans';
+  
+    $filename .= '_' . date('Y-m-d') . '.xlsx';
+    
+    return Excel::download(new KegiatansExport($kegiatans), $filename);
+}
+
 
     public function create(Request $request)
     {
@@ -921,7 +943,7 @@ private function buildTreeData($kegiatans)
                                             $rab->Satuan = $rabData['Satuan'];
                                             $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
                                             $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
-                                            $rab->Status = 'N'; // Default status is Menunggu
+                                            $rab->Status = $rabData['Status'] ?? 'N';// Default status is Menunggu
                                             $rab->DCreated = now();
                                             $rab->UCreated = Auth::id();
                                             $rab->save();
@@ -941,7 +963,7 @@ private function buildTreeData($kegiatans)
                                 $subKegiatan->Nama = $subKegiatanData['Nama'];
                                 $subKegiatan->JadwalMulai = $subKegiatanData['JadwalMulai'];
                                 $subKegiatan->JadwalSelesai = $subKegiatanData['JadwalSelesai'];
-                                $subKegiatan->Status = 'N'; // Default status is Menunggu
+                                $subKegiatan->Status = $subKegiatanData['Status'] ?? 'N';
                                 $subKegiatan->DCreated = now();
                                 $subKegiatan->UCreated = Auth::id();
                                 $subKegiatan->save();
@@ -959,7 +981,7 @@ private function buildTreeData($kegiatans)
                                         $rab->Satuan = $rabData['Satuan'];
                                         $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
                                         $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
-                                        $rab->Status = 'N'; // Default status is Menunggu
+                                       $rab->Status = $rabData['Status'] ?? 'N';// Default status is Menunggu
                                         $rab->DCreated = now();
                                         $rab->UCreated = Auth::id();
                                         $rab->save();
@@ -1002,7 +1024,7 @@ private function buildTreeData($kegiatans)
                             $rab->Satuan = $rabData['Satuan'];
                             $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
                             $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
-                            $rab->Status = 'N'; // Default status is Menunggu
+                            $rab->Status = $rabData['Status'] ?? 'N';
                             $rab->DCreated = now();
                             $rab->UCreated = Auth::id();
                             $rab->save();
@@ -1010,13 +1032,15 @@ private function buildTreeData($kegiatans)
                     }
                     
                     // Handle deleted items
-                    if ($request->has('deleted_sub_kegiatans') && is_array($request->deleted_sub_kegiatans)) {
-                        SubKegiatan::whereIn('SubKegiatanID', $request->deleted_sub_kegiatans)->delete();
-                    }
-                    
-                    if ($request->has('deleted_rabs') && is_array($request->deleted_rabs)) {
-                        RAB::whereIn('RABID', $request->deleted_rabs)->delete();
-                    }
+                   // Handle deleted items
+                        if ($request->has('delete_sub_kegiatans') && is_array($request->delete_sub_kegiatans)) {
+                            SubKegiatan::whereIn('SubKegiatanID', $request->delete_sub_kegiatans)->delete();
+                        }
+
+                        if ($request->has('delete_rabs') && is_array($request->delete_rabs)) {
+                            RAB::whereIn('RABID', $request->delete_rabs)->delete();
+                        }
+
                     
                     // Commit transaction
                     \DB::commit();

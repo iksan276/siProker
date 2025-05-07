@@ -21,10 +21,10 @@ class SubKegiatanController extends Controller
             $data = [];
             foreach ($subKegiatans as $index => $subKegiatan) {
                 $actions = '
-                    <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('sub-kegiatans.show', $subKegiatan->SubKegiatanID).'" data-title="Detail Sub Kegiatan">
+                    <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('subKegiatans.show', $subKegiatan->SubKegiatanID).'" data-title="Detail Sub Kegiatan">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('sub-kegiatans.edit', $subKegiatan->SubKegiatanID).'" data-title="Edit Sub Kegiatan">
+                    <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('subKegiatans.edit', $subKegiatan->SubKegiatanID).'" data-title="Edit Sub Kegiatan">
                         <i class="fas fa-edit"></i>
                     </button>
                     <button type="button" class="btn btn-danger btn-square btn-sm delete-sub-kegiatan" data-id="'.$subKegiatan->SubKegiatanID.'">
@@ -47,7 +47,7 @@ class SubKegiatanController extends Controller
             ]);
         }
         
-        return view('sub-kegiatans.index', compact('subKegiatans'));
+        return view('subKegiatans.index', compact('subKegiatans'));
     }
 
     public function create(Request $request)
@@ -59,9 +59,9 @@ class SubKegiatanController extends Controller
         $selectedKegiatan = request('kegiatanID');
         
         if (request()->ajax()) {
-            return view('sub-kegiatans.create', compact('kegiatans', 'users', 'selectedKegiatan'))->render();
+            return view('subKegiatans.create', compact('kegiatans', 'users', 'selectedKegiatan'))->render();
         }
-        return view('sub-kegiatans.create', compact('kegiatans', 'users', 'selectedKegiatan'));
+        return view('subKegiatans.create', compact('kegiatans', 'users', 'selectedKegiatan'));
     }
 
     public function store(Request $request)
@@ -87,7 +87,7 @@ class SubKegiatanController extends Controller
         if ($request->ajax()) {
             return response()->json(['success' => true, 'message' => 'Sub Kegiatan berhasil ditambahkan', 'subKegiatan' => $subKegiatan]);
         }
-        return redirect()->route('sub-kegiatans.index')->with('success', 'Sub Kegiatan berhasil ditambahkan');
+        return redirect()->route('subKegiatans.index')->with('success', 'Sub Kegiatan berhasil ditambahkan');
     }
 
     public function show(SubKegiatan $subKegiatan)
@@ -95,9 +95,9 @@ class SubKegiatanController extends Controller
         $subKegiatan->load(['kegiatan', 'createdBy', 'editedBy', 'rabs.satuanRelation']);
         
         if (request()->ajax()) {
-            return view('sub-kegiatans.show', compact('subKegiatan'))->render();
+            return view('subKegiatans.show', compact('subKegiatan'))->render();
         }
-        return view('sub-kegiatans.show', compact('subKegiatan'));
+        return view('subKegiatans.show', compact('subKegiatan'));
     }
 
     public function edit(SubKegiatan $subKegiatan)
@@ -106,9 +106,9 @@ class SubKegiatanController extends Controller
         $users = User::all();
         
         if (request()->ajax()) {
-            return view('sub-kegiatans.edit', compact('subKegiatan', 'kegiatans', 'users'))->render();
+            return view('subKegiatans.edit', compact('subKegiatan', 'kegiatans', 'users'))->render();
         }
-        return view('sub-kegiatans.edit', compact('subKegiatan', 'kegiatans', 'users'));
+        return view('subKegiatans.edit', compact('subKegiatan', 'kegiatans', 'users'));
     }
 
     public function update(Request $request, SubKegiatan $subKegiatan)
@@ -133,7 +133,7 @@ class SubKegiatanController extends Controller
         if ($request->ajax()) {
             return response()->json(['success' => true, 'message' => 'Sub Kegiatan berhasil diupdate', 'subKegiatan' => $subKegiatan]);
         }
-        return redirect()->route('sub-kegiatans.index')->with('success', 'Sub Kegiatan berhasil diupdate');
+        return redirect()->route('subKegiatans.index')->with('success', 'Sub Kegiatan berhasil diupdate');
     }
 
     public function destroy(SubKegiatan $subKegiatan)
@@ -145,7 +145,7 @@ class SubKegiatanController extends Controller
                 return response()->json(['success' => true, 'message' => 'Sub Kegiatan berhasil dihapus']);
             }
             
-            return redirect()->route('sub-kegiatans.index')->with('success', 'Sub Kegiatan berhasil dihapus');
+            return redirect()->route('subKegiatans.index')->with('success', 'Sub Kegiatan berhasil dihapus');
         } catch (QueryException $e) {
             // Check if it's a foreign key constraint error
             if ($e->getCode() == 23000) { // Integrity constraint violation
@@ -156,7 +156,7 @@ class SubKegiatanController extends Controller
                     ], 422);
                 }
                 
-                return redirect()->route('sub-kegiatans.index')
+                return redirect()->route('subKegiatans.index')
                     ->with('error', 'Tidak dapat menghapus sub kegiatan ini karena dirujuk oleh baris di table lain.');
             }
             
@@ -168,7 +168,7 @@ class SubKegiatanController extends Controller
                 ], 500);
             }
             
-            return redirect()->route('sub-kegiatans.index')
+            return redirect()->route('subKegiatans.index')
                 ->with('error', 'Database error occurred: ' . $e->getMessage());
         }
     }

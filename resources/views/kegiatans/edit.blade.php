@@ -3,17 +3,19 @@
     @method('PUT')
     <div class="form-group">
         <label for="ProgramRektorID">Program Rektor</label>
-        <select name="ProgramRektorID" id="ProgramRektorID" class="form-control select2" >
-        <option value="" disabled selected></option>
+        <select name="ProgramRektorID" id="ProgramRektorID" class="form-control select2">
+            <option value="" disabled {{ !isset($kegiatan->ProgramRektorID) ? 'selected' : '' }}></option>
             @foreach($programRektors as $programRektor)
                 <option value="{{ $programRektor->ProgramRektorID }}" {{ $kegiatan->ProgramRektorID == $programRektor->ProgramRektorID ? 'selected' : '' }}>{{ $programRektor->Nama }}</option>
             @endforeach
         </select>
     </div>
+    
     <div class="form-group">
         <label for="Nama">Nama</label>
         <textarea name="Nama" id="Nama" class="form-control" rows="3">{{ $kegiatan->Nama }}</textarea>
     </div>
+    
     <div class="row">
         <div class="col-sm-6">
             <div class="form-group">
@@ -29,6 +31,7 @@
             </div>
         </div>
     </div>
+    
     <div class="form-group">
         <label for="RincianKegiatan">Rincian Kegiatan</label>
         <textarea name="RincianKegiatan" id="RincianKegiatan" class="form-control" rows="4">{{ $kegiatan->RincianKegiatan }}</textarea>
@@ -46,79 +49,9 @@
         </div>
     </div>
     
-    <!-- RAB Section (always visible) -->
-    <div id="rab_section">
-        <h5 class="mt-4 mb-3">Rencana Anggaran Biaya (RAB)</h5>
-        <div id="rab_container">
-            @foreach($kegiatan->rabs->whereNull('SubKegiatanID') as $index => $rab)
-                <div class="card mb-3 rab-item">
-                    <div class="card-body py-3">
-                        <div class="row align-items-center">
-                            <div class="col-md-3">
-                                <div class="form-group mb-0">
-                                    <label>Komponen</label>
-                                    <input type="text" name="existing_rabs[{{ $rab->RABID }}][Komponen]" class="form-control" value="{{ $rab->Komponen }}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-1">
-                                <div class="form-group mb-0">
-                                    <label>Volume</label>
-                                    <input type="text" name="existing_rabs[{{ $rab->RABID }}][Volume]" class="form-control volume-input rab-calc" data-type="volume" value="{{ number_format($rab->Volume, 0, ',', '.') }}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group mb-0">
-                                    <label>Satuan</label>
-                                    <select name="existing_rabs[{{ $rab->RABID }}][Satuan]" class="form-control satuan-select select2" required>
-                                        <option value="">Pilih</option>
-                                        @foreach($satuans as $satuan)
-                                            <option value="{{ $satuan->SatuanID }}" {{ $rab->Satuan == $satuan->SatuanID ? 'selected' : '' }}>{{ $satuan->Nama }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group mb-0">
-                                    <label>Harga Satuan</label>
-                                    <input type="text" name="existing_rabs[{{ $rab->RABID }}][HargaSatuan]" class="form-control harga-input rab-calc" data-type="harga" value="{{ number_format($rab->HargaSatuan, 0, ',', '.') }}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group mb-0">
-                                    <label>Jumlah</label>
-                                    <input type="text" class="form-control jumlah-input" value="{{ number_format($rab->Volume * $rab->HargaSatuan, 0, ',', '.') }}" readonly>
-                                    <input type="hidden" name="existing_rabs[{{ $rab->RABID }}][Jumlah]" class="jumlah-hidden" value="{{ $rab->Volume * $rab->HargaSatuan }}">
-                                </div>
-                            </div>
-                            <div class="col-md-1">
-                                <div class="form-group mb-0">
-                                    <label>Status</label>
-                                    <select name="existing_rabs[{{ $rab->RABID }}][Status]" class="form-control form-control-sm">
-                                        <option value="N" {{ $rab->Status == 'N' ? 'selected' : '' }}>Menunggu</option>
-                                        <option value="Y" {{ $rab->Status == 'Y' ? 'selected' : '' }}>Disetujui</option>
-                                        <option value="T" {{ $rab->Status == 'T' ? 'selected' : '' }}>Ditolak</option>
-                                        <option value="R" {{ $rab->Status == 'R' ? 'selected' : '' }}>Revisi</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-1">
-                                <button type="button" class="btn btn-sm btn-danger remove-existing-rab" data-id="{{ $rab->RABID }}">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-        <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="add_rab">
-            <i class="fas fa-plus"></i> Tambah RAB
-        </button>
-    </div>
-    
     <!-- Sub Kegiatan Section -->
     <div id="sub_kegiatan_section" style="{{ $kegiatan->subKegiatans->count() > 0 ? '' : 'display: none;' }}">
-        <h5 class="mt-4 mb-3">Sub Kegiatan</h5>
+        <label class="mb-3">Sub Kegiatan</label>
         <div id="sub_kegiatan_container">
             @foreach($kegiatan->subKegiatans as $index => $subKegiatan)
                 <div class="card mb-3 sub-kegiatan-item">
@@ -132,21 +65,14 @@
                     <div class="card-body">
                         <div class="form-group">
                             <label>Nama Sub Kegiatan</label>
-                            <textarea name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][Nama]" class="form-control" rows="2" required>{{ $subKegiatan->Nama }}</textarea>
+                            <textarea name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][Nama]" class="form-control" rows="2">{{ $subKegiatan->Nama }}</textarea>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Jadwal Mulai</label>
-                                    <input type="date" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][JadwalMulai]" class="form-control sub-kegiatan-start" value="{{ \Carbon\Carbon::parse($subKegiatan->JadwalMulai)->format('Y-m-d') }}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Jadwal Selesai</label>
-                                    <input type="date" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][JadwalSelesai]" class="form-control sub-kegiatan-end" value="{{ \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('Y-m-d') }}" required>
-                                </div>
-                            </div>
+                        <div class="form-group">
+                            <label>Jadwal</label>
+                            <input type="text" class="form-control date-range-picker" id="date_range_{{ $subKegiatan->SubKegiatanID }}" 
+                                value="{{ \Carbon\Carbon::parse($subKegiatan->JadwalMulai)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('d/m/Y') }}">
+                            <input type="hidden" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][JadwalMulai]" class="date-start-hidden" value="{{ \Carbon\Carbon::parse($subKegiatan->JadwalMulai)->format('Y-m-d') }}">
+                            <input type="hidden" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][JadwalSelesai]" class="date-end-hidden" value="{{ \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('Y-m-d') }}">
                         </div>
                         <div class="form-group">
                             <label>Status</label>
@@ -164,23 +90,30 @@
                                 @foreach($subKegiatan->rabs as $rabIndex => $rab)
                                     <div class="card mb-2 rab-sub-item">
                                         <div class="card-body py-2">
-                                            <div class="row align-items-center">
-                                                <div class="col-md-2">
+                                            <div class="row align-items-center mb-2">
+                                                <div class="col-md-11">
                                                     <div class="form-group mb-0">
                                                         <label class="small">Komponen</label>
-                                                        <input type="text" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][existing_rabs][{{ $rab->RABID }}][Komponen]" class="form-control form-control-sm" value="{{ $rab->Komponen }}" required>
+                                                        <textarea name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][existing_rabs][{{ $rab->RABID }}][Komponen]" class="form-control form-control-sm" rows="2">{{ $rab->Komponen }}</textarea>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-1">
+                                                <div class="col-md-1 text-right">
+                                                    <button type="button" class="btn btn-sm btn-danger remove-existing-rab-sub" data-id="{{ $rab->RABID }}">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="row align-items-center">
+                                                <div class="col-md-3">
                                                     <div class="form-group mb-0">
                                                         <label class="small">Volume</label>
-                                                        <input type="text" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][existing_rabs][{{ $rab->RABID }}][Volume]" class="form-control form-control-sm volume-input rab-calc" data-type="volume" value="{{ number_format($rab->Volume, 0, ',', '.') }}" required>
+                                                        <input type="text" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][existing_rabs][{{ $rab->RABID }}][Volume]" class="form-control form-control-sm volume-input rab-calc" data-type="volume" value="{{ number_format($rab->Volume, 0, ',', '.') }}">
                                                     </div>
-                                                    </div>
-                                                <div class="col-md-2">
+                                                </div>
+                                                <div class="col-md-3">
                                                     <div class="form-group mb-0">
-                                                        <label class="small">Satuan</label>
-                                                        <select name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][existing_rabs][{{ $rab->RABID }}][Satuan]" class="form-control form-control-sm satuan-select select2" required>
+                                                        <label class="small d-block">Satuan</label>
+                                                        <select name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][existing_rabs][{{ $rab->RABID }}][Satuan]" class="form-control form-control-sm select2">
                                                             <option value="">Pilih</option>
                                                             @foreach($satuans as $satuan)
                                                                 <option value="{{ $satuan->SatuanID }}" {{ $rab->Satuan == $satuan->SatuanID ? 'selected' : '' }}>{{ $satuan->Nama }}</option>
@@ -188,20 +121,22 @@
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-2">
+                                                <div class="col-md-3">
                                                     <div class="form-group mb-0">
                                                         <label class="small">Harga Satuan</label>
-                                                        <input type="text" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][existing_rabs][{{ $rab->RABID }}][HargaSatuan]" class="form-control form-control-sm harga-input rab-calc" data-type="harga" value="{{ number_format($rab->HargaSatuan, 0, ',', '.') }}" required>
+                                                        <input type="text" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][existing_rabs][{{ $rab->RABID }}][HargaSatuan]" class="form-control form-control-sm harga-input rab-calc" data-type="harga" value="{{ number_format($rab->HargaSatuan, 0, ',', '.') }}">
                                                     </div>
                                                 </div>
-                                                <div class="col-md-2">
+                                                <div class="col-md-3">
                                                     <div class="form-group mb-0">
                                                         <label class="small">Jumlah</label>
-                                                        <input type="text" class="form-control form-control-sm jumlah-input" value="{{ number_format($rab->Volume * $rab->HargaSatuan, 0, ',', '.') }}" readonly>
+                                                        <input type="text" class="form-control form-control-sm jumlah-input" value="{{ number_format($rab->Volume * $rab->HargaSatuan, 0, ',', '.') }}" >
                                                         <input type="hidden" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][existing_rabs][{{ $rab->RABID }}][Jumlah]" class="jumlah-hidden" value="{{ $rab->Volume * $rab->HargaSatuan }}">
                                                     </div>
                                                 </div>
-                                                <div class="col-md-2">
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-12">
                                                     <div class="form-group mb-0">
                                                         <label class="small">Status</label>
                                                         <select name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][existing_rabs][{{ $rab->RABID }}][Status]" class="form-control form-control-sm">
@@ -211,11 +146,6 @@
                                                             <option value="R" {{ $rab->Status == 'R' ? 'selected' : '' }}>Revisi</option>
                                                         </select>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-1">
-                                                    <button type="button" class="btn btn-sm btn-danger remove-existing-rab-sub" data-id="{{ $rab->RABID }}">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -230,8 +160,82 @@
                 </div>
             @endforeach
         </div>
-        <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="add_sub_kegiatan">
+        <button type="button" class="btn btn-outline-primary btn-sm mt-2 mb-4" id="add_sub_kegiatan">
             <i class="fas fa-plus"></i> Tambah Sub Kegiatan
+        </button>
+    </div>
+    
+    <!-- RAB Section (always visible) -->
+    <div id="rab_section">
+        <label class="mb-3">Rencana Anggaran Biaya (RAB)</label>
+        <div id="rab_container">
+            @foreach($kegiatan->rabs->whereNull('SubKegiatanID') as $index => $rab)
+                <div class="card mb-3 rab-item">
+                    <div class="card-body py-3">
+                        <div class="row align-items-center mb-2">
+                            <div class="col-md-11">
+                                <div class="form-group mb-0">
+                                    <label>Komponen</label>
+                                    <textarea name="existing_rabs[{{ $rab->RABID }}][Komponen]" class="form-control" rows="2">{{ $rab->Komponen }}</textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-1 text-right">
+                                <button type="button" class="btn btn-sm btn-danger remove-existing-rab" data-id="{{ $rab->RABID }}">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <div class="form-group mb-0">
+                                    <label>Volume</label>
+                                    <input type="text" name="existing_rabs[{{ $rab->RABID }}][Volume]" class="form-control volume-input rab-calc" data-type="volume" value="{{ number_format($rab->Volume, 0, ',', '.') }}">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group mb-0">
+                                    <label class="d-block">Satuan</label>
+                                    <select name="existing_rabs[{{ $rab->RABID }}][Satuan]" class="form-control select2">
+                                        <option value="">Pilih</option>
+                                        @foreach($satuans as $satuan)
+                                            <option value="{{ $satuan->SatuanID }}" {{ $rab->Satuan == $satuan->SatuanID ? 'selected' : '' }}>{{ $satuan->Nama }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group mb-0">
+                                    <label>Harga Satuan</label>
+                                    <input type="text" name="existing_rabs[{{ $rab->RABID }}][HargaSatuan]" class="form-control harga-input rab-calc" data-type="harga" value="{{ number_format($rab->HargaSatuan, 0, ',', '.') }}">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group mb-0">
+                                    <label>Jumlah</label>
+                                    <input type="text" class="form-control jumlah-input" value="{{ number_format($rab->Volume * $rab->HargaSatuan, 0, ',', '.') }}" >
+                                    <input type="hidden" name="existing_rabs[{{ $rab->RABID }}][Jumlah]" class="jumlah-hidden" value="{{ $rab->Volume * $rab->HargaSatuan }}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <div class="form-group mb-0">
+                                    <label>Status</label>
+                                    <select name="existing_rabs[{{ $rab->RABID }}][Status]" class="form-control">
+                                        <option value="N" {{ $rab->Status == 'N' ? 'selected' : '' }}>Menunggu</option>
+                                        <option value="Y" {{ $rab->Status == 'Y' ? 'selected' : '' }}>Disetujui</option>
+                                        <option value="T" {{ $rab->Status == 'T' ? 'selected' : '' }}>Ditolak</option>
+                                        <option value="R" {{ $rab->Status == 'R' ? 'selected' : '' }}>Revisi</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm mb-4" id="add_rab">
+            <i class="fas fa-plus"></i> Tambah RAB
         </button>
     </div>
     
@@ -244,8 +248,61 @@
 <script>
 $(document).ready(function() {
     // Initialize select2 for all existing select elements
-    initSelect2ForRab();
-    
+    $('.select2').each(function() {
+        // Apply custom styling to this specific element
+        var $container = $(this).next('.select2-container');
+        
+        // Style the selection container
+        $container.find('.select2-selection--single').css({
+            'height': '33px',
+            'padding': '0.15rem 0.75rem',
+            'border': '1px solid #d1d3e2',
+            'border-radius': '0.35rem'
+        });
+        
+        // Style the rendered text and center the placeholder
+        $container.find('.select2-selection__rendered').css({
+            'line-height': '1.5',
+            'padding-left': '0',
+            'padding-top': '0.15rem',
+            'padding-bottom': '0.15rem',
+            'color': '#6e707e',
+        });
+        
+        // Style the dropdown arrow
+        $container.find('.select2-selection__arrow').css({
+            'height': '33px'
+        });
+        
+        // Namespace the event handler to avoid affecting modals
+        var selectId = $(this).attr('id') || 'select-' + Math.random().toString(36).substring(2, 15);
+        $(this).attr('id', selectId);
+        
+        // Remove any previous event handlers
+        $(document).off('select2:open.' + selectId);
+        
+        // Add namespaced event handler
+        $(document).on('select2:open.' + selectId, function() {
+            // Only target dropdowns that are not in modals
+            $('.select2-dropdown').each(function() {
+                if ($(this).closest('.modal').length === 0) {
+                    $(this).css({
+                        'font-size': '0.875rem'
+                    });
+                    
+                    $(this).find('.select2-search__field').css({
+                        'height': '28px',
+                        'padding': '2px 6px'
+                    });
+                    
+                    $(this).find('.select2-results__option').css({
+                        'padding': '4px 8px',
+                        'min-height': '28px'
+                    });
+                }
+            });
+        });
+    });
     // Toggle sub kegiatan section based on radio button
     $('input[name="has_sub_kegiatan"]').change(function() {
         if ($(this).val() === 'yes') {
@@ -269,6 +326,12 @@ $(document).ready(function() {
         addRAB();
     });
     
+    // Initialize date range pickers for existing sub kegiatans
+    $('.date-range-picker').each(function() {
+        const subKegiatanId = $(this).attr('id').replace('date_range_', '');
+        initDateRangePicker(subKegiatanId);
+    });
+    
     // Function to add a new sub kegiatan
     function addSubKegiatan() {
         const index = new Date().getTime(); // Use timestamp as unique index
@@ -283,21 +346,13 @@ $(document).ready(function() {
                 <div class="card-body">
                     <div class="form-group">
                         <label>Nama Sub Kegiatan</label>
-                        <textarea name="new_sub_kegiatans[${index}][Nama]" class="form-control" rows="2" required></textarea>
+                        <textarea name="new_sub_kegiatans[${index}][Nama]" class="form-control" rows="2"></textarea>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Jadwal Mulai</label>
-                                <input type="date" name="new_sub_kegiatans[${index}][JadwalMulai]" class="form-control sub-kegiatan-start" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Jadwal Selesai</label>
-                                <input type="date" name="new_sub_kegiatans[${index}][JadwalSelesai]" class="form-control sub-kegiatan-end" required>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label>Jadwal</label>
+                        <input type="text" class="form-control date-range-picker" id="date_range_new_${index}">
+                        <input type="hidden" name="new_sub_kegiatans[${index}][JadwalMulai]" class="date-start-hidden">
+                        <input type="hidden" name="new_sub_kegiatans[${index}][JadwalSelesai]" class="date-end-hidden">
                     </div>
                     <div class="form-group">
                         <label>Status</label>
@@ -324,11 +379,62 @@ $(document).ready(function() {
         
         $('#sub_kegiatan_container').append(html);
         
+        // Initialize date range picker for this sub kegiatan
+        initDateRangePicker('new_' + index);
+        
         // Add first RAB for this sub kegiatan
         addRABForNewSubKegiatan(index);
+    }
+    
+    // Function to initialize the date range picker
+    function initDateRangePicker(index) {
+        $(`#date_range_${index}`).daterangepicker({
+            opens: 'left',
+            autoApply: true,
+            locale: {
+                format: 'DD/MM/YYYY',
+                separator: ' - ',
+                applyLabel: 'Pilih',
+                cancelLabel: 'Batal',
+                fromLabel: 'Dari',
+                toLabel: 'Sampai',
+                customRangeLabel: 'Custom',
+                weekLabel: 'W',
+                daysOfWeek: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                monthNames: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+                firstDay: 1
+            }
+        }, function(start, end, label) {
+            // When a date range is selected, update the hidden inputs
+            const subKegiatan = $(`#date_range_${index}`).closest('.sub-kegiatan-item');
+            subKegiatan.find('.date-start-hidden').val(start.format('YYYY-MM-DD'));
+            subKegiatan.find('.date-end-hidden').val(end.format('YYYY-MM-DD'));
+            
+            // Validate against main kegiatan dates
+            validateSubKegiatanDateRange(subKegiatan, start, end);
+        });
+    }
+    
+    // Function to validate the date range against main kegiatan dates
+    function validateSubKegiatanDateRange(subKegiatan, start, end) {
+        const mainStartDate = new Date($('#TanggalMulai').val());
+        const mainEndDate = new Date($('#TanggalSelesai').val());
         
-        // Initialize date validation for this sub kegiatan
-        initSubKegiatanDateValidation();
+        if (mainStartDate && start && start.toDate() < mainStartDate) {
+            alert('Jadwal Mulai sub kegiatan tidak boleh sebelum Tanggal Mulai kegiatan utama');
+            // Reset the date range picker
+            const dateRangePicker = subKegiatan.find('.date-range-picker').data('daterangepicker');
+            dateRangePicker.setStartDate(moment(mainStartDate));
+            subKegiatan.find('.date-start-hidden').val(moment(mainStartDate).format('YYYY-MM-DD'));
+        }
+        
+        if (mainEndDate && end && end.toDate() > mainEndDate) {
+            alert('Jadwal Selesai sub kegiatan tidak boleh setelah Tanggal Selesai kegiatan utama');
+            // Reset the date range picker
+            const dateRangePicker = subKegiatan.find('.date-range-picker').data('daterangepicker');
+            dateRangePicker.setEndDate(moment(mainEndDate));
+            subKegiatan.find('.date-end-hidden').val(moment(mainEndDate).format('YYYY-MM-DD'));
+        }
     }
     
     // Function to add a RAB for a new sub kegiatan
@@ -337,23 +443,30 @@ $(document).ready(function() {
         const html = `
             <div class="card mb-2 rab-sub-item">
                 <div class="card-body py-2">
-                    <div class="row align-items-center">
-                        <div class="col-md-2">
+                    <div class="row align-items-center mb-2">
+                        <div class="col-md-11">
                             <div class="form-group mb-0">
                                 <label class="small">Komponen</label>
-                                <input type="text" name="new_sub_kegiatans[${subKegiatanIndex}][rabs][${rabIndex}][Komponen]" class="form-control form-control-sm" required>
+                                <textarea name="new_sub_kegiatans[${subKegiatanIndex}][rabs][${rabIndex}][Komponen]" class="form-control form-control-sm" rows="2"></textarea>
                             </div>
                         </div>
-                        <div class="col-md-1">
+                        <div class="col-md-1 text-right">
+                            <button type="button" class="btn btn-sm btn-danger remove-rab-sub">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
                             <div class="form-group mb-0">
                                 <label class="small">Volume</label>
-                                <input type="text" name="new_sub_kegiatans[${subKegiatanIndex}][rabs][${rabIndex}][Volume]" class="form-control form-control-sm volume-input rab-calc" data-type="volume" required>
+                                <input type="text" name="new_sub_kegiatans[${subKegiatanIndex}][rabs][${rabIndex}][Volume]" class="form-control form-control-sm volume-input rab-calc" data-type="volume">
                             </div>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <div class="form-group mb-0">
-                                <label class="small">Satuan</label>
-                                <select name="new_sub_kegiatans[${subKegiatanIndex}][rabs][${rabIndex}][Satuan]" class="form-control form-control-sm satuan-select select2" required>
+                                <label class="small d-block">Satuan</label>
+                                <select name="new_sub_kegiatans[${subKegiatanIndex}][rabs][${rabIndex}][Satuan]" class="form-control form-control-sm select2">
                                     <option value="">Pilih</option>
                                     @foreach($satuans as $satuan)
                                         <option value="{{ $satuan->SatuanID }}">{{ $satuan->Nama }}</option>
@@ -361,34 +474,31 @@ $(document).ready(function() {
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <div class="form-group mb-0">
                                 <label class="small">Harga Satuan</label>
-                                <input type="text" name="new_sub_kegiatans[${subKegiatanIndex}][rabs][${rabIndex}][HargaSatuan]" class="form-control form-control-sm harga-input rab-calc" data-type="harga" required>
+                                <input type="text" name="new_sub_kegiatans[${subKegiatanIndex}][rabs][${rabIndex}][HargaSatuan]" class="form-control form-control-sm harga-input rab-calc" data-type="harga">
                             </div>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <div class="form-group mb-0">
                                 <label class="small">Jumlah</label>
-                                <input type="text" class="form-control form-control-sm jumlah-input" readonly>
+                                <input type="text" class="form-control form-control-sm jumlah-input" >
                                 <input type="hidden" name="new_sub_kegiatans[${subKegiatanIndex}][rabs][${rabIndex}][Jumlah]" class="jumlah-hidden">
                             </div>
                         </div>
-                        <div class="col-md-2">
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-12">
                             <div class="form-group mb-0">
                                 <label class="small">Status</label>
                                 <select name="new_sub_kegiatans[${subKegiatanIndex}][rabs][${rabIndex}][Status]" class="form-control form-control-sm">
                                     <option value="N" selected>Menunggu</option>
                                     <option value="Y">Disetujui</option>
                                     <option value="T">Ditolak</option>
-                                    <option value="R">Revisi</option>
+                                                                     <option value="R">Revisi</option>
                                 </select>
                             </div>
-                        </div>
-                        <div class="col-md-1">
-                            <button type="button" class="btn btn-sm btn-danger remove-rab-sub">
-                                <i class="fas fa-times"></i>
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -398,7 +508,66 @@ $(document).ready(function() {
         $(`.sub-kegiatan-item:last .rab-sub-container`).append(html);
         
         // Initialize select2 for this RAB
-        initSelect2ForRab();
+        $(`.sub-kegiatan-item:last .rab-sub-container .rab-sub-item:last-child select.select2`).each(function() {
+            $(this).select2({
+                dropdownParent: $('#mainModal .modal-body'),
+                width: '100%'
+            });
+            
+            // Apply custom styling to this specific element
+            var $container = $(this).next('.select2-container');
+            
+            // Style the selection container
+            $container.find('.select2-selection--single').css({
+                'height': '33px',
+                'padding': '0.15rem 0.75rem',
+                'border': '1px solid #d1d3e2',
+                'border-radius': '0.35rem'
+            });
+            
+            // Style the rendered text and center the placeholder
+            $container.find('.select2-selection__rendered').css({
+                'line-height': '1.5',
+                'padding-left': '0',
+                'padding-top': '0.15rem',
+                'padding-bottom': '0.15rem',
+                'color': '#6e707e',
+            });
+            
+            // Style the dropdown arrow
+            $container.find('.select2-selection__arrow').css({
+                'height': '33px'
+            });
+            
+            // Namespace the event handler to avoid affecting modals
+            var selectId = $(this).attr('id') || 'select-' + Math.random().toString(36).substring(2, 15);
+            $(this).attr('id', selectId);
+            
+            // Remove any previous event handlers
+            $(document).off('select2:open.' + selectId);
+            
+            // Add namespaced event handler
+            $(document).on('select2:open.' + selectId, function() {
+                // Only target dropdowns that are not in modals
+                $('.select2-dropdown').each(function() {
+                    if ($(this).closest('.modal').length === 0) {
+                        $(this).css({
+                            'font-size': '0.875rem'
+                        });
+                        
+                        $(this).find('.select2-search__field').css({
+                            'height': '28px',
+                            'padding': '2px 6px'
+                        });
+                        
+                        $(this).find('.select2-results__option').css({
+                            'padding': '4px 8px',
+                            'min-height': '28px'
+                        });
+                    }
+                });
+            });
+        });
         
         // Initialize number formatting for this RAB
         initNumberFormatting();
@@ -410,44 +579,53 @@ $(document).ready(function() {
         const html = `
             <div class="card mb-2 rab-sub-item">
                 <div class="card-body py-2">
-                    <div class="row align-items-center">
-                        <div class="col-md-2">
+                    <div class="row align-items-center mb-2">
+                        <div class="col-md-11">
                             <div class="form-group mb-0">
                                 <label class="small">Komponen</label>
-                                <input type="text" name="existing_sub_kegiatans[${subKegiatanId}][new_rabs][${rabIndex}][Komponen]" class="form-control form-control-sm" required>
+                                <textarea name="existing_sub_kegiatans[${subKegiatanId}][new_rabs][${rabIndex}][Komponen]" class="form-control form-control-sm" rows="2"></textarea>
                             </div>
                         </div>
-                        <div class="col-md-1">
+                        <div class="col-md-1 text-right">
+                            <button type="button" class="btn btn-sm btn-danger remove-rab-sub">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
                             <div class="form-group mb-0">
                                 <label class="small">Volume</label>
-                                <input type="text" name="existing_sub_kegiatans[${subKegiatanId}][new_rabs][${rabIndex}][Volume]" class="form-control form-control-sm volume-input rab-calc" data-type="volume" required>
+                                <input type="text" name="existing_sub_kegiatans[${subKegiatanId}][new_rabs][${rabIndex}][Volume]" class="form-control form-control-sm volume-input rab-calc" data-type="volume">
                             </div>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <div class="form-group mb-0">
-                                <label class="small">Satuan</label>
-                                <select name="existing_sub_kegiatans[${subKegiatanId}][new_rabs][${rabIndex}][Satuan]" class="form-control form-control-sm satuan-select select2" required>
+                                <label class="small d-block">Satuan</label>
+                                <select name="existing_sub_kegiatans[${subKegiatanId}][new_rabs][${rabIndex}][Satuan]" class="form-control form-control-sm select2">
                                     <option value="">Pilih</option>
                                     @foreach($satuans as $satuan)
                                         <option value="{{ $satuan->SatuanID }}">{{ $satuan->Nama }}</option>
                                     @endforeach
                                 </select>
-                                                       </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group mb-0">
-                                <label class="small">Harga Satuan</label>
-                                <input type="text" name="existing_sub_kegiatans[${subKegiatanId}][new_rabs][${rabIndex}][HargaSatuan]" class="form-control form-control-sm harga-input rab-calc" data-type="harga" required>
                             </div>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
+                            <div class="form-group mb-0">
+                                <label class="small">Harga Satuan</label>
+                                <input type="text" name="existing_sub_kegiatans[${subKegiatanId}][new_rabs][${rabIndex}][HargaSatuan]" class="form-control form-control-sm harga-input rab-calc" data-type="harga">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
                             <div class="form-group mb-0">
                                 <label class="small">Jumlah</label>
-                                <input type="text" class="form-control form-control-sm jumlah-input" readonly>
+                                <input type="text" class="form-control form-control-sm jumlah-input" >
                                 <input type="hidden" name="existing_sub_kegiatans[${subKegiatanId}][new_rabs][${rabIndex}][Jumlah]" class="jumlah-hidden">
                             </div>
                         </div>
-                        <div class="col-md-2">
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-12">
                             <div class="form-group mb-0">
                                 <label class="small">Status</label>
                                 <select name="existing_sub_kegiatans[${subKegiatanId}][new_rabs][${rabIndex}][Status]" class="form-control form-control-sm">
@@ -458,11 +636,6 @@ $(document).ready(function() {
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-1">
-                            <button type="button" class="btn btn-sm btn-danger remove-rab-sub">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -471,7 +644,66 @@ $(document).ready(function() {
         $(`[data-subkegiatan-id="${subKegiatanId}"]`).closest('.card-body').find('.rab-sub-container').append(html);
         
         // Initialize select2 for this RAB
-        initSelect2ForRab();
+        $(`[data-subkegiatan-id="${subKegiatanId}"]`).closest('.card-body').find('.rab-sub-container .rab-sub-item:last-child select.select2').each(function() {
+            $(this).select2({
+                dropdownParent: $('#mainModal .modal-body'),
+                width: '100%'
+            });
+            
+            // Apply custom styling to this specific element
+            var $container = $(this).next('.select2-container');
+            
+            // Style the selection container
+            $container.find('.select2-selection--single').css({
+                'height': '33px',
+                'padding': '0.15rem 0.75rem',
+                'border': '1px solid #d1d3e2',
+                'border-radius': '0.35rem'
+            });
+            
+            // Style the rendered text and center the placeholder
+            $container.find('.select2-selection__rendered').css({
+                'line-height': '1.5',
+                'padding-left': '0',
+                'padding-top': '0.15rem',
+                'padding-bottom': '0.15rem',
+                'color': '#6e707e',
+            });
+            
+            // Style the dropdown arrow
+            $container.find('.select2-selection__arrow').css({
+                'height': '33px'
+            });
+            
+            // Namespace the event handler to avoid affecting modals
+            var selectId = $(this).attr('id') || 'select-' + Math.random().toString(36).substring(2, 15);
+            $(this).attr('id', selectId);
+            
+            // Remove any previous event handlers
+            $(document).off('select2:open.' + selectId);
+            
+            // Add namespaced event handler
+            $(document).on('select2:open.' + selectId, function() {
+                // Only target dropdowns that are not in modals
+                $('.select2-dropdown').each(function() {
+                    if ($(this).closest('.modal').length === 0) {
+                        $(this).css({
+                            'font-size': '0.875rem'
+                        });
+                        
+                        $(this).find('.select2-search__field').css({
+                            'height': '28px',
+                            'padding': '2px 6px'
+                        });
+                        
+                        $(this).find('.select2-results__option').css({
+                            'padding': '4px 8px',
+                            'min-height': '28px'
+                        });
+                    }
+                });
+            });
+        });
         
         // Initialize number formatting for this RAB
         initNumberFormatting();
@@ -483,23 +715,30 @@ $(document).ready(function() {
         const html = `
             <div class="card mb-3 rab-item">
                 <div class="card-body py-3">
+                    <div class="row align-items-center mb-2">
+                        <div class="col-md-11">
+                            <div class="form-group mb-0">
+                                <label>Komponen</label>
+                                <textarea name="new_rabs[${index}][Komponen]" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-1 text-right">
+                            <button type="button" class="btn btn-sm btn-danger remove-rab mt-4">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
                     <div class="row align-items-center">
                         <div class="col-md-3">
                             <div class="form-group mb-0">
-                                <label>Komponen</label>
-                                <input type="text" name="new_rabs[${index}][Komponen]" class="form-control" required>
-                            </div>
-                        </div>
-                        <div class="col-md-1">
-                            <div class="form-group mb-0">
                                 <label>Volume</label>
-                                <input type="text" name="new_rabs[${index}][Volume]" class="form-control volume-input rab-calc" data-type="volume" required>
+                                <input type="text" name="new_rabs[${index}][Volume]" class="form-control volume-input rab-calc" data-type="volume">
                             </div>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <div class="form-group mb-0">
-                                <label>Satuan</label>
-                                <select name="new_rabs[${index}][Satuan]" class="form-control satuan-select select2" required>
+                                <label class="d-block">Satuan</label>
+                                <select name="new_rabs[${index}][Satuan]" class="form-control select2">
                                     <option value="">Pilih</option>
                                     @foreach($satuans as $satuan)
                                         <option value="{{ $satuan->SatuanID }}">{{ $satuan->Nama }}</option>
@@ -507,20 +746,22 @@ $(document).ready(function() {
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <div class="form-group mb-0">
                                 <label>Harga Satuan</label>
-                                <input type="text" name="new_rabs[${index}][HargaSatuan]" class="form-control harga-input rab-calc" data-type="harga" required>
+                                <input type="text" name="new_rabs[${index}][HargaSatuan]" class="form-control harga-input rab-calc" data-type="harga">
                             </div>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <div class="form-group mb-0">
                                 <label>Jumlah</label>
-                                <input type="text" class="form-control jumlah-input" readonly>
+                                <input type="text" class="form-control jumlah-input" >
                                 <input type="hidden" name="new_rabs[${index}][Jumlah]" class="jumlah-hidden">
                             </div>
                         </div>
-                        <div class="col-md-1">
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-12">
                             <div class="form-group mb-0">
                                 <label>Status</label>
                                 <select name="new_rabs[${index}][Status]" class="form-control">
@@ -531,11 +772,6 @@ $(document).ready(function() {
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-1">
-                            <button type="button" class="btn btn-sm btn-danger remove-rab mt-4">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -544,7 +780,10 @@ $(document).ready(function() {
         $('#rab_container').append(html);
         
         // Initialize select2 for this RAB
-        initSelect2ForRab();
+        $('#rab_container .rab-item:last-child select.select2').select2({
+            dropdownParent: $('#mainModal .modal-body'),
+            width: '100%'
+        });
         
         // Initialize number formatting for this RAB
         initNumberFormatting();
@@ -561,7 +800,12 @@ $(document).ready(function() {
         
         $(this).closest('.sub-kegiatan-item').remove();
         
-        // If no sub kegiatans left, add a new one
+        // Renumber the remaining sub kegiatans
+        $('.sub-kegiatan-item').each(function(index) {
+            $(this).find('h6').text(`Sub Kegiatan #${index + 1}`);
+        });
+        
+        // If no sub kegiatans left and radio is yes, add a new one
         if ($('.sub-kegiatan-item').length === 0 && $('#has_sub_kegiatan_yes').is(':checked')) {
             addSubKegiatan();
         }
@@ -570,13 +814,12 @@ $(document).ready(function() {
     // Remove RAB from Sub Kegiatan
     $(document).on('click', '.remove-rab-sub', function() {
         const rabContainer = $(this).closest('.rab-sub-container');
-        if (rabContainer.find('.rab-sub-item').length > 1) {
+        if (rabContainer.find('.rab-sub-item').length > 0) {
             $(this).closest('.rab-sub-item').remove();
-        } else {
-            alert('Minimal harus ada satu RAB untuk sub kegiatan ini');
         }
     });
     
+    // Remove existing RAB from Sub
     // Remove existing RAB from Sub Kegiatan
     $(document).on('click', '.remove-existing-rab-sub', function() {
         const rabId = $(this).data('id');
@@ -585,19 +828,15 @@ $(document).ready(function() {
         // Add a hidden field to mark this RAB for deletion
         $('#kegiatanEditForm').append(`<input type="hidden" name="delete_rabs[]" value="${rabId}">`);
         
-        if (rabContainer.find('.rab-sub-item').length > 1) {
+        if (rabContainer.find('.rab-sub-item').length > 0) {
             $(this).closest('.rab-sub-item').remove();
-        } else {
-            alert('Minimal harus ada satu RAB untuk sub kegiatan ini');
         }
     });
     
     // Remove RAB from main kegiatan
     $(document).on('click', '.remove-rab', function() {
-        if ($('.rab-item').length > 1) {
+        if ($('.rab-item').length > 0) {
             $(this).closest('.rab-item').remove();
-        } else {
-            alert('Minimal harus ada satu RAB');
         }
     });
     
@@ -608,38 +847,27 @@ $(document).ready(function() {
         // Add a hidden field to mark this RAB for deletion
         $('#kegiatanEditForm').append(`<input type="hidden" name="delete_rabs[]" value="${rabId}">`);
         
-        if ($('.rab-item').length > 1) {
+        if ($('.rab-item').length > 0) {
             $(this).closest('.rab-item').remove();
-        } else {
-            alert('Minimal harus ada satu RAB');
+        } 
+    });
+    
+    $(document).off('click', '.add-rab-sub').on('click', '.add-rab-sub', function(e) {
+        e.stopPropagation(); // Prevent event bubbling
+        const subKegiatanId = $(this).data('subkegiatan-id');
+        
+        // Call the appropriate function based on whether it's an existing or new sub kegiatan
+        if (subKegiatanId) {
+            addRABForExistingSubKegiatan(subKegiatanId);
         }
     });
     
-    // Add RAB to existing Sub Kegiatan
-    $(document).on('click', '.add-rab-sub', function() {
-        const subKegiatanId = $(this).data('subkegiatan-id');
-        addRABForExistingSubKegiatan(subKegiatanId);
-    });
-    
-    // Add RAB to new Sub Kegiatan
-    $(document).on('click', '.add-new-rab-sub', function() {
+    // Similarly for new sub kegiatans
+    $(document).off('click', '.add-new-rab-sub').on('click', '.add-new-rab-sub', function(e) {
+        e.stopPropagation(); // Prevent event bubbling
         const subKegiatanIndex = $(this).data('index');
         addRABForNewSubKegiatan(subKegiatanIndex);
     });
-    
-    // Initialize select2 for RAB satuan fields
-    function initSelect2ForRab() {
-        $('.satuan-select').each(function() {
-            if (!$(this).hasClass('select2-hidden-accessible')) {
-                $(this).select2({
-                    dropdownParent: $('#mainModal .modal-body'),
-                    width: '100%',
-                    placeholder: "Pilih satuan"
-                });
-            }
-        });
-    }
-    
     // Initialize number formatting for currency inputs
     function initNumberFormatting() {
         $('.volume-input, .harga-input').off('input').on('input', function() {
@@ -654,7 +882,7 @@ $(document).ready(function() {
             $(this).val(value);
             
             // Calculate jumlah
-            calculateJumlah($(this).closest('.row'));
+            calculateJumlah($(this).closest('.card-body'));
         });
     }
     
@@ -682,48 +910,17 @@ $(document).ready(function() {
         }
     }
     
-    // Initialize date validation for sub kegiatans
-    function initSubKegiatanDateValidation() {
-        $('.sub-kegiatan-start, .sub-kegiatan-end').off('change').on('change', function() {
-            const subKegiatan = $(this).closest('.sub-kegiatan-item');
-            const startDate = new Date(subKegiatan.find('.sub-kegiatan-start').val());
-            const endDate = new Date(subKegiatan.find('.sub-kegiatan-end').val());
-            
-            if (startDate && endDate && endDate < startDate) {
-                alert('Jadwal Selesai harus lebih besar atau sama dengan Jadwal Mulai');
-                $(this).val('');
-            }
-            
-            // Also validate against main kegiatan dates
-            const mainStartDate = new Date($('#TanggalMulai').val());
-            const mainEndDate = new Date($('#TanggalSelesai').val());
-            
-            if (mainStartDate && startDate && startDate < mainStartDate) {
-                alert('Jadwal Mulai sub kegiatan tidak boleh sebelum Tanggal Mulai kegiatan utama');
-                subKegiatan.find('.sub-kegiatan-start').val('');
-            }
-            
-            if (mainEndDate && endDate && endDate > mainEndDate) {
-                alert('Jadwal Selesai sub kegiatan tidak boleh setelah Tanggal Selesai kegiatan utama');
-                subKegiatan.find('.sub-kegiatan-end').val('');
-            }
-        });
-    }
-    
     // Recalculate all jumlah values when inputs change
     $(document).on('input', '.rab-calc', function() {
-        calculateJumlah($(this).closest('.row'));
+        calculateJumlah($(this).closest('.card-body'));
     });
     
     // Initialize all number formatting
     initNumberFormatting();
     
-    // Initialize all sub kegiatan date validation
-    initSubKegiatanDateValidation();
-    
     // Calculate all jumlah values on page load
     $('.rab-calc').each(function() {
-        calculateJumlah($(this).closest('.row'));
+        calculateJumlah($(this).closest('.card-body'));
     });
 });
 
@@ -741,17 +938,22 @@ function validateDatesEdit() {
             errorElement.style.display = 'none';
             submitBtn.disabled = false;
             
-            // Also validate sub kegiatan dates if they exist
+            // Update sub kegiatan date ranges if they exist
             $('.sub-kegiatan-item').each(function() {
-                const subStartDate = new Date($(this).find('.sub-kegiatan-start').val());
-                const subEndDate = new Date($(this).find('.sub-kegiatan-end').val());
-                
-                if (subStartDate && subStartDate < tanggalMulai) {
-                    $(this).find('.sub-kegiatan-start').val('');
-                }
-                
-                if (subEndDate && subEndDate > tanggalSelesai) {
-                    $(this).find('.sub-kegiatan-end').val('');
+                const dateRangePicker = $(this).find('.date-range-picker').data('daterangepicker');
+                if (dateRangePicker) {
+                    const startDate = dateRangePicker.startDate;
+                    const endDate = dateRangePicker.endDate;
+                    
+                    if (startDate && startDate.toDate() < tanggalMulai) {
+                        dateRangePicker.setStartDate(moment(tanggalMulai));
+                        $(this).find('.date-start-hidden').val(moment(tanggalMulai).format('YYYY-MM-DD'));
+                    }
+                    
+                    if (endDate && endDate.toDate() > tanggalSelesai) {
+                        dateRangePicker.setEndDate(moment(tanggalSelesai));
+                        $(this).find('.date-end-hidden').val(moment(tanggalSelesai).format('YYYY-MM-DD'));
+                    }
                 }
             });
         }
@@ -800,7 +1002,7 @@ document.getElementById('kegiatanEditForm').addEventListener('submit', function(
     // Validate RABs for main kegiatan
     let rabValid = true;
     $('.rab-item').each(function(index) {
-        const komponen = $(this).find('input[name*="[Komponen]"]').val().trim();
+        const komponen = $(this).find('textarea[name*="[Komponen]"], input[name*="[Komponen]"]').val().trim();
         const volume = $(this).find('input[name*="[Volume]"]').val().trim();
         const satuan = $(this).find('select[name*="[Satuan]"]').val();
         const hargaSatuan = $(this).find('input[name*="[HargaSatuan]"]').val().trim();
@@ -815,7 +1017,7 @@ document.getElementById('kegiatanEditForm').addEventListener('submit', function(
     if (hasSubKegiatan === 'yes') {
         let subKegiatanValid = true;
         
-        // Validate existing sub kegiatans
+        // Validate all sub kegiatans
         $('.sub-kegiatan-item').each(function(index) {
             const subNama = $(this).find('textarea[name*="[Nama]"]').val().trim();
             const subJadwalMulai = $(this).find('input[name*="[JadwalMulai]"]').val().trim();
@@ -828,7 +1030,7 @@ document.getElementById('kegiatanEditForm').addEventListener('submit', function(
             
             // Validate RABs for this sub kegiatan
             $(this).find('.rab-sub-item').each(function(rabIndex) {
-                const komponen = $(this).find('input[name*="[Komponen]"]').val().trim();
+                const komponen = $(this).find('textarea[name*="[Komponen]"], input[name*="[Komponen]"]').val().trim();
                 const volume = $(this).find('input[name*="[Volume]"]').val().trim();
                 const satuan = $(this).find('select[name*="[Satuan]"]').val();
                 const hargaSatuan = $(this).find('input[name*="[HargaSatuan]"]').val().trim();
@@ -868,7 +1070,7 @@ document.getElementById('kegiatanEditForm').addEventListener('submit', function(
         });
         return false;
     }
-    
+
 });
 
 // Run validation on page load
@@ -905,4 +1107,3 @@ function calculateJumlah(container) {
     }
 }
 </script>
-
