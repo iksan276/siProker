@@ -450,6 +450,47 @@
         });
     }
     
+    // Function to get node type tooltip
+    function getNodeTypeTooltip(nodeType) {
+        switch(nodeType) {
+            case 'kegiatan':
+                return 'Ini adalah Kegiatan';
+            case 'subkegiatan':
+                return 'Ini adalah Sub Kegiatan';
+            case 'rab':
+                return 'Ini adalah RAB';
+            default:
+                return 'Ini adalah item';
+        }
+    }
+    
+    // Function to get expand tooltip based on node type
+    function getExpandTooltip(nodeType) {
+        switch(nodeType) {
+            case 'kegiatan':
+                return 'Lihat sub kegiatan dan RAB';
+            case 'subkegiatan':
+                return 'Lihat RAB sub kegiatan';
+            case 'rab':
+                return 'Lihat detail RAB';
+            default:
+                return 'Lihat detail';
+        }
+    }
+    
+    // Function to get collapse tooltip based on node type
+    function getCollapseTooltip(nodeType) {
+        switch(nodeType) {
+            case 'kegiatan':
+                return 'Tutup sub kegiatan dan RAB';
+            case 'subkegiatan':
+                return 'Tutup RAB sub kegiatan';
+            case 'rab':
+                return 'Tutup detail RAB';
+            default:
+                return 'Tutup detail';
+        }
+    }
     
     $(document).ready(function () {
         // Set the filter values from cookies if available
@@ -593,6 +634,7 @@
         $('#pilarFilter').on('change', function() {
             var pilarID = $(this).val();
             
+            // Store selected Pilar ID in
             // Store selected Pilar ID in global variable and cookie
             selectedPilarId = pilarID;
             
@@ -694,7 +736,6 @@
                 updateUrlParameter('programPengembanganID', null);
                 updateUrlParameter('programRektorID', null);
                 
-                // Reload TreeTable with ren
                 // Reload TreeTable with renstra, pilar, and isu filters
                 isFiltering = true;
                 loadTreeData();
@@ -991,7 +1032,8 @@
         });
         
         // Handle tree node expansion/collapse
-        $(document).on('click', '.node-expander', function(e) {
+               // Handle tree node expansion/collapse
+               $(document).on('click', '.node-expander', function(e) {
             e.stopPropagation();
             
             // Hide any tooltips that might be visible
@@ -1128,36 +1170,9 @@
         $('[data-toggle="tooltip"]').tooltip({
             trigger: 'hover',
             container: 'body',
-            animation: false
+            animation: false,
+            html: true
         });
-    }
-    
-    // Function to get expand tooltip based on node type
-    function getExpandTooltip(nodeType) {
-        switch(nodeType) {
-            case 'kegiatan':
-                return 'Lihat sub kegiatan dan RAB';
-            case 'subkegiatan':
-                return 'Lihat RAB sub kegiatan';
-            case 'rab':
-                return 'Lihat detail RAB';
-            default:
-                return 'Lihat detail';
-        }
-    }
-    
-    // Function to get collapse tooltip based on node type
-    function getCollapseTooltip(nodeType) {
-        switch(nodeType) {
-            case 'kegiatan':
-                return 'Tutup sub kegiatan dan RAB';
-            case 'subkegiatan':
-                return 'Tutup RAB sub kegiatan';
-            case 'rab':
-                return 'Tutup detail RAB';
-            default:
-                return 'Tutup detail';
-        }
     }
     
     // Function to collapse a node and all its children recursively
@@ -1298,11 +1313,13 @@
                         indentPrefix += '<span class="tree-indent text-primary">- - -&nbsp;</span>';
                     }
                     
+                    // Create tooltip text that includes both the original tooltip and the node type information
+                    var tooltipText = getNodeTypeTooltip(item.type);
                     if (item.tooltip) {
-                        nameText = indentPrefix + '<span class="node-name" data-toggle="tooltip" title="' + item.tooltip + '">' + item.nama + '</span>';
-                    } else {
-                        nameText = indentPrefix + item.nama;
+                        tooltipText += '<br>' + item.tooltip;
                     }
+                    
+                    nameText = indentPrefix + '<span class="node-name" data-toggle="tooltip" data-html="true" title="' + tooltipText + '">' + item.nama + '</span>';
                     
                     var nameCell = '<td>' + nameText + "&nbsp;&nbsp;" + expander + '</td>';
                     row.append(nameCell);
@@ -1436,7 +1453,6 @@
         $('tr[data-parent="' + nodeId + '"]').hide();
     }
 
-    // Function to initialize
     // Function to initialize event handlers for dynamic content
     function initEventHandlers() {
         // Handle modal loading
