@@ -2,6 +2,7 @@
     @csrf
     @method('PUT')
     
+    @if($rab->SubKegiatanID < 1)
     <div class="form-group">
         <label for="KegiatanID">Kegiatan</label>
         <select name="KegiatanID" id="KegiatanID" class="form-control select2">
@@ -14,7 +15,7 @@
         </select>
         <small class="form-text text-muted">Pilih salah satu: Kegiatan atau Sub Kegiatan</small>
     </div>
-    
+    @else
     <div class="form-group">
         <label for="SubKegiatanID">Sub Kegiatan</label>
         <select name="SubKegiatanID" id="SubKegiatanID" class="form-control select2">
@@ -28,7 +29,8 @@
             @endforeach
         </select>
     </div>
-    
+    @endif
+
     <div class="form-group">
         <label for="Komponen">Komponen <span class="text-danger">*</span></label>
         <textarea class="form-control" id="Komponen" name="Komponen" rows="3" required>{{ $rab->Komponen }}</textarea>
@@ -42,7 +44,7 @@
         <div class="form-group col-md-4">
             <label for="Satuan">Satuan <span class="text-danger">*</span></label>
             <select name="Satuan" id="Satuan" class="form-control select2" required>
-                <option value="">-- Pilih Satuan --</option>
+                <option value="" disabled selected></option>
                 @foreach($satuans as $satuan)
                     <option value="{{ $satuan->SatuanID }}" {{ $rab->Satuan == $satuan->SatuanID ? 'selected' : '' }}>
                         {{ $satuan->Nama }}

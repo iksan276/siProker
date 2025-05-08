@@ -45,7 +45,7 @@
             <a href="{{ route('kegiatans.export.excel', request()->query()) }}" class="btn btn-success btn-sm">
                 <i class="fas fa-file-excel fa-sm"></i> Export Excel
             </a>
-            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('kegiatans.create') }}" data-title="Tambah Kegiatan">
+            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('kegiatans.create') }}" data-title="Tambah Kegiatan" data-toggle="tooltip" title="Tambah kegiatan baru">
                 <i class="fas fa-plus fa-sm"></i> Tambah Kegiatan
             </button>
         </div>
@@ -114,7 +114,7 @@
                     <tr>
                         <th class="text-center" style="width: 5%;">No</th>
                         <th class="text-center">Nama</th>
-                        <th class="text-center" style="width: 15%;">Actions</th>
+                        <th class="text-center" style="width: 20%;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -243,6 +243,23 @@
     .tooltip {
         z-index: 9999;
     }
+    
+    /* Action button group styling */
+    .action-btn-group {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .action-btn-group .btn {
+        margin-right: 2px;
+    }
+    
+    /* Divider for action button groups */
+    .action-divider {
+        width: 1px;
+        background-color: #e3e6f0;
+        margin: 0 5px;
+    }
 </style>
 @endpush
 
@@ -328,10 +345,8 @@
                     $.each(response.isus, function(index, isu) {
                         $('#isuFilter').append('<option value="' + isu.IsuID + '">' + isu.Nama + '</option>');
                     });
-                    
-                    // If there was a previously selected isu, select it
-                    // If there was a previously selected isu, select it
-                    if (selectedIsuId) {
+                                    // If there was a previously selected isu, select it
+                                    if (selectedIsuId) {
                         // Check if the previously selected isu exists in the new options
                         var isuExists = false;
                         $.each(response.isus, function(index, isu) {
@@ -488,6 +503,9 @@
     }
     
     $(document).ready(function () {
+        // Initialize tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+        
         // Set the filter values from cookies if available
         if (selectedRenstraId) {
             $('#renstraFilter').val(selectedRenstraId).trigger('change');
@@ -513,7 +531,7 @@
             $('#programRektorFilter').val(selectedProgramRektorId).trigger('change');
         }
         
-     $('#tree-grid th').addClass('text-dark');
+        $('#tree-grid th').addClass('text-dark');
 
         loadTreeData();
         
@@ -625,11 +643,11 @@
                 }
             });
         });
+        
         // Handle pilar filter change
         $('#pilarFilter').on('change', function() {
             var pilarID = $(this).val();
             
-            // Store selected Pilar ID in
             // Store selected Pilar ID in global variable and cookie
             selectedPilarId = pilarID;
             
@@ -696,6 +714,7 @@
                 updateUrlParameter('programPengembanganID', null);
                 updateUrlParameter('programRektorID', null);
                 
+                // Reload TreeTable with renstra and pilar filters
                 // Reload TreeTable with renstra and pilar filters
                 isFiltering = true;
                 loadTreeData();
@@ -1027,8 +1046,7 @@
         });
         
         // Handle tree node expansion/collapse
-               // Handle tree node expansion/collapse
-               $(document).on('click', '.node-expander', function(e) {
+        $(document).on('click', '.node-expander', function(e) {
             e.stopPropagation();
             
             // Hide any tooltips that might be visible
@@ -1094,6 +1112,7 @@
                 var collapseTooltip = getCollapseTooltip(nodeType);
                 $(this).html('<i class="fas fa-chevron-down text-primary" data-toggle="tooltip" title="' + collapseTooltip + '"></i>');
                 
+                // Add to expanded nodes
                 // Add to expanded nodes
                 expandedNodes[nodeId] = true;
             }
@@ -1211,7 +1230,7 @@
             },
             success: function(response) {
                 // Clear container
-                $('#tree-grid-container').html('<table id="tree-grid" class="table table-bordered"><thead><tr><th class="text-center" style="width: 5%;">No</th><th class="text-center">Nama</th><th class="text-center" style="width: 15%;">Actions</th></tr></thead><tbody></tbody></table>');
+                $('#tree-grid-container').html('<table id="tree-grid" class="table table-bordered"><thead><tr><th class="text-center" style="width: 5%;">No</th><th class="text-center">Nama</th><th class="text-center" style="width: 20%;">Actions</th></tr></thead><tbody></tbody></table>');
                 
                 $('#tree-grid th').addClass('text-dark');
                 // Add rows to the table
@@ -1323,24 +1342,62 @@
                     var actions = '';
                     
                     if (item.type === 'kegiatan') {
-                        // Use the original actions for kegiatan
-                        actions = item.actions || '';
-                    } else if (item.type === 'subkegiatan') {
-                        // Add view, edit, and delete buttons for subkegiatan
-                        actions = '<button class="btn btn-info btn-square btn-sm load-modal" ' +
-                                  'data-url="' + "{{ route('sub-kegiatans.show', ':id') }}".replace(':id', item.id.replace('subkegiatan_', '')) + '" ' +
-                                  'data-title="Detail Sub Kegiatan">' +
+                        var kegiatanId = item.id.replace('kegiatan_', '');
+                        // Add view, edit, delete buttons for kegiatan
+                        // Plus add new buttons for adding sub-kegiatan and RAB directly
+                        actions = '<div class="action-btn-group">' +
+                                  '<button class="btn btn-primary btn-square btn-sm load-modal" ' +
+                                  'data-url="' + "{{ route('sub-kegiatans.create') }}?kegiatanID=" + kegiatanId + '" ' +
+                                  'data-title="Tambah Sub Kegiatan" data-toggle="tooltip" title="Tambah sub kegiatan baru">' +
+                                  '<i class="fas fa-plus"></i>' +
+                                  '</button> ' +
+                                  '<button class="btn btn-success btn-square btn-sm load-modal" ' +
+                                  'data-url="' + "{{ route('rabs.create') }}?kegiatanID=" + kegiatanId + '" ' +
+                                  'data-title="Tambah RAB" data-toggle="tooltip" title="Tambah RAB baru untuk kegiatan ini">' +
+                                  '<i class="fas fa-plus"></i>' +
+                                  '</button> '+
+                                  '<button class="btn btn-info btn-square btn-sm load-modal" ' +
+                                  'data-url="' + "{{ route('kegiatans.show', ':id') }}".replace(':id', kegiatanId) + '" ' +
+                                  'data-title="Detail Kegiatan" data-toggle="tooltip" title="Lihat detail kegiatan">' +
                                   '<i class="fas fa-eye"></i>' +
                                   '</button> ' +
                                   '<button class="btn btn-warning btn-square btn-sm load-modal" ' +
-                                  'data-url="' + "{{ route('sub-kegiatans.edit', ':id') }}".replace(':id', item.id.replace('subkegiatan_', '')) + '" ' +
-                                  'data-title="Edit Sub Kegiatan">' +
+                                  'data-url="' + "{{ route('kegiatans.edit', ':id') }}".replace(':id', kegiatanId) + '" ' +
+                                  'data-title="Edit Kegiatan" data-toggle="tooltip" title="Edit kegiatan">' +
+                                  '<i class="fas fa-edit"></i>' +
+                                  '</button> ' +
+                                  '<button type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" ' +
+                                  'data-id="' + kegiatanId + '" data-toggle="tooltip" title="Hapus kegiatan">' +
+                                  '<i class="fas fa-trash"></i>' +
+                                  '</button>' +
+                                  '<span class="action-divider"></span>' +
+                                  '</div>';
+                    } else if (item.type === 'subkegiatan') {
+                        // Add view, edit, delete buttons for subkegiatan
+                        // Plus add new button for adding RAB to this subkegiatan
+                        var subKegiatanId = item.id.replace('subkegiatan_', '');
+                        actions = '<div class="action-btn-group">' +
+                                 '<button class="btn btn-success btn-square btn-sm load-modal" ' +
+                                  'data-url="' + "{{ route('rabs.create') }}?subKegiatanID=" + subKegiatanId + '" ' +
+                                  'data-title="Tambah RAB" data-toggle="tooltip" title="Tambah RAB baru untuk sub kegiatan ini">' +
+                                  '<i class="fas fa-plus"></i>' +
+                                  '</button> ' +
+                                  '<button class="btn btn-info btn-square btn-sm load-modal" ' +
+                                  'data-url="' + "{{ route('sub-kegiatans.show', ':id') }}".replace(':id', subKegiatanId) + '" ' +
+                                  'data-title="Detail Sub Kegiatan" data-toggle="tooltip" title="Lihat detail sub kegiatan">' +
+                                  '<i class="fas fa-eye"></i>' +
+                                  '</button> ' +
+                                  '<button class="btn btn-warning btn-square btn-sm load-modal" ' +
+                                  'data-url="' + "{{ route('sub-kegiatans.edit', ':id') }}".replace(':id', subKegiatanId) + '" ' +
+                                  'data-title="Edit Sub Kegiatan" data-toggle="tooltip" title="Edit sub kegiatan">' +
                                   '<i class="fas fa-edit"></i>' +
                                   '</button> ' +
                                   '<button type="button" class="btn btn-danger btn-square btn-sm delete-sub-kegiatan" ' +
-                                  'data-id="' + item.id.replace('subkegiatan_', '') + '">' +
+                                  'data-id="' + subKegiatanId + '" data-toggle="tooltip" title="Hapus sub kegiatan">' +
                                   '<i class="fas fa-trash"></i>' +
-                                  '</button>';
+                                  '</button>' +
+                                  '<span class="action-divider"></span>' +
+                                  '</div>';
                     } else if (item.type === 'rab') {
                         // Add view, edit, and delete buttons for RAB
                         var rabId = '';
@@ -1350,20 +1407,22 @@
                             rabId = item.id.replace('rab_', '');
                         }
                         
-                        actions = '<button class="btn btn-info btn-square btn-sm load-modal" ' +
+                        actions = '<div class="action-btn-group">' +
+                                  '<button class="btn btn-info btn-square btn-sm load-modal" ' +
                                   'data-url="' + "{{ route('rabs.show', ':id') }}".replace(':id', rabId) + '" ' +
-                                  'data-title="Detail RAB">' +
+                                  'data-title="Detail RAB" data-toggle="tooltip" title="Lihat detail RAB">' +
                                   '<i class="fas fa-eye"></i>' +
                                   '</button> ' +
                                   '<button class="btn btn-warning btn-square btn-sm load-modal" ' +
                                   'data-url="' + "{{ route('rabs.edit', ':id') }}".replace(':id', rabId) + '" ' +
-                                  'data-title="Edit RAB">' +
+                                  'data-title="Edit RAB" data-toggle="tooltip" title="Edit RAB">' +
                                   '<i class="fas fa-edit"></i>' +
                                   '</button> ' +
                                   '<button type="button" class="btn btn-danger btn-square btn-sm delete-rab" ' +
-                                  'data-id="' + rabId + '">' +
+                                  'data-id="' + rabId + '" data-toggle="tooltip" title="Hapus RAB">' +
                                   '<i class="fas fa-trash"></i>' +
-                                  '</button>';
+                                  '</button>' +
+                                  '</div>';
                     }
                     
                     row.append('<td class="text-center" style="white-space:nowrap;width:1px;">' + actions + '</td>');
@@ -1481,7 +1540,7 @@
         });
     }
 
-    
+
     function updateUrlParameter(key, value) {
         var url = new URL(window.location.href);
         
