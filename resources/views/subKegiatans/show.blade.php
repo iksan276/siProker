@@ -30,7 +30,7 @@
                         </tr>
                         <tr>
                             <th>Tanggal Dibuat</th>
-                            <td>{{ $subKegiatan->DCreated ? \Carbon\Carbon::parse($subKegiatan->DCreated)->format('d-m-Y H:i:s') : 'N/A' }}</td>
+                            <td>{{ $subKegiatan->DCreated ? \Carbon\Carbon::parse($subKegiatan->DCreated)->timezone('Asia/Jakarta')->format('d-m-Y H:i:s') : 'N/A' }}</td>
                         </tr>
                         <tr>
                             <th>Diubah Oleh</th>
@@ -38,7 +38,7 @@
                         </tr>
                         <tr>
                             <th>Tanggal Diubah</th>
-                            <td>{{ $subKegiatan->DEdited ? \Carbon\Carbon::parse($subKegiatan->DEdited)->format('d-m-Y H:i:s') : 'N/A' }}</td>
+                            <td>{{ $subKegiatan->DEdited ? \Carbon\Carbon::parse($subKegiatan->DEdited)->timezone('Asia/Jakarta')->format('d-m-Y H:i:s') : 'N/A' }}</td>
                         </tr>
                     </tbody>
                 </table>

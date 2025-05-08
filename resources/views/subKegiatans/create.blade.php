@@ -54,10 +54,14 @@
             $("#KegiatanID").prop('disabled', false);
         }
 
-        // Initialize date range picker
+        // Initialize date range picker with empty initial value
+        $('#daterange').attr('placeholder', 'DD/MM/YYYY - DD/MM/YYYY');
+        $('#daterange').val('');
+        
         $('#daterange').daterangepicker({
             opens: 'left',
             autoApply: true,
+            autoUpdateInput: false, // Prevent automatic update with current date
             locale: {
                 format: 'DD/MM/YYYY',
                 separator: ' - ',
@@ -71,10 +75,20 @@
                 monthNames: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
                 firstDay: 1
             }
-        }, function(start, end, label) {
-            // Set values to hidden fields when date range is selected
-            $('#JadwalMulai').val(start.format('YYYY-MM-DD'));
-            $('#JadwalSelesai').val(end.format('YYYY-MM-DD'));
+        });
+        
+        // Handle the apply event
+        $('#daterange').on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+            $('#JadwalMulai').val(picker.startDate.format('YYYY-MM-DD'));
+            $('#JadwalSelesai').val(picker.endDate.format('YYYY-MM-DD'));
+        });
+        
+        // Handle the cancel event
+        $('#daterange').on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
+            $('#JadwalMulai').val('');
+            $('#JadwalSelesai').val('');
         });
 
         // Set initial values if they exist
@@ -82,8 +96,12 @@
         var endDate = $('#JadwalSelesai').val();
         
         if (startDate && endDate) {
-            $('#daterange').data('daterangepicker').setStartDate(startDate);
-            $('#daterange').data('daterangepicker').setEndDate(endDate);
+            var start = moment(startDate);
+            var end = moment(endDate);
+            
+            $('#daterange').data('daterangepicker').setStartDate(start);
+            $('#daterange').data('daterangepicker').setEndDate(end);
+            $('#daterange').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
         }
 
         // Form validation before submit
@@ -105,3 +123,4 @@
         });
     });
 </script>
+

@@ -174,9 +174,13 @@ function addSubKegiatan() {
 
 // Add this function to initialize the date range picker
 function initDateRangePicker(index) {
+    $(`#date_range_${index}`).attr('placeholder', 'DD/MM/YYYY - DD/MM/YYYY');
+        $(`#date_range_${index}`).val('');
+        
     $(`#date_range_${index}`).daterangepicker({
         opens: 'left',
         autoApply: true,
+        autoUpdateInput: false,
         locale: {
             format: 'DD/MM/YYYY',
             separator: ' - ',
@@ -190,14 +194,24 @@ function initDateRangePicker(index) {
             monthNames: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
             firstDay: 1
         }
-    }, function(start, end, label) {
-        // When a date range is selected, update the hidden inputs
-        const subKegiatan = $(`#date_range_${index}`).closest('.sub-kegiatan-item');
-        subKegiatan.find('.date-start-hidden').val(start.format('YYYY-MM-DD'));
-        subKegiatan.find('.date-end-hidden').val(end.format('YYYY-MM-DD'));
+    });
+     // Handle the apply event
+     $(`#date_range_${index}`).on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+        const subKegiatan = $(this).closest('.sub-kegiatan-item');
+        subKegiatan.find('.date-start-hidden').val(picker.startDate.format('YYYY-MM-DD'));
+        subKegiatan.find('.date-end-hidden').val(picker.endDate.format('YYYY-MM-DD'));
         
         // Validate against main kegiatan dates
-        validateSubKegiatanDateRange(subKegiatan, start, end);
+        validateSubKegiatanDateRange(subKegiatan, picker.startDate, picker.endDate);
+    });
+    
+    // Handle the cancel event
+    $(`#date_range_${index}`).on('cancel.daterangepicker', function(ev, picker) {
+        $(this).val('');
+        const subKegiatan = $(this).closest('.sub-kegiatan-item');
+        subKegiatan.find('.date-start-hidden').val('');
+        subKegiatan.find('.date-end-hidden').val('');
     });
 }
 

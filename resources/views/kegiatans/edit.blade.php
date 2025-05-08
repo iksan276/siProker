@@ -342,11 +342,11 @@ $(document).ready(function() {
     function addSubKegiatan() {
         const index = new Date().getTime(); // Use timestamp as unique index
         const isAdmin = document.querySelector('body').dataset.isAdmin === 'true';
-    
+        const index1 = $('.sub-kegiatan-item').length;
         const html = `
             <div class="card mb-3 sub-kegiatan-item">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">Sub Kegiatan Baru</h6>
+                    <h6 class="mb-0">Sub Kegiatan #${index1 + 1}</h6>
                     <button type="button" class="btn btn-sm btn-danger remove-sub-kegiatan">
                         <i class="fas fa-times"></i>
                     </button>
