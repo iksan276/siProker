@@ -71,7 +71,6 @@ class SubKegiatanController extends Controller
             'Nama' => 'required|string',
             'JadwalMulai' => 'required|date',
             'JadwalSelesai' => 'required|date|after_or_equal:JadwalMulai',
-            'Status' => 'required|in:N,Y,T,R',
         ]);
 
         $subKegiatan = new SubKegiatan();
@@ -79,7 +78,7 @@ class SubKegiatanController extends Controller
         $subKegiatan->Nama = $request->Nama;
         $subKegiatan->JadwalMulai = $request->JadwalMulai;
         $subKegiatan->JadwalSelesai = $request->JadwalSelesai;
-        $subKegiatan->Status = $request->Status;
+        $subKegiatan->Status = isset($request->Status) ? $request->Status : 'N';
         $subKegiatan->DCreated = now();
         $subKegiatan->UCreated = Auth::id();
         $subKegiatan->save();
@@ -118,14 +117,13 @@ class SubKegiatanController extends Controller
             'Nama' => 'required|string',
             'JadwalMulai' => 'required|date',
             'JadwalSelesai' => 'required|date|after_or_equal:JadwalMulai',
-            'Status' => 'required|in:N,Y,T,R',
         ]);
 
         $subKegiatan->KegiatanID = $request->KegiatanID;
         $subKegiatan->Nama = $request->Nama;
         $subKegiatan->JadwalMulai = $request->JadwalMulai;
         $subKegiatan->JadwalSelesai = $request->JadwalSelesai;
-        $subKegiatan->Status = $request->Status;
+        $subKegiatan->Status = isset($request->Status) ? $request->Status : 'N';
         $subKegiatan->DEdited = now();
         $subKegiatan->UEdited = Auth::id();
         $subKegiatan->save();

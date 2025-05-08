@@ -96,7 +96,6 @@ class RABController extends Controller
             'Volume' => 'required|integer|min:1',
             'Satuan' => 'required|exists:satuans,SatuanID',
             'HargaSatuan' => 'required|integer|min:0',
-            'Status' => 'required|in:N,Y,T,R',
         ]);
     
         // Ensure at least one of KegiatanID or SubKegiatanID is provided
@@ -121,7 +120,7 @@ class RABController extends Controller
         $rab->Satuan = $request->Satuan;
         $rab->HargaSatuan = $request->HargaSatuan;
         $rab->Jumlah = $jumlah;
-        $rab->Status = $request->Status;
+        $rab->Status = isset($request->Status) ? $request->Status : 'N';
         $rab->DCreated = now();
         $rab->UCreated = Auth::id();
         $rab->save();
@@ -179,7 +178,6 @@ class RABController extends Controller
             'Volume' => 'required|integer|min:1',
             'Satuan' => 'required|exists:satuans,SatuanID',
             'HargaSatuan' => 'required|integer|min:0',
-            'Status' => 'required|in:N,Y,T,R',
         ]);
     
         // Ensure at least one of KegiatanID or SubKegiatanID is provided
@@ -203,7 +201,7 @@ class RABController extends Controller
         $rab->Satuan = $request->Satuan;
         $rab->HargaSatuan = $request->HargaSatuan;
         $rab->Jumlah = $jumlah;
-        $rab->Status = $request->Status;
+        $rab->Status = isset($request->Status) ? $request->Status : 'N';
         $rab->DEdited = now();
         $rab->UEdited = Auth::id();
         $rab->save();

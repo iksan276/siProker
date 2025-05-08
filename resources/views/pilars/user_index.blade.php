@@ -432,6 +432,122 @@ cancelButtonText: 'Batal'
                 }
             });
         });
+
+            // Handle delete sub-kegiatan button click
+            $(document).on('click', '.delete-sub-kegiatan', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var subKegiatanId = $(this).data('id');
+            var deleteUrl = "{{ route('sub-kegiatans.destroy', ':id') }}".replace(':id', subKegiatanId);
+            
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Menghapus data?',
+                text: "Kamu yakin menghapus baris ini?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Iya, yakin',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Perform AJAX delete
+                    $.ajax({
+                        url: deleteUrl,
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            _method: 'DELETE'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                // Show success message
+                                Swal.fire({
+                                    title: 'Terhapus!',
+                                    text: response.message || 'Item has been successfully deleted.',
+                                    icon: 'success',
+                                    confirmButtonColor: '#3085d6',
+                                    confirmButtonText: 'OK'
+                                });
+                                
+                                // Reload tree data
+                                loadTreeData();
+                            } else {
+                                // Show error message
+                                showAlert('danger', response.message || 'Failed to delete sub kegiatan');
+                            }
+                        },
+                        error: function(xhr) {
+                            // Handle error response
+                            var message = 'An error occurred';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            }
+                            showAlert('danger', message);
+                        }
+                    });
+                }
+            });
+        });
+        
+        // Handle delete RAB button click
+        $(document).on('click', '.delete-rab', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var rabId = $(this).data('id');
+            var deleteUrl = "{{ route('rabs.destroy', ':id') }}".replace(':id', rabId);
+            
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Menghapus data?',
+                text: "Kamu yakin menghapus baris ini?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Iya, yakin',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Perform AJAX delete
+                    $.ajax({
+                        url: deleteUrl,
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            _method: 'DELETE'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                // Show success message
+                                Swal.fire({
+                                    title: 'Terhapus!',
+                                    text: response.message || 'Item has been successfully deleted.',
+                                    icon: 'success',
+                                    confirmButtonColor: '#3085d6',
+                                    confirmButtonText: 'OK'
+                                });
+                                
+                                // Reload tree data
+                                loadTreeData();
+                            } else {
+                                // Show error message
+                                showAlert('danger', response.message || 'Failed to delete RAB');
+                            }
+                        },
+                        error: function(xhr) {
+                            // Handle error response
+                            var message = 'An error occurred';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            }
+                            showAlert('danger', message);
+                        }
+                    });
+                }
+            });
+        });
         
         // Handle tree node expansion/collapse
         $(document).on('click', '.node-expander', function(e) {
