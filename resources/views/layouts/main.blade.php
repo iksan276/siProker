@@ -441,7 +441,7 @@
     }
     </style>
 </head>
-<body id="page-top">
+<body id="page-top" data-is-admin="{{ auth()->user()->isAdmin() ? 'true' : 'false' }}">
     <!-- Page Transition Splash
     Page Transition Splashscreen -->
     <div id="page-transition-overlay">

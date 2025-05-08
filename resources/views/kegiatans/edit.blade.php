@@ -74,6 +74,7 @@
                             <input type="hidden" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][JadwalMulai]" class="date-start-hidden" value="{{ \Carbon\Carbon::parse($subKegiatan->JadwalMulai)->format('Y-m-d') }}">
                             <input type="hidden" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][JadwalSelesai]" class="date-end-hidden" value="{{ \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('Y-m-d') }}">
                         </div>
+                        @if(auth()->user()->isAdmin())
                         <div class="form-group">
                             <label>Status</label>
                             <select name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][Status]" class="form-control">
@@ -83,6 +84,7 @@
                                 <option value="R" {{ $subKegiatan->Status == 'R' ? 'selected' : '' }}>Revisi</option>
                             </select>
                         </div>
+                        @endif
                         
                         <div class="mt-3">
                             <h6>RAB Sub Kegiatan</h6>
@@ -135,6 +137,7 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            @if(auth()->user()->isAdmin())
                                             <div class="row mt-2">
                                                 <div class="col-md-12">
                                                     <div class="form-group mb-0">
@@ -148,6 +151,7 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            @endif
                                         </div>
                                     </div>
                                 @endforeach
@@ -217,6 +221,7 @@
                                 </div>
                             </div>
                         </div>
+                        @if(auth()->user()->isAdmin())
                         <div class="row mt-2">
                             <div class="col-md-12">
                                 <div class="form-group mb-0">
@@ -230,6 +235,7 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
                     </div>
                 </div>
             @endforeach
@@ -335,6 +341,8 @@ $(document).ready(function() {
     // Function to add a new sub kegiatan
     function addSubKegiatan() {
         const index = new Date().getTime(); // Use timestamp as unique index
+        const isAdmin = document.querySelector('body').dataset.isAdmin === 'true';
+    
         const html = `
             <div class="card mb-3 sub-kegiatan-item">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
@@ -354,6 +362,7 @@ $(document).ready(function() {
                         <input type="hidden" name="new_sub_kegiatans[${index}][JadwalMulai]" class="date-start-hidden">
                         <input type="hidden" name="new_sub_kegiatans[${index}][JadwalSelesai]" class="date-end-hidden">
                     </div>
+                     ${isAdmin ? `
                     <div class="form-group">
                         <label>Status</label>
                         <select name="new_sub_kegiatans[${index}][Status]" class="form-control">
@@ -363,6 +372,7 @@ $(document).ready(function() {
                             <option value="R">Revisi</option>
                         </select>
                     </div>
+                    ` : ''}
                     
                     <div class="mt-3">
                         <h6>RAB Sub Kegiatan</h6>
@@ -440,6 +450,7 @@ $(document).ready(function() {
     // Function to add a RAB for a new sub kegiatan
     function addRABForNewSubKegiatan(subKegiatanIndex) {
         const rabIndex = new Date().getTime(); // Use timestamp as unique index
+        const isAdmin = document.querySelector('body').dataset.isAdmin === 'true';
         const html = `
             <div class="card mb-2 rab-sub-item">
                 <div class="card-body py-2">
@@ -488,6 +499,7 @@ $(document).ready(function() {
                             </div>
                         </div>
                     </div>
+                     ${isAdmin ? `
                     <div class="row mt-2">
                         <div class="col-md-12">
                             <div class="form-group mb-0">
@@ -501,6 +513,7 @@ $(document).ready(function() {
                             </div>
                         </div>
                     </div>
+                    ` : ''}
                 </div>
             </div>
         `;
@@ -576,6 +589,7 @@ $(document).ready(function() {
     // Function to add a RAB for an existing sub kegiatan
     function addRABForExistingSubKegiatan(subKegiatanId) {
         const rabIndex = new Date().getTime(); // Use timestamp as unique index
+        const isAdmin = document.querySelector('body').dataset.isAdmin === 'true';
         const html = `
             <div class="card mb-2 rab-sub-item">
                 <div class="card-body py-2">
@@ -624,6 +638,7 @@ $(document).ready(function() {
                             </div>
                         </div>
                     </div>
+                     ${isAdmin ? `
                     <div class="row mt-2">
                         <div class="col-md-12">
                             <div class="form-group mb-0">
@@ -637,6 +652,7 @@ $(document).ready(function() {
                             </div>
                         </div>
                     </div>
+                    ` : ''}
                 </div>
             </div>
         `;
@@ -712,6 +728,7 @@ $(document).ready(function() {
     // Function to add a new RAB for the main kegiatan
     function addRAB() {
         const index = new Date().getTime(); // Use timestamp as unique index
+        const isAdmin = document.querySelector('body').dataset.isAdmin === 'true';
         const html = `
             <div class="card mb-3 rab-item">
                 <div class="card-body py-3">
@@ -760,6 +777,7 @@ $(document).ready(function() {
                             </div>
                         </div>
                     </div>
+                     ${isAdmin ? `
                     <div class="row mt-2">
                         <div class="col-md-12">
                             <div class="form-group mb-0">
@@ -773,6 +791,7 @@ $(document).ready(function() {
                             </div>
                         </div>
                     </div>
+                     ` : ''}
                 </div>
             </div>
         `;

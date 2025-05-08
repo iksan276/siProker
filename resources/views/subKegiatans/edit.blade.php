@@ -30,7 +30,7 @@
             </div>
         </div>
     </div>
-    
+    @if(auth()->user()->isAdmin())
     <div class="form-group">
         <label for="Status">Status <span class="text-danger">*</span></label>
         <select name="Status" id="Status" class="form-control" required>
@@ -40,6 +40,7 @@
             <option value="R" {{ $subKegiatan->Status == 'R' ? 'selected' : '' }}>Revisi</option>
         </select>
     </div>
+    @endif
     
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
