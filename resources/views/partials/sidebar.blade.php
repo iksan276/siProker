@@ -41,7 +41,7 @@
             <i class="fas fa-fw fa-folder"></i>
             <span>Master</span>
         </a>
-        <div id="collapseMaster" class="collapse" aria-labelledby="headingMaster" data-parent="#accordionSidebar">
+        <div id="collapseMaster" class="collapse" aria-labelledby="headingMaster" style="z-index: 2" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <a class="collapse-item {{ request()->is('users*') ? 'active' : '' }}" href="{{ route('users.index') }}">
                     <i class="fas fa-fw fa-users"></i> Users
@@ -78,7 +78,7 @@
             <i class="fas fa-fw fa-project-diagram"></i>
             <span>Master Proker</span>
         </a>
-        <div id="collapseProker" class="collapse" aria-labelledby="headingProker" data-parent="#accordionSidebar">
+        <div id="collapseProker" class="collapse" aria-labelledby="headingProker" style="z-index: 2" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <a class="collapse-item {{ request()->is('pilars*') ? 'active' : '' }}" href="{{ route('pilars.index') }}">
                     <i class="fas fa-fw fa-columns"></i> Pilar

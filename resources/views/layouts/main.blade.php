@@ -673,11 +673,13 @@
                 placeholderText = $(this).text();
             });
             
-            
             // Destroy if already initialized
             if ($(this).hasClass('select2-hidden-accessible')) {
                 $(this).select2('destroy');
             }
+            
+            // Store the element for later reference
+            var $select = $(this);
             
             // Initialize with basic settings and custom template
             $(this).select2({
@@ -686,18 +688,8 @@
                 allowClear: true,
                 templateSelection: function(data) {
                     if (data.id && data.id !== '') {
-                        // Extract label from placeholder text like "--pilih renstra--"
-                        var label = '';
-                        if (placeholderText) {
-                            // Remove dashes and trim
-                            var cleanText = placeholderText.replace(/--/g, '').trim();
-                            // Remove "pilih " if it exists (case insensitive)
-                            var labelText = cleanText.replace(/^pilih\s+/i, '').trim();
-                            // Use the result as label
-                            label = labelText;
-                        }
-                        
-                        return $('<span><span class="text-primary small">' + label + ':</span> <span class="font-weight-bold text-dark">' + data.text + '</span></span>');
+                        // Just return the data text - tooltip will be handled separately
+                        return $('<span style="color:#000000">' + data.text + '</span>');
                     }
                     return data.text;
                 }
@@ -711,22 +703,87 @@
                 'height': '34px',
                 'padding': '0.15rem 0.75rem',
                 'border': '1px solid #d1d3e2',
-                'border-radius': '0.35rem'
+                'border-radius': '0.35rem',
+                'position': 'relative'  // For absolute positioning of tooltip
             });
             
-            // Style the rendered text and center the placeholder
+            // Style the rendered text
             $container.find('.select2-selection__rendered').css({
                 'line-height': '1.5',
                 'padding-left': '0',
                 'padding-top': '0.15rem',
                 'padding-bottom': '0.15rem',
-                'color': '#6e707e',
+                'color': '#6e707e'
             });
             
             // Style the dropdown arrow
             $container.find('.select2-selection__arrow').css({
                 'height': '34px'
             });
+            
+            // Add CSS for the permanent tooltip
+            $('<style>')
+                .prop('type', 'text/css')
+                .html(`
+                    .select2-container {
+                        position: relative;
+                    }
+                    .permanent-tooltip {
+                        position: absolute;
+                        top: -8px;
+                        left: 8px;
+                        background-color: white;
+                        color: #4e73df;
+                        font-size: 0.7rem;
+                        padding: 0 5px;
+                        border-radius: 3px;
+                        z-index: 1;
+                        font-weight: normal;
+                        line-height: 1.2;
+                        pointer-events: none;
+                    }
+                    .select2-value {
+                        font-weight: bold;
+                        color: #5a5c69;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        display: inline-block;
+                        width: 100%;
+                    }
+                `)
+                .appendTo('head');
+            
+            // Function to update the tooltip
+            function updateTooltip() {
+                // Remove any existing tooltip
+                $container.find('.permanent-tooltip').remove();
+                
+                // Only add tooltip if a value is selected
+                if ($select.val() && $select.val() !== '') {
+                    // Extract label from placeholder text
+                    var label = '';
+                    if (placeholderText) {
+                        // Remove dashes and trim
+                        var cleanText = placeholderText.replace(/--/g, '').trim();
+                        // Remove "pilih " if it exists (case insensitive)
+                        var labelText = cleanText.replace(/^pilih\s+/i, '').trim();
+                        // Use the result as label
+                        label = labelText;
+                    }
+                    
+                    // Create and append the permanent tooltip
+                    if (label) {
+                        $('<div class="permanent-tooltip">' + label + '</div>').appendTo($container);
+                    }
+                }
+            }
+            
+            // Update tooltip on initialization
+            updateTooltip();
+            
+            // Update tooltip when selection changes
+            $select.on('change', updateTooltip);
             
             // Namespace the event handler to avoid affecting modals
             var selectId = $(this).attr('id') || 'select-' + Math.random().toString(36).substring(2, 15);
@@ -759,6 +816,11 @@
         }
     });
 }
+
+
+
+
+
 
     
     // Initialize Select2 for modal elements
