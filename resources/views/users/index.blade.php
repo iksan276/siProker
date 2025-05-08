@@ -10,20 +10,23 @@
 
 <!-- DataTales Card -->
 <div class="card shadow mb-4">
-    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-primary">Users List</h6>
-        <div>
-            <a href="{{ route('users.export.excel') }}" class="btn btn-success btn-sm">
+<div class="card-header py-3">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary mb-2 mb-md-0 w-100">Users List</h6>
+        <div class="d-flex flex-wrap w-100 w-md-auto justify-content-start justify-content-md-end">
+            <a href="{{ route('users.export.excel') }}" class="btn btn-success btn-sm mr-1 mb-1">
                 <i class="fas fa-file-excel fa-sm"></i> Export Excel
             </a>
-            <a href="{{ route('users.export.pdf') }}" class="btn btn-danger btn-sm">
+            <a href="{{ route('users.export.pdf') }}" class="btn btn-danger btn-sm mr-1 mb-1">
                 <i class="fas fa-file-pdf fa-sm"></i> Export PDF
             </a>
-            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('users.create') }}" data-title="Tambah User">
+            <button class="btn btn-primary btn-sm mb-1 load-modal" data-url="{{ route('users.create') }}" data-title="Tambah User">
                 <i class="fas fa-user-plus fa-sm"></i> Tambah User
             </button>
         </div>
     </div>
+</div>
+
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-bordered" id="userTable" width="100%" cellspacing="0">

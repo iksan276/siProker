@@ -69,8 +69,9 @@
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
         <h6 class="m-0 font-weight-bold text-primary">Struktur Pilar</h6>
-        <div class="d-flex align-items-center">
-            <div class="mr-2">
+    </div>
+    <div class="card-body">
+    <div class="form-group mb-5">
                 <select id="renstraFilter" class="form-control select2-filter">
                     <option value="">-- Pilih Renstra --</option>
                     @foreach($renstras as $renstra)
@@ -80,9 +81,6 @@
                     @endforeach
                 </select>
             </div>
-        </div>
-    </div>
-    <div class="card-body">
         <div id="tree-grid-container">
             <table id="tree-grid" class="table table-bordered">
                 <thead>

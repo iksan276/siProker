@@ -10,18 +10,20 @@
 
 <!-- DataTales Card -->
 <div class="card shadow mb-4">
-    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-primary">Program Rektor List</h6>
-        <div>
-        <a href="{{ route('program-rektors.export.excel', request()->query()) }}" class="btn btn-success btn-sm">
+  
+    <div class="card-header py-3">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary mb-2 mb-md-0 w-100">Program Rektor List</h6>
+        <div class="d-flex flex-wrap w-100 w-md-auto justify-content-start justify-content-md-end">
+        <a href="{{ route('program-rektors.export.excel', request()->query()) }}" class="btn btn-success btn-sm mr-1">
                 <i class="fas fa-file-excel fa-sm"></i> Export Excel
             </a>
             <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('program-rektors.create') }}" data-title="Tambah Program Rektor">
                 <i class="fas fa-plus fa-sm"></i> Tambah Program Rektor
             </button>
-          
         </div>
     </div>
+</div>
     <div class="card-body">
         <!-- Filters -->
         <div class="form-group">

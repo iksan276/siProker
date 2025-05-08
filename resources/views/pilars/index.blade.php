@@ -10,16 +10,20 @@
 
 <!-- DataTales Card -->
 <div class="card shadow mb-4">
-    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-primary">Pilar List</h6>
+    <div class="card-header py-3">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary mb-2 mb-md-0 w-100">Pilar List</h6>
+        <div class="d-flex flex-wrap w-100 w-md-auto justify-content-start justify-content-md-end">
         @if(auth()->user()->isAdmin())
-        <div>
+        
             <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('pilars.create') }}" data-title="Tambah Pilar">
                 <i class="fas fa-plus fa-sm"></i> Tambah Pilar
             </button>
-        </div>
+       
         @endif
+        </div>
     </div>
+</div>
     <div class="card-body">
         <!-- Move filter here and make it full width -->
         <div class="form-group mb-5">

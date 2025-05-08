@@ -10,14 +10,16 @@
 
 <!-- DataTales Card -->
 <div class="card shadow mb-4">
-    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-primary">Satuan List</h6>
-        <div>
-            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('satuans.create') }}" data-title="Tambah Satuan">
+    <div class="card-header py-3">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary mb-2 mb-md-0 w-100">Satuan List</h6>
+        <div class="d-flex flex-wrap w-100 w-md-auto justify-content-start justify-content-md-end">
+        <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('satuans.create') }}" data-title="Tambah Satuan">
                 <i class="fas fa-plus fa-sm"></i> Tambah Satuan
             </button>
         </div>
     </div>
+</div>
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-bordered" id="satuanTable" width="100%" cellspacing="0">
