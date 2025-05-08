@@ -154,6 +154,31 @@
                 </div>
             </div>
         </div>
+        <div class="card shadow mb-4">
+            <!-- Card Header - Dropdown -->
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Program Rektor per Jenis Kegiatan</h6>
+                <div class="dropdown no-arrow">
+                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                        aria-labelledby="dropdownMenuLink">
+                        <div class="dropdown-header">Program Pengembangan:</div>
+                        @foreach($programPengembangans->take(10) as $pp)
+                            <a class="dropdown-item" href="{{ route('dashboard', array_merge(request()->except('program_pengembangan_id'), ['program_pengembangan_id' => $pp->ProgramPengembanganID])) }}">{{ $pp->Nama }}</a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            <!-- Card Body -->
+            <div class="card-body">
+                <div class="chart-bar">
+                    <canvas id="jenisKegiatanBarChart"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Pie Chart -->
@@ -190,43 +215,6 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- Content Row -->
-<div class="row">
-    <!-- Bar Chart -->
-    <div class="col-xl-8 col-lg-7">
-        <div class="card shadow mb-4">
-            <!-- Card Header - Dropdown -->
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">Program Rektor per Jenis Kegiatan</h6>
-                <div class="dropdown no-arrow">
-                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                        aria-labelledby="dropdownMenuLink">
-                        <div class="dropdown-header">Program Pengembangan:</div>
-                        @foreach($programPengembangans->take(10) as $pp)
-                            <a class="dropdown-item" href="{{ route('dashboard', array_merge(request()->except('program_pengembangan_id'), ['program_pengembangan_id' => $pp->ProgramPengembanganID])) }}">{{ $pp->Nama }}</a>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-            <!-- Card Body -->
-            <div class="card-body">
-                <div class="chart-bar">
-                    <canvas id="jenisKegiatanBarChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Content Column -->
-    <div class="col-xl-4 col-lg-5">
-        <!-- Project Card Example -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Data Summary</h6>
@@ -266,6 +254,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- Filter Modal -->
 <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
