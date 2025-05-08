@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\QueryException;
 use App\Models\Kegiatan;
 use App\Models\ProgramRektor;
+use App\Models\SubKegiatan;
+use App\Models\RAB;
 
 class PilarController extends Controller
 {
@@ -209,8 +211,18 @@ class PilarController extends Controller
                                 'type' => 'kegiatan',
                                 'parent' => 'rektor_' . $rektor->ProgramRektorID,
                                 'level' => 4,
-                                'has_children' => false,
+                                'has_children' => $kegiatan->subKegiatans->count() > 0 || $kegiatan->rabs->whereNull('SubKegiatanID')->count() > 0,
                                 'actions' => '
+                                    <button class="btn btn-primary btn-square btn-sm load-modal" 
+                                        data-url="' . route('sub-kegiatans.create') . '?kegiatanID=' . $kegiatan->KegiatanID . '" 
+                                        data-title="Tambah Sub Kegiatan">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button class="btn btn-success btn-square btn-sm load-modal" 
+                                        data-url="' . route('rabs.create') . '?kegiatanID=' . $kegiatan->KegiatanID . '" 
+                                        data-title="Tambah RAB">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
                                     <button class="btn btn-info btn-square btn-sm load-modal" 
                                         data-url="' . route('kegiatans.show', $kegiatan->KegiatanID) . '" 
                                         data-title="Detail Kegiatan">
@@ -226,10 +238,158 @@ class PilarController extends Controller
                                         <i class="fas fa-trash"></i>
                                     </button>',
                                 'row_class' => '',
-                                'tooltip' => ''
+                                'tooltip' => 'Tanggal: ' . \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y') . ' s/d ' . 
+                                            \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y')
                             ];
                             
                             $treeData[] = $kegiatanNode;
+                            
+                            // Add Sub Kegiatans
+                            foreach ($kegiatan->subKegiatans as $subKegiatan) {
+                                $statusBadge = '';
+                                if ($subKegiatan->Status == 'N') {
+                                    $statusBadge = '<span class="badge badge-warning">Menunggu</span>';
+                                } elseif ($subKegiatan->Status == 'Y') {
+                                    $statusBadge = '<span class="badge badge-success">Disetujui</span>';
+                                } elseif ($subKegiatan->Status == 'T') {
+                                    $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
+                                } elseif ($subKegiatan->Status == 'R') {
+                                    $statusBadge = '<span class="badge badge-info">Revisi</span>';
+                                }
+                                
+                                $subKegiatanNode = [
+                                    'id' => 'subkegiatan_' . $subKegiatan->SubKegiatanID,
+                                    'no' => '',
+                                    'nama' => $subKegiatan->Nama . ' ' . $statusBadge,
+                                    'type' => 'subkegiatan',
+                                    'parent' => 'kegiatan_' . $kegiatan->KegiatanID,
+                                    'level' => 5,
+                                    'has_children' => $subKegiatan->rabs->count() > 0,
+                                    'actions' => '
+                                        <button class="btn btn-success btn-square btn-sm load-modal" 
+                                            data-url="' . route('rabs.create') . '?subKegiatanID=' . $subKegiatan->SubKegiatanID . '" 
+                                            data-title="Tambah RAB">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button class="btn btn-info btn-square btn-sm load-modal" 
+                                            data-url="' . route('sub-kegiatans.show', $subKegiatan->SubKegiatanID) . '" 
+                                            data-title="Detail Sub Kegiatan">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-warning btn-square btn-sm load-modal" 
+                                            data-url="' . route('sub-kegiatans.edit', $subKegiatan->SubKegiatanID) . '" 
+                                            data-title="Edit Sub Kegiatan">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-square btn-sm delete-sub-kegiatan" 
+                                            data-id="' . $subKegiatan->SubKegiatanID . '">
+                                            <i class="fas fa-trash"></i>
+                                        </button>',
+                                    'row_class' => '',
+                                    'tooltip' => 'Jadwal: ' . \Carbon\Carbon::parse($subKegiatan->JadwalMulai)->format('d-m-Y') . ' s/d ' . 
+                                                \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('d-m-Y')
+                                ];
+                                
+                                $treeData[] = $subKegiatanNode;
+                                
+                                // Add RABs for this Sub Kegiatan
+                                foreach ($subKegiatan->rabs as $rab) {
+                                    $statusBadge = '';
+                                    if ($rab->Status == 'N') {
+                                        $statusBadge = '<span class="badge badge-warning">Menunggu</span>';
+                                    } elseif ($rab->Status == 'Y') {
+                                        $statusBadge = '<span class="badge badge-success">Disetujui</span>';
+                                    } elseif ($rab->Status == 'T') {
+                                        $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
+                                    } elseif ($rab->Status == 'R') {
+                                        $statusBadge = '<span class="badge badge-info">Revisi</span>';
+                                    }
+                                    
+                                    $total = $rab->Volume * $rab->HargaSatuan;
+                                    
+                                    $rabNode = [
+                                        'id' => 'rab_sub_' . $rab->RABID,
+                                        'no' => '',
+                                        'nama' => $rab->Komponen . ' ' . $statusBadge,
+                                        'type' => 'rab',
+                                        'parent' => 'subkegiatan_' . $subKegiatan->SubKegiatanID,
+                                        'level' => 6,
+                                        'has_children' => false,
+                                        'actions' => '
+                                            <button class="btn btn-info btn-square btn-sm load-modal" 
+                                                data-url="' . route('rabs.show', $rab->RABID) . '" 
+                                                data-title="Detail RAB">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-warning btn-square btn-sm load-modal" 
+                                                data-url="' . route('rabs.edit', $rab->RABID) . '" 
+                                                data-title="Edit RAB">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-square btn-sm delete-rab" 
+                                                data-id="' . $rab->RABID . '">
+                                                <i class="fas fa-trash"></i>
+                                            </button>',
+                                        'row_class' => '',
+                                        'tooltip' => 'Volume: ' . number_format($rab->Volume, 0, ',', '.') . ' ' . 
+                                                    ($rab->satuan ? $rab->satuan->Nama : '-') . ' x Rp ' . 
+                                                    number_format($rab->HargaSatuan, 0, ',', '.') . ' = Rp ' . 
+                                                    number_format($total, 0, ',', '.')
+                                    ];
+                                    
+                                    $treeData[] = $rabNode;
+                                }
+                            }
+                            
+                            // Add direct RABs for this Kegiatan (if no sub kegiatans)
+                            $directRabs = $kegiatan->rabs()->whereNull('SubKegiatanID')->get();
+                            
+                            foreach ($directRabs as $rab) {
+                                $statusBadge = '';
+                                if ($rab->Status == 'N') {
+                                    $statusBadge = '<span class="badge badge-warning">Menunggu</span>';
+                                } elseif ($rab->Status == 'Y') {
+                                    $statusBadge = '<span class="badge badge-success">Disetujui</span>';
+                                } elseif ($rab->Status == 'T') {
+                                    $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
+                                } elseif ($rab->Status == 'R') {
+                                    $statusBadge = '<span class="badge badge-info">Revisi</span>';
+                                }
+                                
+                                $total = $rab->Volume * $rab->HargaSatuan;
+                                
+                                $rabNode = [
+                                    'id' => 'rab_' . $rab->RABID,
+                                    'no' => '',
+                                    'nama' => $rab->Komponen . ' ' . $statusBadge,
+                                    'type' => 'rab',
+                                    'parent' => 'kegiatan_' . $kegiatan->KegiatanID,
+                                    'level' => 5,
+                                    'has_children' => false,
+                                    'actions' => '
+                                        <button class="btn btn-info btn-square btn-sm load-modal" 
+                                            data-url="' . route('rabs.show', $rab->RABID) . '" 
+                                            data-title="Detail RAB">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-warning btn-square btn-sm load-modal" 
+                                            data-url="' . route('rabs.edit', $rab->RABID) . '" 
+                                            data-title="Edit RAB">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-square btn-sm delete-rab" 
+                                            data-id="' . $rab->RABID . '">
+                                            <i class="fas fa-trash"></i>
+                                        </button>',
+                                    'row_class' => '',
+                                    'tooltip' => 'Volume: ' . number_format($rab->Volume, 0, ',', '.') . ' ' . 
+                                                ($rab->satuan ? $rab->satuan->Nama : '-') . ' x Rp ' . 
+                                                number_format($rab->HargaSatuan, 0, ',', '.') . ' = Rp ' . 
+                                                number_format($total, 0, ',', '.')
+                                ];
+                                
+                                $treeData[] = $rabNode;
+                            }
                         }
                     }
                 }
@@ -353,7 +513,4 @@ class PilarController extends Controller
                 ->with('error', 'Database error occurred: ' . $e->getMessage());
         }
     }
-
- 
-    
 }

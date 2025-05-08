@@ -17,19 +17,19 @@
         <div class="d-flex flex-wrap justify-content-between">
             <div class="mb-2">
                 <div class="d-flex align-items-center">
-                    <div class="tree-legend-line" style="background-color: rgba(78, 115, 223, 0.1); height: 5px; width: 30px;"></div>
+                    <div class="tree-legend-line" style="background-color: rgba(156, 39, 176, 0.1); height: 5px; width: 30px;"></div>
                     <span class="ml-2">Kegiatan</span>
                 </div>
             </div>
             <div class="mb-2">
                 <div class="d-flex align-items-center">
-                    <div class="tree-legend-line" style="background-color: rgba(54, 185, 204, 0.1); height: 5px; width: 30px;"></div>
+                    <div class="tree-legend-line" style="background-color: rgba(255, 140, 0, 0.1); height: 5px; width: 30px;"></div>
                     <span class="ml-2">Sub Kegiatan</span>
                 </div>
             </div>
             <div class="mb-2">
                 <div class="d-flex align-items-center">
-                    <div class="tree-legend-line" style="background-color: rgba(28, 200, 138, 0.1); height: 5px; width: 30px;"></div>
+                    <div class="tree-legend-line" style="background-color: rgba(0, 0, 0, 0.1); height: 5px; width: 30px;"></div>
                     <span class="ml-2">RAB</span>
                 </div>
             </div>
@@ -160,20 +160,20 @@
     
     /* Hover effect */
     #tree-grid tbody tr:hover {
-        background-color: rgba(78, 115, 223, 0.1); /* light-primary color */
+        background-color: rgba(156, 39, 176, 0.1); /* light-primary color */
     }
     
     /* Different background colors for different node types */
     tr.node-kegiatan {
-        background-color: rgba(78, 115, 223, 0.1); /* Light blue for Kegiatan */
+        background-color: rgba(156, 39, 176, 0.1); /* Light blue for Kegiatan */
     }
     
     tr.node-subkegiatan {
-        background-color: rgba(54, 185, 204, 0.1); /* Light info color for Sub Kegiatan */
+        background-color: rgba(255, 140, 0, 0.1); /* Light info color for Sub Kegiatan */
     }
     
     tr.node-rab {
-        background-color: rgba(28, 200, 138, 0.1); /* Light green for RAB */
+        background-color: rgba(0, 0, 0, 0.1); /* Light green for RAB */
     }
     
     /* Custom expand/collapse icons */
@@ -1280,11 +1280,11 @@
                     
                     // Apply background color directly based on node type
                     if (item.type === 'kegiatan') {
-                        row.css('background-color', 'rgba(78, 115, 223, 0.1)'); // Light blue
+                        row.css('background-color', 'rgba(156, 39, 176, 0.1)'); // Light blue
                     } else if (item.type === 'subkegiatan') {
-                        row.css('background-color', 'rgba(54, 185, 204, 0.1)'); // Light info
+                        row.css('background-color', 'rgba(255, 140, 0, 0.1)'); // Light info
                     } else if (item.type === 'rab') {
-                        row.css('background-color', 'rgba(28, 200, 138, 0.1)'); // Light green
+                        row.css('background-color', 'rgba(0, 0, 0, 0.1)'); // Light green
                     }
                     
                     // Add level class for styling

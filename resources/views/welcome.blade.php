@@ -1454,9 +1454,16 @@
             <div class="navbar-cta">
                 @if (Route::has('login'))
                     @auth
+                    @if(auth()->user()->isAdmin())
                         <a href="{{ url('/dashboard') }}" class="btn btn-primary">
                             <i class="fas fa-tachometer-alt"></i> Dashboard
                         </a>
+                    @else
+                    <a href="{{ url('/pilars') }}" class="btn btn-primary">
+                            <i class="fas fa-tachometer-alt"></i> Pilar
+                        </a>
+                    @endif
+
                     @else
                         <a href="{{ route('login') }}" class="btn btn-primary">
                             <i class="fas fa-sign-in-alt"></i> Masuk

@@ -15,6 +15,7 @@
     </div>
     <div class="card-body">
         <div class="d-flex flex-wrap justify-content-between">
+            <!-- Warna yang sudah ada -->
             <div class="mb-2">
                 <div class="d-flex align-items-center">
                     <div class="tree-legend-line" style="background-color: rgba(231, 74, 59, 0.1); height: 5px; width: 30px;"></div>
@@ -45,9 +46,23 @@
                     <span class="ml-2">Kegiatan</span>
                 </div>
             </div>
+            <!-- Tambahan Warna Baru -->
+            <div class="mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(255, 140, 0, 0.1); height: 5px; width: 30px;"></div>
+                    <span class="ml-2">Sub Kegiatan</span>
+                </div>
+            </div>
+            <div class="mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(0, 0, 0, 0.1); height: 5px; width: 30px;"></div>
+                    <span class="ml-2">RAB</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
 
 
 <!-- DataTales Card -->
@@ -687,6 +702,7 @@ function getCollapseTooltip(nodeType) {
                 
                 // Process tree data to update tooltips based on node type
                 treeData.forEach(function(item) {
+                    console.log(item.type)
                     // Update tooltip based on node type
                     if (item.type === 'pilar') {
                         item.tooltip = 'Ini adalah Pilar';
@@ -700,6 +716,10 @@ function getCollapseTooltip(nodeType) {
                         item.tooltip = 'Ini adalah Indikator Kinerja';
                     } else if (item.type === 'kegiatan') {
                         item.tooltip = 'Ini adalah Kegiatan';
+                    }else if (item.type === 'subkegiatan') {
+                        item.tooltip = 'Ini adalah Sub Kegiatan';
+                    }else if (item.type === 'rab') {
+                        item.tooltip = 'Ini adalah RAB';
                     }
                 });
                 
@@ -729,6 +749,10 @@ function getCollapseTooltip(nodeType) {
                         row.css('background-color', 'rgba(2, 255, 251, 0.1)'); // Light info
                     } else if (item.type === 'kegiatan') {
                         row.css('background-color', 'rgba(156, 39, 176, 0.1)'); // Light purple
+                    }else if (item.type === 'subkegiatan') {
+                        row.css('background-color', 'rgba(255, 140, 0, 0.1)'); // Light purple
+                    }else if (item.type === 'rab') {
+                        row.css('background-color', 'rgba(0, 0, 0, 0.1)'); // Light purple
                     }
                     
                     // Add level class for styling
@@ -894,14 +918,6 @@ function getCollapseTooltip(nodeType) {
         });
     }
     
-    // Initialize Select2 in modals
-    function initModalSelect2() {
-        if ($.fn.select2) {
-            $('.modal .select2').select2({
-                dropdownParent: $('#mainModal')
-            });
-        }
-    }
     
     function updateUrlParameter(key, value) {
         var url = new URL(window.location.href);
