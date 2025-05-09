@@ -46,6 +46,7 @@
                         <th style="white-space:nowrap" id="tahun2Header">{{ $yearLabels[1] ?? '2026' }}</th>
                         <th style="white-space:nowrap" id="tahun3Header">{{ $yearLabels[2] ?? '2027' }}</th>
                         <th style="white-space:nowrap" id="tahun4Header">{{ $yearLabels[3] ?? '2028' }}</th>
+                        <th style="white-space:nowrap" id="tahun5Header">{{ $yearLabels[4] ?? '2029' }}</th>
                         <th style="white-space:nowrap">Mendukung IKU</th>
                         <th style="white-space:nowrap">NA</th>
                         <th style="white-space:nowrap">Actions</th>
@@ -70,7 +71,7 @@
 <script>
     var indikatorKinerjaTable;
     var isFiltering = false;
-    var defaultYearLabels = ['2025', '2026', '2027', '2028'];
+    var defaultYearLabels = ['2025', '2026', '2027', '2028', '2029'];
     // Then in the view:
     var yearLabels = @json($yearLabels ?? $defaultYearLabels);
     // Add this line to get the selected Renstra from cookie
@@ -128,7 +129,7 @@
                 });
             } else {
                 // Reset to default year labels (2025-2028)
-                yearLabels = ['2025', '2026', '2027', '2028'];
+                yearLabels = ['2025', '2026', '2027', '2028', '2029'];
                 updateYearHeaders();
                 
                 // Reload DataTable with default year labels
@@ -270,6 +271,9 @@ cancelButtonText: 'Batal'
         if (yearLabels.length >= 4) {
             $('#tahun4Header').text(yearLabels[3]);
         }
+        if (yearLabels.length >= 5) {
+            $('#tahun5Header').text(yearLabels[4]);
+        }
     }
     
     function initDataTable() {
@@ -320,6 +324,7 @@ cancelButtonText: 'Batal'
                 { data: 'tahun2', className: 'text-center' },
                 { data: 'tahun3', className: 'text-center' },
                 { data: 'tahun4', className: 'text-center' },
+                { data: 'tahun5', className: 'text-center' },
                 { 
                     data: 'mendukung_iku', 
                     className: 'text-center',

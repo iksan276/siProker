@@ -9,6 +9,9 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
@@ -18,7 +21,7 @@ class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMappi
     public function __construct($indikatorKinerjas = null, $yearLabels = null)
     {
         $this->indikatorKinerjas = $indikatorKinerjas;
-        $this->yearLabels = $yearLabels ?? [2025, 2026, 2027, 2028];
+        $this->yearLabels = $yearLabels ?? [2025, 2026, 2027, 2028, 2029];
     }
 
     /**
@@ -48,6 +51,7 @@ class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMappi
             $this->yearLabels[1] ?? 'Tahun 2',
             $this->yearLabels[2] ?? 'Tahun 3',
             $this->yearLabels[3] ?? 'Tahun 4',
+            $this->yearLabels[4] ?? 'Tahun 5',
             'Mendukung IKU PT / Kriteria Akreditasi',
             'Status'
         ];
@@ -77,6 +81,7 @@ class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMappi
             $indikatorKinerja->Tahun2,
             $indikatorKinerja->Tahun3,
             $indikatorKinerja->Tahun4,
+            $indikatorKinerja->Tahun5,
             $mendukungIKUStatus,
             $naStatus
         ];
@@ -100,11 +105,11 @@ class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMappi
                 'bold' => true,
             ],
             'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
             ],
             'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'fillType' => Fill::FILL_SOLID,
                 'startColor' => [
                     'rgb' => 'E2EFDA',
                 ],
@@ -112,16 +117,16 @@ class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMappi
         ]);
         
         // Center specific columns
-        $sheet->getStyle('A2:A' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // No
-        $sheet->getStyle('C2:C' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // Satuan
-        $sheet->getStyle('E2:H' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // Tahun 1-4
-        $sheet->getStyle('I2:J' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // Mendukung IKU & NA
+        $sheet->getStyle('A2:A' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // No
+        $sheet->getStyle('C2:C' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Satuan
+        $sheet->getStyle('D2:I' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Baseline and Tahun 1-5
+        $sheet->getStyle('J2:K' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Mendukung IKU & Status
         
         // Add borders to all cells
         $sheet->getStyle('A1:' . $highestColumn . $highestRow)->applyFromArray([
             'borders' => [
                 'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'borderStyle' => Border::BORDER_THIN,
                     'color' => ['rgb' => '000000'],
                 ],
             ],

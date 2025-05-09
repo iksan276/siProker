@@ -10,7 +10,7 @@
                         </tr>
                         <tr>
                             <th>Nama Sub Kegiatan</th>
-                            <td>{{ $subKegiatan->Nama }}</td>
+                            <td>{!! nl2br($subKegiatan->Nama) !!}</td>
                         </tr>
                         <tr>
                             <th>Jadwal Mulai</th>
@@ -19,6 +19,10 @@
                         <tr>
                             <th>Jadwal Selesai</th>
                             <td>{{ \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('d-m-Y') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Catatan</th>
+                            <td>{!! nl2br($subKegiatan->Catatan) !!}</td>
                         </tr>
                         <tr>
                             <th>Status</th>

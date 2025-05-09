@@ -146,6 +146,14 @@ class KegiatansExport implements FromArray, WithHeadings, WithStyles, ShouldAuto
                         $statusSubKegiatan,
                         '', '', '', '', '', '', ''
                     ];
+                    
+                    // Add Catatan for Sub Kegiatan
+                    $this->data[] = [
+                        '',
+                        'Catatan',
+                        $subKegiatan->Catatan ?? '-',
+                        '', '', '', '', '', '', ''
+                    ];
 
                     // Process RABs for this Sub Kegiatan
                     if ($subKegiatan->rabs->count() > 0) {
@@ -446,5 +454,23 @@ class KegiatansExport implements FromArray, WithHeadings, WithStyles, ShouldAuto
                 ]);
             }
         }
+        
+        // Special styling for Catatan rows
+        for ($row = 2; $row <= $highestRow; $row++) {
+            if ($sheet->getCell('B' . $row)->getValue() === 'Catatan') {
+                $sheet->getStyle('C' . $row)->applyFromArray([
+                    'font' => [
+                        'italic' => true,
+                    ],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => [
+                            'rgb' => 'FFF2CC',
+                        ],
+                    ],
+                ]);
+            }
+        }
     }
 }
+

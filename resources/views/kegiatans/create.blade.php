@@ -149,6 +149,10 @@ function addSubKegiatan() {
                     <input type="hidden" name="sub_kegiatans[${index}][JadwalMulai]" class="date-start-hidden">
                     <input type="hidden" name="sub_kegiatans[${index}][JadwalSelesai]" class="date-end-hidden">
                 </div>
+                 <div class="form-group">
+                    <label>Catatan</label>
+                    <textarea name="sub_kegiatans[${index}][Catatan]" class="form-control" rows="2" ></textarea>
+                </div>
                 
                 <div class="mt-3">
                     <h6>RAB Sub Kegiatan</h6>

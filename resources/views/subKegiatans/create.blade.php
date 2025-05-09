@@ -15,7 +15,7 @@
     
     <div class="form-group">
         <label for="Nama">Nama Sub Kegiatan <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="Nama" name="Nama" required>
+        <textarea class="form-control" id="Nama" name="Nama" rows="3" required></textarea>
     </div>
     
     <div class="form-group">
@@ -29,6 +29,12 @@
             </div>
         </div>
     </div>
+
+    <div class="form-group">
+        <label for="Catatan">Catatan </label>
+        <textarea class="form-control" id="Catatan" name="Catatan" rows="3" required></textarea>
+    </div>
+
     @if(auth()->user()->isAdmin())
     <div class="form-group">
         <label for="Status">Status <span class="text-danger">*</span></label>

@@ -47,7 +47,7 @@ class IndikatorKinerjaController extends Controller
             }
         } else {
             // Default year labels if no renstra is selected (2025-2028)
-            $yearLabels = [2025, 2026, 2027, 2028];
+            $yearLabels = [2025, 2026, 2027, 2028, 2029];
         }
         
         // Store year labels in session for use in other views and exports
@@ -98,6 +98,7 @@ class IndikatorKinerjaController extends Controller
                     'tahun2' => nl2br($indikatorKinerja->Tahun2),
                     'tahun3' => nl2br($indikatorKinerja->Tahun3),
                     'tahun4' => nl2br($indikatorKinerja->Tahun4),
+                    'tahun5' => nl2br($indikatorKinerja->Tahun5),
                     'mendukung_iku' => $mendukungIKUBadge,
                     'na' => $naBadge,
                     'actions' => $actions
@@ -119,7 +120,7 @@ class IndikatorKinerjaController extends Controller
         $selectedRenstraID = $request->renstraID ?? session('selectedRenstraID');
         
         // Get the year labels from session
-        $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028]);
+        $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028, 2029]);
         
         // If renstra ID is provided but not in session, fetch the year labels
         if ($selectedRenstraID && !session('yearLabels')) {
@@ -149,7 +150,7 @@ class IndikatorKinerjaController extends Controller
         $users = User::all();
         
         // Get the year labels from the session or use default
-        $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028]);
+        $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028, 2029]);
         
         if (request()->ajax()) {
             return view('indikatorKinerjas.create', compact('satuans', 'users', 'yearLabels'))->render();
@@ -167,6 +168,7 @@ class IndikatorKinerjaController extends Controller
             'Tahun2' => 'nullable|string',
             'Tahun3' => 'nullable|string',
             'Tahun4' => 'nullable|string',
+            'Tahun5' => 'nullable|string',
             'MendukungIKU' => 'required|in:Y,N',
             'NA' => 'required|in:Y,N',
         ]);
@@ -179,6 +181,7 @@ class IndikatorKinerjaController extends Controller
         $indikatorKinerja->Tahun2 = $request->Tahun2;
         $indikatorKinerja->Tahun3 = $request->Tahun3;
         $indikatorKinerja->Tahun4 = $request->Tahun4;
+        $indikatorKinerja->Tahun5 = $request->Tahun5;
         $indikatorKinerja->MendukungIKU = $request->MendukungIKU;
         $indikatorKinerja->NA = $request->NA;
         $indikatorKinerja->DCreated = now();
@@ -196,7 +199,7 @@ class IndikatorKinerjaController extends Controller
         $indikatorKinerja = IndikatorKinerja::findOrFail($id);
         
         // Get the year labels from the session or use default
-        $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028]);
+        $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028, 2029]);
         
         if (request()->ajax()) {
             return view('indikatorKinerjas.show', compact('indikatorKinerja', 'yearLabels'))->render();
@@ -211,7 +214,7 @@ class IndikatorKinerjaController extends Controller
         $users = User::all();
         
         // Get the year labels from the session or use default
-        $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028]);
+        $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028, 2029]);
         
         if (request()->ajax()) {
             return view('indikatorKinerjas.edit', compact('indikatorKinerja', 'satuans', 'users', 'yearLabels'))->render();
@@ -231,6 +234,7 @@ class IndikatorKinerjaController extends Controller
             'Tahun2' => 'nullable|string',
             'Tahun3' => 'nullable|string',
             'Tahun4' => 'nullable|string',
+            'Tahun5' => 'nullable|string',
             'MendukungIKU' => 'required|in:Y,N',
             'NA' => 'required|in:Y,N',
         ]);
@@ -242,6 +246,7 @@ class IndikatorKinerjaController extends Controller
         $indikatorKinerja->Tahun2 = $request->Tahun2;
         $indikatorKinerja->Tahun3 = $request->Tahun3;
         $indikatorKinerja->Tahun4 = $request->Tahun4;
+        $indikatorKinerja->Tahun5 = $request->Tahun5;
         $indikatorKinerja->MendukungIKU = $request->MendukungIKU;
         $indikatorKinerja->NA = $request->NA;
         $indikatorKinerja->DEdited = now();

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->text('Tahun2')->nullable();
             $table->text('Tahun3')->nullable();
             $table->text('Tahun4')->nullable();
+            $table->text('Tahun5')->nullable();
             $table->enum('MendukungIKU', ['Y', 'N'])->default('Y');
             $table->enum('NA', ['Y', 'N'])->default('N');
             $table->dateTime('DCreated')->nullable();

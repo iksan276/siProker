@@ -18,6 +18,7 @@ class IndikatorKinerja extends Model
         'Tahun2',
         'Tahun3',
         'Tahun4',
+        'Tahun5',
         'MendukungIKU',
         'NA',
         'DCreated',

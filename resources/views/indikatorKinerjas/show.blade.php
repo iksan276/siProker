@@ -33,6 +33,10 @@
             <td>{!! nl2br($indikatorKinerja->Tahun4) !!}</td>
         </tr>
         <tr>
+            <th>{{ $yearLabels[4] ?? '2029' }}</th>
+            <td>{!! nl2br($indikatorKinerja->Tahun5) !!}</td>
+        </tr>
+        <tr>
             <th>Mendukung IKU PT / Kriteria Akreditasi</th>
             <td>
                 @if($indikatorKinerja->MendukungIKU == 'Y')

@@ -692,6 +692,7 @@ class KegiatanController extends Controller
                             $subKegiatan->Nama = $subKegiatanData['Nama'];
                             $subKegiatan->JadwalMulai = $subKegiatanData['JadwalMulai'];
                             $subKegiatan->JadwalSelesai = $subKegiatanData['JadwalSelesai'];
+                            $subKegiatan->Catatan = $subKegiatanData['Catatan'];
                             $subKegiatan->Status = 'N'; // Default status is Menunggu
                             $subKegiatan->DCreated = now();
                             $subKegiatan->UCreated = Auth::id();
@@ -905,6 +906,7 @@ class KegiatanController extends Controller
                                     $subKegiatan->Nama = $subKegiatanData['Nama'];
                                     $subKegiatan->JadwalMulai = $subKegiatanData['JadwalMulai'];
                                     $subKegiatan->JadwalSelesai = $subKegiatanData['JadwalSelesai'];
+                                    $subKegiatan->Catatan = $subKegiatanData['Catatan'];
                                     $subKegiatan->Status = $subKegiatanData['Status'] ?? 'N';
                                     $subKegiatan->DEdited = now();
                                     $subKegiatan->UEdited = Auth::id();
@@ -963,6 +965,7 @@ class KegiatanController extends Controller
                                 $subKegiatan->Nama = $subKegiatanData['Nama'];
                                 $subKegiatan->JadwalMulai = $subKegiatanData['JadwalMulai'];
                                 $subKegiatan->JadwalSelesai = $subKegiatanData['JadwalSelesai'];
+                                $subKegiatan->Catatan = $subKegiatanData['Catatan'];
                                 $subKegiatan->Status = $subKegiatanData['Status'] ?? 'N';
                                 $subKegiatan->DCreated = now();
                                 $subKegiatan->UCreated = Auth::id();

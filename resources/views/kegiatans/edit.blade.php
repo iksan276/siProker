@@ -74,6 +74,10 @@
                             <input type="hidden" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][JadwalMulai]" class="date-start-hidden" value="{{ \Carbon\Carbon::parse($subKegiatan->JadwalMulai)->format('Y-m-d') }}">
                             <input type="hidden" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][JadwalSelesai]" class="date-end-hidden" value="{{ \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('Y-m-d') }}">
                         </div>
+                        <div class="form-group">
+                            <label>Catatan</label>
+                            <textarea name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][Catatan]" class="form-control" rows="2">{{ $subKegiatan->Catatan }}</textarea>
+                        </div>
                         @if(auth()->user()->isAdmin())
                         <div class="form-group">
                             <label>Status</label>
@@ -362,6 +366,10 @@ $(document).ready(function() {
                         <input type="hidden" name="new_sub_kegiatans[${index}][JadwalMulai]" class="date-start-hidden">
                         <input type="hidden" name="new_sub_kegiatans[${index}][JadwalSelesai]" class="date-end-hidden">
                     </div>
+                     <div class="form-group">
+                            <label>Catatan</label>
+                            <textarea name="new_sub_kegiatans[${index}][Catatan]" class="form-control" rows="2"></textarea>
+                        </div>
                      ${isAdmin ? `
                     <div class="form-group">
                         <label>Status</label>

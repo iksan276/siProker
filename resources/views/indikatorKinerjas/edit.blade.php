@@ -18,37 +18,42 @@
             </div>
         </div>
     </div>
+
     <div class="row">
-        <div class="col-sm-12">
+    <div class="col-sm-2">
             <div class="form-group">
                 <label for="Baseline">Baseline</label>
-                <textarea name="Baseline" id="Baseline" class="form-control" rows="3">{{ $indikatorKinerja->Baseline }}</textarea>
+                <textarea name="Baseline" id="Baseline" class="form-control" rows="1">{{ $indikatorKinerja->Baseline }}</textarea>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-3">
+        <div class="col-sm-2">
             <div class="form-group">
                 <label for="Tahun1" id="tahun1Label">{{ $yearLabels[0] ?? '2025' }}</label>
                 <input type="text" name="Tahun1" id="Tahun1" class="form-control"  value="{{ $indikatorKinerja->Tahun1 }}">
             </div>
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
             <div class="form-group">
                 <label for="Tahun2" id="tahun2Label">{{ $yearLabels[1] ?? '2026' }}</label>
                 <input type="text" name="Tahun2" id="Tahun2" class="form-control"  value="{{ $indikatorKinerja->Tahun2 }}">
             </div>
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
             <div class="form-group">
             <label for="Tahun3" id="tahun3Label">{{ $yearLabels[2] ?? '2027' }}</label>
                 <input type="text" name="Tahun3" id="Tahun3" class="form-control"  value="{{ $indikatorKinerja->Tahun3 }}">
             </div>
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
             <div class="form-group">
                 <label for="Tahun4" id="tahun4Label">{{ $yearLabels[3] ?? '2028' }}</label>
                 <input type="text" name="Tahun4" id="Tahun4" class="form-control"  value="{{ $indikatorKinerja->Tahun4 }}">
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="form-group">
+                <label for="Tahun5" id="tahun5Label">{{ $yearLabels[4] ?? '2029' }}</label>
+                <input type="text" name="Tahun5" id="Tahun5" class="form-control"  value="{{ $indikatorKinerja->Tahun5 }}">
             </div>
         </div>
     </div>
