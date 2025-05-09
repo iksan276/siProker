@@ -77,7 +77,7 @@
                 </tr>
                 @if($subKegiatan->rabs->count() > 0)
                 <tr>
-                    <td colspan="5" class="bg-light">
+                    <td colspan="7" class="bg-light">
                         <strong>RAB untuk Sub Kegiatan: {{ $subKegiatan->Nama }}</strong>
                         <div class="table-responsive mt-2">
                             <table class="table table-sm table-bordered">
@@ -109,6 +109,7 @@
                                     <tr class="font-weight-bold">
                                         <td colspan="5" class="text-right">Total</td>
                                         <td class="text-right">Rp {{ number_format($subKegiatan->rabs->sum('Jumlah'), 0, ',', '.') }}</td>
+                                        <td></td>
                                         <td></td>
                                     </tr>
                                 </tbody>
@@ -157,6 +158,7 @@
                 <tr class="font-weight-bold">
                     <td colspan="5" class="text-right">Total</td>
                     <td class="text-right">Rp {{ number_format($kegiatan->rabs->whereNull('SubKegiatanID')->sum('Jumlah'), 0, ',', '.') }}</td>
+                    <td></td>
                     <td></td>
                 </tr>
             </tbody>

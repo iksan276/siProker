@@ -679,7 +679,7 @@ class KegiatanController extends Controller
                     $kegiatan->TanggalMulai = $request->TanggalMulai;
                     $kegiatan->TanggalSelesai = $request->TanggalSelesai;
                     $kegiatan->RincianKegiatan = $request->RincianKegiatan;
-                    $kegiatan->Feedback = $request->Feedback;
+                    $kegiatan->Feedback = $request->Feedback  ?? null;
                     $kegiatan->DCreated = now();
                     $kegiatan->UCreated = Auth::id();
                     $kegiatan->save();
@@ -695,7 +695,7 @@ class KegiatanController extends Controller
                             $subKegiatan->JadwalMulai = $subKegiatanData['JadwalMulai'];
                             $subKegiatan->JadwalSelesai = $subKegiatanData['JadwalSelesai'];
                             $subKegiatan->Catatan = $subKegiatanData['Catatan'];
-                            $subKegiatan->Feedback = $subKegiatanData['Feedback'];
+                            $subKegiatan->Feedback = $subKegiatanData['Feedback']  ?? null;
                             $subKegiatan->Status = 'N'; // Default status is Menunggu
                             $subKegiatan->DCreated = now();
                             $subKegiatan->UCreated = Auth::id();
@@ -714,7 +714,7 @@ class KegiatanController extends Controller
                                     $rab->Satuan = $rabData['Satuan'];
                                     $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
                                     $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
-                                    $rab->Feedback = $rabData['Feedback'];
+                                    $rab->Feedback = $rabData['Feedback']  ?? null;
                                     $rab->Status = 'N'; // Default status is Menunggu
                                     $rab->DCreated = now();
                                     $rab->UCreated = Auth::id();
@@ -737,7 +737,7 @@ class KegiatanController extends Controller
                             $rab->Satuan = $rabData['Satuan'];
                             $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
                             $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
-                            $rab->Feedback = $rabData['Feedback'];
+                            $rab->Feedback = $rabData['Feedback']  ?? null;
                             $rab->Status = 'N'; // Default status is Menunggu
                             $rab->DCreated = now();
                             $rab->UCreated = Auth::id();

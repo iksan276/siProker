@@ -65,6 +65,7 @@
                                 <th>Satuan</th>
                                 <th>Harga Satuan</th>
                                 <th>Jumlah</th>
+                                <th>Feedback</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -78,6 +79,7 @@
                                 <td>{{ $rab->satuanRelation ? $rab->satuanRelation->Nama : 'N/A' }}</td>
                                 <td>Rp {{ number_format($rab->HargaSatuan, 0, ',', '.') }}</td>
                                 <td>Rp {{ number_format($rab->Jumlah, 0, ',', '.') }}</td>
+                                <td>{!! nl2br($rab->Feedback) !!}</td>
                                 <td>{!! $rab->status_label !!}</td>
                             </tr>
                             @php $total += $rab->Jumlah; @endphp
@@ -85,6 +87,7 @@
                             <tr class="font-weight-bold">
                                 <td colspan="5" class="text-right">Total</td>
                                 <td>Rp {{ number_format($total, 0, ',', '.') }}</td>
+                                <td></td>
                                 <td></td>
                             </tr>
                         </tbody>
