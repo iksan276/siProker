@@ -47,6 +47,7 @@ Route::middleware('auth')->prefix('api')->group(function() {
     Route::get('/programs-by-isu', 'App\Http\Controllers\ApiController@getProgramsByIsu')->name('api.programs-by-isu');
     Route::get('/programs-by-rektor', 'App\Http\Controllers\ApiController@getProgramRektor')->name('api.programs-by-rektor');
     Route::get('/sub-kegiatans-by-kegiatan', 'App\Http\Controllers\ApiController@getSubKegiatansByKegiatan')->name('api.sub-kegiatans-by-kegiatan');
+    Route::get('/program-rektor-details/{id}', 'App\Http\Controllers\ApiController@getProgramRektorDetails')->name('api.program-rektor-details');
 });
 
 Route::get('/auth/oauth_google', [OAuthGoogleController::class, 'authenticate']);

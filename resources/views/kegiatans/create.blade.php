@@ -14,6 +14,24 @@
             @endforeach
         </select>
     </div>
+
+    <!-- Add this alert div below the Program Rektor select -->
+<!-- Program Rektor Info in a more compact single-row layout -->
+<div id="programRektorInfo" class="alert alert-info mt-2 py-2" style="display: none;">
+    <div class="d-flex align-items-center">
+        <div class="mr-3">
+            <span class="badge badge-primary">Info Program Rektor</span>
+        </div>
+        <div class="d-flex flex-wrap">
+            <div class="mr-3"><small><strong>Jumlah:</strong> <span id="infoJumlahKegiatan">-</span></small></div>
+            <div class="mr-3"><small><strong>Satuan:</strong> <span id="infoSatuan">-</span></small></div>
+            <div class="mr-3"><small><strong>Harga:</strong> <span id="infoHargaSatuan">-</span></small></div>
+            <div class="mr-3"><small><strong>Total:</strong> <span id="infoTotal">-</span></small></div>
+            <div><small><strong>Penanggung Jawab:</strong> <span id="infoPenanggungJawab">-</span></small></div>
+        </div>
+    </div>
+</div>
+
     
     <div class="form-group">
         <label for="Nama">Nama</label>
@@ -83,6 +101,56 @@
 
 <script>
 $(document).ready(function() {
+    // Add this to the existing $(document).ready function
+$('#ProgramRektorID').on('change', function() {
+    const programRektorId = $(this).val();
+    
+    if (programRektorId) {
+        // Show loading state
+        $('#programRektorInfo').show();
+        $('#infoJumlahKegiatan, #infoSatuan, #infoHargaSatuan, #infoTotal, #infoPenanggungJawab').text('Loading...');
+        
+        // Fetch program rektor details
+        $.ajax({
+            url: `/api/program-rektor-details/${programRektorId}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                // Format currency values
+                const hargaSatuan = parseInt(data.hargaSatuan).toLocaleString('id-ID');
+                const total = parseInt(data.total).toLocaleString('id-ID');
+                
+                // Update the info alert
+                $('#infoJumlahKegiatan').text(data.jumlahKegiatan || '-');
+                $('#infoSatuan').text(data.satuan || '-');
+                $('#infoHargaSatuan').text('Rp ' + hargaSatuan);
+                $('#infoTotal').text('Rp ' + total);
+                $('#infoPenanggungJawab').text(data.penanggungJawab || '-');
+                
+                // Show the info alert
+                $('#programRektorInfo').show();
+            },
+            error: function() {
+                // Hide the info alert on error
+                $('#programRektorInfo').hide();
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Gagal memuat informasi Program Rektor',
+                    icon: 'error'
+                });
+            }
+        });
+    } else {
+        // Hide the info alert if no program rektor is selected
+        $('#programRektorInfo').hide();
+    }
+});
+
+// Trigger the change event if a program rektor is already selected
+if ($('#ProgramRektorID').val()) {
+    $('#ProgramRektorID').trigger('change');
+}
+
     // Get the selected values from cookies if not already set
     if (!$('#ProgramRektorID').val()) {
         var programRektorCookie = getCookie('selected_program_rektor');
