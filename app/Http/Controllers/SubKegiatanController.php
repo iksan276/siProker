@@ -38,6 +38,7 @@ class SubKegiatanController extends Controller
                     'nama' => nl2br($subKegiatan->Nama),
                     'jadwal' => \Carbon\Carbon::parse($subKegiatan->JadwalMulai)->format('d-m-Y') . ' s/d ' . \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('d-m-Y'),
                     'catatan' => nl2br($subKegiatan->Catatan),
+                    'feedback' => nl2br($subKegiatan->Feedback),
                     'status' => $subKegiatan->status_label,
                     'actions' => $actions
                 ];
@@ -80,6 +81,7 @@ class SubKegiatanController extends Controller
         $subKegiatan->JadwalMulai = $request->JadwalMulai;
         $subKegiatan->JadwalSelesai = $request->JadwalSelesai;
         $subKegiatan->Catatan = $request->Catatan;
+        $subKegiatan->Feedback = $request->Feedback;
         $subKegiatan->Status = isset($request->Status) ? $request->Status : 'N';
         $subKegiatan->DCreated = now();
         $subKegiatan->UCreated = Auth::id();
@@ -126,6 +128,7 @@ class SubKegiatanController extends Controller
         $subKegiatan->JadwalMulai = $request->JadwalMulai;
         $subKegiatan->JadwalSelesai = $request->JadwalSelesai;
         $subKegiatan->Catatan = $request->Catatan;
+        $subKegiatan->Feedback = $request->Feedback;
         $subKegiatan->Status = isset($request->Status) ? $request->Status : 'N';
         $subKegiatan->DEdited = now();
         $subKegiatan->UEdited = Auth::id();

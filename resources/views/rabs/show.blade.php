@@ -33,6 +33,10 @@
                             <td>Rp {{ number_format($rab->Jumlah, 0, ',', '.') }}</td>
                         </tr>
                         <tr>
+                            <th>Feedback</th>
+                            <td>{!! nl2br($rab->Feedback) !!}</td>
+                        </tr>
+                        <tr>
                             <th>Status</th>
                             <td>{!! $rab->status_label !!}</td>
                         </tr>

@@ -16,6 +16,7 @@ class SubKegiatan extends Model
         'JadwalMulai',
         'JadwalSelesai',
         'Catatan',
+        'Feedback',
         'Status',
         'DCreated',
         'UCreated',

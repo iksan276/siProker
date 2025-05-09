@@ -52,7 +52,8 @@ class KegiatansExport implements FromArray, WithHeadings, WithStyles, ShouldAuto
                 $rowNumber,
                 'KEGIATAN',
                 $kegiatan->Nama,
-                '', '', '', '', '', '', ''
+                '', '', '', '', '', '', '',
+                '' // Feedback column
             ];
 
             // Add Kegiatan details
@@ -60,57 +61,157 @@ class KegiatansExport implements FromArray, WithHeadings, WithStyles, ShouldAuto
                 '',
                 'Renstra',
                 $renstra ? $renstra->Nama : 'N/A',
-                '', '', '', '', '', '', ''
+                '', '', '', '', '', '', '',
+                '' // Feedback column
             ];
             
             $this->data[] = [
                 '',
                 'Pilar',
                 $pilar ? $pilar->Nama : 'N/A',
-                '', '', '', '', '', '', ''
+                '', '', '', '', '', '', '',
+                '' // Feedback column
             ];
             
             $this->data[] = [
                 '',
                 'Isu Strategis',
                 $isuStrategis ? $isuStrategis->Nama : 'N/A',
-                '', '', '', '', '', '', ''
+                '', '', '', '', '', '', '',
+                '' // Feedback column
             ];
             
             $this->data[] = [
                 '',
                 'Program Pengembangan',
                 $programPengembangan ? $programPengembangan->Nama : 'N/A',
-                '', '', '', '', '', '', ''
+                '', '', '', '', '', '', '',
+                '' // Feedback column
             ];
             
             $this->data[] = [
                 '',
                 'Program Rektor',
                 $programRektor ? $programRektor->Nama : 'N/A',
-                '', '', '', '', '', '', ''
+                '', '', '', '', '', '', '',
+                '' // Feedback column
             ];
             
             $this->data[] = [
                 '',
                 'Tanggal Mulai',
                 Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y'),
-                '', '', '', '', '', '', ''
+                '', '', '', '', '', '', '',
+                '' // Feedback column
             ];
             
             $this->data[] = [
                 '',
                 'Tanggal Selesai',
                 Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y'),
-                '', '', '', '', '', '', ''
+                '', '', '', '', '', '', '',
+                '' // Feedback column
             ];
             
             $this->data[] = [
                 '',
                 'Rincian Kegiatan',
                 $kegiatan->RincianKegiatan,
-                '', '', '', '', '', '', ''
+                '', '', '', '', '', '', '',
+                '' // Feedback column
             ];
+            
+            // Add Feedback for Kegiatan
+            $this->data[] = [
+                '',
+                'Feedback Kegiatan',
+                $kegiatan->Feedback ?? '-',
+                '', '', '', '', '', '', '',
+                '' // Feedback column
+            ];
+
+            // Process direct RABs for this Kegiatan
+            $directRabs = $kegiatan->rabs()->whereNull('SubKegiatanID')->get();
+            if ($directRabs->count() > 0) {
+                // Add RAB header
+                $this->data[] = [
+                    '',
+                    'RAB KEGIATAN',
+                    '',
+                    '', '', '', '', '', '', '',
+                    '' // Feedback column
+                ];
+                
+                foreach ($directRabs as $rabIndex => $rab) {
+                    $statusRAB = $this->getStatusLabel($rab->Status);
+                    
+                    // Add RAB item number
+                    $this->data[] = [
+                        '',
+                        'Item ' . ($rabIndex + 1),
+                        '',
+                        '', '', '', '', '', '', '',
+                        '' // Feedback column
+                    ];
+                    
+                    // Add RAB details in vertical format
+                    $this->data[] = [
+                        '',
+                        'Komponen',
+                        $rab->Komponen,
+                        '', '', '', '', '', '', '',
+                        '' // Feedback column
+                    ];
+                    
+                    $this->data[] = [
+                        '',
+                        'Volume',
+                        number_format($rab->Volume, 0, ',', '.'),
+                        '', '', '', '', '', '', '',
+                        '' // Feedback column
+                    ];
+                    
+                    $this->data[] = [
+                        '',
+                        'Satuan',
+                        $rab->satuanRelation ? $rab->satuanRelation->Nama : '-',
+                        '', '', '', '', '', '', '',
+                        '' // Feedback column
+                    ];
+                    
+                    $this->data[] = [
+                        '',
+                        'Harga Satuan',
+                        number_format($rab->HargaSatuan, 0, ',', '.'),
+                        '', '', '', '', '', '', '',
+                        '' // Feedback column
+                    ];
+                    
+                    $this->data[] = [
+                        '',
+                        'Jumlah',
+                        number_format($rab->Jumlah, 0, ',', '.'),
+                        '', '', '', '', '', '', '',
+                        '' // Feedback column
+                    ];
+                    
+                    $this->data[] = [
+                        '',
+                        'Status',
+                        $statusRAB,
+                        '', '', '', '', '', '', '',
+                        '' // Feedback column
+                    ];
+                    
+                    $this->data[] = [
+                        '',
+                        'Feedback RAB',
+                        $rab->Feedback ?? '-',
+                        '', '', '', '', '', '', '',
+                        $rab->Feedback ?? '-' // Feedback column
+                    ];
+                }
+            }
 
             // Process Sub Kegiatans
             if ($kegiatan->subKegiatans->count() > 0) {
@@ -122,7 +223,8 @@ class KegiatansExport implements FromArray, WithHeadings, WithStyles, ShouldAuto
                         '',
                         'SUB KEGIATAN ' . ($index + 1),
                         $subKegiatan->Nama,
-                        '', '', '', '', '', '', ''
+                        '', '', '', '', '', '', '',
+                        '' // Feedback column
                     ];
                     
                     // Add Sub Kegiatan details
@@ -130,21 +232,24 @@ class KegiatansExport implements FromArray, WithHeadings, WithStyles, ShouldAuto
                         '',
                         'Jadwal Mulai',
                         Carbon::parse($subKegiatan->JadwalMulai)->format('d-m-Y'),
-                        '', '', '', '', '', '', ''
+                        '', '', '', '', '', '', '',
+                        '' // Feedback column
                     ];
                     
                     $this->data[] = [
                         '',
                         'Jadwal Selesai',
                         Carbon::parse($subKegiatan->JadwalSelesai)->format('d-m-Y'),
-                        '', '', '', '', '', '', ''
+                        '', '', '', '', '', '', '',
+                        '' // Feedback column
                     ];
                     
                     $this->data[] = [
                         '',
                         'Status',
                         $statusSubKegiatan,
-                        '', '', '', '', '', '', ''
+                        '', '', '', '', '', '', '',
+                        '' // Feedback column
                     ];
                     
                     // Add Catatan for Sub Kegiatan
@@ -152,7 +257,17 @@ class KegiatansExport implements FromArray, WithHeadings, WithStyles, ShouldAuto
                         '',
                         'Catatan',
                         $subKegiatan->Catatan ?? '-',
-                        '', '', '', '', '', '', ''
+                        '', '', '', '', '', '', '',
+                        '' // Feedback column
+                    ];
+                    
+                    // Add Feedback for Sub Kegiatan
+                    $this->data[] = [
+                        '',
+                        'Feedback Sub Kegiatan',
+                        $subKegiatan->Feedback ?? '-',
+                        '', '', '', '', '', '', '',
+                        '' // Feedback column
                     ];
 
                     // Process RABs for this Sub Kegiatan
@@ -161,74 +276,87 @@ class KegiatansExport implements FromArray, WithHeadings, WithStyles, ShouldAuto
                         $this->data[] = [
                             '',
                             'RAB SUB KEGIATAN',
-                            'Komponen',
-                            'Volume',
-                            'Satuan',
-                            'Harga Satuan',
-                            'Jumlah',
-                            'Status',
                             '',
-                            ''
+                            '', '', '', '', '', '', '',
+                            '' // Feedback column
                         ];
                         
                         foreach ($subKegiatan->rabs as $rabIndex => $rab) {
                             $statusRAB = $this->getStatusLabel($rab->Status);
                             
+                            // Add RAB item number
                             $this->data[] = [
                                 '',
-                                ($rabIndex + 1),
-                                $rab->Komponen,
-                                number_format($rab->Volume, 0, ',', '.'),
-                                $rab->satuanRelation ? $rab->satuanRelation->Nama : '-',
-                                number_format($rab->HargaSatuan, 0, ',', '.'),
-                                number_format($rab->Jumlah, 0, ',', '.'),
-                                $statusRAB,
+                                'Item ' . ($rabIndex + 1),
                                 '',
-                                ''
+                                '', '', '', '', '', '', '',
+                                '' // Feedback column
+                            ];
+                            
+                            // Add RAB details in vertical format
+                            $this->data[] = [
+                                '',
+                                'Komponen',
+                                $rab->Komponen,
+                                '', '', '', '', '', '', '',
+                                '' // Feedback column
+                            ];
+                            
+                            $this->data[] = [
+                                '',
+                                'Volume',
+                                number_format($rab->Volume, 0, ',', '.'),
+                                '', '', '', '', '', '', '',
+                                '' // Feedback column
+                            ];
+                            
+                            $this->data[] = [
+                                '',
+                                'Satuan',
+                                $rab->satuanRelation ? $rab->satuanRelation->Nama : '-',
+                                '', '', '', '', '', '', '',
+                                '' // Feedback column
+                            ];
+                            
+                            $this->data[] = [
+                                '',
+                                'Harga Satuan',
+                                number_format($rab->HargaSatuan, 0, ',', '.'),
+                                '', '', '', '', '', '', '',
+                                '' // Feedback column
+                            ];
+                            
+                            $this->data[] = [
+                                '',
+                                'Jumlah',
+                                number_format($rab->Jumlah, 0, ',', '.'),
+                                '', '', '', '', '', '', '',
+                                '' // Feedback column
+                            ];
+                            
+                            $this->data[] = [
+                                '',
+                                'Status',
+                                $statusRAB,
+                                '', '', '', '', '', '', '',
+                                '' // Feedback column
+                            ];
+                            
+                            $this->data[] = [
+                                '',
+                                'Feedback RAB',
+                                $rab->Feedback ?? '-',
+                                '', '', '', '', '', '', '',
+                                $rab->Feedback ?? '-' // Feedback column
                             ];
                         }
                     }
                 }
             }
 
-            // Process direct RABs for this Kegiatan
-            $directRabs = $kegiatan->rabs()->whereNull('SubKegiatanID')->get();
-            if ($directRabs->count() > 0) {
-                // Add RAB header
-                $this->data[] = [
-                    '',
-                    'RAB KEGIATAN',
-                    'Komponen',
-                    'Volume',
-                    'Satuan',
-                    'Harga Satuan',
-                    'Jumlah',
-                    'Status',
-                    '',
-                    ''
-                ];
-                
-                foreach ($directRabs as $rabIndex => $rab) {
-                    $statusRAB = $this->getStatusLabel($rab->Status);
-                    
-                    $this->data[] = [
-                        '',
-                        ($rabIndex + 1),
-                        $rab->Komponen,
-                        number_format($rab->Volume, 0, ',', '.'),
-                        $rab->satuanRelation ? $rab->satuanRelation->Nama : '-',
-                        number_format($rab->HargaSatuan, 0, ',', '.'),
-                        number_format($rab->Jumlah, 0, ',', '.'),
-                        $statusRAB,
-                        '',
-                        ''
-                    ];
-                }
-            }
-
             // Add separator row
             $this->data[] = [
-                '', '', '', '', '', '', '', '', '', ''
+                '', '', '', '', '', '', '', '', '', '', ''
             ];
 
             $rowNumber++;
@@ -272,7 +400,8 @@ class KegiatansExport implements FromArray, WithHeadings, WithStyles, ShouldAuto
             'Detail 4',
             'Detail 5',
             'Detail 6',
-            'Detail 7'
+            'Detail 7',
+            'Feedback' // Added Feedback column to headings
         ];
     }
 
@@ -308,7 +437,6 @@ class KegiatansExport implements FromArray, WithHeadings, WithStyles, ShouldAuto
         // Style for main section headers (KEGIATAN, SUB KEGIATAN, RAB)
         for ($row = 2; $row <= $highestRow; $row++) {
             $cellValue = $sheet->getCell('B' . $row)->getValue();
-            
             if (in_array($cellValue, ['KEGIATAN', 'SUB KEGIATAN 1', 'SUB KEGIATAN 2', 'SUB KEGIATAN 3', 'SUB KEGIATAN 4', 'SUB KEGIATAN 5', 'RAB KEGIATAN', 'RAB SUB KEGIATAN'])) {
                 $sheet->getStyle('A' . $row . ':' . $highestColumn . $row)->applyFromArray([
                     'font' => [
@@ -362,6 +490,21 @@ class KegiatansExport implements FromArray, WithHeadings, WithStyles, ShouldAuto
                     ],
                 ]);
             }
+            
+            // Special styling for RAB item headers
+            if (strpos($cellValue, 'Item ') === 0) {
+                $sheet->getStyle('A' . $row . ':' . $highestColumn . $row)->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                    ],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => [
+                            'rgb' => 'FFF2CC',
+                        ],
+                    ],
+                ]);
+            }
         }
         
         // Center the 'No' column
@@ -396,35 +539,15 @@ class KegiatansExport implements FromArray, WithHeadings, WithStyles, ShouldAuto
         $sheet->getColumnDimension('H')->setWidth(15);  // Detail 5
         $sheet->getColumnDimension('I')->setWidth(15);  // Detail 6
         $sheet->getColumnDimension('J')->setWidth(15);  // Detail 7
-        
-        // Right align numeric columns in RAB sections
-        for ($row = 2; $row <= $highestRow; $row++) {
-            $cellValue = $sheet->getCell('B' . $row)->getValue();
-            
-            // If this is a RAB item row (where B column is a number)
-            if (is_numeric($cellValue) && $row > 1) {
-                // Right align volume, harga satuan, and jumlah columns
-                $sheet->getStyle('D' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
-                $sheet->getStyle('F' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
-                $sheet->getStyle('G' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
-            }
-        }
-        
-        // Center align status columns
-        for ($row = 2; $row <= $highestRow; $row++) {
-            if ($sheet->getCell('B' . $row)->getValue() === 'Status' || 
-                $sheet->getCell('H' . $row)->getValue() === 'Status') {
-                $sheet->getStyle('C' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle('H' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-            }
-        }
+        $sheet->getColumnDimension('K')->setWidth(30);  // Feedback - wider column for feedback
         
         // Add alternating row colors for better readability
         for ($row = 2; $row <= $highestRow; $row++) {
             $cellValue = $sheet->getCell('B' . $row)->getValue();
             
             // Skip rows that already have specific styling
-            if (in_array($cellValue, ['KEGIATAN', 'SUB KEGIATAN 1', 'SUB KEGIATAN 2', 'SUB KEGIATAN 3', 'SUB KEGIATAN 4', 'SUB KEGIATAN 5', 'RAB KEGIATAN', 'RAB SUB KEGIATAN'])) {
+            if (in_array($cellValue, ['KEGIATAN', 'SUB KEGIATAN 1', 'SUB KEGIATAN 2', 'SUB KEGIATAN 3', 'SUB KEGIATAN 4', 'SUB KEGIATAN 5', 'RAB KEGIATAN', 'RAB SUB KEGIATAN']) || 
+                strpos($cellValue, 'Item ') === 0) {
                 continue;
             }
             
@@ -446,7 +569,8 @@ class KegiatansExport implements FromArray, WithHeadings, WithStyles, ShouldAuto
             $cellValue = $sheet->getCell('B' . $row)->getValue();
             
             if (!is_numeric($cellValue) && $cellValue != '' && 
-                !in_array($cellValue, ['KEGIATAN', 'SUB KEGIATAN 1', 'SUB KEGIATAN 2', 'SUB KEGIATAN 3', 'SUB KEGIATAN 4', 'SUB KEGIATAN 5', 'RAB KEGIATAN', 'RAB SUB KEGIATAN'])) {
+                !in_array($cellValue, ['KEGIATAN', 'SUB KEGIATAN 1', 'SUB KEGIATAN 2', 'SUB KEGIATAN 3', 'SUB KEGIATAN 4', 'SUB KEGIATAN 5', 'RAB KEGIATAN', 'RAB SUB KEGIATAN']) &&
+                strpos($cellValue, 'Item ') !== 0) {
                 $sheet->getStyle('B' . $row)->applyFromArray([
                     'font' => [
                         'bold' => true,
@@ -455,7 +579,7 @@ class KegiatansExport implements FromArray, WithHeadings, WithStyles, ShouldAuto
             }
         }
         
-        // Special styling for Catatan rows
+        // Special styling for Catatan and Feedback rows
         for ($row = 2; $row <= $highestRow; $row++) {
             if ($sheet->getCell('B' . $row)->getValue() === 'Catatan') {
                 $sheet->getStyle('C' . $row)->applyFromArray([
@@ -470,7 +594,36 @@ class KegiatansExport implements FromArray, WithHeadings, WithStyles, ShouldAuto
                     ],
                 ]);
             }
+            
+            // Special styling for Feedback rows
+            if (strpos($sheet->getCell('B' . $row)->getValue(), 'Feedback') === 0) {
+                $sheet->getStyle('C' . $row)->applyFromArray([
+                    'font' => [
+                        'italic' => true,
+                    ],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => [
+                            'rgb' => 'FFE6E6', // Light red for feedback
+                        ],
+                    ],
+                ]);
+            }
+        }
+        
+        // Special styling for numeric values in RAB sections
+        for ($row = 2; $row <= $highestRow; $row++) {
+            $cellValue = $sheet->getCell('B' . $row)->getValue();
+            
+            if (in_array($cellValue, ['Volume', 'Harga Satuan', 'Jumlah'])) {
+                $sheet->getStyle('C' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+            }
+            
+            if ($cellValue === 'Status') {
+                $sheet->getStyle('C' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            }
         }
     }
 }
-
+  
+     

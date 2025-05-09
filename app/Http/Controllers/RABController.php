@@ -43,6 +43,7 @@ class RABController extends Controller
                     'satuan' => $rab->satuanRelation ? $rab->satuanRelation->Nama : 'N/A',
                     'harga_satuan' => 'Rp ' . number_format($rab->HargaSatuan, 0, ',', '.'),
                     'jumlah' => 'Rp ' . number_format($rab->Jumlah, 0, ',', '.'),
+                    'feedback' => nl2br($rab->Feedback),
                     'status' => $rab->status_label,
                     'actions' => $actions
                 ];
@@ -120,6 +121,7 @@ class RABController extends Controller
         $rab->Satuan = $request->Satuan;
         $rab->HargaSatuan = $request->HargaSatuan;
         $rab->Jumlah = $jumlah;
+        $rab->Feedback = $request->Feedback;
         $rab->Status = isset($request->Status) ? $request->Status : 'N';
         $rab->DCreated = now();
         $rab->UCreated = Auth::id();
@@ -201,6 +203,7 @@ class RABController extends Controller
         $rab->Satuan = $request->Satuan;
         $rab->HargaSatuan = $request->HargaSatuan;
         $rab->Jumlah = $jumlah;
+        $rab->Feedback = $request->Feedback;
         $rab->Status = isset($request->Status) ? $request->Status : 'N';
         $rab->DEdited = now();
         $rab->UEdited = Auth::id();

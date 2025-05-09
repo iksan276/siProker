@@ -16,6 +16,7 @@ class Kegiatan extends Model
         'TanggalMulai',
         'TanggalSelesai',
         'RincianKegiatan',
+        'Feedback',
         'DCreated',
         'UCreated',
         'DEdited',

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('JadwalMulai');
             $table->date('JadwalSelesai');
             $table->text('Catatan')->nullable();
+            $table->text('Feedback')->nullable();
             $table->enum('Status', ['N', 'Y', 'T', 'R'])->default('N');
             $table->dateTime('DCreated')->nullable();
             $table->unsignedBigInteger('UCreated')->nullable();

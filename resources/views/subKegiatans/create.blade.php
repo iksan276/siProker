@@ -32,8 +32,14 @@
 
     <div class="form-group">
         <label for="Catatan">Catatan </label>
-        <textarea class="form-control" id="Catatan" name="Catatan" rows="3" required></textarea>
+        <textarea class="form-control" id="Catatan" name="Catatan" rows="3"></textarea>
     </div>
+
+    <div class="form-group">
+        <label for="Feedback">Feedback </label>
+        <textarea class="form-control" id="Feedback" name="Feedback" rows="3"></textarea>
+    </div>
+
 
     @if(auth()->user()->isAdmin())
     <div class="form-group">

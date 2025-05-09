@@ -18,6 +18,7 @@ return new class extends Migration
             $table->dateTime('TanggalMulai');
             $table->dateTime('TanggalSelesai');
             $table->text('RincianKegiatan');
+            $table->text('Feedback')->nullable();
             $table->dateTime('DCreated')->nullable();
             $table->unsignedBigInteger('UCreated')->nullable();
             $table->dateTime('DEdited')->nullable();

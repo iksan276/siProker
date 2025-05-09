@@ -36,7 +36,12 @@
         <label for="RincianKegiatan">Rincian Kegiatan</label>
         <textarea name="RincianKegiatan" id="RincianKegiatan" class="form-control" rows="4">{{ $kegiatan->RincianKegiatan }}</textarea>
     </div>
-    
+    @if(auth()->user()->isAdmin())
+    <div class="form-group">
+        <label for="Feedback">Feedback </label>
+        <textarea class="form-control" id="Feedback" name="Feedback" rows="3">{{ $kegiatan->Feedback }}</textarea>
+    </div>
+    @endif
     <div class="form-group">
         <label>Apakah kegiatan ini memiliki sub kegiatan?</label>
         <div class="custom-control custom-radio">
@@ -78,7 +83,12 @@
                             <label>Catatan</label>
                             <textarea name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][Catatan]" class="form-control" rows="2">{{ $subKegiatan->Catatan }}</textarea>
                         </div>
+                     
                         @if(auth()->user()->isAdmin())
+                        <div class="form-group">
+                            <label for="Feedback">Feedback </label>
+                            <textarea class="form-control" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][Feedback]" rows="3">{{ $subKegiatan->Feedback }}</textarea>
+                        </div>
                         <div class="form-group">
                             <label>Status</label>
                             <select name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][Status]" class="form-control">
@@ -144,6 +154,10 @@
                                             @if(auth()->user()->isAdmin())
                                             <div class="row mt-2">
                                                 <div class="col-md-12">
+                                                <div class="form-group">
+                                                        <label for="Feedback">Feedback </label>
+                                                        <textarea class="form-control" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][existing_rabs][{{ $rab->RABID }}][Feedback]" rows="3">{{ $rab->Feedback }}</textarea>
+                                                    </div>
                                                     <div class="form-group mb-0">
                                                         <label class="small">Status</label>
                                                         <select name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][existing_rabs][{{ $rab->RABID }}][Status]" class="form-control form-control-sm">
@@ -228,6 +242,10 @@
                         @if(auth()->user()->isAdmin())
                         <div class="row mt-2">
                             <div class="col-md-12">
+                            <div class="form-group">
+                                                        <label for="Feedback">Feedback </label>
+                                                        <textarea class="form-control" name="existing_rabs[{{ $rab->RABID }}][Feedback]" rows="3">{{ $rab->Feedback }}</textarea>
+                                                    </div>
                                 <div class="form-group mb-0">
                                     <label>Status</label>
                                     <select name="existing_rabs[{{ $rab->RABID }}][Status]" class="form-control">
@@ -370,6 +388,10 @@ $(document).ready(function() {
                             <label>Catatan</label>
                             <textarea name="new_sub_kegiatans[${index}][Catatan]" class="form-control" rows="2"></textarea>
                         </div>
+                         <div class="form-group">
+                        <label >Feedback </label>
+                        <textarea class="form-control" name="new_sub_kegiatans[${index}][Feedback]" rows="3"></textarea>
+                    </div>
                      ${isAdmin ? `
                     <div class="form-group">
                         <label>Status</label>
@@ -510,6 +532,10 @@ $(document).ready(function() {
                      ${isAdmin ? `
                     <div class="row mt-2">
                         <div class="col-md-12">
+                           <div class="form-group">
+                        <label >Feedback </label>
+                        <textarea class="form-control" name="new_sub_kegiatans[${subKegiatanIndex}][rabs][${rabIndex}][Feedback]" rows="3"></textarea>
+                    </div>
                             <div class="form-group mb-0">
                                 <label class="small">Status</label>
                                 <select name="new_sub_kegiatans[${subKegiatanIndex}][rabs][${rabIndex}][Status]" class="form-control form-control-sm">
@@ -649,6 +675,10 @@ $(document).ready(function() {
                      ${isAdmin ? `
                     <div class="row mt-2">
                         <div class="col-md-12">
+                              <div class="form-group">
+                        <label >Feedback </label>
+                        <textarea class="form-control" name="existing_sub_kegiatans[${subKegiatanId}][new_rabs][${rabIndex}][Feedback]" rows="3"></textarea>
+                    </div>
                             <div class="form-group mb-0">
                                 <label class="small">Status</label>
                                 <select name="existing_sub_kegiatans[${subKegiatanId}][new_rabs][${rabIndex}][Status]" class="form-control form-control-sm">
@@ -788,6 +818,10 @@ $(document).ready(function() {
                      ${isAdmin ? `
                     <div class="row mt-2">
                         <div class="col-md-12">
+                                    <div class="form-group">
+                        <label >Feedback </label>
+                        <textarea class="form-control" name="new_rabs[${index}][Feedback]" rows="3"></textarea>
+                    </div>
                             <div class="form-group mb-0">
                                 <label>Status</label>
                                 <select name="new_rabs[${index}][Status]" class="form-control">

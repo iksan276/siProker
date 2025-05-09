@@ -74,6 +74,11 @@
         </div>
         <small class="form-text text-muted">Jumlah akan dihitung otomatis (Volume × Harga Satuan)</small>
     </div>
+    <div class="form-group">
+        <label for="Feedback">Feedback </label>
+        <textarea class="form-control" id="Feedback" name="Feedback" rows="3"></textarea>
+    </div>
+    
     @if(auth()->user()->isAdmin())
     <div class="form-group">
         <label for="Status">Status <span class="text-danger">*</span></label>

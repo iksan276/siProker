@@ -33,7 +33,12 @@
 
     <div class="form-group">
         <label for="Catatan">Catatan </label>
-        <textarea class="form-control" id="Catatan" name="Catatan" rows="3" required>{{ $subKegiatan->Catatan }}</textarea>
+        <textarea class="form-control" id="Catatan" name="Catatan" rows="3" >{{ $subKegiatan->Catatan }}</textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="Feedback">Feedback </label>
+        <textarea class="form-control" id="Feedback" name="Feedback" rows="3" >{{ $subKegiatan->Feedback }}</textarea>
     </div>
 
     @if(auth()->user()->isAdmin())
@@ -56,10 +61,13 @@
 
 <script>
     $(document).ready(function() {
-        // Initialize date range picker
+        // Initialize date range picker with empty initial value
+        $('#daterange').attr('placeholder', 'DD/MM/YYYY - DD/MM/YYYY');
+        
         $('#daterange').daterangepicker({
             opens: 'left',
             autoApply: true,
+            autoUpdateInput: false, // Prevent automatic update with current date
             locale: {
                 format: 'DD/MM/YYYY',
                 separator: ' - ',
@@ -73,19 +81,33 @@
                 monthNames: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
                 firstDay: 1
             }
-        }, function(start, end, label) {
-            // Set values to hidden fields when date range is selected
-            $('#JadwalMulai').val(start.format('YYYY-MM-DD'));
-            $('#JadwalSelesai').val(end.format('YYYY-MM-DD'));
+        });
+        
+        // Handle the apply event
+        $('#daterange').on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+            $('#JadwalMulai').val(picker.startDate.format('YYYY-MM-DD'));
+            $('#JadwalSelesai').val(picker.endDate.format('YYYY-MM-DD'));
+        });
+        
+        // Handle the cancel event
+        $('#daterange').on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
+            $('#JadwalMulai').val('');
+            $('#JadwalSelesai').val('');
         });
 
-        // Set initial values from the model
+        // Set initial values if they exist
         var startDate = $('#JadwalMulai').val();
         var endDate = $('#JadwalSelesai').val();
         
         if (startDate && endDate) {
-            $('#daterange').data('daterangepicker').setStartDate(startDate);
-            $('#daterange').data('daterangepicker').setEndDate(endDate);
+            var start = moment(startDate);
+            var end = moment(endDate);
+            
+            $('#daterange').data('daterangepicker').setStartDate(start);
+            $('#daterange').data('daterangepicker').setEndDate(end);
+            $('#daterange').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
         }
 
         // Form validation before submit

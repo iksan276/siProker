@@ -20,6 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('Satuan');
             $table->integer('HargaSatuan');
             $table->integer('Jumlah');
+            $table->text('Feedback')->nullable();
             $table->enum('Status', ['N', 'Y', 'T', 'R'])->default('N');
             $table->dateTime('DCreated')->nullable();
             $table->unsignedBigInteger('UCreated')->nullable();

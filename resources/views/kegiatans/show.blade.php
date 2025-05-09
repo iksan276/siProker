@@ -40,6 +40,11 @@
             <th>Rincian Kegiatan</th>
             <td>{!! nl2br($kegiatan->RincianKegiatan) !!}</td>
         </tr>
+     
+            <tr>
+                <th>Feedback</th>
+                <td>{!! nl2br($kegiatan->Feedback) !!}</td>
+            </tr>
     </table>
 </div>
 
@@ -54,6 +59,8 @@
                     <th>Nama</th>
                     <th>Jadwal Mulai</th>
                     <th>Jadwal Selesai</th>
+                    <th>Catatan</th>
+                    <th>Feedback</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -64,6 +71,8 @@
                     <td>{!! nl2br($subKegiatan->Nama) !!}</td>
                     <td>{{ \Carbon\Carbon::parse($subKegiatan->JadwalMulai)->format('d-m-Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('d-m-Y') }}</td>
+                    <td>{!! nl2br($subKegiatan->Catatan) !!}</td>
+                    <td>{!! nl2br($subKegiatan->Feedback) !!}</td>
                     <td>{!! $subKegiatan->StatusLabel !!}</td>
                 </tr>
                 @if($subKegiatan->rabs->count() > 0)
@@ -80,6 +89,7 @@
                                         <th>Satuan</th>
                                         <th>Harga Satuan</th>
                                         <th>Jumlah</th>
+                                        <th>Feedback</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -92,6 +102,7 @@
                                         <td>{{ $rab->satuanRelation->Nama ?? '' }}</td>
                                         <td class="text-right">{{ $rab->FormattedHargaSatuan }}</td>
                                         <td class="text-right">{{ $rab->FormattedJumlah }}</td>
+                                        <td>{!! nl2br($rab->Feedback) !!}</td>
                                         <td>{!! $rab->StatusLabel !!}</td>
                                     </tr>
                                     @endforeach
@@ -126,6 +137,7 @@
                     <th>Satuan</th>
                     <th>Harga Satuan</th>
                     <th>Jumlah</th>
+                    <th>Feedback</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -138,6 +150,7 @@
                     <td>{{ $rab->satuanRelation->Nama ?? '' }}</td>
                     <td class="text-right">{{ $rab->FormattedHargaSatuan }}</td>
                     <td class="text-right">{{ $rab->FormattedJumlah }}</td>
+                    <td>{!! nl2br($rab->Feedback) !!}</td>
                     <td>{!! $rab->StatusLabel !!}</td>
                 </tr>
                 @endforeach

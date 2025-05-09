@@ -18,6 +18,7 @@ class RAB extends Model
         'Satuan',
         'HargaSatuan',
         'Jumlah',
+        'Feedback',
         'Status',
         'DCreated',
         'UCreated',

@@ -25,6 +25,10 @@
                             <td>{!! nl2br($subKegiatan->Catatan) !!}</td>
                         </tr>
                         <tr>
+                            <th>Feedback</th>
+                            <td>{!! nl2br($subKegiatan->Feedback) !!}</td>
+                        </tr>
+                        <tr>
                             <th>Status</th>
                             <td>{!! $subKegiatan->status_label !!}</td>
                         </tr>
