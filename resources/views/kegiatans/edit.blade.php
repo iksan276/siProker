@@ -457,25 +457,35 @@ $(document).ready(function() {
     
     // Function to validate the date range against main kegiatan dates
     function validateSubKegiatanDateRange(subKegiatan, start, end) {
-        const mainStartDate = new Date($('#TanggalMulai').val());
-        const mainEndDate = new Date($('#TanggalSelesai').val());
-        
-        if (mainStartDate && start && start.toDate() < mainStartDate) {
-            alert('Jadwal Mulai sub kegiatan tidak boleh sebelum Tanggal Mulai kegiatan utama');
-            // Reset the date range picker
-            const dateRangePicker = subKegiatan.find('.date-range-picker').data('daterangepicker');
-            dateRangePicker.setStartDate(moment(mainStartDate));
-            subKegiatan.find('.date-start-hidden').val(moment(mainStartDate).format('YYYY-MM-DD'));
-        }
-        
-        if (mainEndDate && end && end.toDate() > mainEndDate) {
-            alert('Jadwal Selesai sub kegiatan tidak boleh setelah Tanggal Selesai kegiatan utama');
-            // Reset the date range picker
-            const dateRangePicker = subKegiatan.find('.date-range-picker').data('daterangepicker');
-            dateRangePicker.setEndDate(moment(mainEndDate));
-            subKegiatan.find('.date-end-hidden').val(moment(mainEndDate).format('YYYY-MM-DD'));
-        }
+    // Get main dates and strip time components by using YYYY-MM-DD format
+    const mainStartStr = $('#TanggalMulai').val();
+    const mainEndStr = $('#TanggalSelesai').val();
+    
+    // Create date objects using only the date part
+    const mainStartDate = mainStartStr ? new Date(mainStartStr) : null;
+    const mainEndDate = mainEndStr ? new Date(mainEndStr) : null;
+    
+    // Convert moment objects to date objects and set time to 00:00:00
+    const startDate = start ? new Date(start.format('YYYY-MM-DD')) : null;
+    const endDate = end ? new Date(end.format('YYYY-MM-DD')) : null;
+    
+    if (mainStartDate && startDate && startDate < mainStartDate) {
+        alert('Jadwal Mulai sub kegiatan tidak boleh sebelum Tanggal Mulai kegiatan utama');
+        // Reset the date range picker
+        const dateRangePicker = subKegiatan.find('.date-range-picker').data('daterangepicker');
+        dateRangePicker.setStartDate(moment(mainStartStr));
+        subKegiatan.find('.date-start-hidden').val(mainStartStr);
     }
+    
+    if (mainEndDate && endDate && endDate > mainEndDate) {
+        alert('Jadwal Selesai sub kegiatan tidak boleh setelah Tanggal Selesai kegiatan utama');
+        // Reset the date range picker
+        const dateRangePicker = subKegiatan.find('.date-range-picker').data('daterangepicker');
+        dateRangePicker.setEndDate(moment(mainEndStr));
+        subKegiatan.find('.date-end-hidden').val(mainEndStr);
+    }
+}
+
     
     // Function to add a RAB for a new sub kegiatan
     function addRABForNewSubKegiatan(subKegiatanIndex) {
@@ -986,12 +996,18 @@ $(document).ready(function() {
 });
 
 function validateDatesEdit() {
-    const tanggalMulai = new Date(document.getElementById('TanggalMulai').value);
-    const tanggalSelesai = new Date(document.getElementById('TanggalSelesai').value);
+    // Get date strings
+    const tanggalMulaiStr = document.getElementById('TanggalMulai').value;
+    const tanggalSelesaiStr = document.getElementById('TanggalSelesai').value;
+    
+    // Create date objects using only the date part
+    const tanggalMulai = tanggalMulaiStr ? new Date(tanggalMulaiStr) : null;
+    const tanggalSelesai = tanggalSelesaiStr ? new Date(tanggalSelesaiStr) : null;
+    
     const errorElement = document.getElementById('dateErrorEdit');
     const submitBtn = document.getElementById('submitBtnEdit');
     
-    if (document.getElementById('TanggalMulai').value && document.getElementById('TanggalSelesai').value) {
+    if (tanggalMulaiStr && tanggalSelesaiStr) {
         if (tanggalSelesai < tanggalMulai) {
             errorElement.style.display = 'block';
             submitBtn.disabled = true;
@@ -1003,17 +1019,18 @@ function validateDatesEdit() {
             $('.sub-kegiatan-item').each(function() {
                 const dateRangePicker = $(this).find('.date-range-picker').data('daterangepicker');
                 if (dateRangePicker) {
-                    const startDate = dateRangePicker.startDate;
-                    const endDate = dateRangePicker.endDate;
+                    // Convert moment objects to date objects using only the date part
+                    const startDate = new Date(dateRangePicker.startDate.format('YYYY-MM-DD'));
+                    const endDate = new Date(dateRangePicker.endDate.format('YYYY-MM-DD'));
                     
-                    if (startDate && startDate.toDate() < tanggalMulai) {
-                        dateRangePicker.setStartDate(moment(tanggalMulai));
-                        $(this).find('.date-start-hidden').val(moment(tanggalMulai).format('YYYY-MM-DD'));
+                    if (startDate && startDate < tanggalMulai) {
+                        dateRangePicker.setStartDate(moment(tanggalMulaiStr));
+                        $(this).find('.date-start-hidden').val(tanggalMulaiStr);
                     }
                     
-                    if (endDate && endDate.toDate() > tanggalSelesai) {
-                        dateRangePicker.setEndDate(moment(tanggalSelesai));
-                        $(this).find('.date-end-hidden').val(moment(tanggalSelesai).format('YYYY-MM-DD'));
+                    if (endDate && endDate > tanggalSelesai) {
+                        dateRangePicker.setEndDate(moment(tanggalSelesaiStr));
+                        $(this).find('.date-end-hidden').val(tanggalSelesaiStr);
                     }
                 }
             });
