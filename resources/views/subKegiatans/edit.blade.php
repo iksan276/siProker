@@ -13,6 +13,39 @@
             @endforeach
         </select>
     </div>
+
+    <!-- Kegiatan Info Display -->
+    <div id="kegiatanInfo" class="alert alert-info mt-2 py-2" style="display: none;">
+        <div class="d-flex align-items-center">
+            <div class="mr-3">
+                <span class="badge badge-primary">Info Kegiatan</span>
+            </div>
+            <div class="d-flex flex-wrap">
+                <div class="mr-3"><small><strong>Program Rektor:</strong> <span id="infoProgramRektor">-</span></small></div>
+                <div class="mr-3"><small><strong>Total Anggaran:</strong> <span id="infoTotalAnggaran">-</span></small></div>
+                <div class="mr-3"><small><strong>Sisa Anggaran:</strong> <span id="infoSisaAnggaran">-</span></small></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget warning alert -->
+    <div id="budgetWarning" class="alert alert-danger mt-2 py-2" style="display: none;">
+        <div class="d-flex align-items-center">
+            <div class="mr-3">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div>
+                <strong>Peringatan Anggaran!</strong> Tidak ada sisa anggaran untuk kegiatan ini.
+            </div>
+        </div>
+    </div>
+
+    <div id="loadingIndicator" style="display: none;" class="text-center my-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <p class="mt-2">Memuat data...</p>
+    </div>
     
     <div class="form-group">
         <label for="Nama">Nama Sub Kegiatan <span class="text-danger">*</span></label>
@@ -36,8 +69,6 @@
         <textarea class="form-control" id="Catatan" name="Catatan" rows="3" >{{ $subKegiatan->Catatan }}</textarea>
     </div>
 
-  
-
     @if(auth()->user()->isAdmin())
     <div class="form-group">
         <label for="Feedback">Feedback </label>
@@ -56,12 +87,23 @@
     
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-        <button type="submit" class="btn btn-primary">Simpan</button>
+        <button type="submit" class="btn btn-primary" id="submitBtn">Simpan</button>
     </div>
 </form>
 
 <script>
     $(document).ready(function() {
+        // Global variables to store budget information
+        let availableBudget = 0;
+        let currentKegiatanID = null;
+        let originalKegiatanID = "{{ $subKegiatan->KegiatanID }}";
+        
+        // Initialize with the current kegiatan
+        currentKegiatanID = $("#KegiatanID").val();
+        if (currentKegiatanID) {
+            loadKegiatanDetails(currentKegiatanID);
+        }
+
         // Initialize date range picker with empty initial value
         $('#daterange').attr('placeholder', 'DD/MM/YYYY - DD/MM/YYYY');
         
@@ -111,6 +153,87 @@
             $('#daterange').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
         }
 
+        // Load kegiatan details when a kegiatan is selected
+        $('#KegiatanID').on('change', function() {
+            currentKegiatanID = $(this).val();
+            
+            if (currentKegiatanID) {
+                loadKegiatanDetails(currentKegiatanID);
+            } else {
+                // Hide info panels if no kegiatan selected
+                $('#kegiatanInfo').hide();
+                $('#budgetWarning').hide();
+            }
+        });
+
+        // Function to load kegiatan details
+        function loadKegiatanDetails(kegiatanID) {
+            $('#loadingIndicator').show();
+            $('#kegiatanInfo').hide();
+            
+            $.ajax({
+                url: `/api/kegiatan-details/${kegiatanID}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    $('#loadingIndicator').hide();
+                    
+                    // Update kegiatan info
+                    $('#infoProgramRektor').text(data.programRektorNama);
+                    $('#infoTotalAnggaran').text('Rp ' + parseInt(data.totalAnggaran).toLocaleString('id-ID'));
+                    $('#infoSisaAnggaran').text('Rp ' + parseInt(data.sisaAnggaran).toLocaleString('id-ID'));
+                    
+                    // Store values for validation
+                    availableBudget = parseInt(data.sisaAnggaran);
+                    
+                    // For edit, if it's the same kegiatan, we don't need to check budget
+                    // because this sub kegiatan is already accounted for in the budget
+                    if (kegiatanID === originalKegiatanID) {
+                        $('#budgetWarning').hide();
+                        $('#submitBtn').prop('disabled', false);
+                    } else {
+                        // Only validate budget if changing to a different kegiatan
+                        validateBudget();
+                    }
+                    
+                    // Show kegiatan info panel
+                    $('#kegiatanInfo').show();
+                },
+                error: function() {
+                    $('#loadingIndicator').hide();
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Gagal memuat informasi Kegiatan',
+                        icon: 'error'
+                    });
+                }
+            });
+        }
+
+        // Validate budget against available amount
+        function validateBudget() {
+            // Only validate budget if changing to a different kegiatan
+            if (currentKegiatanID !== originalKegiatanID && availableBudget <= 0) {
+                $('#budgetWarning').show();
+                $('#submitBtn').prop('disabled', true);
+                
+                // Tambahkan SweetAlert untuk validasi budget
+                Swal.fire({
+                    title: 'Peringatan Anggaran!',
+                    html: `Tidak ada sisa anggaran untuk kegiatan ini.<br><br>
+                          <div class="text-left">
+                            <strong>Sisa Anggaran:</strong> Rp ${availableBudget.toLocaleString('id-ID')}
+                          </div>`,
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'Mengerti'
+                });
+            } else {
+                $('#budgetWarning').hide();
+                $('#submitBtn').prop('disabled', false);
+            }
+        }
+
         // Form validation before submit
         $('.modal-form').on('submit', function(e) {
             var startDate = $('#JadwalMulai').val();
@@ -125,6 +248,35 @@
             if (new Date(endDate) < new Date(startDate)) {
                 e.preventDefault();
                 alert('Jadwal Selesai tidak boleh lebih awal dari Jadwal Mulai');
+                return false;
+            }
+
+            // Check if kegiatan is selected
+            if (!$('#KegiatanID').val()) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Validasi',
+                    text: 'Harus memilih Kegiatan',
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+                return false;
+            }
+
+            // Check if budget is available when changing kegiatan
+            if (currentKegiatanID !== originalKegiatanID && availableBudget <= 0) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Peringatan Anggaran!',
+                    html: `Tidak dapat memindahkan Sub Kegiatan karena tidak ada sisa anggaran pada kegiatan tujuan.<br><br>
+                          <div class="text-left">
+                            <strong>Sisa Anggaran:</strong> Rp ${availableBudget.toLocaleString('id-ID')}
+                          </div>`,
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'Mengerti'
+                });
                 return false;
             }
         });

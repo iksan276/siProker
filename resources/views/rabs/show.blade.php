@@ -1,4 +1,4 @@
-<div class="container-fluid">
+
     <div class="row">
         <div class="col-md-12">
             <div class="table-responsive">
@@ -61,7 +61,6 @@
             </div>
         </div>
     </div>
-</div>
 <div class="modal-footer">
     <button class="btn btn-secondary" type="button" data-dismiss="modal">Tutup</button>
 </div>
