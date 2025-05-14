@@ -81,7 +81,7 @@
                     @endforeach
                 </select>
             </div>
-        <div id="tree-grid-container">
+        <div id="tree-grid-container" class="table-responsive">
             <table id="tree-grid" class="table table-bordered">
                 <thead>
                     <tr>
@@ -893,7 +893,7 @@ function getCollapseTooltip(nodeType) {
                         indentPrefix += '<span class="tree-indent text-primary">- - -&nbsp;</span>';
                     }
                     
-                    if (item.tooltip) {
+                    if (item.tooltip && item.type!== 'rab' && item.type!== 'subkegiatan') {
                         nameText = indentPrefix + '<span class="node-name" data-toggle="tooltip" title="' + item.tooltip + '">' + item.nama + '</span>';
                     } else {
                         nameText = indentPrefix + item.nama;

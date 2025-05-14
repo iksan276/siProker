@@ -110,7 +110,7 @@
         </div>
         
         <!-- Tree Grid Table -->
-        <div id="tree-grid-container">
+        <div id="tree-grid-container" class="table-responsive">
             <table id="tree-grid" class="table table-bordered">
                 <thead>
                     <tr>
@@ -1330,12 +1330,9 @@
                     }
                     
                     // Create tooltip text that includes both the original tooltip and the node type information
-                    var tooltipText = getNodeTypeTooltip(item.type);
-                    if (item.tooltip) {
-                        tooltipText += '<br>' + item.tooltip;
-                    }
+                    //var tooltipText = getNodeTypeTooltip(item.type);
                     
-                    nameText = indentPrefix + '<span class="node-name" data-toggle="tooltip" data-html="true" title="' + tooltipText + '">' + item.nama + '</span>';
+                    nameText = indentPrefix + '<span class="node-name" data-html="true">' + item.nama + '</span>';
                     
                     var nameCell = '<td>' + nameText + "&nbsp;&nbsp;" + expander + '</td>';
                     row.append(nameCell);
@@ -1615,5 +1612,6 @@
         // Remove the highlight effect
         $(this).css('filter', 'none');
     });
+    
 </script>
 @endpush
