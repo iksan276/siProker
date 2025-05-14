@@ -1517,7 +1517,7 @@
             e.stopPropagation(); // Prevent row click event
             var url = $(this).data('url');
             var title = $(this).data('title');
-            
+            $('#mainModal .modal-body').empty();
             $('#mainModalLabel').text(title);
             $('#mainModal .modal-body').html('<div class="text-center"><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>');
             $('#mainModal').modal('show');

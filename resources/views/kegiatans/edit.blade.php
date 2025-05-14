@@ -12,21 +12,40 @@
     </div>
     
     <div id="programRektorInfo" class="alert alert-info mt-2 py-2" style="display: none;">
-    <div class="d-flex align-items-center">
-        <div class="mr-3">
-            <span class="badge badge-primary">Info Program Rektor</span>
-        </div>
-        <div class="d-flex flex-wrap">
-            <div class="mr-3"><small><strong>Jumlah:</strong> <span id="infoJumlahKegiatan">-</span></small></div>
-            <div class="mr-3"><small><strong>Satuan:</strong> <span id="infoSatuan">-</span></small></div>
-            <div class="mr-3"><small><strong>Harga:</strong> <span id="infoHargaSatuan">-</span></small></div>
-            <div class="mr-3"><small><strong>Total:</strong> <span id="infoTotal">-</span></small></div>
-            <div><small><strong>Penanggung Jawab:</strong> <span id="infoPenanggungJawab">-</span></small></div>
+        <div class="d-flex align-items-center">
+            <div class="mr-3">
+                <span class="badge badge-primary">Info Program Rektor</span>
+            </div>
+            <div class="d-flex flex-wrap">
+                <div class="mr-3"><small><strong>Jumlah:</strong> <span id="infoJumlahKegiatan">-</span></small></div>
+                <div class="mr-3"><small><strong>Satuan:</strong> <span id="infoSatuan">-</span></small></div>
+                <div class="mr-3"><small><strong>Harga:</strong> <span id="infoHargaSatuan">-</span></small></div>
+                <div class="mr-3"><small><strong>Total:</strong> <span id="infoTotal">-</span></small></div>
+                <div><small><strong>Penanggung Jawab:</strong> <span id="infoPenanggungJawab">-</span></small></div>
+            </div>
         </div>
     </div>
-</div>
 
+    <!-- Budget warning alert -->
+    <div id="budgetWarning" class="alert alert-danger mt-2 py-2" style="display: none;">
+        <div class="d-flex align-items-center">
+            <div class="mr-3">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div>
+                <strong>Peringatan Anggaran!</strong> Total anggaran melebihi batas Program Rektor.
+                <div>Total RAB: <span id="currentTotal">Rp 0</span> | Batas: <span id="budgetLimit">Rp 0</span></div>
+            </div>
+        </div>
+    </div>
 
+    <div id="loadingIndicator" style="display: none;" class="text-center my-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <p class="mt-2">Memuat data Program Rektor...</p>
+    </div>
+    <div id="formContent" style="display: none;">
     <div class="form-group">
         <label for="Nama">Nama</label>
         <textarea name="Nama" id="Nama" class="form-control" rows="3">{{ $kegiatan->Nama }}</textarea>
@@ -282,7 +301,7 @@
             <i class="fas fa-plus"></i> Tambah RAB
         </button>
     </div>
-    
+</div>
     <div class="modal-footer">
         <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
         <button class="btn btn-primary" type="submit" id="submitBtnEdit">Ubah</button>
@@ -290,12 +309,26 @@
 </form>
 
 <script>
+    $(document).ready(function() {
+    // Global variable to store Program Rektor total budget
+    let programRektorTotal = 0;
+    let formContentVisible = true;
+
+    $('#formContent').hide();
+    
+
     // Add this to the existing $(document).ready function
     $('#ProgramRektorID').on('change', function() {
     const programRektorId = $(this).val();
     
+    // Hide form content when changing Program Rektor
+    $('#formContent').hide();
+    $('#budgetWarning').hide();
+    formContentVisible = false;
+    
     if (programRektorId) {
-        // Show loading state
+        // Show loading indicator
+        $('#loadingIndicator').show();
         $('#programRektorInfo').show();
         $('#infoJumlahKegiatan, #infoSatuan, #infoHargaSatuan, #infoTotal, #infoPenanggungJawab').text('Loading...');
         
@@ -305,23 +338,37 @@
             type: 'GET',
             dataType: 'json',
             success: function(data) {
+                // Hide loading indicator
+                $('#loadingIndicator').hide();
+                
                 // Format currency values
                 const hargaSatuan = parseInt(data.hargaSatuan).toLocaleString('id-ID');
                 const total = parseInt(data.total).toLocaleString('id-ID');
                 
-                // Update the info alert
+                // Rest of the success handler remains the same...
+                programRektorTotal = parseInt(data.total);
+                
                 $('#infoJumlahKegiatan').text(data.jumlahKegiatan || '-');
                 $('#infoSatuan').text(data.satuan || '-');
                 $('#infoHargaSatuan').text('Rp ' + hargaSatuan);
                 $('#infoTotal').text('Rp ' + total);
                 $('#infoPenanggungJawab').text(data.penanggungJawab || '-');
+                $('#budgetLimit').text('Rp ' + total);
                 
-                // Show the info alert
                 $('#programRektorInfo').show();
+                $('#formContent').show();
+                formContentVisible = true;
+                
+                validateTotalBudget();
             },
             error: function() {
-                // Hide the info alert on error
+                // Hide loading indicator on error
+                $('#loadingIndicator').hide();
                 $('#programRektorInfo').hide();
+                $('#formContent').hide();
+                $('#budgetWarning').hide();
+                formContentVisible = false;
+                
                 Swal.fire({
                     title: 'Error',
                     text: 'Gagal memuat informasi Program Rektor',
@@ -330,15 +377,19 @@
             }
         });
     } else {
-        // Hide the info alert if no program rektor is selected
+        // Hide loading indicator and other elements if no program rektor is selected
+        $('#loadingIndicator').hide();
         $('#programRektorInfo').hide();
+        $('#formContent').hide();
+        $('#budgetWarning').hide();
+        formContentVisible = false;
     }
 });
 
-// Trigger the change event if a program rektor is already selected
-if ($('#ProgramRektorID').val()) {
-    $('#ProgramRektorID').trigger('change');
-}
+    // Trigger the change event if a program rektor is already selected
+    if ($('#ProgramRektorID').val()) {
+        $('#ProgramRektorID').trigger('change');
+    }
 
 $(document).ready(function() {
     // Initialize select2 for all existing select elements
@@ -405,19 +456,23 @@ $(document).ready(function() {
             if ($('.sub-kegiatan-item').length === 0) {
                 addSubKegiatan();
             }
+            validateTotalBudget(); // Validate after toggling
         } else {
             $('#sub_kegiatan_section').hide();
+            validateTotalBudget(); // Validate after toggling
         }
     });
     
     // Add Sub Kegiatan button click
     $('#add_sub_kegiatan').click(function() {
         addSubKegiatan();
+        validateTotalBudget(); // Validate after adding
     });
     
     // Add RAB button click
     $('#add_rab').click(function() {
         addRAB();
+        validateTotalBudget(); // Validate after adding
     });
     
     // Initialize date range pickers for existing sub kegiatans
@@ -694,6 +749,9 @@ $(document).ready(function() {
         
         // Initialize number formatting for this RAB
         initNumberFormatting();
+        
+        // Validate total budget after adding new RAB
+        validateTotalBudget();
     }
     
     // Function to add a RAB for an existing sub kegiatan
@@ -837,6 +895,9 @@ $(document).ready(function() {
         
         // Initialize number formatting for this RAB
         initNumberFormatting();
+        
+        // Validate total budget after adding new RAB
+        validateTotalBudget();
     }
     
     // Function to add a new RAB for the main kegiatan
@@ -924,6 +985,9 @@ $(document).ready(function() {
         
         // Initialize number formatting for this RAB
         initNumberFormatting();
+        
+        // Validate total budget after adding new RAB
+        validateTotalBudget();
     }
     
     // Remove Sub Kegiatan
@@ -946,6 +1010,9 @@ $(document).ready(function() {
         if ($('.sub-kegiatan-item').length === 0 && $('#has_sub_kegiatan_yes').is(':checked')) {
             addSubKegiatan();
         }
+        
+        // Validate total budget after removing sub kegiatan
+        validateTotalBudget();
     });
     
     // Remove RAB from Sub Kegiatan
@@ -953,10 +1020,10 @@ $(document).ready(function() {
         const rabContainer = $(this).closest('.rab-sub-container');
         if (rabContainer.find('.rab-sub-item').length > 0) {
             $(this).closest('.rab-sub-item').remove();
+            validateTotalBudget(); // Validate after removing
         }
     });
     
-    // Remove existing RAB from Sub
     // Remove existing RAB from Sub Kegiatan
     $(document).on('click', '.remove-existing-rab-sub', function() {
         const rabId = $(this).data('id');
@@ -967,6 +1034,7 @@ $(document).ready(function() {
         
         if (rabContainer.find('.rab-sub-item').length > 0) {
             $(this).closest('.rab-sub-item').remove();
+            validateTotalBudget(); // Validate after removing
         }
     });
     
@@ -974,6 +1042,7 @@ $(document).ready(function() {
     $(document).on('click', '.remove-rab', function() {
         if ($('.rab-item').length > 0) {
             $(this).closest('.rab-item').remove();
+            validateTotalBudget(); // Validate after removing
         }
     });
     
@@ -986,6 +1055,7 @@ $(document).ready(function() {
         
         if ($('.rab-item').length > 0) {
             $(this).closest('.rab-item').remove();
+            validateTotalBudget(); // Validate after removing
         } 
     });
     
@@ -1020,6 +1090,9 @@ $(document).ready(function() {
             
             // Calculate jumlah
             calculateJumlah($(this).closest('.card-body'));
+            
+            // Validate total budget after any change
+            validateTotalBudget();
         });
     }
     
@@ -1047,9 +1120,72 @@ $(document).ready(function() {
         }
     }
     
+    // Function to validate total budget against Program Rektor limit
+    function validateTotalBudget() {
+        if (programRektorTotal <= 0) {
+            return; // Skip validation if program rektor total is not set
+        }
+        
+        let totalBudget = 0;
+        
+        // Calculate total from main RABs
+        $('.rab-item').each(function() {
+            const jumlahHidden = $(this).find('.jumlah-hidden').val();
+            if (jumlahHidden) {
+                totalBudget += parseInt(jumlahHidden);
+            }
+        });
+        
+        // Calculate total from sub kegiatan RABs if sub kegiatan is enabled
+        if ($('#has_sub_kegiatan_yes').is(':checked')) {
+            $('.sub-kegiatan-item').each(function() {
+                $(this).find('.rab-sub-item').each(function() {
+                    const jumlahHidden = $(this).find('.jumlah-hidden').val();
+                    if (jumlahHidden) {
+                        totalBudget += parseInt(jumlahHidden);
+                    }
+                });
+            });
+        }
+        
+        // Update current total display
+        $('#currentTotal').text('Rp ' + totalBudget.toLocaleString('id-ID'));
+        
+        // Check if total budget exceeds program rektor total
+        if (totalBudget > programRektorTotal) {
+            $('#budgetWarning').show();
+            $('#submitBtnEdit').prop('disabled', true);
+            
+            // Highlight the budget warning
+            $('#budgetWarning').removeClass('alert-danger').addClass('alert-danger');
+            setTimeout(function() {
+                $('#budgetWarning').removeClass('alert-danger').addClass('alert-danger');
+            }, 200);
+            
+            if ($('#budgetWarning').is(':visible')) {
+                Swal.fire({
+                    title: 'Peringatan Anggaran!',
+                    html: `Total anggaran melebihi batas Program Rektor.<br><br>
+                          <div class="text-left">
+                            <strong>Total RAB:</strong> Rp ${totalBudget.toLocaleString('id-ID')}<br>
+                            <strong>Batas:</strong> Rp ${programRektorTotal.toLocaleString('id-ID')}<br>
+                            <strong>Selisih:</strong> Rp ${(totalBudget - programRektorTotal).toLocaleString('id-ID')}
+                          </div>`,
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'Mengerti'
+                });
+            }
+        } else {
+            $('#budgetWarning').hide();
+            $('#submitBtnEdit').prop('disabled', false);
+        }
+    }
+    
     // Recalculate all jumlah values when inputs change
     $(document).on('input', '.rab-calc', function() {
         calculateJumlah($(this).closest('.card-body'));
+        validateTotalBudget();
     });
     
     // Initialize all number formatting
@@ -1059,6 +1195,9 @@ $(document).ready(function() {
     $('.rab-calc').each(function() {
         calculateJumlah($(this).closest('.card-body'));
     });
+    
+    // Validate total budget on page load
+    validateTotalBudget();
 });
 
 function validateDatesEdit() {
@@ -1187,6 +1326,34 @@ document.getElementById('kegiatanEditForm').addEventListener('submit', function(
         });
     }
     
+    // Validate budget
+    let totalBudget = 0;
+    
+    // Calculate total from main RABs
+    $('.rab-item').each(function() {
+        const jumlahHidden = $(this).find('.jumlah-hidden').val();
+        if (jumlahHidden) {
+            totalBudget += parseInt(jumlahHidden);
+        }
+    });
+    
+    // Calculate total from sub kegiatan RABs if sub kegiatan is enabled
+    if ($('#has_sub_kegiatan_yes').is(':checked')) {
+        $('.sub-kegiatan-item').each(function() {
+            $(this).find('.rab-sub-item').each(function() {
+                const jumlahHidden = $(this).find('.jumlah-hidden').val();
+                if (jumlahHidden) {
+                    totalBudget += parseInt(jumlahHidden);
+                }
+            });
+        });
+    }
+    
+    // Check if total budget exceeds program rektor total
+    if (totalBudget > programRektorTotal && programRektorTotal > 0) {
+        emptyFields.push(`Total anggaran (Rp ${totalBudget.toLocaleString('id-ID')}) melebihi batas Program Rektor (Rp ${programRektorTotal.toLocaleString('id-ID')})`);
+    }
+    
     // If there are empty fields, show the error message
     if (emptyFields.length > 0) {
         const errorList = '<ul style="text-align:left;margin-left:40px;margin-right:50px" class="text-danger">' + 
@@ -1225,6 +1392,9 @@ document.addEventListener('DOMContentLoaded', function() {
     $('.rab-calc').each(function() {
         calculateJumlah($(this).closest('.row'));
     });
+    
+    // Validate total budget on page load
+    validateTotalBudget();
 });
 
 // Helper function to calculate jumlah for any row
@@ -1250,4 +1420,53 @@ function calculateJumlah(container) {
         jumlahHidden.val('');
     }
 }
+
+// Function to validate total budget against Program Rektor limit
+function validateTotalBudget() {
+    if (programRektorTotal <= 0) {
+        return; // Skip validation if program rektor total is not set
+    }
+    
+    let totalBudget = 0;
+    
+    // Calculate total from main RABs
+    $('.rab-item').each(function() {
+        const jumlahHidden = $(this).find('.jumlah-hidden').val();
+        if (jumlahHidden) {
+            totalBudget += parseInt(jumlahHidden);
+        }
+    });
+    
+    // Calculate total from sub kegiatan RABs if sub kegiatan is enabled
+    if ($('#has_sub_kegiatan_yes').is(':checked')) {
+        $('.sub-kegiatan-item').each(function() {
+            $(this).find('.rab-sub-item').each(function() {
+                const jumlahHidden = $(this).find('.jumlah-hidden').val();
+                if (jumlahHidden) {
+                    totalBudget += parseInt(jumlahHidden);
+                }
+            });
+        });
+    }
+    
+    // Update current total display
+    $('#currentTotal').text('Rp ' + totalBudget.toLocaleString('id-ID'));
+    
+    // Check if total budget exceeds program rektor total
+    if (totalBudget > programRektorTotal) {
+        $('#budgetWarning').show();
+        $('#submitBtnEdit').prop('disabled', true);
+        
+        // Highlight the budget warning
+        $('#budgetWarning').removeClass('alert-danger').addClass('alert-danger');
+        setTimeout(function() {
+            $('#budgetWarning').removeClass('alert-danger').addClass('alert-danger');
+        }, 200);
+    } else {
+        $('#budgetWarning').hide();
+        $('#submitBtnEdit').prop('disabled', false);
+    }
+}
+
+});
 </script>
