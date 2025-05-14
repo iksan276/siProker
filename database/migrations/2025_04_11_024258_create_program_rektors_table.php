@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('program_rektors', function (Blueprint $table) {
             $table->id('ProgramRektorID');
             $table->unsignedBigInteger('ProgramPengembanganID');
-            $table->unsignedBigInteger('IndikatorKinerjaID');
+            $table->text('IndikatorKinerjaID');
             $table->text('Nama');
             $table->text('Output');
             $table->text('Outcome');
@@ -33,7 +33,6 @@ return new class extends Migration
             $table->unsignedBigInteger('UEdited')->nullable();
             
             $table->foreign('ProgramPengembanganID')->references('ProgramPengembanganID')->on('program_pengembangans');
-            $table->foreign('IndikatorKinerjaID')->references('IndikatorKinerjaID')->on('indikator_kinerjas');
             $table->foreign('JenisKegiatanID')->references('JenisKegiatanID')->on('jenis_kegiatans');
             $table->foreign('SatuanID')->references('SatuanID')->on('satuans');
             // No foreign key for PenanggungJawabID since it references an external API

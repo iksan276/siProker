@@ -71,7 +71,7 @@
         </div>
         
         <div class="form-group mb-5">
-          <select id="indikatorKinerjaFilter" class="form-control select2-filter">
+        <select id="indikatorKinerjaFilter" class="form-control select2-filter" multiple>
                 <option value="">-- Pilih Indikator Kinerja --</option>
                 @foreach($indikatorKinerjas as $indikatorKinerja)
                     <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}" {{ isset($selectedIndikatorKinerja) && $selectedIndikatorKinerja == $indikatorKinerja->IndikatorKinerjaID ? 'selected' : '' }}>
@@ -363,28 +363,32 @@
         });
         
         // Handle indikator kinerja filter change
-        $('#indikatorKinerjaFilter').on('change', function() {
-            var indikatorKinerjaID = $(this).val();
-            
-            // Store selected Indikator Kinerja ID in global variable and cookie
-            selectedIndikatorKinerjaId = indikatorKinerjaID;
-            
-            if (indikatorKinerjaID) {
-                setCookie('selected_indikator_kinerja', indikatorKinerjaID, 30);
-                updateUrlParameter('indikatorKinerjaID', indikatorKinerjaID);
-            } else {
-                eraseCookie('selected_indikator_kinerja');
-                updateUrlParameter('indikatorKinerjaID', null);
-            }
-            
-            // Set filtering flag to true
-            isFiltering = true;
-            
-            // Reload DataTable with new filter
-            programRektorTable.ajax.reload(function() {
-                isFiltering = false;
-            });
-        });
+       // Handle indikator kinerja filter change
+$('#indikatorKinerjaFilter').on('change', function() {
+    var indikatorKinerjaID = $(this).val();
+    
+    // Store selected Indikator Kinerja ID in global variable and cookie
+    selectedIndikatorKinerjaId = indikatorKinerjaID;
+    
+    if (indikatorKinerjaID && indikatorKinerjaID.length > 0) {
+        setCookie('selected_indikator_kinerja', indikatorKinerjaID, 30);
+        // Untuk URL parameter, gunakan join jika array
+        var paramValue = Array.isArray(indikatorKinerjaID) ? indikatorKinerjaID.join(',') : indikatorKinerjaID;
+        updateUrlParameter('indikatorKinerjaID', paramValue);
+    } else {
+        eraseCookie('selected_indikator_kinerja');
+        updateUrlParameter('indikatorKinerjaID', null);
+    }
+    
+    // Set filtering flag to true
+    isFiltering = true;
+    
+    // Reload DataTable with new filter
+    programRektorTable.ajax.reload(function() {
+        isFiltering = false;
+    });
+});
+
         
         // Handle form submission within modal
         $(document).on('submit', '.modal-form', function(e) {
@@ -634,27 +638,46 @@
     }
     
     // Cookie functions
-    function setCookie(name, value, days) {
-        var expires = "";
-        if (days) {
-            var date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            expires = "; expires=" + date.toUTCString();
-        }
-        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+   // Ubah fungsi setCookie untuk menangani array dengan benar
+function setCookie(name, value, days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
     }
     
-    function getCookie(name) {
-        var nameEQ = name + "=";
-        var ca = document.cookie.split(';');
-        for(var i=0; i < ca.length; i++) {
-            var c = ca[i];
-            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-        }
-        return null;
+    // Jika value adalah array, konversi ke JSON string
+    if (Array.isArray(value)) {
+        value = JSON.stringify(value);
     }
     
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+}
+
+// Ubah fungsi getCookie untuk menangani array dengan benar
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) {
+            var value = c.substring(nameEQ.length, c.length);
+            // Coba parse sebagai JSON jika dimulai dengan [ (array)
+            if (value.startsWith('[')) {
+                try {
+                    return JSON.parse(value);
+                } catch (e) {
+                    return value;
+                }
+            }
+            return value;
+        }
+    }
+    return null;
+}
+
     function eraseCookie(name) {   
         document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     }

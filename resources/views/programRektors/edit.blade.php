@@ -11,10 +11,10 @@
     </div>
     
     <div class="form-group">
-        <label for="IndikatorKinerjaID">Indikator Kinerja</label>
-        <select name="IndikatorKinerjaID" id="IndikatorKinerjaID" class="form-control select2">
+        <label for="IndikatorKinerjaID" class="d-block">Indikator Kinerja</label>
+        <select name="IndikatorKinerjaID[]" id="IndikatorKinerjaID" class="form-control select2" multiple>
             @foreach($indikatorKinerjas as $indikatorKinerja)
-                <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}" {{ $programRektor->IndikatorKinerjaID == $indikatorKinerja->IndikatorKinerjaID ? 'selected' : '' }}>{{ $indikatorKinerja->Nama }}</option>
+            <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}" {{ in_array($indikatorKinerja->IndikatorKinerjaID, $selectedIndikatorKinerjas) ? 'selected' : '' }}>{{ $indikatorKinerja->Nama }}</option>
             @endforeach
         </select>
     </div>
@@ -184,7 +184,7 @@ document.getElementById('programRektorEditForm').addEventListener('submit', func
     
     // Validate empty fields
     const programPengembanganID = document.getElementById('ProgramPengembanganID').value.trim();
-    const indikatorKinerjaID = document.getElementById('IndikatorKinerjaID').value.trim(); // Added validation
+    const indikatorKinerjaID = $('#IndikatorKinerjaID').val(); // Added validation
     const nama = document.getElementById('Nama').value.trim();
     const output = document.getElementById('Output').value.trim();
     const outcome = document.getElementById('Outcome').value.trim();

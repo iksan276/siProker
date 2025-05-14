@@ -36,9 +36,22 @@ class ProgramRektor extends Model
         return $this->belongsTo(ProgramPengembangan::class, 'ProgramPengembanganID', 'ProgramPengembanganID');
     }
     
+    // Define a proper relationship for indikatorKinerja
     public function indikatorKinerja()
     {
-        return $this->belongsTo(IndikatorKinerja::class, 'IndikatorKinerjaID', 'IndikatorKinerjaID');
+        $ids = explode(',', $this->IndikatorKinerjaID);
+        return IndikatorKinerja::whereIn('IndikatorKinerjaID', $ids);
+    }
+    
+    // Keep the accessor for backward compatibility
+    public function getIndikatorKinerjaAttribute()
+    {
+        if (empty($this->IndikatorKinerjaID)) {
+            return collect();
+        }
+        
+        $ids = explode(',', $this->IndikatorKinerjaID);
+        return IndikatorKinerja::whereIn('IndikatorKinerjaID', $ids)->get();
     }
     
     public function jenisKegiatan()

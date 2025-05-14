@@ -12,11 +12,10 @@
     </div>
     
     <div class="form-group">
-        <label for="IndikatorKinerjaID">Indikator Kinerja</label>
-        <select name="IndikatorKinerjaID" id="IndikatorKinerjaID" class="form-control select2">
-            <option value="" disabled selected></option>
+        <label for="IndikatorKinerjaID" class="d-block">Indikator Kinerja </label>
+        <select name="IndikatorKinerjaID[]" id="IndikatorKinerjaID" class="form-control select2" multiple>
             @foreach($indikatorKinerjas as $indikatorKinerja)
-                <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}" {{ isset($selectedIndikatorKinerja) && $selectedIndikatorKinerja == $indikatorKinerja->IndikatorKinerjaID ? 'selected' : '' }}>{{ $indikatorKinerja->Nama }}</option>
+                <option value="{{ $indikatorKinerja->IndikatorKinerjaID }}" {{ isset($selectedIndikatorKinerjas) && in_array($indikatorKinerja->IndikatorKinerjaID, $selectedIndikatorKinerjas) ? 'selected' : '' }}>{{ $indikatorKinerja->Nama }}</option>
             @endforeach
         </select>
     </div>
@@ -143,7 +142,6 @@
 <script>
 $(document).ready(function() {
     // Get the selected values from cookies if not already set
- 
     if (!$('#ProgramPengembanganID').val()) {
         var programPengembanganCookie = getCookie('selected_program_pengembangan');
         if (programPengembanganCookie) {
@@ -151,25 +149,65 @@ $(document).ready(function() {
         }
     }
     
-    if (!$('#IndikatorKinerjaID').val()) {
-        var indikatorKinerjaCookie = getCookie('selected_indikator_kinerja');
-        if (indikatorKinerjaCookie) {
-            $('#IndikatorKinerjaID').val(indikatorKinerjaCookie).trigger('change');
+    // Handle Indikator Kinerja selection from filter
+    if (!$('#IndikatorKinerjaID').val() || $('#IndikatorKinerjaID').val().length === 0) {
+        // First try to get from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const indikatorKinerjaParam = urlParams.get('indikatorKinerjaID');
+        
+        if (indikatorKinerjaParam) {
+            // Check if the parameter contains multiple values (comma-separated)
+            const indikatorValues = indikatorKinerjaParam.includes(',') 
+                ? indikatorKinerjaParam.split(',') 
+                : [indikatorKinerjaParam];
+                
+            $('#IndikatorKinerjaID').val(indikatorValues).trigger('change');
+        } else {
+            // If not in URL, try to get from cookie
+            var indikatorKinerjaCookie = getCookie('selected_indikator_kinerja');
+            if (indikatorKinerjaCookie) {
+                // Handle both array and string formats from cookie
+                let indikatorValues;
+                
+                try {
+                    // Try to parse as JSON (for array format)
+                    indikatorValues = JSON.parse(indikatorKinerjaCookie);
+                } catch (e) {
+                    // If not valid JSON, treat as comma-separated string
+                    indikatorValues = indikatorKinerjaCookie.includes(',') 
+                        ? indikatorKinerjaCookie.split(',') 
+                        : [indikatorKinerjaCookie];
+                }
+                
+                $('#IndikatorKinerjaID').val(indikatorValues).trigger('change');
+            }
         }
-    }
-      
-    // Cookie function
-    function getCookie(name) {
-        var nameEQ = name + "=";
-        var ca = document.cookie.split(';');
-        for(var i=0; i < ca.length; i++) {
-            var c = ca[i];
-            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-        }
-        return null;
     }
 });
+
+// Cookie function that can handle arrays
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) {
+            var value = c.substring(nameEQ.length, c.length);
+            // Try to parse as JSON if it starts with [ (array)
+            if (value.startsWith('[')) {
+                try {
+                    return JSON.parse(value);
+                } catch (e) {
+                    return value;
+                }
+            }
+            return value;
+        }
+    }
+    return null;
+}
+
 
 function validateNumericInput(input, errorId) {
     const errorElement = document.getElementById(errorId);
@@ -219,7 +257,7 @@ document.getElementById('programRektorForm').addEventListener('submit', function
     
     // Validate empty fields
     const programPengembanganID = document.getElementById('ProgramPengembanganID').value.trim();
-    const indikatorKinerjaID = document.getElementById('IndikatorKinerjaID').value.trim();
+    const indikatorKinerjaID = $('#IndikatorKinerjaID').val();
     const nama = document.getElementById('Nama').value.trim();
     const output = document.getElementById('Output').value.trim();
     const outcome = document.getElementById('Outcome').value.trim();
@@ -240,7 +278,7 @@ document.getElementById('programRektorForm').addEventListener('submit', function
         emptyFields.push('Program Pengembangan harus dipilih');
     }
     
-    if (!indikatorKinerjaID) {
+    if (!indikatorKinerjaID || indikatorKinerjaID.length === 0) {
         emptyFields.push('Indikator Kinerja harus dipilih');
     }
     
@@ -264,7 +302,8 @@ document.getElementById('programRektorForm').addEventListener('submit', function
         emptyFields.push('Mata Anggaran harus dipilih');
     }
     
-    if (!jumlahKegiatan) {
+    if (!jumlahKegiatan)
+ {
         emptyFields.push('Jumlah Kegiatan harus diisi');
     }
     

@@ -6,7 +6,13 @@
         </tr>
         <tr>
             <th>Indikator Kinerja</th>
-            <td>{!! nl2br($programRektor->indikatorKinerja->Nama) !!}</td>
+            <td>
+                <ul class="mb-0 pl-3">
+                    @foreach($indikatorKinerjas as $indikatorKinerja)
+                        <li>{!! nl2br($indikatorKinerja['Nama']) !!}</li>
+                    @endforeach
+                </ul>
+            </td>
         </tr>
         <tr>
             <th>Nama</th>

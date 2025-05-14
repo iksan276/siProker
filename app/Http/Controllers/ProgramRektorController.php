@@ -39,10 +39,9 @@ class ProgramRektorController extends Controller
         // Get all indikator kinerjas for the filter
         $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get();
         
-        // Base query
+        // Base query - modified to not use the indikatorKinerja relationship directly
         $programRektorsQuery = ProgramRektor::with([
             'programPengembangan.isuStrategis.pilar.renstra', 
-            'indikatorKinerja', 
             'jenisKegiatan', 
             'satuan', 
             'createdBy', 
@@ -131,7 +130,18 @@ class ProgramRektorController extends Controller
         
         // Apply filter if indikatorKinerjaID is provided
         if ($request->has('indikatorKinerjaID') && $request->indikatorKinerjaID) {
-            $programRektorsQuery->where('IndikatorKinerjaID', $request->indikatorKinerjaID);
+            // Make sure we're dealing with a string value, not an array
+            $indikatorId = is_array($request->indikatorKinerjaID) 
+                ? $request->indikatorKinerjaID[0] 
+                : $request->indikatorKinerjaID;
+            
+            // Since IndikatorKinerjaID is stored as comma-separated values, we need to use LIKE
+            $programRektorsQuery->where(function($query) use ($indikatorId) {
+                $query->where('IndikatorKinerjaID', $indikatorId)
+                      ->orWhere('IndikatorKinerjaID', 'LIKE', $indikatorId.',%')
+                      ->orWhere('IndikatorKinerjaID', 'LIKE', '%,'.$indikatorId)
+                      ->orWhere('IndikatorKinerjaID', 'LIKE', '%,'.$indikatorId.',%');
+            });
         }
         
         // Get the filtered results
@@ -151,235 +161,266 @@ class ProgramRektorController extends Controller
             return redirect('/login')->with('error', 'Sesi login telah berakhir. Silakan login kembali.');
         }
         
-        // Hit API untuk mendapatkan data unit
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $ssoCode,
-        ])->get("https://webhook.itp.ac.id/api/units", [
-            'order_by' => 'Nama',
-            'sort' => 'asc',
-            'limit' => 100
-        ]);
-        
-        $units = [];
-        if ($response->successful()) {
-            $responseData = $response->json();
-            
-            // Adapt the response to our expected format
-            // The API returns PosisiID instead of UnitID
-            foreach ($responseData as $unit) {
-                if (isset($unit['PosisiID']) && isset($unit['Nama'])) {
-                    $units[] = [
-                        'UnitID' => $unit['PosisiID'],
-                        'Nama' => $unit['Nama']
-                    ];
-                }
-            }
-        }
-        
-        // If it's an AJAX request, return JSON data for DataTable
-        if ($request->ajax()) {
-            $data = [];
-            foreach ($programRektors as $index => $program) {
-                // Format the actions HTML
-                $actions = '
-                    <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('program-rektors.show', $program->ProgramRektorID).'" data-title="Detail Program Rektor">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('program-rektors.edit', $program->ProgramRektorID).'" data-title="Edit Program Rektor">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button type="button" class="btn btn-danger btn-square btn-sm delete-program-rektor" data-id="'.$program->ProgramRektorID.'">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                ';
-                
-                // Format the NA status
-                $naStatus = '';
-                if ($program->NA == 'Y') {
-                    $naStatus = '<span class="badge badge-danger">Non Aktif</span>';
-                } else if ($program->NA == 'N') {
-                    $naStatus = '<span class="badge badge-success">Aktif</span>';
-                }
-                
-                // Get mata anggaran names and format as ul/li
-                $mataAnggaranIds = explode(',', $program->MataAnggaranID);
-                $mataAnggaranItems = MataAnggaran::whereIn('MataAnggaranID', $mataAnggaranIds)->pluck('Nama')->toArray();
-                $mataAnggaranHtml = '';
-                if (count($mataAnggaranItems) > 0) {
-                    $mataAnggaranHtml = '<ul class=" mb-0">';
-                    foreach ($mataAnggaranItems as $item) {
-                        $mataAnggaranHtml .= '<li>' . $item . '</li>';
-                    }
-                    $mataAnggaranHtml .= '</ul>';
-                }
-                
-                // Get pelaksana names from API data and format as ul/li
-                $pelaksanaIds = explode(',', $program->PelaksanaID);
-                $pelaksanaItems = [];
-                foreach ($units as $unit) {
-                    if (in_array($unit['UnitID'], $pelaksanaIds)) {
-                        $pelaksanaItems[] = $unit['Nama'];
-                    }
-                }
-                
-                $pelaksanaHtml = '';
-                if (count($pelaksanaItems) > 0) {
-                    $pelaksanaHtml = '<ul class=" mb-0">';
-                    foreach ($pelaksanaItems as $item) {
-                        $pelaksanaHtml .= '<li>' . $item . '</li>';
-                    }
-                    $pelaksanaHtml .= '</ul>';
-                }
-                
-                // Find penanggung jawab name from API data
-                $penanggungJawabNama = '';
-                foreach ($units as $unit) {
-                    if ($unit['UnitID'] == $program->PenanggungJawabID) {
-                        $penanggungJawabNama = $unit['Nama'];
-                        break;
-                    }
-                }
-                
-                // In the index method, modify the data array construction:
-                $data[] = [
-                    'no' => $index + 1,
-                    'program_pengembangan' => nl2br($program->programPengembangan->Nama),
-                    'indikator_kinerja' => nl2br($program->indikatorKinerja->Nama),
-                    'nama' => nl2br($program->Nama),
-                    'jenis_kegiatan' => $program->jenisKegiatan->Nama,
-                    'jumlah_kegiatan' => number_format($program->JumlahKegiatan, 0, ',', '.'),
-                    'satuan' => $program->satuan->Nama,
-                    'harga_satuan' => 'Rp ' . number_format($program->HargaSatuan, 0, ',', '.'),
-                    'mata_anggaran' => $mataAnggaranHtml,
-                    'total' => 'Rp ' . number_format($program->Total, 0, ',', '.'),
-                    'penanggung_jawab' => $penanggungJawabNama,
-                    'pelaksana' => $pelaksanaHtml,
-                    'na' => $naStatus,
-                    'actions' => $actions,
-                    'row_class' => $program->NA == 'Y' ? 'bg-light text-muted' : ''
-                ];
-            }
-            
-            return response()->json([
-                'data' => $data
+              // Hit API untuk mendapatkan data unit
+              $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $ssoCode,
+            ])->get("https://webhook.itp.ac.id/api/units", [
+                'order_by' => 'Nama',
+                'sort' => 'asc',
+                'limit' => 100
             ]);
-        }
-        
-        return view('programRektors.index', compact(
-            'programRektors', 
-            'renstras', 
-            'pilars', 
-            'isuStrategis', 
-            'programPengembangans', 
-            'indikatorKinerjas', 
-            'selectedRenstra', 
-            'selectedPilar', 
-            'selectedIsu', 
-            'selectedProgramPengembangan', 
-            'selectedIndikatorKinerja',
-            'units'
-        ));
-    }
-
-    public function create()
-    {
-        // Get all active renstras, pilars, and isu strategis
-        $renstras = Renstra::where('NA', 'N')->get();
-        $pilars = Pilar::where('NA', 'N')->get();
-        $isuStrategis = IsuStrategis::where('NA', 'N')->get();
-        $programPengembangans = ProgramPengembangan::where('NA', 'N')->get();
-        $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get();
-        $jenisKegiatans = JenisKegiatan::where('NA', 'N')->get();
-        $mataAnggarans = MataAnggaran::where('NA', 'N')->get();
-        $satuans = Satuan::where('NA', 'N')->get();
-        $users = User::all();
-        
-        // Ambil SSO code dari session untuk API
-        $ssoCode = session('sso_code');
-        
-        if (!$ssoCode) {
-            if (request()->ajax()) {
-                return response()->json(['error' => 'Sesi login telah berakhir. Silakan login kembali.'], 401);
-            }
-            return redirect('/login')->with('error', 'Sesi login telah berakhir. Silakan login kembali.');
-        }
-        
-        // Hit API untuk mendapatkan data unit
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $ssoCode,
-        ])->get("https://webhook.itp.ac.id/api/units", [
-            'order_by' => 'Nama',
-            'sort' => 'asc',
-            'limit' => 100
-        ]);
-        
-        $units = [];
-        if ($response->successful()) {
-            $responseData = $response->json();
             
-            // Adapt the response to our expected format
-            // The API returns PosisiID instead of UnitID
-            foreach ($responseData as $unit) {
-                if (isset($unit['PosisiID']) && isset($unit['Nama']) && $unit['NA'] === 'N') {
-                    $units[] = [
-                        'UnitID' => $unit['PosisiID'],
-                        'Nama' => $unit['Nama']
-                    ];
+            $units = [];
+            if ($response->successful()) {
+                $responseData = $response->json();
+                
+                // Adapt the response to our expected format
+                // The API returns PosisiID instead of UnitID
+                foreach ($responseData as $unit) {
+                    if (isset($unit['PosisiID']) && isset($unit['Nama'])) {
+                        $units[] = [
+                            'UnitID' => $unit['PosisiID'],
+                            'Nama' => $unit['Nama']
+                        ];
+                    }
                 }
             }
-        } else {
-            if (request()->ajax()) {
-                return response()->json(['error' => 'Gagal mengambil data unit dari API: ' . $response->status()], 500);
+            
+            // If it's an AJAX request, return JSON data for DataTable
+            if ($request->ajax()) {
+                $data = [];
+                foreach ($programRektors as $index => $program) {
+                    // Format the actions HTML
+                    $actions = '
+                        <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('program-rektors.show', $program->ProgramRektorID).'" data-title="Detail Program Rektor">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('program-rektors.edit', $program->ProgramRektorID).'" data-title="Edit Program Rektor">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button type="button" class="btn btn-danger btn-square btn-sm delete-program-rektor" data-id="'.$program->ProgramRektorID.'">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ';
+                    
+                    // Format the NA status
+                    $naStatus = '';
+                    if ($program->NA == 'Y') {
+                        $naStatus = '<span class="badge badge-danger">Non Aktif</span>';
+                    } else if ($program->NA == 'N') {
+                        $naStatus = '<span class="badge badge-success">Aktif</span>';
+                    }
+                    
+                    // Get mata anggaran names and format as ul/li
+                    $mataAnggaranIds = explode(',', $program->MataAnggaranID);
+                    $mataAnggaranItems = MataAnggaran::whereIn('MataAnggaranID', $mataAnggaranIds)->pluck('Nama')->toArray();
+                    $mataAnggaranHtml = '';
+                    if (count($mataAnggaranItems) > 0) {
+                        $mataAnggaranHtml = '<ul class=" mb-0">';
+                        foreach ($mataAnggaranItems as $item) {
+                            $mataAnggaranHtml .= '<li>' . $item . '</li>';
+                        }
+                        $mataAnggaranHtml .= '</ul>';
+                    }
+                    
+                    // Get pelaksana names from API data and format as ul/li
+                    $pelaksanaIds = explode(',', $program->PelaksanaID);
+                    $pelaksanaItems = [];
+                    foreach ($units as $unit) {
+                        if (in_array($unit['UnitID'], $pelaksanaIds)) {
+                            $pelaksanaItems[] = $unit['Nama'];
+                        }
+                    }
+                    
+                    $pelaksanaHtml = '';
+                    if (count($pelaksanaItems) > 0) {
+                        $pelaksanaHtml = '<ul class=" mb-0">';
+                        foreach ($pelaksanaItems as $item) {
+                            $pelaksanaHtml .= '<li>' . $item . '</li>';
+                        }
+                        $pelaksanaHtml .= '</ul>';
+                    }
+                    
+                    // Find penanggung jawab name from API data
+                    $penanggungJawabNama = '';
+                    foreach ($units as $unit) {
+                        if ($unit['UnitID'] == $program->PenanggungJawabID) {
+                            $penanggungJawabNama = $unit['Nama'];
+                            break;
+                        }
+                    }
+                    
+                    // Get indikator kinerja names and format as ul/li
+                    // Using the accessor method instead of the relationship
+                    $indikatorKinerjaIds = explode(',', $program->IndikatorKinerjaID);
+                    $indikatorKinerjaItems = IndikatorKinerja::whereIn('IndikatorKinerjaID', $indikatorKinerjaIds)->pluck('Nama')->toArray();
+                    $indikatorKinerjaHtml = '';
+                    if (count($indikatorKinerjaItems) > 0) {
+                        $indikatorKinerjaHtml = '<ul class="mb-0">';
+                        foreach ($indikatorKinerjaItems as $item) {
+                            $indikatorKinerjaHtml .= '<li>' . $item . '</li>';
+                        }
+                        $indikatorKinerjaHtml .= '</ul>';
+                    }
+                    
+                    // In the index method, modify the data array construction:
+                    $data[] = [
+                        'no' => $index + 1,
+                        'program_pengembangan' => nl2br($program->programPengembangan->Nama),
+                        'indikator_kinerja' => $indikatorKinerjaHtml,
+                        'nama' => nl2br($program->Nama),
+                        'jenis_kegiatan' => $program->jenisKegiatan->Nama,
+                        'jumlah_kegiatan' => number_format($program->JumlahKegiatan, 0, ',', '.'),
+                        'satuan' => $program->satuan->Nama,
+                        'harga_satuan' => 'Rp ' . number_format($program->HargaSatuan, 0, ',', '.'),
+                        'mata_anggaran' => $mataAnggaranHtml,
+                        'total' => 'Rp ' . number_format($program->Total, 0, ',', '.'),
+                        'penanggung_jawab' => $penanggungJawabNama,
+                        'pelaksana' => $pelaksanaHtml,
+                        'na' => $naStatus,
+                        'actions' => $actions,
+                        'row_class' => $program->NA == 'Y' ? 'bg-light text-muted' : ''
+                    ];
+                }
+                
+                return response()->json([
+                    'data' => $data
+                ]);
             }
-            return redirect()->route('program-rektors.index')->with('error', 'Gagal mengambil data unit dari API: ' . $response->status());
+            
+            return view('programRektors.index', compact(
+                'programRektors', 
+                'renstras', 
+                'pilars', 
+                'isuStrategis', 
+                'programPengembangans', 
+                'indikatorKinerjas', 
+                'selectedRenstra', 
+                'selectedPilar', 
+                'selectedIsu', 
+                'selectedProgramPengembangan', 
+                'selectedIndikatorKinerja',
+                'units'
+            ));
         }
-        
-        // Get the selected filters from the request
-        $selectedRenstra = request('renstraID');
-        $selectedPilar = request('pilarID');
-        $selectedIsu = request('isuID');
-        $selectedProgramPengembangan = request('programPengembanganID');
-        
-        // If renstra is selected, filter pilars
-        if ($selectedRenstra) {
-            $pilars = Pilar::where('RenstraID', $selectedRenstra)
-                ->where('NA', 'N')
-                ->get();
+    
+        public function create()
+        {
+            // Get all active renstras, pilars, and isu strategis
+            $renstras = Renstra::where('NA', 'N')->get();
+            $pilars = Pilar::where('NA', 'N')->get();
+            $isuStrategis = IsuStrategis::where('NA', 'N')->get();
+            $programPengembangans = ProgramPengembangan::where('NA', 'N')->get();
+            $indikatorKinerjas = IndikatorKinerja::where('NA', 'N')->get();
+            $jenisKegiatans = JenisKegiatan::where('NA', 'N')->get();
+            $mataAnggarans = MataAnggaran::where('NA', 'N')->get();
+            $satuans = Satuan::where('NA', 'N')->get();
+            $users = User::all();
+            
+            // Ambil SSO code dari session untuk API
+            $ssoCode = session('sso_code');
+            
+            if (!$ssoCode) {
+                if (request()->ajax()) {
+                    return response()->json(['error' => 'Sesi login telah berakhir. Silakan login kembali.'], 401);
+                }
+                return redirect('/login')->with('error', 'Sesi login telah berakhir. Silakan login kembali.');
+            }
+            
+            // Hit API untuk mendapatkan data unit
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $ssoCode,
+            ])->get("https://webhook.itp.ac.id/api/units", [
+                'order_by' => 'Nama',
+                'sort' => 'asc',
+                'limit' => 100
+            ]);
+            
+            $units = [];
+            if ($response->successful()) {
+                $responseData = $response->json();
                 
-            // Filter isu strategis by pilars from selected renstra
-            $pilarIds = $pilars->pluck('PilarID')->toArray();
-            $isuStrategis = IsuStrategis::whereIn('PilarID', $pilarIds)
-                ->where('NA', 'N')
-                ->get();
-                
-            // Filter program pengembangans by isu strategis from selected pilars
-            $isuIds = $isuStrategis->pluck('IsuID')->toArray();
-            $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
-                ->where('NA', 'N')
-                ->get();
-        }
-        
-        // If pilar is selected, filter isu strategis
-        if ($selectedPilar) {
-            $isuStrategis = IsuStrategis::where('PilarID', $selectedPilar)
-                ->where('NA', 'N')
-                ->get();
-                
-            // Filter program pengembangans by isu strategis from selected pilar
-            $isuIds = $isuStrategis->pluck('IsuID')->toArray();
-            $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
-                ->where('NA', 'N')
-                ->get();
-        }
-        
-        // If isu strategis is selected, filter program pengembangans
-        if ($selectedIsu) {
-            $programPengembangans = ProgramPengembangan::where('IsuID', $selectedIsu)
-                ->where('NA', 'N')
-                ->get();
-        }
-        
-        if (request()->ajax()) {
+                // Adapt the response to our expected format
+                // The API returns PosisiID instead of UnitID
+                foreach ($responseData as $unit) {
+                    if (isset($unit['PosisiID']) && isset($unit['Nama']) && $unit['NA'] === 'N') {
+                        $units[] = [
+                            'UnitID' => $unit['PosisiID'],
+                            'Nama' => $unit['Nama']
+                        ];
+                    }
+                }
+            } else {
+                if (request()->ajax()) {
+                    return response()->json(['error' => 'Gagal mengambil data unit dari API: ' . $response->status()], 500);
+                }
+                return redirect()->route('program-rektors.index')->with('error', 'Gagal mengambil data unit dari API: ' . $response->status());
+            }
+            
+            // Get the selected filters from the request
+            $selectedRenstra = request('renstraID');
+            $selectedPilar = request('pilarID');
+            $selectedIsu = request('isuID');
+            $selectedProgramPengembangan = request('programPengembanganID');
+            
+            // If renstra is selected, filter pilars
+            if ($selectedRenstra) {
+                $pilars = Pilar::where('RenstraID', $selectedRenstra)
+                    ->where('NA', 'N')
+                    ->get();
+                    
+                // Filter isu strategis by pilars from selected renstra
+                $pilarIds = $pilars->pluck('PilarID')->toArray();
+                $isuStrategis = IsuStrategis::whereIn('PilarID', $pilarIds)
+                    ->where('NA', 'N')
+                    ->get();
+                    
+                // Filter program pengembangans by isu strategis from selected pilars
+                $isuIds = $isuStrategis->pluck('IsuID')->toArray();
+                $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
+                    ->where('NA', 'N')
+                    ->get();
+            }
+            
+            // If pilar is selected, filter isu strategis
+            if ($selectedPilar) {
+                $isuStrategis = IsuStrategis::where('PilarID', $selectedPilar)
+                    ->where('NA', 'N')
+                    ->get();
+                    
+                // Filter program pengembangans by isu strategis from selected pilar
+                $isuIds = $isuStrategis->pluck('IsuID')->toArray();
+                $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
+                    ->where('NA', 'N')
+                    ->get();
+            }
+            
+            // If isu strategis is selected, filter program pengembangans
+            if ($selectedIsu) {
+                $programPengembangans = ProgramPengembangan::where('IsuID', $selectedIsu)
+                    ->where('NA', 'N')
+                    ->get();
+            }
+            
+            if (request()->ajax()) {
+                return view('programRektors.create', compact(
+                    'renstras',
+                    'pilars',
+                    'isuStrategis',
+                    'programPengembangans', 
+                    'indikatorKinerjas',
+                    'jenisKegiatans', 
+                    'mataAnggarans', 
+                    'satuans',
+                    'units', 
+                    'users',
+                    'selectedRenstra',
+                    'selectedPilar',
+                    'selectedIsu',
+                    'selectedProgramPengembangan'
+                ))->render();
+            }
+            
             return view('programRektors.create', compact(
                 'renstras',
                 'pilars',
@@ -388,85 +429,67 @@ class ProgramRektorController extends Controller
                 'indikatorKinerjas',
                 'jenisKegiatans', 
                 'mataAnggarans', 
-                'satuans',
+                'satuans', 
                 'units', 
                 'users',
                 'selectedRenstra',
                 'selectedPilar',
                 'selectedIsu',
                 'selectedProgramPengembangan'
-            ))->render();
+            ));
         }
-        
-        return view('programRektors.create', compact(
-            'renstras',
-            'pilars',
-            'isuStrategis',
-            'programPengembangans', 
-            'indikatorKinerjas',
-            'jenisKegiatans', 
-            'mataAnggarans', 
-            'satuans', 
-            'units', 
-            'users',
-            'selectedRenstra',
-            'selectedPilar',
-            'selectedIsu',
-            'selectedProgramPengembangan'
-        ));
-    }
-
-    public function exportExcel(Request $request)
-    {
-        // Base query with all necessary relationships
-        $programRektorsQuery = ProgramRektor::with([
-            'programPengembangan.isuStrategis.pilar.renstra',
-            'indikatorKinerja',
-            'jenisKegiatan',
-            'satuan',
-            'createdBy', 
-            'editedBy'
-        ]);
-        
-        // Apply filter if renstraID is provided
-        if ($request->has('renstraID') && $request->renstraID) {
-            // Filter pilars by renstraID
-            $pilarIds = Pilar::where('RenstraID', $request->renstraID)
-                ->where('NA', 'N')
-                ->pluck('PilarID');
-                
-            // Filter isu strategis by pilar IDs
-            $isuIds = IsuStrategis::whereIn('PilarID', $pilarIds)
-                ->where('NA', 'N')
-                ->pluck('IsuID');
-                
-            // Filter program pengembangans by isu IDs
-            $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
-                ->where('NA', 'N')
-                ->pluck('ProgramPengembanganID');
-                
-            $programRektorsQuery->whereIn('ProgramPengembanganID', $programIds);
-        }
-        
-        // Apply filter if pilarID is provided
-        if ($request->has('pilarID') && $request->pilarID) {
-            // Filter isu strategis by pilarID
-            $isuIds = IsuStrategis::where('PilarID', $request->pilarID)
-                ->where('NA', 'N')
-                ->pluck('IsuID');
-                
-            // Filter program pengembangans by isu IDs
-            $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
-                ->where('NA', 'N')
-                ->pluck('ProgramPengembanganID');
-                
-            $programRektorsQuery->whereIn('ProgramPengembanganID', $programIds);
-        }
-        
-        // Apply filter if isuID is provided
-        if ($request->has('isuID') && $request->isuID) {
-            // Filter program pengembangans by isuID
-            $programIds = ProgramPengembangan::where('IsuID', $request->isuID)
+    
+        public function exportExcel(Request $request)
+        {
+            // Base query with all necessary relationships
+            $programRektorsQuery = ProgramRektor::with([
+                'programPengembangan.isuStrategis.pilar.renstra',
+                'jenisKegiatan',
+                'satuan',
+                'createdBy', 
+                'editedBy'
+            ]);
+            
+            // Apply filter if renstraID is provided
+            if ($request->has('renstraID') && $request->renstraID) {
+                // Filter pilars by renstraID
+                $pilarIds = Pilar::where('RenstraID', $request->renstraID)
+                    ->where('NA', 'N')
+                    ->pluck('PilarID');
+                    
+                // Filter isu strategis by pilar IDs
+                $isuIds = IsuStrategis::whereIn('PilarID', $pilarIds)
+                    ->where('NA', 'N')
+                    ->pluck('IsuID');
+                    
+                // Filter program pengembangans by isu IDs
+                $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
+                    ->where('NA', 'N')
+                    ->pluck('ProgramPengembanganID');
+                    
+                $programRektorsQuery->whereIn('ProgramPengembanganID', $programIds);
+            }
+            
+            // Apply filter if pilarID is provided
+            if ($request->has('pilarID') && $request->pilarID) {
+                // Filter isu strategis by pilarID
+                $isuIds = IsuStrategis::where('PilarID', $request->pilarID)
+                    ->where('NA', 'N')
+                    ->pluck('IsuID');
+                    
+                // Filter program pengembangans by isu IDs
+                $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
+                    ->where('NA', 'N')
+                    ->pluck('ProgramPengembanganID');
+                    
+                $programRektorsQuery->whereIn('ProgramPengembanganID', $programIds);
+            }
+            
+            // Apply filter if isuID is provided
+            if ($request->has('isuID') && $request->isuID) {
+                // Filter program pengembangans by isuID
+                // Filter program pengembangans by isuID
+                $programIds = ProgramPengembangan::where('IsuID', $request->isuID)
                 ->where('NA', 'N')
                 ->pluck('ProgramPengembanganID');
                 
@@ -480,7 +503,13 @@ class ProgramRektorController extends Controller
         
         // Apply filter if indikatorKinerjaID is provided
         if ($request->has('indikatorKinerjaID') && $request->indikatorKinerjaID) {
-            $programRektorsQuery->where('IndikatorKinerjaID', $request->indikatorKinerjaID);
+            // Since IndikatorKinerjaID is stored as comma-separated values, we need to use LIKE
+            $programRektorsQuery->where(function($query) use ($request) {
+                $query->where('IndikatorKinerjaID', $request->indikatorKinerjaID)
+                      ->orWhere('IndikatorKinerjaID', 'LIKE', $request->indikatorKinerjaID.',%')
+                      ->orWhere('IndikatorKinerjaID', 'LIKE', '%,'.$request->indikatorKinerjaID)
+                      ->orWhere('IndikatorKinerjaID', 'LIKE', '%,'.$request->indikatorKinerjaID.',%');
+            });
         }
         
         // Get the filtered results
@@ -543,7 +572,7 @@ class ProgramRektorController extends Controller
     {
         $request->validate([
             'ProgramPengembanganID' => 'required|exists:program_pengembangans,ProgramPengembanganID',
-            'IndikatorKinerjaID' => 'required|exists:indikator_kinerjas,IndikatorKinerjaID',
+            'IndikatorKinerjaID' => 'required|array',
             'Nama' => 'required|string',
             'Output' => 'required|string',
             'Outcome' => 'required|string',
@@ -614,7 +643,7 @@ class ProgramRektorController extends Controller
 
         $programRektor = new ProgramRektor();
         $programRektor->ProgramPengembanganID = $request->ProgramPengembanganID;
-        $programRektor->IndikatorKinerjaID = $request->IndikatorKinerjaID;
+        $programRektor->IndikatorKinerjaID = implode(',', $request->IndikatorKinerjaID);
         $programRektor->Nama = $request->Nama;
         $programRektor->Output = $request->Output;
         $programRektor->Outcome = $request->Outcome;
@@ -636,15 +665,19 @@ class ProgramRektorController extends Controller
         }
         return redirect()->route('program-rektors.index')->with('success', 'Program Rektor berhasil ditambahkan');
     }
+    
     public function show(ProgramRektor $programRektor)
     {
         // Load relationships
         $programRektor->load([
             'programPengembangan.isuStrategis.pilar.renstra',
-            'indikatorKinerja',
             'jenisKegiatan',
             'satuan',
         ]);
+        
+        // Get indikator kinerja names
+        $indikatorKinerjaIds = explode(',', $programRektor->IndikatorKinerjaID);
+        $indikatorKinerjas = IndikatorKinerja::whereIn('IndikatorKinerjaID', $indikatorKinerjaIds)->get();
         
         // Get mata anggaran names
         $mataAnggaranIds = explode(',', $programRektor->MataAnggaranID);
@@ -708,9 +741,9 @@ class ProgramRektorController extends Controller
         }
         
         if (request()->ajax()) {
-            return view('programRektors.show', compact('programRektor', 'mataAnggarans', 'penanggungJawab', 'pelaksanas'))->render();
+            return view('programRektors.show', compact('programRektor', 'indikatorKinerjas', 'mataAnggarans', 'penanggungJawab', 'pelaksanas'))->render();
         }
-        return view('programRektors.show', compact('programRektor', 'mataAnggarans', 'penanggungJawab', 'pelaksanas'));
+        return view('programRektors.show', compact('programRektor', 'indikatorKinerjas', 'mataAnggarans', 'penanggungJawab', 'pelaksanas'));
     }
 
     public function edit(ProgramRektor $programRektor)
@@ -756,50 +789,74 @@ class ProgramRektorController extends Controller
         $units = [];
         
         // Adapt the response to our expected format
-        foreach ($responseData as $unit) {
-            if (isset($unit['PosisiID']) && isset($unit['Nama'])) {
-                $units[] = [
-                    'UnitID' => $unit['PosisiID'],
-                    'Nama' => $unit['Nama']
-                ];
+              // Adapt the response to our expected format
+              foreach ($responseData as $unit) {
+                if (isset($unit['PosisiID']) && isset($unit['Nama'])) {
+                    $units[] = [
+                        'UnitID' => $unit['PosisiID'],
+                        'Nama' => $unit['Nama']
+                    ];
+                }
             }
-        }
-        
-        // Load the program's relationships to get the hierarchy
-        $programRektor->load('programPengembangan.isuStrategis.pilar.renstra');
-        
-        // Get the selected values from the loaded relationships
-        $selectedRenstra = $programRektor->programPengembangan->isuStrategis->pilar->renstra->RenstraID;
-        $selectedPilar = $programRektor->programPengembangan->isuStrategis->pilar->PilarID;
-        $selectedIsu = $programRektor->programPengembangan->isuStrategis->IsuID;
-        $selectedProgramPengembangan = $programRektor->ProgramPengembanganID;
-        
-        // Filter pilars by selected renstra
-        if ($selectedRenstra) {
-            $pilars = Pilar::where('RenstraID', $selectedRenstra)
-                ->where('NA', 'N')
-                ->get();
-        }
-        
-        // Filter isu strategis by selected pilar
-        if ($selectedPilar) {
-            $isuStrategis = IsuStrategis::where('PilarID', $selectedPilar)
-                ->where('NA', 'N')
-                ->get();
-        }
-        
-        // Filter program pengembangans by selected isu
-        if ($selectedIsu) {
-            $programPengembangans = ProgramPengembangan::where('IsuID', $selectedIsu)
-                ->where('NA', 'N')
-                ->get();
-        }
-        
-        // Convert comma-separated IDs to arrays for select2 multiple
-        $selectedMataAnggarans = explode(',', $programRektor->MataAnggaranID);
-        $selectedPelaksanas = explode(',', $programRektor->PelaksanaID);
-        
-        if (request()->ajax()) {
+            
+            // Load the program's relationships to get the hierarchy
+            $programRektor->load('programPengembangan.isuStrategis.pilar.renstra');
+            
+            // Get the selected values from the loaded relationships
+            $selectedRenstra = $programRektor->programPengembangan->isuStrategis->pilar->renstra->RenstraID;
+            $selectedPilar = $programRektor->programPengembangan->isuStrategis->pilar->PilarID;
+            $selectedIsu = $programRektor->programPengembangan->isuStrategis->IsuID;
+            $selectedProgramPengembangan = $programRektor->ProgramPengembanganID;
+            
+            // Filter pilars by selected renstra
+            if ($selectedRenstra) {
+                $pilars = Pilar::where('RenstraID', $selectedRenstra)
+                    ->where('NA', 'N')
+                    ->get();
+            }
+            
+            // Filter isu strategis by selected pilar
+            if ($selectedPilar) {
+                $isuStrategis = IsuStrategis::where('PilarID', $selectedPilar)
+                    ->where('NA', 'N')
+                    ->get();
+            }
+            
+            // Filter program pengembangans by selected isu
+            if ($selectedIsu) {
+                $programPengembangans = ProgramPengembangan::where('IsuID', $selectedIsu)
+                    ->where('NA', 'N')
+                    ->get();
+            }
+            
+            // Convert comma-separated IDs to arrays for select2 multiple
+            $selectedIndikatorKinerjas = explode(',', $programRektor->IndikatorKinerjaID);
+            $selectedMataAnggarans = explode(',', $programRektor->MataAnggaranID);
+            $selectedPelaksanas = explode(',', $programRektor->PelaksanaID);
+            
+            if (request()->ajax()) {
+                return view('programRektors.edit', compact(
+                    'programRektor',
+                    'renstras',
+                    'pilars',
+                    'isuStrategis',
+                    'programPengembangans', 
+                    'indikatorKinerjas',
+                    'jenisKegiatans', 
+                    'mataAnggarans', 
+                    'satuans', 
+                    'units', 
+                    'users',
+                    'selectedRenstra',
+                    'selectedPilar',
+                    'selectedIsu',
+                    'selectedProgramPengembangan',
+                    'selectedIndikatorKinerjas',
+                    'selectedMataAnggarans',
+                    'selectedPelaksanas'
+                ))->render();
+            }
+            
             return view('programRektors.edit', compact(
                 'programRektor',
                 'renstras',
@@ -816,165 +873,143 @@ class ProgramRektorController extends Controller
                 'selectedPilar',
                 'selectedIsu',
                 'selectedProgramPengembangan',
+                'selectedIndikatorKinerjas',
                 'selectedMataAnggarans',
                 'selectedPelaksanas'
-            ))->render();
+            ));
         }
-        
-        return view('programRektors.edit', compact(
-            'programRektor',
-            'renstras',
-            'pilars',
-            'isuStrategis',
-            'programPengembangans', 
-            'indikatorKinerjas',
-            'jenisKegiatans', 
-            'mataAnggarans', 
-            'satuans', 
-            'units', 
-            'users',
-            'selectedRenstra',
-            'selectedPilar',
-            'selectedIsu',
-            'selectedProgramPengembangan',
-            'selectedMataAnggarans',
-            'selectedPelaksanas'
-        ));
-    }
-
-    public function update(Request $request, ProgramRektor $programRektor)
-    {
-        $request->validate([
-            'ProgramPengembanganID' => 'required|exists:program_pengembangans,ProgramPengembanganID',
-            'IndikatorKinerjaID' => 'required|exists:indikator_kinerjas,IndikatorKinerjaID',
-            'Nama' => 'required|string',
-            'Output' => 'required|string',
-            'Outcome' => 'required|string',
-            'JenisKegiatanID' => 'required|exists:jenis_kegiatans,JenisKegiatanID',
-            'MataAnggaranID' => 'required|array',
-            'JumlahKegiatan' => 'required|integer',
-            'SatuanID' => 'required|exists:satuans,SatuanID',
-            'HargaSatuan' => 'required|integer',
-            'Total' => 'required|integer',
-            'PenanggungJawabID' => 'required',
-            'PelaksanaID' => 'required|array',
-            'NA' => 'required|in:Y,N',
-        ]);
-
-        // Verify that the PenanggungJawabID and PelaksanaID exist in the API
-        $ssoCode = session('sso_code');
-        
-        if (!$ssoCode) {
-            if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => 'Sesi login telah berakhir. Silakan login kembali.'], 401);
-            }
-            return redirect('/login')->with('error', 'Sesi login telah berakhir. Silakan login kembali.');
-        }
-        
-        // Hit API untuk mendapatkan data unit
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $ssoCode,
-        ])->get("https://webhook.itp.ac.id/api/units", [
-            'order_by' => 'Nama',
-            'sort' => 'asc',
-            'limit' => 100
-        ]);
-        
-        if (!$response->successful()) {
-            if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => 'Gagal mengambil data unit dari API: ' . $response->status()], 500);
-            }
-            return redirect()->route('program-rektors.index')->with('error', 'Gagal mengambil data unit dari API: ' . $response->status());
-        }
-        
-        $responseData = $response->json();
-        $unitIds = [];
-        
-        // Extract unit IDs from the response
-        foreach ($responseData as $unit) {
-            if (isset($unit['PosisiID'])) {
-                $unitIds[] = $unit['PosisiID'];
-            }
-        }
-        
-        // Verify PenanggungJawabID exists
-        if (!in_array($request->PenanggungJawabID, $unitIds)) {
-            if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => 'Penanggung jawab yang dipilih tidak valid.'], 422);
-            }
-            return redirect()->back()->withInput()->withErrors(['PenanggungJawabID' => 'Penanggung jawab yang dipilih tidak valid.']);
-        }
-        
-        // Verify all PelaksanaID exist
-        foreach ($request->PelaksanaID as $pelaksanaId) {
-            if (!in_array($pelaksanaId, $unitIds)) {
+    
+        public function update(Request $request, ProgramRektor $programRektor)
+        {
+            $request->validate([
+                'ProgramPengembanganID' => 'required|exists:program_pengembangans,ProgramPengembanganID',
+                'IndikatorKinerjaID' => 'required|array',
+                'Nama' => 'required|string',
+                'Output' => 'required|string',
+                'Outcome' => 'required|string',
+                'JenisKegiatanID' => 'required|exists:jenis_kegiatans,JenisKegiatanID',
+                'MataAnggaranID' => 'required|array',
+                'JumlahKegiatan' => 'required|integer',
+                'SatuanID' => 'required|exists:satuans,SatuanID',
+                'HargaSatuan' => 'required|integer',
+                'Total' => 'required|integer',
+                'PenanggungJawabID' => 'required',
+                'PelaksanaID' => 'required|array',
+                'NA' => 'required|in:Y,N',
+            ]);
+    
+            // Verify that the PenanggungJawabID and PelaksanaID exist in the API
+            $ssoCode = session('sso_code');
+            
+            if (!$ssoCode) {
                 if ($request->ajax()) {
-                    return response()->json(['success' => false, 'message' => 'Salah satu pelaksana yang dipilih tidak valid.'], 422);
+                    return response()->json(['success' => false, 'message' => 'Sesi login telah berakhir. Silakan login kembali.'], 401);
                 }
-                return redirect()->back()->withInput()->withErrors(['PelaksanaID' => 'Salah satu pelaksana yang dipilih tidak valid.']);
-            }
-        }
-
-        $programRektor->ProgramPengembanganID = $request->ProgramPengembanganID;
-        $programRektor->IndikatorKinerjaID = $request->IndikatorKinerjaID;
-        $programRektor->Nama = $request->Nama;
-        $programRektor->Output = $request->Output;
-        $programRektor->Outcome = $request->Outcome;
-        $programRektor->JenisKegiatanID = $request->JenisKegiatanID;
-        $programRektor->MataAnggaranID = implode(',', $request->MataAnggaranID);
-        $programRektor->JumlahKegiatan = $request->JumlahKegiatan;
-        $programRektor->SatuanID = $request->SatuanID;
-        $programRektor->HargaSatuan = $request->HargaSatuan;
-        $programRektor->Total = $request->Total;
-        $programRektor->PenanggungJawabID = $request->PenanggungJawabID;
-        $programRektor->PelaksanaID = implode(',', $request->PelaksanaID);
-        $programRektor->NA = $request->NA;
-        $programRektor->DEdited = now();
-        $programRektor->UEdited = Auth::id();
-        $programRektor->save();
-
-        if ($request->ajax()) {
-            return response()->json(['success' => true, 'message' => 'Program Rektor berhasil diupdate']);
-        }
-        return redirect()->route('program-rektors.index')->with('success', 'Program Rektor berhasil diupdate');
-    }
-
-    public function destroy(ProgramRektor $programRektor)
-    {
-        try {
-            $programRektor->delete();
-            
-            if (request()->ajax()) {
-                return response()->json(['success' => true, 'message' => 'Program Rektor berhasil dihapus']);
+                return redirect('/login')->with('error', 'Sesi login telah berakhir. Silakan login kembali.');
             }
             
-            return redirect()->route('program-rektors.index')->with('success', 'Program Rektor berhasil dihapus');
-        } catch (QueryException $e) {
-            // Check if it's a foreign key constraint error
-            if ($e->getCode() == 23000) { // Integrity constraint violation
+            // Hit API untuk mendapatkan data unit
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $ssoCode,
+            ])->get("https://webhook.itp.ac.id/api/units", [
+                'order_by' => 'Nama',
+                'sort' => 'asc',
+                'limit' => 100
+            ]);
+            
+            if (!$response->successful()) {
+                if ($request->ajax()) {
+                    return response()->json(['success' => false, 'message' => 'Gagal mengambil data unit dari API: ' . $response->status()], 500);
+                }
+                return redirect()->route('program-rektors.index')->with('error', 'Gagal mengambil data unit dari API: ' . $response->status());
+            }
+            
+            $responseData = $response->json();
+            $unitIds = [];
+            
+            // Extract unit IDs from the response
+            foreach ($responseData as $unit) {
+                if (isset($unit['PosisiID'])) {
+                    $unitIds[] = $unit['PosisiID'];
+                }
+            }
+            
+            // Verify PenanggungJawabID exists
+            if (!in_array($request->PenanggungJawabID, $unitIds)) {
+                if ($request->ajax()) {
+                    return response()->json(['success' => false, 'message' => 'Penanggung jawab yang dipilih tidak valid.'], 422);
+                }
+                return redirect()->back()->withInput()->withErrors(['PenanggungJawabID' => 'Penanggung jawab yang dipilih tidak valid.']);
+            }
+            
+            // Verify all PelaksanaID exist
+            foreach ($request->PelaksanaID as $pelaksanaId) {
+                if (!in_array($pelaksanaId, $unitIds)) {
+                    if ($request->ajax()) {
+                        return response()->json(['success' => false, 'message' => 'Salah satu pelaksana yang dipilih tidak valid.'], 422);
+                    }
+                    return redirect()->back()->withInput()->withErrors(['PelaksanaID' => 'Salah satu pelaksana yang dipilih tidak valid.']);
+                }
+            }
+            $programRektor->ProgramPengembanganID = $request->ProgramPengembanganID;
+            $programRektor->IndikatorKinerjaID = implode(',', $request->IndikatorKinerjaID);
+            $programRektor->Nama = $request->Nama;
+            $programRektor->Output = $request->Output;
+            $programRektor->Outcome = $request->Outcome;
+            $programRektor->JenisKegiatanID = $request->JenisKegiatanID;
+            $programRektor->MataAnggaranID = implode(',', $request->MataAnggaranID);
+            $programRektor->JumlahKegiatan = $request->JumlahKegiatan;
+            $programRektor->SatuanID = $request->SatuanID;
+            $programRektor->HargaSatuan = $request->HargaSatuan;
+            $programRektor->Total = $request->Total;
+            $programRektor->PenanggungJawabID = $request->PenanggungJawabID;
+            $programRektor->PelaksanaID = implode(',', $request->PelaksanaID);
+            $programRektor->NA = $request->NA;
+            $programRektor->DEdited = now();
+            $programRektor->UEdited = Auth::id();
+            $programRektor->save();
+    
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Program Rektor berhasil diupdate']);
+            }
+            return redirect()->route('program-rektors.index')->with('success', 'Program Rektor berhasil diupdate');
+        }
+    
+        public function destroy(ProgramRektor $programRektor)
+        {
+            try {
+                $programRektor->delete();
+                
+                if (request()->ajax()) {
+                    return response()->json(['success' => true, 'message' => 'Program Rektor berhasil dihapus']);
+                }
+                
+                return redirect()->route('program-rektors.index')->with('success', 'Program Rektor berhasil dihapus');
+            } catch (QueryException $e) {
+                // Check if it's a foreign key constraint error
+                if ($e->getCode() == 23000) { // Integrity constraint violation
+                    if (request()->ajax()) {
+                        return response()->json([
+                            'success' => false, 
+                            'message' => 'Tidak dapat menghapus program rektor ini karena dirujuk oleh baris di table lain.'
+                        ], 422);
+                    }
+                    
+                    return redirect()->route('program-rektors.index')
+                        ->with('error', 'Tidak dapat menghapus program rektor ini karena dirujuk oleh baris di table lain.');
+                }
+                
+                // For other database errors
                 if (request()->ajax()) {
                     return response()->json([
                         'success' => false, 
-                        'message' => 'Tidak dapat menghapus program rektor ini karena dirujuk oleh baris di table lain.'
-                    ], 422);
+                        'message' => 'Database error occurred: ' . $e->getMessage()
+                    ], 500);
                 }
                 
                 return redirect()->route('program-rektors.index')
-                    ->with('error', 'Tidak dapat menghapus program rektor ini karena dirujuk oleh baris di table lain.');
+                    ->with('error', 'Database error occurred: ' . $e->getMessage());
             }
-            
-            // For other database errors
-            if (request()->ajax()) {
-                return response()->json([
-                    'success' => false, 
-                    'message' => 'Database error occurred: ' . $e->getMessage()
-                ], 500);
-            }
-            
-            return redirect()->route('program-rektors.index')
-                ->with('error', 'Database error occurred: ' . $e->getMessage());
         }
     }
-}
-
- 
+    

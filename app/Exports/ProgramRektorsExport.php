@@ -5,6 +5,7 @@ namespace App\Exports;
 use App\Models\ProgramRektor;
 use App\Models\MataAnggaran;
 use App\Models\Unit;
+use App\Models\IndikatorKinerja;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -32,10 +33,10 @@ class ProgramRektorsExport implements FromCollection, WithHeadings, WithMapping,
         
         return ProgramRektor::with([
             'programPengembangan.isuStrategis.pilar.renstra',
-            'indikatorKinerja', // Added indikatorKinerja relationship
             'jenisKegiatan',
             'satuan',
-            'penanggungJawab',
+            'createdBy',
+            'editedBy'
         ])->get();
     }
 
@@ -50,7 +51,7 @@ class ProgramRektorsExport implements FromCollection, WithHeadings, WithMapping,
             'Pilar',
             'Isu Strategis',
             'Program Pengembangan',
-            'Indikator Kinerja', // Added Indikator Kinerja column
+            'Indikator Kinerja',
             'Nama',
             'Output',
             'Outcome',
@@ -80,6 +81,12 @@ class ProgramRektorsExport implements FromCollection, WithHeadings, WithMapping,
         $pilar = $isuStrategis->pilar;
         $renstra = $pilar->renstra;
 
+        // Get indikator kinerja names
+        $indikatorKinerjaIds = explode(',', $programRektor->IndikatorKinerjaID);
+        $indikatorKinerjaNames = IndikatorKinerja::whereIn('IndikatorKinerjaID', $indikatorKinerjaIds)
+            ->pluck('Nama')
+            ->implode(', ');
+
         // Get mata anggaran names
         $mataAnggaranIds = explode(',', $programRektor->MataAnggaranID);
         $mataAnggaranNames = MataAnggaran::whereIn('MataAnggaranID', $mataAnggaranIds)
@@ -88,9 +95,24 @@ class ProgramRektorsExport implements FromCollection, WithHeadings, WithMapping,
         
         // Get pelaksana names
         $pelaksanaIds = explode(',', $programRektor->PelaksanaID);
-        $pelaksanaNames = Unit::whereIn('UnitID', $pelaksanaIds)
-            ->pluck('Nama')
-            ->implode(', ');
+        $pelaksanaNames = '';
+        
+        // Check if we have penanggungJawabNama property (set in controller)
+        $penanggungJawabName = '';
+        if (isset($programRektor->penanggungJawabNama)) {
+            $penanggungJawabName = $programRektor->penanggungJawabNama;
+        } else if (isset($programRektor->penanggungJawab)) {
+            $penanggungJawabName = $programRektor->penanggungJawab->Nama;
+        }
+        
+        // Check if we have pelaksanaNames property (set in controller)
+        if (isset($programRektor->pelaksanaNames) && is_array($programRektor->pelaksanaNames)) {
+            $pelaksanaNames = implode(', ', $programRektor->pelaksanaNames);
+        } else {
+            $pelaksanaNames = Unit::whereIn('UnitID', $pelaksanaIds)
+                ->pluck('Nama')
+                ->implode(', ');
+        }
 
         // Format NA status
         $naStatus = ($programRektor->NA == 'Y') ? 'Non Aktif' : 'Aktif';
@@ -101,7 +123,7 @@ class ProgramRektorsExport implements FromCollection, WithHeadings, WithMapping,
             $pilar->Nama,
             $isuStrategis->Nama,
             $programPengembangan->Nama,
-            $programRektor->indikatorKinerja->Nama, // Added Indikator Kinerja
+            $indikatorKinerjaNames,
             $programRektor->Nama,
             $programRektor->Output,
             $programRektor->Outcome,
@@ -111,7 +133,7 @@ class ProgramRektorsExport implements FromCollection, WithHeadings, WithMapping,
             $programRektor->satuan->Nama,
             $programRektor->HargaSatuan,
             $programRektor->Total,
-            $programRektor->penanggungJawab->Nama,
+            $penanggungJawabName,
             $pelaksanaNames,
             $naStatus
         ];
