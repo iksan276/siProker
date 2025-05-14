@@ -48,6 +48,38 @@
     </table>
 </div>
 
+
+<!-- Kegiatan Info Display -->
+<div class="alert alert-info mt-2 py-2">
+    <div class="d-flex align-items-center">
+        <div class="mr-3">
+            <span class="badge badge-primary">Info Kegiatan</span>
+        </div>
+        <div class="d-flex flex-wrap">
+            <div class="mr-3"><small><strong>Program Rektor:</strong> {{ $kegiatan->programRektor->Nama ?? '-' }}</small></div>
+            <div class="mr-3"><small><strong>Total Anggaran:</strong> {{ $kegiatan->FormattedTotalRABAmount }}</small></div>
+            <div class="mr-3"><small><strong>Sisa Anggaran:</strong> Rp {{ number_format(($kegiatan->programRektor->Total ?? 0) - $kegiatan->getTotalRABAmount(), 0, ',', '.') }}</small></div>
+        </div>
+    </div>
+</div>
+
+<!-- Program Rektor Info Display -->
+<div class="alert alert-info mt-2 py-2">
+    <div class="d-flex align-items-center">
+        <div class="mr-3">
+            <span class="badge badge-primary">Info Program Rektor</span>
+        </div>
+        <div class="d-flex flex-wrap">
+            <div class="mr-3"><small><strong>Jumlah:</strong> {{ $kegiatan->programRektor->JumlahKegiatan ?? '-' }}</small></div>
+            <div class="mr-3"><small><strong>Satuan:</strong> {{ $kegiatan->programRektor->satuan->Nama ?? '-' }}</small></div>
+            <div class="mr-3"><small><strong>Harga:</strong> Rp {{ number_format($kegiatan->programRektor->HargaSatuan ?? 0, 0, ',', '.') }}</small></div>
+            <div class="mr-3"><small><strong>Total:</strong> Rp {{ number_format($kegiatan->programRektor->Total ?? 0, 0, ',', '.') }}</small></div>
+            <div><small><strong>Penanggung Jawab:</strong> {{ $kegiatan->programRektor->PenanggungJawab ?? '-' }}</small></div>
+        </div>
+    </div>
+</div>
+
+
 @if($kegiatan->subKegiatans->count() > 0)
 <div class="mt-4">
     <label class="font-weight-bold">Sub Kegiatan</label>

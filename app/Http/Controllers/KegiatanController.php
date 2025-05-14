@@ -279,6 +279,7 @@ class KegiatanController extends Controller
                 'id' => 'kegiatan_' . $kegiatan->KegiatanID,
                 'no' => $rowIndex++,
                 'nama' => '<span data-toggle="tooltip" title="Ini adalah Kegiatan">' . $kegiatan->Nama . '</span>',
+                'program_rektor_id' => $kegiatan->ProgramRektorID,
                 'type' => 'kegiatan',
                 'parent' => null,
                 'level' => 0,

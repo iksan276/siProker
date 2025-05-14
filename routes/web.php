@@ -48,6 +48,9 @@ Route::middleware('auth')->prefix('api')->group(function() {
     Route::get('/programs-by-rektor', 'App\Http\Controllers\ApiController@getProgramRektor')->name('api.programs-by-rektor');
     Route::get('/sub-kegiatans-by-kegiatan', 'App\Http\Controllers\ApiController@getSubKegiatansByKegiatan')->name('api.sub-kegiatans-by-kegiatan');
     Route::get('/program-rektor-details/{id}', 'App\Http\Controllers\ApiController@getProgramRektorDetails')->name('api.program-rektor-details');
+    Route::get('/kegiatan-details/{id}', 'App\Http\Controllers\ApiController@getKegiatanDetails')->name('api.kegiatan-details');
+    // Add this to the existing API routes
+    Route::get('/sub-kegiatan-details/{id}', 'App\Http\Controllers\ApiController@getSubKegiatanDetails')->name('api.sub-kegiatan-details');
 });
 
 Route::get('/auth/oauth_google', [OAuthGoogleController::class, 'authenticate']);
