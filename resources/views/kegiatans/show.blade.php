@@ -74,7 +74,7 @@
             <div class="mr-3"><small><strong>Satuan:</strong> {{ $kegiatan->programRektor->satuan->Nama ?? '-' }}</small></div>
             <div class="mr-3"><small><strong>Harga:</strong> Rp {{ number_format($kegiatan->programRektor->HargaSatuan ?? 0, 0, ',', '.') }}</small></div>
             <div class="mr-3"><small><strong>Total:</strong> Rp {{ number_format($kegiatan->programRektor->Total ?? 0, 0, ',', '.') }}</small></div>
-            <div><small><strong>Penanggung Jawab:</strong> {{ $kegiatan->programRektor->PenanggungJawab ?? '-' }}</small></div>
+            <div><small><strong>Penanggung Jawab:</strong> {{ $penanggungJawabName }}</small></div>
         </div>
     </div>
 </div>

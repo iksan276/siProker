@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\KegiatansExport;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Http;
 
 class KegiatanController extends Controller
 {
@@ -764,25 +765,57 @@ class KegiatanController extends Controller
                 }
             }
         
-            public function show($id)
-            {
-                $kegiatan = Kegiatan::with([
-                    'programRektor', 
-                    'programRektor.programPengembangan', 
-                    'programRektor.programPengembangan.isuStrategis', 
-                    'programRektor.programPengembangan.isuStrategis.pilar',
-                    'programRektor.programPengembangan.isuStrategis.pilar.renstra',
-                    'createdBy', 
-                    'editedBy',
-                    'subKegiatans.rabs.satuanRelation',
-                    'rabs.satuanRelation'
-                ])->findOrFail($id);
+           public function show($id)
+{
+    $kegiatan = Kegiatan::with([
+        'programRektor', 
+        'programRektor.programPengembangan', 
+        'programRektor.programPengembangan.isuStrategis', 
+        'programRektor.programPengembangan.isuStrategis.pilar',
+        'programRektor.programPengembangan.isuStrategis.pilar.renstra',
+        'createdBy', 
+        'editedBy',
+        'subKegiatans.rabs.satuanRelation',
+        'rabs.satuanRelation'
+    ])->findOrFail($id);
+    
+    // Get penanggung jawab name if available
+    $penanggungJawabName = '-';
+    if ($kegiatan->programRektor && $kegiatan->programRektor->PenanggungJawabID) {
+        // Get SSO code from session for API
+        $ssoCode = session('sso_code');
+        
+        if ($ssoCode) {
+            // Get unit data from API
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $ssoCode,
+            ])->get("https://webhook.itp.ac.id/api/units", [
+                'order_by' => 'Nama',
+                'sort' => 'asc',
+                'limit' => 100
+            ]);
+            
+            if ($response->successful()) {
+                $units = $response->json();
                 
-                if (request()->ajax()) {
-                    return view('kegiatans.show', compact('kegiatan'))->render();
+                // Find penanggung jawab name from API data
+                foreach ($units as $unit) {
+                    if (isset($unit['PosisiID']) && $unit['PosisiID'] == $kegiatan->programRektor->PenanggungJawabID) {
+                        $penanggungJawabName = $unit['Nama'];
+                        break;
+                    }
                 }
-                return view('kegiatans.show', compact('kegiatan'));
             }
+        }
+    }
+    
+    // Pass the penanggung jawab name to the view
+    if (request()->ajax()) {
+        return view('kegiatans.show', compact('kegiatan', 'penanggungJawabName'))->render();
+    }
+    return view('kegiatans.show', compact('kegiatan', 'penanggungJawabName'));
+}
+
         
             public function edit($id)
             {
