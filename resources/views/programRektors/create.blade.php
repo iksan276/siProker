@@ -26,13 +26,13 @@
     </div>
     
     <div class="row">
-        <div class="col-sm-6">
+        <div class="col-sm-12">
             <div class="form-group">
                 <label for="Output">Output</label>
                 <textarea name="Output" id="Output" class="form-control" rows="3"></textarea>
             </div>
         </div>
-        <div class="col-sm-6">
+        <div class="col-sm-12">
             <div class="form-group">
                 <label for="Outcome">Outcome</label>
                 <textarea name="Outcome" id="Outcome" class="form-control" rows="3"></textarea>
@@ -141,49 +141,81 @@
 
 <script>
 $(document).ready(function() {
-    // Get the selected values from cookies if not already set
-    if (!$('#ProgramPengembanganID').val()) {
-        var programPengembanganCookie = getCookie('selected_program_pengembangan');
+    
+    // Get the selected values from URL parameters first, then cookies
+    setFilterValuesFromUrlOrCookie();
+    
+    // Calculate total when inputs change
+    $('#JumlahKegiatan, #HargaSatuan').on('change keyup', function() {
+        calculateTotal();
+    });
+});
+
+function setFilterValuesFromUrlOrCookie() {
+    // Get URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Set Program Pengembangan from URL or cookie
+    const programPengembanganParam = urlParams.get('programPengembanganID');
+    if (programPengembanganParam) {
+        $('#ProgramPengembanganID').val(programPengembanganParam).trigger('change');
+    } else {
+        const programPengembanganCookie = getCookie('selected_program_pengembangan');
         if (programPengembanganCookie) {
             $('#ProgramPengembanganID').val(programPengembanganCookie).trigger('change');
         }
     }
     
-    // Handle Indikator Kinerja selection from filter
-    if (!$('#IndikatorKinerjaID').val() || $('#IndikatorKinerjaID').val().length === 0) {
-        // First try to get from URL parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        const indikatorKinerjaParam = urlParams.get('indikatorKinerjaID');
-        
-        if (indikatorKinerjaParam) {
-            // Check if the parameter contains multiple values (comma-separated)
-            const indikatorValues = indikatorKinerjaParam.includes(',') 
-                ? indikatorKinerjaParam.split(',') 
-                : [indikatorKinerjaParam];
-                
-            $('#IndikatorKinerjaID').val(indikatorValues).trigger('change');
-        } else {
-            // If not in URL, try to get from cookie
-            var indikatorKinerjaCookie = getCookie('selected_indikator_kinerja');
-            if (indikatorKinerjaCookie) {
-                // Handle both array and string formats from cookie
-                let indikatorValues;
-                
-                try {
-                    // Try to parse as JSON (for array format)
-                    indikatorValues = JSON.parse(indikatorKinerjaCookie);
-                } catch (e) {
-                    // If not valid JSON, treat as comma-separated string
+    // Set Indikator Kinerja from URL or cookie
+    const indikatorKinerjaParam = urlParams.get('indikatorKinerjaID');
+    if (indikatorKinerjaParam) {
+        // Handle both single value and comma-separated values
+        const indikatorValues = indikatorKinerjaParam.includes(',') 
+            ? indikatorKinerjaParam.split(',') 
+            : [indikatorKinerjaParam];
+            
+        $('#IndikatorKinerjaID').val(indikatorValues).trigger('change');
+    } else {
+        // If not in URL, try to get from cookie
+        const indikatorKinerjaCookie = getCookie('selected_indikator_kinerja');
+        if (indikatorKinerjaCookie) {
+            // Handle different formats of cookie value
+            let indikatorValues;
+            
+            if (Array.isArray(indikatorKinerjaCookie)) {
+                // Already an array
+                indikatorValues = indikatorKinerjaCookie;
+            } else if (typeof indikatorKinerjaCookie === 'string') {
+                // Try to parse as JSON if it looks like an array
+                if (indikatorKinerjaCookie.startsWith('[')) {
+                    try {
+                        indikatorValues = JSON.parse(indikatorKinerjaCookie);
+                    } catch (e) {
+                        // If parsing fails, treat as comma-separated string
+                        indikatorValues = indikatorKinerjaCookie.includes(',') 
+                            ? indikatorKinerjaCookie.split(',') 
+                            : [indikatorKinerjaCookie];
+                    }
+                } else {
+                    // Simple string, possibly comma-separated
                     indikatorValues = indikatorKinerjaCookie.includes(',') 
                         ? indikatorKinerjaCookie.split(',') 
                         : [indikatorKinerjaCookie];
                 }
+            }
+            
+            // Set the values if we have any
+            if (indikatorValues && indikatorValues.length > 0) {
+                // Filter out empty values
+                indikatorValues = indikatorValues.filter(val => val && val !== '');
                 
-                $('#IndikatorKinerjaID').val(indikatorValues).trigger('change');
+                if (indikatorValues.length > 0) {
+                    $('#IndikatorKinerjaID').val(indikatorValues).trigger('change');
+                }
             }
         }
     }
-});
+}
 
 // Cookie function that can handle arrays
 function getCookie(name) {

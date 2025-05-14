@@ -25,13 +25,13 @@
     </div>
     
     <div class="row">
-        <div class="col-sm-6">
+        <div class="col-sm-12">
             <div class="form-group">
                 <label for="Output">Output</label>
                 <textarea name="Output" id="Output" class="form-control" rows="3">{{ $programRektor->Output }}</textarea>
             </div>
         </div>
-        <div class="col-sm-6">
+        <div class="col-sm-12">
             <div class="form-group">
                 <label for="Outcome">Outcome</label>
                 <textarea name="Outcome" id="Outcome" class="form-control" rows="3">{{ $programRektor->Outcome }}</textarea>
