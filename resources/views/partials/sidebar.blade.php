@@ -33,7 +33,7 @@
     <!-- Master Tree -->
     @php
         $masterActive = request()->is('users*') || request()->is('renstras*') || request()->is('satuans*') || 
-                        request()->is('meta-anggarans*') || request()->is('jenis-kegiatans*') || request()->is('units*');
+                        request()->is('meta-anggarans*') || request()->is('jenis-kegiatans*') || request()->is('units*') || request()->is('ikupts*') || request()->is('kriteria-akreditasis*');
     @endphp
     <li class="nav-item {{ $masterActive ? 'active' : '' }}">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMaster"
@@ -61,7 +61,12 @@
                 <a class="collapse-item {{ request()->is('units*') ? 'active' : '' }}" href="{{ route('units.index') }}">
                     <i class="fas fa-fw fa-building"></i> Unit
                 </a>
-
+                <a class="collapse-item {{ request()->is('ikupts*') ? 'active' : '' }}" href="{{ route('ikupts.index') }}">
+                        <i class="fas fa-fw fa-chart-line"></i> IKU PT
+                    </a>
+                    <a class="collapse-item {{ request()->is('kriteria-akreditasis*') ? 'active' : '' }}" href="{{ route('kriteria-akreditasis.index') }}">
+                        <i class="fas fa-fw fa-award"></i> Kriteria Akreditasi
+                    </a>
             </div>
         </div>
     </li>

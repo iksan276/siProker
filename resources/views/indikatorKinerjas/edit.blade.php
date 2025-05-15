@@ -20,7 +20,7 @@
     </div>
 
     <div class="row">
-    <div class="col-sm-2">
+        <div class="col-sm-2">
             <div class="form-group">
                 <label for="Baseline">Baseline</label>
                 <textarea name="Baseline" id="Baseline" class="form-control" rows="1">{{ $indikatorKinerja->Baseline }}</textarea>
@@ -40,7 +40,7 @@
         </div>
         <div class="col-sm-2">
             <div class="form-group">
-            <label for="Tahun3" id="tahun3Label">{{ $yearLabels[2] ?? '2027' }}</label>
+                <label for="Tahun3" id="tahun3Label">{{ $yearLabels[2] ?? '2027' }}</label>
                 <input type="text" name="Tahun3" id="Tahun3" class="form-control"  value="{{ $indikatorKinerja->Tahun3 }}">
             </div>
         </div>
@@ -58,7 +58,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-sm-6">
+        <div class="col-sm-12">
             <div class="form-group">
                 <label for="MendukungIKU">Mendukung IKU PT / Kriteria Akreditasi</label>
                 <select name="MendukungIKU" id="MendukungIKU" class="form-control">
@@ -67,7 +67,40 @@
                 </select>
             </div>
         </div>
-        <div class="col-sm-6">
+    </div>
+    
+    <div id="ikuptSection" style="display: {{ $indikatorKinerja->MendukungIKU == 'Y' ? 'block' : 'none' }};">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="IKUPTID">IKU PT</label>
+                    <select name="IKUPTID[]" id="IKUPTID" class="form-control select2" multiple>
+                        @foreach($ikupts as $ikupt)
+                            <option value="{{ $ikupt->IKUPTID }}" {{ in_array($ikupt->IKUPTID, $selectedIKUPTIds) ? 'selected' : '' }}>{{ $ikupt->Nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="kriteriaSection" style="display: {{ $indikatorKinerja->MendukungIKU == 'N' ? 'block' : 'none' }};">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="KriteriaAkreditasiID">Kriteria Akreditasi</label>
+                    <select name="KriteriaAkreditasiID[]" id="KriteriaAkreditasiID" class="form-control select2" multiple>
+                        @foreach($kriteriaAkreditasis as $kriteria)
+                            <option value="{{ $kriteria->KriteriaAkreditasiID }}" {{ in_array($kriteria->KriteriaAkreditasiID, $selectedKriteriaIds) ? 'selected' : '' }}>{{ $kriteria->Nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-sm-12">
             <div class="form-group">
                 <label for="NA">Status</label>
                 <select name="NA" id="NA" class="form-control">
@@ -84,6 +117,35 @@
 </form>
 
 <script>
+    // Toggle IKU PT / Kriteria Akreditasi sections based on MendukungIKU selection
+document.getElementById('MendukungIKU').addEventListener('change', function() {
+    toggleSections(this.value);
+});
+
+// Function to toggle sections based on MendukungIKU value
+function toggleSections(value) {
+    const ikuptSection = document.getElementById('ikuptSection');
+    const kriteriaSection = document.getElementById('kriteriaSection');
+    
+    if (value === 'Y') {
+        ikuptSection.style.display = 'block';
+        kriteriaSection.style.display = 'none';
+        
+        // Reset the other select when switching
+        if (typeof $('#KriteriaAkreditasiID').select2 !== 'undefined') {
+            $('#KriteriaAkreditasiID').val(null).trigger('change');
+        }
+    } else {
+        ikuptSection.style.display = 'none';
+        kriteriaSection.style.display = 'block';
+        
+        // Reset the other select when switching
+        if (typeof $('#IKUPTID').select2 !== 'undefined') {
+            $('#IKUPTID').val(null).trigger('change');
+        }
+    }
+}
+
 document.getElementById('indikatorKinerjaEditForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent the form from traditional submission
     
@@ -119,6 +181,31 @@ document.getElementById('indikatorKinerjaEditForm').addEventListener('submit', f
         return false;
     }
     
- 
+  
+
+// Toggle IKU PT / Kriteria Akreditasi sections based on MendukungIKU selection
+document.getElementById('MendukungIKU').addEventListener('change', function() {
+    const ikuptSection = document.getElementById('ikuptSection');
+    const kriteriaSection = document.getElementById('kriteriaSection');
+    
+    if (this.value === 'Y') {
+        ikuptSection.style.display = 'block';
+        kriteriaSection.style.display = 'none';
+        
+        // Reset the other select when switching
+        if (typeof $('#KriteriaAkreditasiID').select2 !== 'undefined') {
+            $('#KriteriaAkreditasiID').val(null).trigger('change');
+        }
+    } else {
+        ikuptSection.style.display = 'none';
+        kriteriaSection.style.display = 'block';
+        
+        // Reset the other select when switching
+        if (typeof $('#IKUPTID').select2 !== 'undefined') {
+            $('#IKUPTID').val(null).trigger('change');
+        }
+    }
 });
+});
+
 </script>

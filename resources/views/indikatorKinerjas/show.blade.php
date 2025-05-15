@@ -12,7 +12,7 @@
             <th>Satuan</th>
             <td>{{ $indikatorKinerja->satuan->Nama }}</td>
         </tr>
-        <tr>
+              <tr>
             <th>Baseline</th>
             <td>{!! nl2br($indikatorKinerja->Baseline) !!}</td>
         </tr>
@@ -47,6 +47,33 @@
                 @endif
             </td>
         </tr>
+        
+        @if($indikatorKinerja->MendukungIKU == 'Y' && count($ikupts) > 0)
+        <tr>
+            <th>IKU PT</th>
+            <td>
+                <ul class="mb-0 pl-3">
+                    @foreach($ikupts as $ikupt)
+                        <li>{{ $ikupt->Nama }}</li>
+                    @endforeach
+                </ul>
+            </td>
+        </tr>
+        @endif
+        
+        @if($indikatorKinerja->MendukungIKU == 'N' && count($kriteriaAkreditasis) > 0)
+        <tr>
+            <th>Kriteria Akreditasi</th>
+            <td>
+                <ul class="mb-0 pl-3">
+                    @foreach($kriteriaAkreditasis as $kriteria)
+                        <li>{{ $kriteria->Nama }}</li>
+                    @endforeach
+                </ul>
+            </td>
+        </tr>
+        @endif
+        
         <tr>
             <th>Status</th>
             <td>
@@ -59,8 +86,25 @@
                 @endif
             </td>
         </tr>
+        <tr>
+            <th>Dibuat Pada</th>
+            <td>{{ $indikatorKinerja->DCreated ? date('d-m-Y H:i:s', strtotime($indikatorKinerja->DCreated)) : '-' }}</td>
+        </tr>
+        <tr>
+            <th>Dibuat Oleh</th>
+            <td>{{ $indikatorKinerja->createdBy ? $indikatorKinerja->createdBy->name : '-' }}</td>
+        </tr>
+        <tr>
+            <th>Diubah Pada</th>
+            <td>{{ $indikatorKinerja->DEdited ? date('d-m-Y H:i:s', strtotime($indikatorKinerja->DEdited)) : '-' }}</td>
+        </tr>
+        <tr>
+            <th>Diubah Oleh</th>
+            <td>{{ $indikatorKinerja->editedBy ? $indikatorKinerja->editedBy->name : '-' }}</td>
+        </tr>
     </table>
 </div>
 <div class="modal-footer">
     <button class="btn btn-secondary" type="button" data-dismiss="modal">Tutup</button>
 </div>
+

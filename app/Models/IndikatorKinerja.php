@@ -20,6 +20,8 @@ class IndikatorKinerja extends Model
         'Tahun4',
         'Tahun5',
         'MendukungIKU',
+        'IKUPTID',
+        'KriteriaAkreditasiID',
         'NA',
         'DCreated',
         'UCreated',
@@ -56,6 +58,22 @@ class IndikatorKinerja extends Model
     public function programRektors()
     {
         return $this->hasMany(ProgramRektor::class, 'IndikatorKinerjaID', 'IndikatorKinerjaID');
+    }
+    
+    public function ikupts()
+    {
+        return $this->belongsToMany(IKUPT::class, null, 'IndikatorKinerjaID', 'IKUPTID')
+            ->using(function ($query) {
+                $query->whereRaw("FIND_IN_SET(ikupts.IKUPTID, indikator_kinerjas.IKUPTID)");
+            });
+    }
+    
+    public function kriteriaAkreditasis()
+    {
+        return $this->belongsToMany(KriteriaAkreditasi::class, null, 'IndikatorKinerjaID', 'KriteriaAkreditasiID')
+            ->using(function ($query) {
+                $query->whereRaw("FIND_IN_SET(kriteria_akreditasis.KriteriaAkreditasiID, indikator_kinerjas.KriteriaAkreditasiID)");
+            });
     }
     
     // Scope for active records

@@ -3,6 +3,8 @@
 namespace App\Exports;
 
 use App\Models\IndikatorKinerja;
+use App\Models\IKUPT;
+use App\Models\KriteriaAkreditasi;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -52,7 +54,9 @@ class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMappi
             $this->yearLabels[2] ?? 'Tahun 3',
             $this->yearLabels[3] ?? 'Tahun 4',
             $this->yearLabels[4] ?? 'Tahun 5',
-            'Mendukung IKU PT / Kriteria Akreditasi',
+            'Mendukung IKU PT',
+            'IKU PT',
+            'Kriteria Akreditasi',
             'Status'
         ];
     }
@@ -71,6 +75,16 @@ class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMappi
         
         // Format MendukungIKU status
         $mendukungIKUStatus = ($indikatorKinerja->MendukungIKU == 'Y') ? 'Ya' : 'Tidak';
+        
+        // Get IKUPT names
+        $ikuptIds = !empty($indikatorKinerja->IKUPTID) ? explode(',', $indikatorKinerja->IKUPTID) : [];
+        $ikuptNames = IKUPT::whereIn('IKUPTID', $ikuptIds)->pluck('Nama')->toArray();
+        $ikuptText = implode(', ', $ikuptNames);
+        
+        // Get KriteriaAkreditasi names
+        $kriteriaIds = !empty($indikatorKinerja->KriteriaAkreditasiID) ? explode(',', $indikatorKinerja->KriteriaAkreditasiID) : [];
+        $kriteriaNames = KriteriaAkreditasi::whereIn('KriteriaAkreditasiID', $kriteriaIds)->pluck('Nama')->toArray();
+        $kriteriaText = implode(', ', $kriteriaNames);
 
         return [
             $rowNumber,
@@ -83,6 +97,8 @@ class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMappi
             $indikatorKinerja->Tahun4,
             $indikatorKinerja->Tahun5,
             $mendukungIKUStatus,
+            $ikuptText,
+            $kriteriaText,
             $naStatus
         ];
     }
@@ -120,7 +136,7 @@ class IndikatorKinerjasExport implements FromCollection, WithHeadings, WithMappi
         $sheet->getStyle('A2:A' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // No
         $sheet->getStyle('C2:C' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Satuan
         $sheet->getStyle('D2:I' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Baseline and Tahun 1-5
-        $sheet->getStyle('J2:K' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Mendukung IKU & Status
+        $sheet->getStyle('J2:M' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Mendukung IKU, IKU PT, Kriteria & Status
         
         // Add borders to all cells
         $sheet->getStyle('A1:' . $highestColumn . $highestRow)->applyFromArray([

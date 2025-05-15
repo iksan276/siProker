@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\IndikatorKinerja;
+use App\Models\IKUPT;
+use App\Models\KriteriaAkreditasi;
 use App\Models\Satuan;
 use App\Models\User;
 use App\Models\Renstra;
@@ -29,6 +31,10 @@ class IndikatorKinerjaController extends Controller
         
         // Get all satuans for form
         $satuans = Satuan::where('NA', 'N')->get();
+        
+        // Get all IKUPTs and KriteriaAkreditasis for form
+        $ikupts = IKUPT::where('NA', 'N')->get();
+        $kriteriaAkreditasis = KriteriaAkreditasi::where('NA', 'N')->get();
         
         // Base query - don't filter by RenstraID
         $indikatorKinerjasQuery = IndikatorKinerja::with(['satuan', 'createdBy', 'editedBy']);
@@ -73,6 +79,30 @@ class IndikatorKinerjaController extends Controller
                     $mendukungIKUBadge = '<span class="badge badge-danger">Tidak</span>';
                 }
                 
+                // Get IKUPT names and format as ul/li
+                $ikuptIds = !empty($indikatorKinerja->IKUPTID) ? explode(',', $indikatorKinerja->IKUPTID) : [];
+                $ikuptItems = IKUPT::whereIn('IKUPTID', $ikuptIds)->pluck('Nama')->toArray();
+                $ikuptHtml = '';
+                if (count($ikuptItems) > 0) {
+                    $ikuptHtml = '<ul class="mb-0">';
+                    foreach ($ikuptItems as $item) {
+                        $ikuptHtml .= '<li>' . $item . '</li>';
+                    }
+                    $ikuptHtml .= '</ul>';
+                }
+                
+                // Get KriteriaAkreditasi names and format as ul/li
+                $kriteriaIds = !empty($indikatorKinerja->KriteriaAkreditasiID) ? explode(',', $indikatorKinerja->KriteriaAkreditasiID) : [];
+                $kriteriaItems = KriteriaAkreditasi::whereIn('KriteriaAkreditasiID', $kriteriaIds)->pluck('Nama')->toArray();
+                $kriteriaHtml = '';
+                if (count($kriteriaItems) > 0) {
+                    $kriteriaHtml = '<ul class="mb-0">';
+                    foreach ($kriteriaItems as $item) {
+                        $kriteriaHtml .= '<li>' . $item . '</li>';
+                    }
+                    $kriteriaHtml .= '</ul>';
+                }
+                
                 // Actions buttons
                 $actions = '
                     <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('indikator-kinerjas.show', $indikatorKinerja->IndikatorKinerjaID).'" data-title="Detail Indikator Kinerja">
@@ -100,6 +130,8 @@ class IndikatorKinerjaController extends Controller
                     'tahun4' => nl2br($indikatorKinerja->Tahun4),
                     'tahun5' => nl2br($indikatorKinerja->Tahun5),
                     'mendukung_iku' => $mendukungIKUBadge,
+                    'ikupt' => $ikuptHtml,
+                    'kriteria_akreditasi' => $kriteriaHtml,
                     'na' => $naBadge,
                     'actions' => $actions
                 ];
@@ -111,7 +143,7 @@ class IndikatorKinerjaController extends Controller
             ]);
         }
         
-        return view('indikatorKinerjas.index', compact('indikatorKinerjas', 'satuans', 'renstras', 'selectedRenstraID', 'yearLabels'));
+        return view('indikatorKinerjas.index', compact('indikatorKinerjas', 'satuans', 'ikupts', 'kriteriaAkreditasis', 'renstras', 'selectedRenstraID', 'yearLabels'));
     }
 
     public function exportExcel(Request $request)
@@ -148,14 +180,16 @@ class IndikatorKinerjaController extends Controller
     {
         $satuans = Satuan::where('NA', 'N')->get();
         $users = User::all();
+        $ikupts = IKUPT::where('NA', 'N')->get();
+        $kriteriaAkreditasis = KriteriaAkreditasi::where('NA', 'N')->get();
         
         // Get the year labels from the session or use default
         $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028, 2029]);
         
         if (request()->ajax()) {
-            return view('indikatorKinerjas.create', compact('satuans', 'users', 'yearLabels'))->render();
+            return view('indikatorKinerjas.create', compact('satuans', 'users', 'ikupts', 'kriteriaAkreditasis', 'yearLabels'))->render();
         }
-        return view('indikatorKinerjas.create', compact('satuans', 'users', 'yearLabels'));
+        return view('indikatorKinerjas.create', compact('satuans', 'users', 'ikupts', 'kriteriaAkreditasis', 'yearLabels'));
     }
 
     public function store(Request $request)
@@ -170,6 +204,8 @@ class IndikatorKinerjaController extends Controller
             'Tahun4' => 'nullable|string',
             'Tahun5' => 'nullable|string',
             'MendukungIKU' => 'required|in:Y,N',
+            'IKUPTID' => 'nullable|array',
+            'KriteriaAkreditasiID' => 'nullable|array',
             'NA' => 'required|in:Y,N',
         ]);
 
@@ -183,6 +219,16 @@ class IndikatorKinerjaController extends Controller
         $indikatorKinerja->Tahun4 = $request->Tahun4;
         $indikatorKinerja->Tahun5 = $request->Tahun5;
         $indikatorKinerja->MendukungIKU = $request->MendukungIKU;
+        
+        // Handle IKUPTID and KriteriaAkreditasiID based on MendukungIKU value
+        if ($request->MendukungIKU == 'Y' && $request->has('IKUPTID')) {
+            $indikatorKinerja->IKUPTID = implode(',', $request->IKUPTID);
+            $indikatorKinerja->KriteriaAkreditasiID = null;
+        } else if ($request->MendukungIKU == 'N' && $request->has('KriteriaAkreditasiID')) {
+            $indikatorKinerja->KriteriaAkreditasiID = implode(',', $request->KriteriaAkreditasiID);
+            $indikatorKinerja->IKUPTID = null;
+        }
+        
         $indikatorKinerja->NA = $request->NA;
         $indikatorKinerja->DCreated = now();
         $indikatorKinerja->UCreated = Auth::id();
@@ -196,30 +242,44 @@ class IndikatorKinerjaController extends Controller
 
     public function show($id)
     {
-        $indikatorKinerja = IndikatorKinerja::findOrFail($id);
+        $indikatorKinerja = IndikatorKinerja::with(['satuan', 'createdBy', 'editedBy'])->findOrFail($id);
+        
+        // Get IKUPT and KriteriaAkreditasi data
+        $ikuptIds = !empty($indikatorKinerja->IKUPTID) ? explode(',', $indikatorKinerja->IKUPTID) : [];
+        $ikupts = IKUPT::whereIn('IKUPTID', $ikuptIds)->get();
+        
+        $kriteriaIds = !empty($indikatorKinerja->KriteriaAkreditasiID) ? explode(',', $indikatorKinerja->KriteriaAkreditasiID) : [];
+        $kriteriaAkreditasis = KriteriaAkreditasi::whereIn('KriteriaAkreditasiID', $kriteriaIds)->get();
         
         // Get the year labels from the session or use default
         $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028, 2029]);
         
         if (request()->ajax()) {
-            return view('indikatorKinerjas.show', compact('indikatorKinerja', 'yearLabels'))->render();
+            return view('indikatorKinerjas.show', compact('indikatorKinerja', 'ikupts', 'kriteriaAkreditasis', 'yearLabels'))->render();
         }
-        return view('indikatorKinerjas.show', compact('indikatorKinerja', 'yearLabels'));
+        return view('indikatorKinerjas.show', compact('indikatorKinerja', 'ikupts', 'kriteriaAkreditasis', 'yearLabels'));
     }
 
-    public function edit($id)
+
+        public function edit($id)
     {
         $indikatorKinerja = IndikatorKinerja::findOrFail($id);
         $satuans = Satuan::all();
         $users = User::all();
+        $ikupts = IKUPT::where('NA', 'N')->get();
+        $kriteriaAkreditasis = KriteriaAkreditasi::where('NA', 'N')->get();
+        
+        // Convert comma-separated IDs to arrays for select2 multiple
+        $selectedIKUPTIds = !empty($indikatorKinerja->IKUPTID) ? explode(',', $indikatorKinerja->IKUPTID) : [];
+        $selectedKriteriaIds = !empty($indikatorKinerja->KriteriaAkreditasiID) ? explode(',', $indikatorKinerja->KriteriaAkreditasiID) : [];
         
         // Get the year labels from the session or use default
         $yearLabels = session('yearLabels', [2025, 2026, 2027, 2028, 2029]);
         
         if (request()->ajax()) {
-            return view('indikatorKinerjas.edit', compact('indikatorKinerja', 'satuans', 'users', 'yearLabels'))->render();
+            return view('indikatorKinerjas.edit', compact('indikatorKinerja', 'satuans', 'users', 'ikupts', 'kriteriaAkreditasis', 'selectedIKUPTIds', 'selectedKriteriaIds', 'yearLabels'))->render();
         }
-        return view('indikatorKinerjas.edit', compact('indikatorKinerja', 'satuans', 'users', 'yearLabels'));
+        return view('indikatorKinerjas.edit', compact('indikatorKinerja', 'satuans', 'users', 'ikupts', 'kriteriaAkreditasis', 'selectedIKUPTIds', 'selectedKriteriaIds', 'yearLabels'));
     }
 
     public function update(Request $request, $id)
@@ -236,6 +296,8 @@ class IndikatorKinerjaController extends Controller
             'Tahun4' => 'nullable|string',
             'Tahun5' => 'nullable|string',
             'MendukungIKU' => 'required|in:Y,N',
+            'IKUPTID' => 'nullable|array',
+            'KriteriaAkreditasiID' => 'nullable|array',
             'NA' => 'required|in:Y,N',
         ]);
 
@@ -248,6 +310,20 @@ class IndikatorKinerjaController extends Controller
         $indikatorKinerja->Tahun4 = $request->Tahun4;
         $indikatorKinerja->Tahun5 = $request->Tahun5;
         $indikatorKinerja->MendukungIKU = $request->MendukungIKU;
+        
+        // Handle IKUPTID and KriteriaAkreditasiID based on MendukungIKU value
+        if ($request->MendukungIKU == 'Y' && $request->has('IKUPTID')) {
+            $indikatorKinerja->IKUPTID = implode(',', $request->IKUPTID);
+            $indikatorKinerja->KriteriaAkreditasiID = null;
+        } else if ($request->MendukungIKU == 'N' && $request->has('KriteriaAkreditasiID')) {
+            $indikatorKinerja->KriteriaAkreditasiID = implode(',', $request->KriteriaAkreditasiID);
+            $indikatorKinerja->IKUPTID = null;
+        } else {
+            // If no selection was made, clear both fields
+            $indikatorKinerja->IKUPTID = null;
+            $indikatorKinerja->KriteriaAkreditasiID = null;
+        }
+        
         $indikatorKinerja->NA = $request->NA;
         $indikatorKinerja->DEdited = now();
         $indikatorKinerja->UEdited = Auth::id();

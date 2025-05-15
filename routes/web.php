@@ -19,6 +19,9 @@ use App\Http\Controllers\RABController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\OAuthGoogleController;
+use App\Http\Controllers\IKUPTController;
+use App\Http\Controllers\KriteriaAkreditasiController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -99,6 +102,12 @@ Route::middleware('auth')->group(function () {
         // Mata Anggaran routes
         Route::resource('meta-anggarans', MataAnggaranController::class);
         
+        // IKUPT routes
+        Route::resource('ikupts', IKUPTController::class);
+
+        // Kriteria Akreditasi routes
+        Route::resource('kriteria-akreditasis', KriteriaAkreditasiController::class);
+
         // Indikator Kinerja routes
         Route::resource('indikator-kinerjas', IndikatorKinerjaController::class);
         Route::get('/indikator-kinerjas/export/excel', [IndikatorKinerjaController::class, 'exportExcel'])->name('indikator-kinerjas.export.excel');

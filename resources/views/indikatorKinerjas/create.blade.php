@@ -56,7 +56,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-sm-6">
+        <div class="col-sm-12">
             <div class="form-group">
                 <label for="MendukungIKU">Mendukung IKU PT / Kriteria Akreditasi</label>
                 <select name="MendukungIKU" id="MendukungIKU" class="form-control">
@@ -65,7 +65,40 @@
                 </select>
             </div>
         </div>
-        <div class="col-sm-6">
+    </div>
+    
+    <div id="ikuptSection" style="display: none;">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="IKUPTID">IKU PT</label>
+                    <select name="IKUPTID[]" id="IKUPTID" class="form-control select2" multiple>
+                        @foreach($ikupts as $ikupt)
+                            <option value="{{ $ikupt->IKUPTID }}">{{ $ikupt->Nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="kriteriaSection">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="KriteriaAkreditasiID">Kriteria Akreditasi</label>
+                    <select name="KriteriaAkreditasiID[]" id="KriteriaAkreditasiID" class="form-control select2" multiple>
+                        @foreach($kriteriaAkreditasis as $kriteria)
+                            <option value="{{ $kriteria->KriteriaAkreditasiID }}">{{ $kriteria->Nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-sm-12">
             <div class="form-group">
                 <label for="NA">Status</label>
                 <select name="NA" id="NA" class="form-control">
@@ -82,6 +115,42 @@
 </form>
 
 <script>
+// Toggle IKU PT / Kriteria Akreditasi sections based on MendukungIKU selection
+document.getElementById('MendukungIKU').addEventListener('change', function() {
+    toggleSections(this.value);
+});
+
+// Function to toggle sections based on MendukungIKU value
+function toggleSections(value) {
+    const ikuptSection = document.getElementById('ikuptSection');
+    const kriteriaSection = document.getElementById('kriteriaSection');
+    
+    if (value === 'Y') {
+        ikuptSection.style.display = 'block';
+        kriteriaSection.style.display = 'none';
+        
+        // Reset the other select when switching
+        if (typeof $('#KriteriaAkreditasiID').select2 !== 'undefined') {
+            $('#KriteriaAkreditasiID').val(null).trigger('change');
+        }
+    } else {
+        ikuptSection.style.display = 'none';
+        kriteriaSection.style.display = 'block';
+        
+        // Reset the other select when switching
+        if (typeof $('#IKUPTID').select2 !== 'undefined') {
+            $('#IKUPTID').val(null).trigger('change');
+        }
+    }
+}
+
+// Initialize the visibility based on initial value when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const mendukungIKU = document.getElementById('MendukungIKU');
+    toggleSections(mendukungIKU.value);
+});
+
+// Form validation on submit
 document.getElementById('indikatorKinerjaForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent the form from traditional submission
     
@@ -117,6 +186,6 @@ document.getElementById('indikatorKinerjaForm').addEventListener('submit', funct
         return false;
     }
     
-  
+
 });
 </script>
