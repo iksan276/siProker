@@ -92,15 +92,19 @@ class Kegiatan extends Model
     }
     
     // Helper method to get total RAB amount
+   // Helper method to get total RAB amount
     public function getTotalRABAmount()
     {
-        $directRABs = $this->rabs()->whereNull('SubKegiatanID')->sum('Jumlah');
-        $subKegiatanRABs = $this->subKegiatans()->with('rabs')->get()->sum(function($subKegiatan) {
+        $directRABs = $this->rabs()->whereNull('SubKegiatanID')->whereIn('Status', ['Y', 'N'])->sum('Jumlah');
+        $subKegiatanRABs = $this->subKegiatans()->with(['rabs' => function($query) {
+            $query->whereIn('Status', ['Y', 'N']);
+        }])->get()->sum(function($subKegiatan) {
             return $subKegiatan->rabs->sum('Jumlah');
         });
         
         return $directRABs + $subKegiatanRABs;
     }
+
     
     // Helper method to get formatted total RAB amount
     public function getFormattedTotalRABAmountAttribute()

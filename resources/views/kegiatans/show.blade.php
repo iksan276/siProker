@@ -56,9 +56,8 @@
             <span class="badge badge-primary">Info Kegiatan</span>
         </div>
         <div class="d-flex flex-wrap">
-            <div class="mr-3"><small><strong>Program Rektor:</strong> {{ $kegiatan->programRektor->Nama ?? '-' }}</small></div>
-            <div class="mr-3"><small><strong>Total Anggaran:</strong> {{ $kegiatan->FormattedTotalRABAmount }}</small></div>
-            <div class="mr-3"><small><strong>Sisa Anggaran:</strong> Rp {{ number_format(($kegiatan->programRektor->Total ?? 0) - $kegiatan->getTotalRABAmount(), 0, ',', '.') }}</small></div>
+            <div class="mr-3"><small><strong>Total Keseluruhan Anggaran RAB:</strong> {{ $kegiatan->FormattedTotalRABAmount }}</small></div>
+            <div class="mr-3"><small><strong>Sisa Anggaran Untuk Pengajuan RAB:</strong> Rp {{ number_format(($kegiatan->programRektor->Total ?? 0) - $kegiatan->getTotalRABAmount(), 0, ',', '.') }}</small></div>
         </div>
     </div>
 </div>
@@ -140,7 +139,7 @@
                                     @endforeach
                                     <tr class="font-weight-bold">
                                         <td colspan="5" class="text-right">Total</td>
-                                        <td class="text-right">Rp {{ number_format($subKegiatan->rabs->sum('Jumlah'), 0, ',', '.') }}</td>
+                                        <td class="text-right">Rp {{ number_format($subKegiatan->rabs->whereIn('Status', ['Y', 'N'])->sum('Jumlah'), 0, ',', '.') }}</td>
                                         <td></td>
                                         <td></td>
                                     </tr>
@@ -189,7 +188,7 @@
                 @endforeach
                 <tr class="font-weight-bold">
                     <td colspan="5" class="text-right">Total</td>
-                    <td class="text-right">Rp {{ number_format($kegiatan->rabs->whereNull('SubKegiatanID')->sum('Jumlah'), 0, ',', '.') }}</td>
+                    <td class="text-right">Rp {{ number_format($kegiatan->rabs->whereNull('SubKegiatanID')->whereIn('Status', ['Y', 'N'])->sum('Jumlah'), 0, ',', '.') }}</td>
                     <td></td>
                     <td></td>
                 </tr>
@@ -200,7 +199,7 @@
 @endif
 
 <div class="mt-4">
-    <label class="font-weight-bold">Total Anggaran</label>
+    <label class="font-weight-bold">Total Keseluruhan Anggaran RAB</label>
     <div class="alert alert-info">
         <h4 class="mb-0">{{ $kegiatan->FormattedTotalRABAmount }}</h4>
     </div>

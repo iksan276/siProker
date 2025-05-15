@@ -22,8 +22,8 @@
             </div>
             <div class="d-flex flex-wrap">
                 <div class="mr-3"><small><strong>Program Rektor:</strong> <span id="infoProgramRektor">-</span></small></div>
-                <div class="mr-3"><small><strong>Total Anggaran:</strong> <span id="infoTotalAnggaran">-</span></small></div>
-                <div class="mr-3"><small><strong>Sisa Anggaran:</strong> <span id="infoSisaAnggaran">-</span></small></div>
+                <div class="mr-3"><small><strong>Total Keseluruhan Anggaran RAB:</strong> <span id="infoTotalAnggaran">-</span></small></div>
+                <div class="mr-3"><small><strong>Sisa Anggaran Untuk Pengajuan RAB:</strong> <span id="infoSisaAnggaran">-</span></small></div>
             </div>
         </div>
     </div>

@@ -37,9 +37,8 @@
                 <span class="badge badge-primary">Info Kegiatan</span>
             </div>
             <div class="d-flex flex-wrap">
-                <div class="mr-3"><small><strong>Program Rektor:</strong> <span id="infoProgramRektor">-</span></small></div>
-                <div class="mr-3"><small><strong>Total Anggaran:</strong> <span id="infoTotalAnggaran">-</span></small></div>
-                <div class="mr-3"><small><strong>Sisa Anggaran:</strong> <span id="infoSisaAnggaran">-</span></small></div>
+               <div class="mr-3"><small><strong>Total Keseluruhan Anggaran RAB:</strong> <span id="infoTotalAnggaran">-</span></small></div>
+                <div class="mr-3"><small><strong>Sisa Anggaran Untuk Pengajuan RAB:</strong> <span id="infoSisaAnggaran">-</span></small></div>
             </div>
         </div>
     </div>
@@ -51,6 +50,7 @@
                 <span class="badge badge-primary">Info Program Rektor</span>
             </div>
             <div class="d-flex flex-wrap">
+                <div class="mr-3"><small><strong>Program Rektor:</strong> <span id="infoProgramRektor">-</span></small></div>
                 <div class="mr-3"><small><strong>Jumlah:</strong> <span id="infoJumlahKegiatan">-</span></small></div>
                 <div class="mr-3"><small><strong>Satuan:</strong> <span id="infoSatuan">-</span></small></div>
                 <div class="mr-3"><small><strong>Harga:</strong> <span id="infoHargaSatuan">-</span></small></div>
