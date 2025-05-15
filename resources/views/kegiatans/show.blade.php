@@ -208,3 +208,9 @@
 <div class="modal-footer">
     <button class="btn btn-secondary" type="button" data-dismiss="modal">Tutup</button>
 </div>
+
+<script>
+     setTimeout(function() {
+            $('.alert').alert('close');
+        }, 10000000);
+</script>

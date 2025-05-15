@@ -274,3 +274,8 @@
         });
     });
 </script>
+<script>
+     setTimeout(function() {
+            $('.alert').alert('close');
+        }, 10000000);
+</script>
