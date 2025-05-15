@@ -260,7 +260,7 @@ class PilarController extends Controller
                                 $subKegiatanNode = [
                                     'id' => 'subkegiatan_' . $subKegiatan->SubKegiatanID,
                                     'no' => '',
-                                    'nama' =>'<span data-toggle="tooltip" title="Ini adalah Sub Kegiatan">' . $subKegiatan->Nama . '</span> <span data-toggle="tooltip" title='. $subKegiatan->Feedback .'>' . $statusBadge . '</span>',
+                                    'nama' =>'<span data-toggle="tooltip" title="Ini adalah Sub Kegiatan">' . $subKegiatan->Nama . '</span> <span data-toggle="tooltip" title="'. $subKegiatan->Feedback .'">' . $statusBadge . '</span>',
                                     'type' => 'subkegiatan',
                                     'parent' => 'kegiatan_' . $kegiatan->KegiatanID,
                                     'level' => 5,
@@ -310,7 +310,7 @@ class PilarController extends Controller
                                     $rabNode = [
                                         'id' => 'rab_sub_' . $rab->RABID,
                                         'no' => '',
-                                        'nama' =>'<span data-toggle="tooltip" title="Ini adalah RAB dari Sub Kegiatan">' . $rab->Komponen . '</span> <span data-toggle="tooltip" title='. $rab->Feedback .'>' . $statusBadge . '</span>',
+                                        'nama' =>'<span data-toggle="tooltip" title="Ini adalah RAB dari Sub Kegiatan">' . $rab->Komponen . '</span> <span data-toggle="tooltip" title="'. $rab->Feedback .'">' . $statusBadge . '</span>',
                                         'type' => 'rab',
                                         'parent' => 'subkegiatan_' . $subKegiatan->SubKegiatanID,
                                         'level' => 6,
@@ -361,7 +361,7 @@ class PilarController extends Controller
                                 $rabNode = [
                                     'id' => 'rab_' . $rab->RABID,
                                     'no' => '',
-                                    'nama' =>'<span data-toggle="tooltip" title="Ini adalah RAB dari Kegiatan">' . $rab->Komponen . '</span> <span data-toggle="tooltip" title='. $rab->Feedback .'>' . $statusBadge . '</span>',
+                                    'nama' =>'<span data-toggle="tooltip" title="Ini adalah RAB dari Kegiatan">' . $rab->Komponen . '</span> <span data-toggle="tooltip" title="'. $rab->Feedback .'">' . $statusBadge . '</span>',
                                     'type' => 'rab',
                                     'parent' => 'kegiatan_' . $kegiatan->KegiatanID,
                                     'level' => 5,
