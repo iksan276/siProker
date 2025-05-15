@@ -46,7 +46,7 @@
         </div>
         <p class="mt-2">Memuat data...</p>
     </div>
-    
+     <div id="formContent" style="display: none;">
     <div class="form-group">
         <label for="Nama">Nama Sub Kegiatan <span class="text-danger">*</span></label>
         <textarea class="form-control" id="Nama" name="Nama" rows="3" required>{{ $subKegiatan->Nama }}</textarea>
@@ -84,7 +84,7 @@
         </select>
     </div>
     @endif
-    
+</div>
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
         <button type="submit" class="btn btn-primary" id="submitBtn">Simpan</button>
@@ -198,6 +198,7 @@
                     
                     // Show kegiatan info panel
                     $('#kegiatanInfo').show();
+                     $('#formContent').show();
                 },
                 error: function() {
                     $('#loadingIndicator').hide();

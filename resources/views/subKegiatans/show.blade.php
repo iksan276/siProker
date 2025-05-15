@@ -1,5 +1,5 @@
 
-    <div class="row">
+    <div class="row" id="formContent" style="display: none;" >
         <div class="col-md-12">
             <!-- Kegiatan Info Display -->
             <div id="kegiatanInfo" class="alert alert-info mt-2 py-2 mb-4">
@@ -183,7 +183,7 @@
                     
                     // Show kegiatan info panel
                     $('#kegiatanInfo').show();
-                    
+                     $('#formContent').show();
                     // Load program rektor details
                     loadProgramRektorDetails(currentProgramRektorID);
                 },
