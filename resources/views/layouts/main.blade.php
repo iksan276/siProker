@@ -534,6 +534,17 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
     <script>
+        // Add this to the scripts section of your main.blade.php file
+$(document).ready(function() {
+    // Initialize tooltips
+    $('[data-toggle="tooltip"]').tooltip();
+    
+    // Re-initialize tooltips after AJAX content is loaded
+    $(document).ajaxComplete(function() {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+});
+
   // Page Transition Splashscreen Script
 (function() {
     const pageTransitionOverlay = document.getElementById('page-transition-overlay');

@@ -80,8 +80,8 @@ class IndikatorKinerjaController extends Controller
                 if (count($ikuptItems) > 0) {
                     $ikuptHtml = '<div class="d-flex flex-wrap">';
                     foreach ($ikuptItems as $item) {
-                        $ikuptHtml .= '<span style="cursor:pointer" class="badge badge-primary mr-1 mb-1 tooltip-item" 
-                                        data-toggle="tooltip" data-placement="top" title="' . htmlspecialchars($item->Nama) . '">' 
+                        $ikuptHtml .= '<span style="cursor:pointer" class="badge badge-primary mr-1 mb-1 " 
+                                        data-toggle="tooltip"  title="' . htmlspecialchars($item->Nama) . '">' 
                                         . $item->Key . '</span>';
                     }
                     $ikuptHtml .= '</div>';
@@ -95,8 +95,8 @@ class IndikatorKinerjaController extends Controller
                 if (count($kriteriaItems) > 0) {
                     $kriteriaHtml = '<div class="d-flex flex-wrap">';
                     foreach ($kriteriaItems as $item) {
-                        $kriteriaHtml .= '<span style="cursor:pointer" class="badge badge-info mr-1 mb-1 tooltip-item" 
-                                        data-toggle="tooltip" data-placement="top" title="' . htmlspecialchars($item->Nama) . '">' 
+                        $kriteriaHtml .= '<span style="cursor:pointer" class="badge badge-info mr-1 mb-1" 
+                                        data-toggle="tooltip"  title="' . htmlspecialchars($item->Nama) . '">' 
                                         . $item->Key . '</span>';
                     }
                     $kriteriaHtml .= '</div>';
