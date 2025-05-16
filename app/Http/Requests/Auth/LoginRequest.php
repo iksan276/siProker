@@ -41,94 +41,14 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        // Get the input credentials
-        $email = $this->input('email');
-        $password = $this->input('password');
-        
-        // Get the SSO code from session
-        $ssoCode = session('sso_code');
-        
-        if (!$ssoCode) {
-            // If no SSO code is available, try standard authentication
-            if (!Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-                RateLimiter::hit($this->throttleKey());
-                throw ValidationException::withMessages([
-                    'email' => trans('auth.failed'),
-                ]);
-            }
-            
-            RateLimiter::clear($this->throttleKey());
-            return;
-        }
-        
-        // Call API to get user data using the SSO code
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $ssoCode,
-        ])->get("https://webhook.itp.ac.id/api/users", [
-            'order_by' => 'Nama',
-            'sort' => 'desc',
-            'limit' => 5,
-            'search' => $email
-        ]);
-        
-        if (!$response->successful()) {
+        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
-            throw ValidationException::withMessages([
-                'email' => 'Failed to connect to authentication service.',
-            ]);
-        }
-        
-        $userData = $response->json();
-        
-        if (empty($userData) || !is_array($userData)) {
-            RateLimiter::hit($this->throttleKey());
+
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
             ]);
         }
-        
-        // Find the user with matching email
-        $apiUser = null;
-        foreach ($userData as $user) {
-            if (isset($user['EmailG']) && $user['EmailG'] === $email) {
-                $apiUser = $user;
-                break;
-            }
-        }
-        
-        if (!$apiUser) {
-            RateLimiter::hit($this->throttleKey());
-            throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
-            ]);
-        }
-        
-        // Compare the password from API with the input password
-        if (!isset($apiUser['Password']) || $apiUser['Password'] !== $password) {
-            RateLimiter::hit($this->throttleKey());
-            throw ValidationException::withMessages([
-                'password' => trans('auth.password'),
-            ]);
-        }
-        
-        // Authentication successful - find or create the user in our database
-        $isAdmin = false;
-        if (isset($apiUser['Posisi']) && isset($apiUser['Posisi']['Nama'])) {
-            $isAdmin = (strpos($apiUser['Posisi']['Nama'], 'BITKom') !== false);
-        }
-        
-        $localUser = User::updateOrCreate(
-            ['email' => $apiUser['EmailG']],
-            [
-                'name' => $apiUser['Nama'],
-                'password' => bcrypt($apiUser['Password']), // Store hashed password
-                'level' => $isAdmin ? 1 : 2, // 1 for admin, 2 for regular user
-            ]
-        );
-        
-        // Login the user
-        Auth::login($localUser, $this->boolean('remember'));
-        
+
         RateLimiter::clear($this->throttleKey());
     }
 
