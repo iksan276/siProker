@@ -4,6 +4,10 @@
             <th width="30%">ID</th>
             <td>{{ $kriteria->KriteriaAkreditasiID }}</td>
         </tr>
+         <tr>
+            <th>Key</th>
+            <td>{{ $kriteria->Key }}</td>
+        </tr>
         <tr>
             <th>Nama</th>
             <td>{{ $kriteria->Nama }}</td>

@@ -45,6 +45,7 @@ class IKUPTController extends Controller
                 $data[] = [
                     'DT_RowClass' => $rowClass,
                     'no' => $index + 1,
+                    'key' => $ikupt->Key,
                     'nama' => $ikupt->Nama,
                     'na' => $naBadge,
                     'actions' => $actions
@@ -73,11 +74,13 @@ class IKUPTController extends Controller
     {
         $request->validate([
             'Nama' => 'required|string|max:255',
+            'Key' => 'required|string|max:255',
             'NA' => 'required|in:Y,N',
         ]);
 
         $ikupt = new IKUPT();
         $ikupt->Nama = $request->Nama;
+        $ikupt->Key = $request->Key;
         $ikupt->NA = $request->NA;
         $ikupt->DCreated = now();
         $ikupt->UCreated = Auth::id();
@@ -116,10 +119,12 @@ class IKUPTController extends Controller
         
         $request->validate([
             'Nama' => 'required|string|max:255',
+            'Key' => 'required|string|max:255',
             'NA' => 'required|in:Y,N',
         ]);
 
         $ikupt->Nama = $request->Nama;
+        $ikupt->Key = $request->Key;
         $ikupt->NA = $request->NA;
         $ikupt->DEdited = now();
         $ikupt->UEdited = Auth::id();

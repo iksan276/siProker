@@ -58,7 +58,7 @@
     <div class="row">
         <div class="col-sm-12">
             <div class="form-group">
-                <label for="MendukungIKU">Mendukung IKU PT / Kriteria Akreditasi</label>
+                <label for="MendukungIKU">Mendukung IKU PT ?</label>
                 <select name="MendukungIKU" id="MendukungIKU" class="form-control">
                     <option value="Y">Ya</option>
                     <option value="N" selected>Tidak</option>
@@ -81,8 +81,18 @@
             </div>
         </div>
     </div>
-    
-    <div id="kriteriaSection">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="MendukungKA">Mendukung Kriteria Akreditasi ?</label>
+                <select name="MendukungKA" id="MendukungKA" class="form-control">
+                    <option value="Y">Ya</option>
+                    <option value="N" selected>Tidak</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div id="kriteriaSection" style="display: none;">
         <div class="row">
             <div class="col-sm-12">
                 <div class="form-group">
@@ -115,40 +125,36 @@
 </form>
 
 <script>
-// Toggle IKU PT / Kriteria Akreditasi sections based on MendukungIKU selection
+// Toggle IKU PT section based on MendukungIKU selection
 document.getElementById('MendukungIKU').addEventListener('change', function() {
-    toggleSections(this.value);
-});
-
-// Function to toggle sections based on MendukungIKU value
-function toggleSections(value) {
     const ikuptSection = document.getElementById('ikuptSection');
-    const kriteriaSection = document.getElementById('kriteriaSection');
     
-    if (value === 'Y') {
+    if (this.value === 'Y') {
         ikuptSection.style.display = 'block';
-        kriteriaSection.style.display = 'none';
-        
-        // Reset the other select when switching
-        if (typeof $('#KriteriaAkreditasiID').select2 !== 'undefined') {
-            $('#KriteriaAkreditasiID').val(null).trigger('change');
-        }
     } else {
         ikuptSection.style.display = 'none';
-        kriteriaSection.style.display = 'block';
-        
-        // Reset the other select when switching
+        // Reset the select when hiding
         if (typeof $('#IKUPTID').select2 !== 'undefined') {
             $('#IKUPTID').val(null).trigger('change');
         }
     }
-}
-
-// Initialize the visibility based on initial value when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    const mendukungIKU = document.getElementById('MendukungIKU');
-    toggleSections(mendukungIKU.value);
 });
+
+// Toggle Kriteria Akreditasi section based on MendukungKA selection
+document.getElementById('MendukungKA').addEventListener('change', function() {
+    const kriteriaSection = document.getElementById('kriteriaSection');
+    
+    if (this.value === 'Y') {
+        kriteriaSection.style.display = 'block';
+    } else {
+        kriteriaSection.style.display = 'none';
+        // Reset the select when hiding
+        if (typeof $('#KriteriaAkreditasiID').select2 !== 'undefined') {
+            $('#KriteriaAkreditasiID').val(null).trigger('change');
+        }
+    }
+});
+
 
 // Form validation on submit
 document.getElementById('indikatorKinerjaForm').addEventListener('submit', function(event) {

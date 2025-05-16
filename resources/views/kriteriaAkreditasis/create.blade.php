@@ -1,5 +1,9 @@
 <form action="{{ route('kriteria-akreditasis.store') }}" method="POST" class="modal-form" id="kriteriaForm">
     @csrf
+     <div class="form-group">
+        <label for="Key">Key</label>
+        <input type="text" name="Key" id="Key" class="form-control" maxlength="255">
+    </div>
     <div class="form-group">
         <label for="Nama">Nama</label>
         <input type="text" name="Nama" id="Nama" class="form-control" maxlength="255">
@@ -22,15 +26,21 @@ document.getElementById('kriteriaForm').addEventListener('submit', function(even
     event.preventDefault(); // Prevent the form from traditional submission
     
     // Validate empty fields
+    const key = document.getElementById('Key').value.trim();
     const nama = document.getElementById('Nama').value.trim();
     
     // Create an array to store error messages
     let emptyFields = [];
     
     // Check each field and add to error messages if empty
+     if (!key) {
+        emptyFields.push('Key harus diisi');
+    }
+    
     if (!nama) {
         emptyFields.push('Nama harus diisi');
     }
+   
     
     // If there are empty fields, show the error message
     if (emptyFields.length > 0) {

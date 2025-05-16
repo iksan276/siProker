@@ -71,38 +71,38 @@ class IndikatorKinerjaController extends Controller
                     $naBadge = '<span class="badge badge-success">Aktif</span>';
                 }
                 
-                // MendukungIKU badge
-                $mendukungIKUBadge = '';
-                if ($indikatorKinerja->MendukungIKU == 'Y') {
-                    $mendukungIKUBadge = '<span class="badge badge-success">Ya</span>';
-                } else if ($indikatorKinerja->MendukungIKU == 'N') {
-                    $mendukungIKUBadge = '<span class="badge badge-danger">Tidak</span>';
-                }
                 
-                // Get IKUPT names and format as ul/li
+              // Get IKUPT names and keys
                 $ikuptIds = !empty($indikatorKinerja->IKUPTID) ? explode(',', $indikatorKinerja->IKUPTID) : [];
-                $ikuptItems = IKUPT::whereIn('IKUPTID', $ikuptIds)->pluck('Nama')->toArray();
+                $ikuptItems = IKUPT::whereIn('IKUPTID', $ikuptIds)->select('Key', 'Nama')->get();
                 $ikuptHtml = '';
+
                 if (count($ikuptItems) > 0) {
-                    $ikuptHtml = '<ul class="mb-0">';
+                    $ikuptHtml = '<div class="d-flex flex-wrap">';
                     foreach ($ikuptItems as $item) {
-                        $ikuptHtml .= '<li>' . $item . '</li>';
+                        $ikuptHtml .= '<span style="cursor:pointer" class="badge badge-primary mr-1 mb-1 tooltip-item" 
+                                        data-toggle="tooltip" data-placement="top" title="' . htmlspecialchars($item->Nama) . '">' 
+                                        . $item->Key . '</span>';
                     }
-                    $ikuptHtml .= '</ul>';
+                    $ikuptHtml .= '</div>';
                 }
-                
-                // Get KriteriaAkreditasi names and format as ul/li
+
+                // Get KriteriaAkreditasi names and keys
                 $kriteriaIds = !empty($indikatorKinerja->KriteriaAkreditasiID) ? explode(',', $indikatorKinerja->KriteriaAkreditasiID) : [];
-                $kriteriaItems = KriteriaAkreditasi::whereIn('KriteriaAkreditasiID', $kriteriaIds)->pluck('Nama')->toArray();
+                $kriteriaItems = KriteriaAkreditasi::whereIn('KriteriaAkreditasiID', $kriteriaIds)->select('Key', 'Nama')->get();
                 $kriteriaHtml = '';
+
                 if (count($kriteriaItems) > 0) {
-                    $kriteriaHtml = '<ul class="mb-0">';
+                    $kriteriaHtml = '<div class="d-flex flex-wrap">';
                     foreach ($kriteriaItems as $item) {
-                        $kriteriaHtml .= '<li>' . $item . '</li>';
+                        $kriteriaHtml .= '<span style="cursor:pointer" class="badge badge-info mr-1 mb-1 tooltip-item" 
+                                        data-toggle="tooltip" data-placement="top" title="' . htmlspecialchars($item->Nama) . '">' 
+                                        . $item->Key . '</span>';
                     }
-                    $kriteriaHtml .= '</ul>';
+                    $kriteriaHtml .= '</div>';
                 }
-                
+
+                                
                 // Actions buttons
                 $actions = '
                     <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('indikator-kinerjas.show', $indikatorKinerja->IndikatorKinerjaID).'" data-title="Detail Indikator Kinerja">
@@ -129,7 +129,6 @@ class IndikatorKinerjaController extends Controller
                     'tahun3' => nl2br($indikatorKinerja->Tahun3),
                     'tahun4' => nl2br($indikatorKinerja->Tahun4),
                     'tahun5' => nl2br($indikatorKinerja->Tahun5),
-                    'mendukung_iku' => $mendukungIKUBadge,
                     'ikupt' => $ikuptHtml,
                     'kriteria_akreditasi' => $kriteriaHtml,
                     'na' => $naBadge,
@@ -204,6 +203,7 @@ class IndikatorKinerjaController extends Controller
             'Tahun4' => 'nullable|string',
             'Tahun5' => 'nullable|string',
             'MendukungIKU' => 'required|in:Y,N',
+            'MendukungKA' => 'required|in:Y,N',
             'IKUPTID' => 'nullable|array',
             'KriteriaAkreditasiID' => 'nullable|array',
             'NA' => 'required|in:Y,N',
@@ -219,14 +219,14 @@ class IndikatorKinerjaController extends Controller
         $indikatorKinerja->Tahun4 = $request->Tahun4;
         $indikatorKinerja->Tahun5 = $request->Tahun5;
         $indikatorKinerja->MendukungIKU = $request->MendukungIKU;
+        $indikatorKinerja->MendukungKA = $request->MendukungKA;
         
         // Handle IKUPTID and KriteriaAkreditasiID based on MendukungIKU value
         if ($request->MendukungIKU == 'Y' && $request->has('IKUPTID')) {
             $indikatorKinerja->IKUPTID = implode(',', $request->IKUPTID);
-            $indikatorKinerja->KriteriaAkreditasiID = null;
-        } else if ($request->MendukungIKU == 'N' && $request->has('KriteriaAkreditasiID')) {
+        } 
+        if ($request->MendukungKA == 'Y' && $request->has('KriteriaAkreditasiID')) {
             $indikatorKinerja->KriteriaAkreditasiID = implode(',', $request->KriteriaAkreditasiID);
-            $indikatorKinerja->IKUPTID = null;
         }
         
         $indikatorKinerja->NA = $request->NA;
@@ -296,6 +296,7 @@ class IndikatorKinerjaController extends Controller
             'Tahun4' => 'nullable|string',
             'Tahun5' => 'nullable|string',
             'MendukungIKU' => 'required|in:Y,N',
+            'MendukungKA' => 'required|in:Y,N',
             'IKUPTID' => 'nullable|array',
             'KriteriaAkreditasiID' => 'nullable|array',
             'NA' => 'required|in:Y,N',
@@ -310,19 +311,15 @@ class IndikatorKinerjaController extends Controller
         $indikatorKinerja->Tahun4 = $request->Tahun4;
         $indikatorKinerja->Tahun5 = $request->Tahun5;
         $indikatorKinerja->MendukungIKU = $request->MendukungIKU;
+        $indikatorKinerja->MendukungKA = $request->MendukungKA;
         
         // Handle IKUPTID and KriteriaAkreditasiID based on MendukungIKU value
         if ($request->MendukungIKU == 'Y' && $request->has('IKUPTID')) {
             $indikatorKinerja->IKUPTID = implode(',', $request->IKUPTID);
-            $indikatorKinerja->KriteriaAkreditasiID = null;
-        } else if ($request->MendukungIKU == 'N' && $request->has('KriteriaAkreditasiID')) {
-            $indikatorKinerja->KriteriaAkreditasiID = implode(',', $request->KriteriaAkreditasiID);
-            $indikatorKinerja->IKUPTID = null;
-        } else {
-            // If no selection was made, clear both fields
-            $indikatorKinerja->IKUPTID = null;
-            $indikatorKinerja->KriteriaAkreditasiID = null;
         }
+         if ($request->MendukungKA == 'Y' && $request->has('KriteriaAkreditasiID')) {
+            $indikatorKinerja->KriteriaAkreditasiID = implode(',', $request->KriteriaAkreditasiID);
+        } 
         
         $indikatorKinerja->NA = $request->NA;
         $indikatorKinerja->DEdited = now();

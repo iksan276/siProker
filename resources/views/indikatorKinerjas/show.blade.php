@@ -37,7 +37,7 @@
             <td>{!! nl2br($indikatorKinerja->Tahun5) !!}</td>
         </tr>
         <tr>
-            <th>Mendukung IKU PT / Kriteria Akreditasi</th>
+            <th>Mendukung IKU PT ?</th>
             <td>
                 @if($indikatorKinerja->MendukungIKU == 'Y')
                     <span class="badge badge-success">Ya</span>
@@ -47,8 +47,7 @@
                 @endif
             </td>
         </tr>
-        
-        @if($indikatorKinerja->MendukungIKU == 'Y' && count($ikupts) > 0)
+            @if($indikatorKinerja->MendukungIKU == 'Y' && count($ikupts) > 0)
         <tr>
             <th>IKU PT</th>
             <td>
@@ -61,7 +60,20 @@
         </tr>
         @endif
         
-        @if($indikatorKinerja->MendukungIKU == 'N' && count($kriteriaAkreditasis) > 0)
+          <tr>
+            <th>Mendukung Kriteria Akreditasi ?</th>
+            <td>
+                @if($indikatorKinerja->MendukungKA == 'Y')
+                    <span class="badge badge-success">Ya</span>
+                @endif
+                @if($indikatorKinerja->MendukungKA == 'N')
+                    <span class="badge badge-danger">Tidak</span>
+                @endif
+            </td>
+        </tr>
+        
+    
+        @if($indikatorKinerja->MendukungKA == 'Y' && count($kriteriaAkreditasis) > 0)
         <tr>
             <th>Kriteria Akreditasi</th>
             <td>

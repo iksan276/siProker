@@ -26,6 +26,7 @@
                 <thead>
                     <tr class="text-center text-dark">
                         <th style="white-space:nowrap">No</th>
+                        <th style="white-space:nowrap">Key</th>
                         <th style="white-space:nowrap">Nama</th>
                         <th style="white-space:nowrap">Status</th>
                         <th style="white-space:nowrap">Actions</th>
@@ -193,6 +194,15 @@
             columns: [
                 { 
                     data: 'no', 
+                    className: 'text-center',
+                    width: '1px',
+                    orderable: false,
+                    render: function(data) {
+                        return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
+                    }
+                },
+                 { 
+                    data: 'key', 
                     className: 'text-center',
                     width: '1px',
                     orderable: false,

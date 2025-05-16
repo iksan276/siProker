@@ -47,7 +47,6 @@
                         <th style="white-space:nowrap" id="tahun3Header">{{ $yearLabels[2] ?? '2027' }}</th>
                         <th style="white-space:nowrap" id="tahun4Header">{{ $yearLabels[3] ?? '2028' }}</th>
                         <th style="white-space:nowrap" id="tahun5Header">{{ $yearLabels[4] ?? '2029' }}</th>
-                        <th style="white-space:nowrap">Mendukung IKU PT</th>
                         <th style="white-space:nowrap">IKU PT</th>
                         <th style="white-space:nowrap">Kriteria Akreditasi</th>
                         <th style="white-space:nowrap">NA</th>
@@ -327,23 +326,22 @@ cancelButtonText: 'Batal'
                 { data: 'tahun3', className: 'text-center' },
                 { data: 'tahun4', className: 'text-center' },
                 { data: 'tahun5', className: 'text-center' },
-                { 
-                    data: 'mendukung_iku', 
+                   { 
+                    data: 'ikupt', 
                     className: 'text-center',
-                    width: '1px'
-                },
-                    { 
-                    data: 'ikupt',
+                    width: '1px',
                     orderable: false,
                     render: function(data) {
-                        return data;
+                        return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
                     }
                 },
-                    { 
-                    data: 'kriteria_akreditasi',
+                   { 
+                    data: 'kriteria_akreditasi', 
+                    className: 'text-center',
+                    width: '1px',
                     orderable: false,
                     render: function(data) {
-                        return data;
+                        return '<span style="white-space:nowrap;width:1px">' + data + '</span>';
                     }
                 },
                 { 

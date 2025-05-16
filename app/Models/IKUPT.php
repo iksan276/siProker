@@ -12,6 +12,7 @@ class IKUPT extends Model
     
     protected $fillable = [
         'Nama',
+        'Key',
         'NA',
         'DCreated',
         'UCreated',

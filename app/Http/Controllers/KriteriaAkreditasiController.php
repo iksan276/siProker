@@ -45,6 +45,7 @@ class KriteriaAkreditasiController extends Controller
                 $data[] = [
                     'DT_RowClass' => $rowClass,
                     'no' => $index + 1,
+                    'key' => $kriteria->Key,
                     'nama' => $kriteria->Nama,
                     'na' => $naBadge,
                     'actions' => $actions
@@ -73,11 +74,13 @@ class KriteriaAkreditasiController extends Controller
     {
         $request->validate([
             'Nama' => 'required|string|max:255',
+            'Key' => 'required|string|max:255',
             'NA' => 'required|in:Y,N',
         ]);
 
         $kriteria = new KriteriaAkreditasi();
         $kriteria->Nama = $request->Nama;
+        $kriteria->Key = $request->Key;
         $kriteria->NA = $request->NA;
         $kriteria->DCreated = now();
         $kriteria->UCreated = Auth::id();
@@ -116,10 +119,12 @@ class KriteriaAkreditasiController extends Controller
         
         $request->validate([
             'Nama' => 'required|string|max:255',
+            'Key' => 'required|string|max:255',
             'NA' => 'required|in:Y,N',
         ]);
 
         $kriteria->Nama = $request->Nama;
+        $kriteria->Key = $request->Key;
         $kriteria->NA = $request->NA;
         $kriteria->DEdited = now();
         $kriteria->UEdited = Auth::id();

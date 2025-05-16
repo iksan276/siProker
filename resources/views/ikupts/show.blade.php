@@ -4,6 +4,10 @@
             <th width="30%">ID</th>
             <td>{{ $ikupt->IKUPTID }}</td>
         </tr>
+          <tr>
+            <th>Key</th>
+            <td>{{ $ikupt->Key }}</td>
+        </tr>
         <tr>
             <th>Nama</th>
             <td>{{ $ikupt->Nama }}</td>

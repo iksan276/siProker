@@ -2,6 +2,10 @@
     @csrf
     @method('PUT')
     <div class="form-group">
+        <label for="Key">Key</label>
+        <input type="text" name="Key" id="Key" class="form-control" maxlength="255" value="{{ $kriteria->Key }}">
+    </div>
+    <div class="form-group">
         <label for="Nama">Nama</label>
         <input type="text" name="Nama" id="Nama" class="form-control" maxlength="255" value="{{ $kriteria->Nama }}">
     </div>
@@ -23,14 +27,18 @@ document.getElementById('kriteriaEditForm').addEventListener('submit', function(
     event.preventDefault(); // Prevent the form from traditional submission
     
     // Validate empty fields
+      const key = document.getElementById('Key').value.trim();
     const nama = document.getElementById('Nama').value.trim();
     
     // Create an array to store error messages
     let emptyFields = [];
-    
+      if (!key) {
+        emptyFields.push('Key harus diisi');
+    }
       if (!nama) {
         emptyFields.push('Nama harus diisi');
     }
+   
     
     // If there are empty fields, show the error message
     if (emptyFields.length > 0) {

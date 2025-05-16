@@ -20,6 +20,7 @@ class IndikatorKinerja extends Model
         'Tahun4',
         'Tahun5',
         'MendukungIKU',
+        'MendukungKA',
         'IKUPTID',
         'KriteriaAkreditasiID',
         'NA',

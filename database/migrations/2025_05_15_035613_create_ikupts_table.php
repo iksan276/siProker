@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('ikupts', function (Blueprint $table) {
             $table->id('IKUPTID');
             $table->string('Nama', 255);
+            $table->string('Key', 255);
             $table->enum('NA', ['Y', 'N'])->default('N');
             $table->dateTime('DCreated')->nullable();
             $table->unsignedBigInteger('UCreated')->nullable();

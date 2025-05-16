@@ -12,6 +12,7 @@ class KriteriaAkreditasi extends Model
     
     protected $fillable = [
         'Nama',
+        'Key',
         'NA',
         'DCreated',
         'UCreated',
