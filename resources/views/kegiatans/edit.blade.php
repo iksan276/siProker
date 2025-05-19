@@ -76,6 +76,22 @@
         <label for="Feedback">Feedback </label>
         <textarea class="form-control" id="Feedback" name="Feedback" rows="3">{{ $kegiatan->Feedback }}</textarea>
     </div>
+     <div class="form-group">
+            <label>Status</label>
+            <select name="Status" class="form-control">
+    <option value="N" {{ $kegiatan->Status == 'N' ? 'selected' : '' }}>Menunggu</option>
+    <option value="Y" {{ $kegiatan->Status == 'Y' ? 'selected' : '' }}>Disetujui</option>
+    <option value="T" {{ $kegiatan->Status == 'T' ? 'selected' : '' }}>Ditolak</option>
+    <option value="R" {{ $kegiatan->Status == 'R' ? 'selected' : '' }}>Revisi</option>
+    <option value="P" {{ $kegiatan->Status == 'P' ? 'selected' : '' }}>Proses</option>
+    <option value="PT" {{ $kegiatan->Status == 'PT' ? 'selected' : '' }}>Pengajuan TOR</option>
+    <option value="YT" {{ $kegiatan->Status == 'YT' ? 'selected' : '' }}>Pengajuan TOR Disetujui</option>
+    <option value="TT" {{ $kegiatan->Status == 'TT' ? 'selected' : '' }}>Pengajuan TOR Ditolak</option>
+    <option value="RT" {{ $kegiatan->Status == 'RT' ? 'selected' : '' }}>Pengajuan TOR Direvisi</option>
+</select>
+
+        </div>
+    </div>
     @endif
     <div class="form-group">
         <label>Apakah kegiatan ini memiliki sub kegiatan?</label>

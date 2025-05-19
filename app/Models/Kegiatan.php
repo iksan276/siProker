@@ -17,6 +17,7 @@ class Kegiatan extends Model
         'TanggalSelesai',
         'RincianKegiatan',
         'Feedback',
+         'Status',
         'DCreated',
         'UCreated',
         'DEdited',
@@ -192,4 +193,30 @@ class Kegiatan extends Model
             $q->where('JenisKegiatanID', $jenisKegiatanId);
         });
     }
+
+      public function getStatusLabelAttribute()
+    {
+        switch ($this->Status) {
+            case 'N':
+                return '<span class="badge badge-warning">Menunggu</span>';
+            case 'Y':
+                return '<span class="badge badge-success">Disetujui</span>';
+            case 'T':
+                return '<span class="badge badge-danger">Ditolak</span>';
+            case 'R':
+                return '<span class="badge badge-info">Revisi</span>';
+            case 'PT':
+                return '<span class="badge badge-warning">Pengajuan TOR</span>';
+            case 'YT':
+                return '<span class="badge badge-success">Pengajuan TOR Disetujui</span>';
+            case 'TT':
+                return '<span class="badge badge-danger">Pengajuan TOR Ditolak</span>';
+            case 'RT':
+                return '<span class="badge badge-info">Pengajuan TOR direvisi</span>';
+            default:
+                return '<span class="badge badge-secondary">Unknown</span>';
+        }
+        }
+
+     
 }

@@ -28,31 +28,32 @@ class PilarController extends Controller
             $pilarsQuery->where('RenstraID', $request->renstraID);
         }
         
-        // Get the filtered results
+              // Get the filtered results
         $pilars = $pilarsQuery->orderBy('PilarID', 'asc')->get();
         
-        // Get the selected filter value (for re-populating the select)
+        // Get the selected filter values (for re-populating the selects)
         $selectedRenstra = $request->renstraID;
+        $selectedTreeLevel = $request->treeLevel ?? 'pilar';
         
         // If user is not admin, prepare tree grid data
         if (!auth()->user()->isAdmin()) {
             $userId = Auth::id();
             
             if ($request->ajax() && $request->wantsJson()) {
-                $treeData = $this->buildTreeData($pilars, $userId);
+                $treeData = $this->buildTreeData($pilars, $userId, $selectedTreeLevel);
                 return response()->json([
                     'data' => $treeData
                 ]);
             }
             
-            return view('pilars.user_index', compact('pilars', 'renstras', 'selectedRenstra'));
+            return view('pilars.user_index', compact('pilars', 'renstras', 'selectedRenstra', 'selectedTreeLevel'));
         }
         
         // If it's an AJAX request, return JSON data for DataTable
         if ($request->ajax() && $request->wantsJson()) {
             // If format=tree is requested, return tree data even for admin
             if ($request->has('format') && $request->format === 'tree') {
-                $treeData = $this->buildTreeData($pilars, Auth::id());
+                $treeData = $this->buildTreeData($pilars, Auth::id(), $selectedTreeLevel);
                 return response()->json([
                     'data' => $treeData
                 ]);
@@ -103,7 +104,7 @@ class PilarController extends Controller
         return view('pilars.index', compact('pilars', 'renstras', 'selectedRenstra'));
     }
     
-    private function buildTreeData($pilars, $userId)
+    private function buildTreeData($pilars, $userId, $startLevel = 'pilar')
     {
         $treeData = [];
         $rowIndex = 1;
@@ -111,58 +112,83 @@ class PilarController extends Controller
         foreach ($pilars as $pilar) {
             if ($pilar->NA == 'Y') continue; // Skip non-active pilars
             
-            $pilarNode = [
-                'id' => 'pilar_' . $pilar->PilarID,
-                'no' => $rowIndex++,
-                'nama' => $pilar->Nama,
-                'type' => 'pilar',
-                'parent' => null,
-                'level' => 0,
-                'has_children' => count($pilar->isuStrategis->where('NA', 'N')) > 0,
-                'actions' => '',
-                'row_class' => '',
-                'tooltip' => 'Lihat isu strategis'
-            ];
-            
-            $treeData[] = $pilarNode;
+            // Only add pilar node if startLevel is 'pilar'
+            if ($startLevel == 'pilar') {
+                $pilarNode = [
+                    'id' => 'pilar_' . $pilar->PilarID,
+                    'no' => $rowIndex++,
+                    'nama' => $pilar->Nama,
+                    'type' => 'pilar',
+                    'parent' => null,
+                    'level' => 0,
+                    'has_children' => count($pilar->isuStrategis->where('NA', 'N')) > 0,
+                    'actions' => '',
+                    'row_class' => '',
+                    'tooltip' => 'Lihat isu strategis'
+                ];
+                
+                $treeData[] = $pilarNode;
+            }
             
             // Add Isu Strategis
             foreach ($pilar->isuStrategis as $isu) {
                 if ($isu->NA == 'Y') continue; // Skip non-active isu
                 
-                $isuNode = [
-                    'id' => 'isu_' . $isu->IsuID,
-                    'no' => '',
-                    'nama' => $isu->Nama,
-                    'type' => 'isu',
-                    'parent' => 'pilar_' . $pilar->PilarID,
-                    'level' => 1,
-                    'has_children' => count($isu->programPengembangans->where('NA', 'N')) > 0,
-                    'actions' => '',
-                    'row_class' => '',
-                    'tooltip' => 'Lihat program pengembangan'
-                ];
+                // Set parent based on startLevel
+                $isuParent = $startLevel == 'pilar' ? 'pilar_' . $pilar->PilarID : null;
+                $isuLevel = $startLevel == 'pilar' ? 1 : 0;
                 
-                $treeData[] = $isuNode;
+                // Only add isu node if startLevel is 'pilar' or 'isu'
+                if ($startLevel == 'pilar' || $startLevel == 'isu') {
+                    $isuNode = [
+                        'id' => 'isu_' . $isu->IsuID,
+                        'no' => $startLevel == 'isu' ? $rowIndex++ : '',
+                        'nama' => $isu->Nama,
+                        'type' => 'isu',
+                        'parent' => $isuParent,
+                        'level' => $isuLevel,
+                        'has_children' => count($isu->programPengembangans->where('NA', 'N')) > 0,
+                        'actions' => '',
+                        'row_class' => '',
+                        'tooltip' => 'Lihat program pengembangan'
+                    ];
+                    
+                    $treeData[] = $isuNode;
+                }
                 
                 // Add Program Pengembangan
                 foreach ($isu->programPengembangans as $program) {
                     if ($program->NA == 'Y') continue; // Skip non-active programs
                     
-                    $programNode = [
-                        'id' => 'program_' . $program->ProgramPengembanganID,
-                        'no' => '',
-                        'nama' => $program->Nama,
-                        'type' => 'program',
-                        'parent' => 'isu_' . $isu->IsuID,
-                        'level' => 2,
-                        'has_children' => count($program->programRektors->where('NA', 'N')) > 0,
-                        'actions' => '',
-                        'row_class' => '',
-                        'tooltip' => 'Lihat program rektor'
-                    ];
+                    // Set parent and level based on startLevel
+                    $programParent = null;
+                    $programLevel = 0;
                     
-                    $treeData[] = $programNode;
+                    if ($startLevel == 'pilar') {
+                        $programParent = 'isu_' . $isu->IsuID;
+                        $programLevel = 2;
+                    } else if ($startLevel == 'isu') {
+                        $programParent = 'isu_' . $isu->IsuID;
+                        $programLevel = 1;
+                    }
+                    
+                    // Only add program node if startLevel is 'pilar', 'isu', or 'program'
+                    if (in_array($startLevel, ['pilar', 'isu', 'program'])) {
+                        $programNode = [
+                            'id' => 'program_' . $program->ProgramPengembanganID,
+                            'no' => $startLevel == 'program' ? $rowIndex++ : '',
+                            'nama' => $program->Nama,
+                            'type' => 'program',
+                            'parent' => $programParent,
+                            'level' => $programLevel,
+                            'has_children' => count($program->programRektors->where('NA', 'N')) > 0,
+                            'actions' => '',
+                            'row_class' => '',
+                            'tooltip' => 'Lihat program rektor'
+                        ];
+                        
+                        $treeData[] = $programNode;
+                    }
                     
                     // Add Program Rektor
                     foreach ($program->programRektors as $rektor) {
@@ -173,30 +199,48 @@ class PilarController extends Controller
                                         ->where('UCreated', $userId)
                                         ->count();
                         
-                        $rektorNode = [
-                            'id' => 'rektor_' . $rektor->ProgramRektorID,
-                            'no' => '',
-                            'nama' => $rektor->Nama,
-                            'type' => 'rektor',
-                            'parent' => 'program_' . $program->ProgramPengembanganID,
-                            'level' => 3,
-                            'has_children' => $kegiatanCount > 0,
-                            'actions' => '
-                                <button class="btn btn-info btn-square btn-sm load-modal" 
-                                    data-url="' . route('program-rektors.show', $rektor->ProgramRektorID) . '" 
-                                    data-title="Detail Program Rektor">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-primary btn-square btn-sm load-modal" 
-                                    data-url="' . route('kegiatans.create') . '?program_rektor=' . $rektor->ProgramRektorID . '" 
-                                    data-title="Tambah Kegiatan">
-                                    <i class="fas fa-plus"></i>
-                                </button>',
-                            'row_class' => '',
-                            'tooltip' => 'Lihat kegiatan'
-                        ];
+                        // Set parent and level based on startLevel
+                        $rektorParent = null;
+                        $rektorLevel = 0;
                         
-                        $treeData[] = $rektorNode;
+                        if ($startLevel == 'pilar') {
+                            $rektorParent = 'program_' . $program->ProgramPengembanganID;
+                            $rektorLevel = 3;
+                        } else if ($startLevel == 'isu') {
+                            $rektorParent = 'program_' . $program->ProgramPengembanganID;
+                            $rektorLevel = 2;
+                        } else if ($startLevel == 'program') {
+                            $rektorParent = 'program_' . $program->ProgramPengembanganID;
+                            $rektorLevel = 1;
+                        }
+                        
+                        // Only add rektor node if startLevel is 'pilar', 'isu', 'program', or 'rektor'
+                        if (in_array($startLevel, ['pilar', 'isu', 'program', 'rektor'])) {
+                            $rektorNode = [
+                                'id' => 'rektor_' . $rektor->ProgramRektorID,
+                                'no' => $startLevel == 'rektor' ? $rowIndex++ : '',
+                                'nama' => $rektor->Nama,
+                                'type' => 'rektor',
+                                'parent' => $rektorParent,
+                                'level' => $rektorLevel,
+                                'has_children' => $kegiatanCount > 0,
+                                'actions' => '
+                                    <button class="btn btn-info btn-square btn-sm load-modal" 
+                                        data-url="' . route('program-rektors.show', $rektor->ProgramRektorID) . '" 
+                                        data-title="Detail Program Rektor">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-primary btn-square btn-sm load-modal" 
+                                        data-url="' . route('kegiatans.create') . '?program_rektor=' . $rektor->ProgramRektorID . '" 
+                                        data-title="Tambah Kegiatan">
+                                        <i class="fas fa-plus"></i>
+                                    </button>',
+                                'row_class' => '',
+                                'tooltip' => 'Lihat kegiatan'
+                            ];
+                            
+                            $treeData[] = $rektorNode;
+                        }
                         
                         // Add Kegiatan directly under Program Rektor
                         $kegiatans = Kegiatan::where('ProgramRektorID', $rektor->ProgramRektorID)
@@ -204,13 +248,31 @@ class PilarController extends Controller
                             ->get();
                             
                         foreach ($kegiatans as $kegiatan) {
+                            // Set parent and level based on startLevel
+                            $kegiatanParent = null;
+                            $kegiatanLevel = 0;
+                            
+                            if ($startLevel == 'pilar') {
+                                $kegiatanParent = 'rektor_' . $rektor->ProgramRektorID;
+                                $kegiatanLevel = 4;
+                            } else if ($startLevel == 'isu') {
+                                $kegiatanParent = 'rektor_' . $rektor->ProgramRektorID;
+                                $kegiatanLevel = 3;
+                            } else if ($startLevel == 'program') {
+                                $kegiatanParent = 'rektor_' . $rektor->ProgramRektorID;
+                                $kegiatanLevel = 2;
+                            } else if ($startLevel == 'rektor') {
+                                $kegiatanParent = 'rektor_' . $rektor->ProgramRektorID;
+                                $kegiatanLevel = 1;
+                            }
+                            
                             $kegiatanNode = [
                                 'id' => 'kegiatan_' . $kegiatan->KegiatanID,
-                                'no' => '',
+                                'no' => $startLevel == 'kegiatan' ? $rowIndex++ : '',
                                 'nama' => $kegiatan->Nama,
                                 'type' => 'kegiatan',
-                                'parent' => 'rektor_' . $rektor->ProgramRektorID,
-                                'level' => 4,
+                                'parent' => $kegiatanParent,
+                                'level' => $kegiatanLevel,
                                 'has_children' => $kegiatan->subKegiatans->count() > 0 || $kegiatan->rabs->whereNull('SubKegiatanID')->count() > 0,
                                 'actions' => '
                                     <button class="btn btn-primary btn-square btn-sm load-modal" 
@@ -246,7 +308,7 @@ class PilarController extends Controller
                             
                             // Add Sub Kegiatans
                             foreach ($kegiatan->subKegiatans as $subKegiatan) {
-                                $statusBadge = '';
+                                                             $statusBadge = '';
                                 if ($subKegiatan->Status == 'N') {
                                     $statusBadge = '<span class="badge badge-warning">Menunggu</span>';
                                 } elseif ($subKegiatan->Status == 'Y') {
@@ -257,13 +319,17 @@ class PilarController extends Controller
                                     $statusBadge = '<span class="badge badge-info">Revisi</span>';
                                 }
                                 
+                                // Set parent and level based on startLevel
+                                $subKegiatanParent = 'kegiatan_' . $kegiatan->KegiatanID;
+                                $subKegiatanLevel = $kegiatanLevel + 1;
+                                
                                 $subKegiatanNode = [
                                     'id' => 'subkegiatan_' . $subKegiatan->SubKegiatanID,
                                     'no' => '',
                                     'nama' =>'<span data-toggle="tooltip" title="Ini adalah Sub Kegiatan">' . $subKegiatan->Nama . '</span> <span data-toggle="tooltip" title="'. $subKegiatan->Feedback .'">' . $statusBadge . '</span>',
                                     'type' => 'subkegiatan',
-                                    'parent' => 'kegiatan_' . $kegiatan->KegiatanID,
-                                    'level' => 5,
+                                    'parent' => $subKegiatanParent,
+                                    'level' => $subKegiatanLevel,
                                     'has_children' => $subKegiatan->rabs->count() > 0,
                                     'actions' => '
                                         <button class="btn btn-success btn-square btn-sm load-modal" 
@@ -313,7 +379,7 @@ class PilarController extends Controller
                                         'nama' =>'<span data-toggle="tooltip" title="Ini adalah RAB dari Sub Kegiatan">' . $rab->Komponen . '</span> <span data-toggle="tooltip" title="'. $rab->Feedback .'">' . $statusBadge . '</span>',
                                         'type' => 'rab',
                                         'parent' => 'subkegiatan_' . $subKegiatan->SubKegiatanID,
-                                        'level' => 6,
+                                        'level' => $subKegiatanLevel + 1,
                                         'has_children' => false,
                                         'actions' => '
                                             <button class="btn btn-info btn-square btn-sm load-modal" 
@@ -364,7 +430,7 @@ class PilarController extends Controller
                                     'nama' =>'<span data-toggle="tooltip" title="Ini adalah RAB dari Kegiatan">' . $rab->Komponen . '</span> <span data-toggle="tooltip" title="'. $rab->Feedback .'">' . $statusBadge . '</span>',
                                     'type' => 'rab',
                                     'parent' => 'kegiatan_' . $kegiatan->KegiatanID,
-                                    'level' => 5,
+                                    'level' => $kegiatanLevel + 1,
                                     'has_children' => false,
                                     'actions' => '
                                         <button class="btn btn-info btn-square btn-sm load-modal" 

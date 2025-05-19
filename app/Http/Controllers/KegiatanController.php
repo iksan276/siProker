@@ -269,17 +269,36 @@ class KegiatanController extends Controller
     }
     
    
-    private function buildTreeData($kegiatans)
+     private function buildTreeData($kegiatans)
     {
         $treeData = [];
         $rowIndex = 1;
         
         foreach ($kegiatans as $kegiatan) {
             // Create kegiatan node
+           $statusBadge = '';
+           if ($kegiatan->Status == 'Y') {
+                $statusBadge = '<span class="badge badge-success">Disetujui</span>';
+            } elseif ($kegiatan->Status == 'T') {
+                $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
+            } elseif ($kegiatan->Status == 'R') {
+                $statusBadge = '<span class="badge badge-info">Revisi</span>';
+            } elseif ($kegiatan->Status == 'P') {
+                $statusBadge = '<span class="badge badge-primary">Proses</span>';
+            } elseif ($kegiatan->Status == 'PT') {
+                $statusBadge = '<span class="badge badge-warning">Pengajuan TOR</span>';
+            } elseif ($kegiatan->Status == 'YT') {
+                $statusBadge = '<span class="badge badge-success">Pengajuan TOR Disetujui</span>';
+            } elseif ($kegiatan->Status == 'TT') {
+                $statusBadge = '<span class="badge badge-danger">Pengajuan TOR Ditolak</span>';
+            } elseif ($kegiatan->Status == 'RT') {
+                $statusBadge = '<span class="badge badge-info">Pengajuan TOR direvisi</span>';
+            }
+
             $kegiatanNode = [
                 'id' => 'kegiatan_' . $kegiatan->KegiatanID,
                 'no' => $rowIndex++,
-                'nama' => '<span data-toggle="tooltip" title="Ini adalah Kegiatan">' . $kegiatan->Nama . '</span>',
+                'nama' => '<span data-toggle="tooltip" title="Ini adalah Kegiatan">' . $kegiatan->Nama . '</span> ' . '</span> <span data-toggle="tooltip" title="'. $kegiatan->Feedback .'">' . $statusBadge . '</span>',
                 'program_rektor_id' => $kegiatan->ProgramRektorID,
                 'type' => 'kegiatan',
                 'parent' => null,
@@ -307,6 +326,7 @@ class KegiatanController extends Controller
             
             $treeData[] = $kegiatanNode;
             
+            // Add Sub
             // Add Sub Kegiatans
             if ($kegiatan->subKegiatans->count() > 0) {
                 foreach ($kegiatan->subKegiatans as $subIndex => $subKegiatan) {
@@ -660,110 +680,112 @@ class KegiatanController extends Controller
             }
         
             public function store(Request $request)
-            {
-                $request->validate([
-                    'ProgramRektorID' => 'required|exists:program_rektors,ProgramRektorID',
-                    'Nama' => 'required|string',
-                    'TanggalMulai' => 'required|date',
-                    'TanggalSelesai' => 'required|date|after_or_equal:TanggalMulai',
-                    'RincianKegiatan' => 'required|string',
-                    'has_sub_kegiatan' => 'required|in:yes,no',
-                ]);
+    {
+        $request->validate([
+            'ProgramRektorID' => 'required|exists:program_rektors,ProgramRektorID',
+            'Nama' => 'required|string',
+            'TanggalMulai' => 'required|date',
+            'TanggalSelesai' => 'required|date|after_or_equal:TanggalMulai',
+            'RincianKegiatan' => 'required|string',
+            'has_sub_kegiatan' => 'required|in:yes,no',
+            'Status' => 'nullable|in:N,Y,T,R,P,PT,YT,TT,RT',
+        ]);
+
+        // Begin transaction
+        \DB::beginTransaction();
         
-                // Begin transaction
-                \DB::beginTransaction();
-                
-                try {
-                    // Create Kegiatan
-                    $kegiatan = new Kegiatan();
-                    $kegiatan->ProgramRektorID = $request->ProgramRektorID;
-                    $kegiatan->Nama = $request->Nama;
-                    $kegiatan->TanggalMulai = $request->TanggalMulai;
-                    $kegiatan->TanggalSelesai = $request->TanggalSelesai;
-                    $kegiatan->RincianKegiatan = $request->RincianKegiatan;
-                    $kegiatan->Feedback = $request->Feedback  ?? null;
-                    $kegiatan->DCreated = now();
-                    $kegiatan->UCreated = Auth::id();
-                    $kegiatan->save();
+        try {
+            // Create Kegiatan
+            $kegiatan = new Kegiatan();
+            $kegiatan->ProgramRektorID = $request->ProgramRektorID;
+            $kegiatan->Nama = $request->Nama;
+            $kegiatan->TanggalMulai = $request->TanggalMulai;
+            $kegiatan->TanggalSelesai = $request->TanggalSelesai;
+            $kegiatan->RincianKegiatan = $request->RincianKegiatan;
+            $kegiatan->Feedback = $request->Feedback ?? null;
+            $kegiatan->Status = $request->Status ?? 'N'; // Default to 'N' if not provided
+            $kegiatan->DCreated = now();
+            $kegiatan->UCreated = Auth::id();
+            $kegiatan->save();
+            
+            // Process Sub Kegiatans if has_sub_kegiatan is yes
+            if ($request->has_sub_kegiatan === 'yes' && $request->has('sub_kegiatans')) {
+                foreach ($request->sub_kegiatans as $subKegiatanData) {
+                    if (empty($subKegiatanData['Nama'])) continue;
                     
-                    // Process Sub Kegiatans if has_sub_kegiatan is yes
-                    if ($request->has_sub_kegiatan === 'yes' && $request->has('sub_kegiatans')) {
-                        foreach ($request->sub_kegiatans as $subKegiatanData) {
-                            if (empty($subKegiatanData['Nama'])) continue;
-                            
-                            $subKegiatan = new SubKegiatan();
-                            $subKegiatan->KegiatanID = $kegiatan->KegiatanID;
-                            $subKegiatan->Nama = $subKegiatanData['Nama'];
-                            $subKegiatan->JadwalMulai = $subKegiatanData['JadwalMulai'];
-                            $subKegiatan->JadwalSelesai = $subKegiatanData['JadwalSelesai'];
-                            $subKegiatan->Catatan = $subKegiatanData['Catatan'];
-                            $subKegiatan->Feedback = $subKegiatanData['Feedback']  ?? null;
-                            $subKegiatan->Status = 'N'; // Default status is Menunggu
-                            $subKegiatan->DCreated = now();
-                            $subKegiatan->UCreated = Auth::id();
-                            $subKegiatan->save();
-                            
-                            // Process RABs for this SubKegiatan if any
-                            if (isset($subKegiatanData['rabs']) && is_array($subKegiatanData['rabs'])) {
-                                foreach ($subKegiatanData['rabs'] as $rabData) {
-                                    if (empty($rabData['Komponen'])) continue;
-                                    
-                                    $rab = new RAB();
-                                    $rab->SubKegiatanID = $subKegiatan->SubKegiatanID;
-                                    $rab->KegiatanID = $kegiatan->KegiatanID;
-                                    $rab->Komponen = $rabData['Komponen'];
-                                    $rab->Volume = str_replace('.', '', $rabData['Volume']);
-                                    $rab->Satuan = $rabData['Satuan'];
-                                    $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
-                                    $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
-                                    $rab->Feedback = $rabData['Feedback']  ?? null;
-                                    $rab->Status = 'N'; // Default status is Menunggu
-                                    $rab->DCreated = now();
-                                    $rab->UCreated = Auth::id();
-                                    $rab->save();
-                                }
-                            }
-                        }
-                    }
+                    $subKegiatan = new SubKegiatan();
+                    $subKegiatan->KegiatanID = $kegiatan->KegiatanID;
+                    $subKegiatan->Nama = $subKegiatanData['Nama'];
+                    $subKegiatan->JadwalMulai = $subKegiatanData['JadwalMulai'];
+                    $subKegiatan->JadwalSelesai = $subKegiatanData['JadwalSelesai'];
+                    $subKegiatan->Catatan = $subKegiatanData['Catatan'];
+                    $subKegiatan->Feedback = $subKegiatanData['Feedback'] ?? null;
+                    $subKegiatan->Status = $subKegiatanData['Status'] ?? 'N'; // Default status is Menunggu
+                    $subKegiatan->DCreated = now();
+                    $subKegiatan->UCreated = Auth::id();
+                    $subKegiatan->save();
                     
-                    // Process RABs for Kegiatan if any
-                    if ($request->has('rabs') && is_array($request->rabs)) {
-                        foreach ($request->rabs as $rabData) {
+                    // Process RABs for this SubKegiatan if any
+                    if (isset($subKegiatanData['rabs']) && is_array($subKegiatanData['rabs'])) {
+                        foreach ($subKegiatanData['rabs'] as $rabData) {
                             if (empty($rabData['Komponen'])) continue;
                             
                             $rab = new RAB();
+                            $rab->SubKegiatanID = $subKegiatan->SubKegiatanID;
                             $rab->KegiatanID = $kegiatan->KegiatanID;
-                            $rab->SubKegiatanID = null; // This RAB belongs directly to Kegiatan
                             $rab->Komponen = $rabData['Komponen'];
                             $rab->Volume = str_replace('.', '', $rabData['Volume']);
                             $rab->Satuan = $rabData['Satuan'];
                             $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
                             $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
-                            $rab->Feedback = $rabData['Feedback']  ?? null;
-                            $rab->Status = 'N'; // Default status is Menunggu
+                            $rab->Feedback = $rabData['Feedback'] ?? null;
+                            $rab->Status = $rabData['Status'] ?? 'N'; // Default status is Menunggu
                             $rab->DCreated = now();
                             $rab->UCreated = Auth::id();
                             $rab->save();
                         }
                     }
-                    
-                    // Commit transaction
-                    \DB::commit();
-                    
-                    if ($request->ajax()) {
-                        return response()->json(['success' => true, 'message' => 'Kegiatan berhasil ditambahkan']);
-                    }
-                    return redirect()->route('kegiatans.index')->with('success', 'Kegiatan berhasil ditambahkan');
-                } catch (\Exception $e) {
-                    // Rollback transaction on error
-                    \DB::rollback();
-                    
-                    if ($request->ajax()) {
-                        return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
-                    }
-                    return redirect()->back()->withInput()->with('error', 'Error: ' . $e->getMessage());
                 }
             }
+            
+            // Process RABs for Kegiatan if any
+            if ($request->has('rabs') && is_array($request->rabs)) {
+                foreach ($request->rabs as $rabData) {
+                    if (empty($rabData['Komponen'])) continue;
+                    
+                    $rab = new RAB();
+                    $rab->KegiatanID = $kegiatan->KegiatanID;
+                    $rab->SubKegiatanID = null; // This RAB belongs directly to Kegiatan
+                    $rab->Komponen = $rabData['Komponen'];
+                    $rab->Volume = str_replace('.', '', $rabData['Volume']);
+                    $rab->Satuan = $rabData['Satuan'];
+                    $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
+                    $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
+                    $rab->Feedback = $rabData['Feedback'] ?? null;
+                    $rab->Status = $rabData['Status'] ?? 'N'; // Default status is Menunggu
+                    $rab->DCreated = now();
+                    $rab->UCreated = Auth::id();
+                    $rab->save();
+                }
+            }
+            
+            // Commit transaction
+            \DB::commit();
+            
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Kegiatan berhasil ditambahkan']);
+            }
+            return redirect()->route('kegiatans.index')->with('success', 'Kegiatan berhasil ditambahkan');
+        } catch (\Exception $e) {
+            // Rollback transaction on error
+            \DB::rollback();
+            
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
+            }
+            return redirect()->back()->withInput()->with('error', 'Error: ' . $e->getMessage());
+        }
+    }
         
            public function show($id)
 {
@@ -906,209 +928,214 @@ class KegiatanController extends Controller
                 ));
             }
         
-            public function update(Request $request, $id)
-            {
-                $kegiatan = Kegiatan::findOrFail($id);
-                
-                $request->validate([
-                    'ProgramRektorID' => 'required|exists:program_rektors,ProgramRektorID',
-                    'Nama' => 'required|string',
-                    'TanggalMulai' => 'required|date',
-                    'TanggalSelesai' => 'required|date|after_or_equal:TanggalMulai',
-                    'RincianKegiatan' => 'required|string',
-                    'has_sub_kegiatan' => 'required|in:yes,no',
-                ]);
+             public function update(Request $request, $id)
+    {
+        $kegiatan = Kegiatan::findOrFail($id);
         
-                // Begin transaction
-                \DB::beginTransaction();
-                
-                try {
-                    // Update Kegiatan
-                    $kegiatan->ProgramRektorID = $request->ProgramRektorID;
-                    $kegiatan->Nama = $request->Nama;
-                    $kegiatan->TanggalMulai = $request->TanggalMulai;
-                    $kegiatan->TanggalSelesai = $request->TanggalSelesai;
-                    $kegiatan->RincianKegiatan = $request->RincianKegiatan;
-                    $kegiatan->Feedback = $request->Feedback;
-                    $kegiatan->DEdited = now();
-                    $kegiatan->UEdited = Auth::id();
-                    $kegiatan->save();
-                    
-                    // Process Sub Kegiatans
-                    if ($request->has_sub_kegiatan === 'yes') {
-                        // Handle existing sub kegiatans
-                        if ($request->has('existing_sub_kegiatans') && is_array($request->existing_sub_kegiatans)) {
-                            foreach ($request->existing_sub_kegiatans as $subKegiatanId => $subKegiatanData) {
-                                $subKegiatan = SubKegiatan::find($subKegiatanId);
-                                
-                                if ($subKegiatan) {
-                                    // Update sub kegiatan
-                                    $subKegiatan->Nama = $subKegiatanData['Nama'];
-                                    $subKegiatan->JadwalMulai = $subKegiatanData['JadwalMulai'];
-                                    $subKegiatan->JadwalSelesai = $subKegiatanData['JadwalSelesai'];
-                                    $subKegiatan->Catatan = $subKegiatanData['Catatan'];
-                                    $subKegiatan->Feedback = $subKegiatanData['Feedback'];
-                                    $subKegiatan->Status = $subKegiatanData['Status'] ?? 'N';
-                                    $subKegiatan->DEdited = now();
-                                    $subKegiatan->UEdited = Auth::id();
-                                    $subKegiatan->save();
-                                    
-                                    // Handle existing RABs for this sub kegiatan
-                                    if (isset($subKegiatanData['existing_rabs']) && is_array($subKegiatanData['existing_rabs'])) {
-                                        foreach ($subKegiatanData['existing_rabs'] as $rabId => $rabData) {
-                                            $rab = RAB::find($rabId);
-                                            
-                                            if ($rab) {
-                                                // Update RAB
-                                                $rab->Komponen = $rabData['Komponen'];
-                                                $rab->Volume = str_replace('.', '', $rabData['Volume']);
-                                                $rab->Satuan = $rabData['Satuan'];
-                                                $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
-                                                $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
-                                                $rab->Feedback = $rabData['Feedback'];
-                                                $rab->Status = $rabData['Status'] ?? 'N';
-                                                $rab->DEdited = now();
-                                                $rab->UEdited = Auth::id();
-                                                $rab->save();
-                                            }
-                                        }
-                                    }
-                                    
-                                    // Add new RABs for this sub kegiatan
-                                    if (isset($subKegiatanData['new_rabs']) && is_array($subKegiatanData['new_rabs'])) {
-                                        foreach ($subKegiatanData['new_rabs'] as $rabData) {
-                                            if (empty($rabData['Komponen'])) continue;
-                                            
-                                            $rab = new RAB();
-                                            $rab->SubKegiatanID = $subKegiatan->SubKegiatanID;
-                                            $rab->KegiatanID = $kegiatan->KegiatanID;
-                                            $rab->Komponen = $rabData['Komponen'];
-                                            $rab->Volume = str_replace('.', '', $rabData['Volume']);
-                                            $rab->Satuan = $rabData['Satuan'];
-                                            $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
-                                            $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
-                                            $rab->Feedback = $rabData['Feedback'];
-                                            $rab->Status = $rabData['Status'] ?? 'N';// Default status is Menunggu
-                                            $rab->DCreated = now();
-                                            $rab->UCreated = Auth::id();
-                                            $rab->save();
-                                        }
-                                    }
-                                }
-                            }
-                        }
+        $request->validate([
+            'ProgramRektorID' => 'required|exists:program_rektors,ProgramRektorID',
+            'Nama' => 'required|string',
+            'TanggalMulai' => 'required|date',
+            'TanggalSelesai' => 'required|date|after_or_equal:TanggalMulai',
+            'RincianKegiatan' => 'required|string',
+            'has_sub_kegiatan' => 'required|in:yes,no',
+            'Status' => 'nullable|in:N,Y,T,R,P,PT,YT,TT,RT',
+        ]);
+
+        // Begin transaction
+        \DB::beginTransaction();
+        
+        try {
+            // Update Kegiatan
+            $kegiatan->ProgramRektorID = $request->ProgramRektorID;
+            $kegiatan->Nama = $request->Nama;
+            $kegiatan->TanggalMulai = $request->TanggalMulai;
+            $kegiatan->TanggalSelesai = $request->TanggalSelesai;
+            $kegiatan->RincianKegiatan = $request->RincianKegiatan;
+            $kegiatan->Feedback = $request->Feedback;
+            $kegiatan->Status = $request->Status ?? $kegiatan->Status; // Keep existing status if not provided
+            $kegiatan->DEdited = now();
+            $kegiatan->UEdited = Auth::id();
+            $kegiatan->save();
+            
+            // Process Sub Kegiatans
+            if ($request->has_sub_kegiatan === 'yes') {
+                // Handle existing sub kegiatans
+                if ($request->has('existing_sub_kegiatans') && is_array($request->existing_sub_kegiatans)) {
+                    foreach ($request->existing_sub_kegiatans as $subKegiatanId => $subKegiatanData) {
+                        $subKegiatan = SubKegiatan::find($subKegiatanId);
                         
-                        // Add new sub kegiatans
-                        if ($request->has('new_sub_kegiatans') && is_array($request->new_sub_kegiatans)) {
-                            foreach ($request->new_sub_kegiatans as $subKegiatanData) {
-                                if (empty($subKegiatanData['Nama'])) continue;
-                                
-                                $subKegiatan = new SubKegiatan();
-                                $subKegiatan->KegiatanID = $kegiatan->KegiatanID;
-                                $subKegiatan->Nama = $subKegiatanData['Nama'];
-                                $subKegiatan->JadwalMulai = $subKegiatanData['JadwalMulai'];
-                                $subKegiatan->JadwalSelesai = $subKegiatanData['JadwalSelesai'];
-                                $subKegiatan->Catatan = $subKegiatanData['Catatan'];
-                                $subKegiatan->Status = $subKegiatanData['Status'] ?? 'N';
-                                $subKegiatan->Feedback = $subKegiatanData['Feedback'];
-                                $subKegiatan->DCreated = now();
-                                $subKegiatan->UCreated = Auth::id();
-                                $subKegiatan->save();
-                                
-                                // Process RABs for this new SubKegiatan if any
-                                if (isset($subKegiatanData['rabs']) && is_array($subKegiatanData['rabs'])) {
-                                    foreach ($subKegiatanData['rabs'] as $rabData) {
-                                        if (empty($rabData['Komponen'])) continue;
-                                        
-                                        $rab = new RAB();
-                                        $rab->SubKegiatanID = $subKegiatan->SubKegiatanID;
-                                        $rab->KegiatanID = $kegiatan->KegiatanID;
+                        if ($subKegiatan) {
+                            // Update sub kegiatan
+                            $subKegiatan->Nama = $subKegiatanData['Nama'];
+                            $subKegiatan->JadwalMulai = $subKegiatanData['JadwalMulai'];
+                            $subKegiatan->JadwalSelesai = $subKegiatanData['JadwalSelesai'];
+                            $subKegiatan->Catatan = $subKegiatanData['Catatan'];
+                            $subKegiatan->Feedback = $subKegiatanData['Feedback'];
+                            $subKegiatan->Status = $subKegiatanData['Status'] ?? 'N';
+                            $subKegiatan->DEdited = now();
+                            $subKegiatan->UEdited = Auth::id();
+                            $subKegiatan->save();
+                            
+                            // Handle existing RABs for this sub kegiatan
+                            if (isset($subKegiatanData['existing_rabs']) && is_array($subKegiatanData['existing_rabs'])) {
+                                foreach ($subKegiatanData['existing_rabs'] as $rabId => $rabData) {
+                                    $rab = RAB::find($rabId);
+                                    
+                                    if ($rab) {
+                                        // Update RAB
                                         $rab->Komponen = $rabData['Komponen'];
                                         $rab->Volume = str_replace('.', '', $rabData['Volume']);
                                         $rab->Satuan = $rabData['Satuan'];
                                         $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
                                         $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
                                         $rab->Feedback = $rabData['Feedback'];
-                                       $rab->Status = $rabData['Status'] ?? 'N';// Default status is Menunggu
-                                        $rab->DCreated = now();
-                                        $rab->UCreated = Auth::id();
+                                        $rab->Status = $rabData['Status'] ?? 'N';
+                                        $rab->DEdited = now();
+                                        $rab->UEdited = Auth::id();
                                         $rab->save();
                                     }
                                 }
                             }
+                            
+                            // Add new RABs for this sub kegiatan
+                            if (isset($subKegiatanData['new_rabs']) && is_array($subKegiatanData['new_rabs'])) {
+                                foreach ($subKegiatanData['new_rabs'] as $rabData) {
+                                    if (empty($rabData['Komponen'])) continue;
+                                    
+                                    $rab = new RAB();
+                                    $rab->SubKegiatanID = $subKegiatan->SubKegiatanID;
+                                    $rab->KegiatanID = $kegiatan->KegiatanID;
+                                    $rab->Komponen = $rabData['Komponen'];
+                                    $rab->Volume = str_replace('.', '', $rabData['Volume']);
+                                    $rab->Satuan = $rabData['Satuan'];
+                                    $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
+                                    $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
+                                    $rab->Feedback = $rabData['Feedback'];
+                                    $rab->Status = $rabData['Status'] ?? 'N';// Default status is Menunggu
+                                    $rab->DCreated = now();
+                                    $rab->UCreated = Auth::id();
+                                    $rab->save();
+                                }
+                            }
                         }
                     }
-                    
-                    // Handle existing RABs for Kegiatan
-                    if ($request->has('existing_rabs') && is_array($request->existing_rabs)) {
-                        foreach ($request->existing_rabs as $rabId => $rabData) {
-                            $rab = RAB::find($rabId);
-                            
-                            if ($rab) {
-                                // Update RAB
+                }
+                
+                // Add new sub kegiatans
+                if ($request->has('new_sub_kegiatans') && is_array($request->new_sub_kegiatans)) {
+                    foreach ($request->new_sub_kegiatans as $subKegiatanData) {
+                        if (empty($subKegiatanData['Nama'])) continue;
+                        
+                        $subKegiatan = new SubKegiatan();
+                        $subKegiatan->KegiatanID = $kegiatan->KegiatanID;
+                        $subKegiatan->Nama = $subKegiatanData['Nama'];
+                        $subKegiatan->JadwalMulai = $subKegiatanData['JadwalMulai'];
+                        $subKegiatan->JadwalSelesai = $subKegiatanData['JadwalSelesai'];
+                        $subKegiatan->Catatan = $subKegiatanData['Catatan'];
+                        $subKegiatan->Status = $subKegiatanData['Status'] ?? 'N';
+                        $subKegiatan->Feedback = $subKegiatanData['Feedback'];
+                        $subKegiatan->DCreated = now();
+                        $subKegiatan->UCreated = Auth::id();
+                        $subKegiatan->save();
+                        
+                        // Process RABs for this new SubKegiatan if any
+                        if (isset($subKegiatanData['rabs']) && is_array($subKegiatanData['rabs'])) {
+                            foreach ($subKegiatanData['rabs'] as $rabData) {
+                                if (empty($rabData['Komponen'])) continue;
+                                
+                                $rab = new RAB();
+                                $rab->SubKegiatanID = $subKegiatan->SubKegiatanID;
+                                $rab->KegiatanID = $kegiatan->KegiatanID;
                                 $rab->Komponen = $rabData['Komponen'];
                                 $rab->Volume = str_replace('.', '', $rabData['Volume']);
                                 $rab->Satuan = $rabData['Satuan'];
                                 $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
                                 $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
                                 $rab->Feedback = $rabData['Feedback'];
-                                $rab->Status = $rabData['Status'] ?? 'N';
-                                $rab->DEdited = now();
-                                $rab->UEdited = Auth::id();
+                                $rab->Status = $rabData['Status'] ?? 'N';// Default status is Menunggu
+                                $rab->DCreated = now();
+                                $rab->UCreated = Auth::id();
                                 $rab->save();
                             }
                         }
                     }
-                    
-                    // Add new RABs for Kegiatan
-                    if ($request->has('new_rabs') && is_array($request->new_rabs)) {
-                        foreach ($request->new_rabs as $rabData) {
-                            if (empty($rabData['Komponen'])) continue;
-                            
-                            $rab = new RAB();
-                            $rab->KegiatanID = $kegiatan->KegiatanID;
-                            $rab->SubKegiatanID = null; // This RAB belongs directly to Kegiatan
-                            $rab->Komponen = $rabData['Komponen'];
-                            $rab->Volume = str_replace('.', '', $rabData['Volume']);
-                            $rab->Satuan = $rabData['Satuan'];
-                            $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
-                            $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
-                            $rab->Feedback = $rabData['Feedback'];
-                            $rab->Status = $rabData['Status'] ?? 'N';
-                            $rab->DCreated = now();
-                            $rab->UCreated = Auth::id();
-                            $rab->save();
-                        }
-                    }
-                    
-                    // Handle deleted items
-                   // Handle deleted items
-                        if ($request->has('delete_sub_kegiatans') && is_array($request->delete_sub_kegiatans)) {
-                            SubKegiatan::whereIn('SubKegiatanID', $request->delete_sub_kegiatans)->delete();
-                        }
-
-                        if ($request->has('delete_rabs') && is_array($request->delete_rabs)) {
-                            RAB::whereIn('RABID', $request->delete_rabs)->delete();
-                        }
-
-                    
-                    // Commit transaction
-                    \DB::commit();
-                    
-                    if ($request->ajax()) {
-                        return response()->json(['success' => true, 'message' => 'Kegiatan berhasil diupdate']);
-                    }
-                    return redirect()->route('kegiatans.index')->with('success', 'Kegiatan berhasil diupdate');
-                } catch (\Exception $e) {
-                    // Rollback transaction on error
-                    \DB::rollback();
-                    
-                    if ($request->ajax()) {
-                        return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
-                    }
-                    return redirect()->back()->withInput()->with('error', 'Error: ' . $e->getMessage());
                 }
             }
+            
+            // Handle existing RABs for Kegiatan
+            if ($request->has('existing_rabs') && is_array($request->existing_rabs)) {
+                foreach ($request->existing_rabs as $rabId => $rabData) {
+                    $rab = RAB::find($rabId);
+                    
+                    if ($rab) {
+                        // Update RAB
+                        $rab->Komponen = $rabData['Komponen'];
+                        $rab->Volume = str_replace('.', '', $rabData['Volume']);
+                        $rab->Satuan = $rabData['Satuan'];
+                        $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
+                        $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
+                        $rab->Feedback = $rabData['Feedback'];
+                        $rab->Status = $rabData['Status'] ?? 'N';
+                        $rab->DEdited = now();
+                        $rab->UEdited = Auth::id();
+                        $rab->save();
+                    }
+                }
+            }
+            
+            // Add new RABs for Kegiatan
+            if ($request->has('new_rabs') && is_array($request->new_rabs)) {
+                foreach ($request->new_rabs as $rabData) {
+                    if (empty($rabData['Komponen'])) continue;
+                    
+                    $rab = new RAB();
+                    $rab->KegiatanID = $kegiatan->KegiatanID;
+                    $rab->SubKegiatanID = null; // This RAB belongs directly to Kegiatan
+                    $rab->Komponen = $rabData['Komponen'];
+                    $rab->Volume = str_replace('.', '', $rabData['Volume']);
+                    $rab->Satuan = $rabData['Satuan'];
+                    $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
+                    $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
+                    $rab->Feedback = $rabData['Feedback'];
+                    $rab->Status = $rabData['Status'] ?? 'N';
+                    $rab->DCreated = now();
+                    $rab->UCreated = Auth::id();
+                    $rab->save();
+                }
+            }
+            
+            // Handle deleted items
+            if ($request->has('delete_sub_kegiatans') && is_array($request->delete_sub_kegiatans)) {
+                SubKegiatan::whereIn('SubKegiatanID', $request->delete_sub_kegiatans)->delete();
+            }
+
+            if ($request->has('delete_rabs') && is_array($request->delete_rabs)) {
+                RAB::whereIn('RABID', $request->delete_rabs)->delete();
+            }
+            
+            // Commit transaction
+            \DB::commit();
+            
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Kegiatan berhasil diupdate']);
+            }
+            return redirect()->route('kegiatans.index')->with('success', 'Kegiatan berhasil diupdate');
+        } catch (\Exception $e) {
+            // Rollback transaction on error
+            \DB::rollback();
+            
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
+            }
+            return redirect()->back()->withInput()->with('error', 'Error: ' . $e->getMessage());
+        }
+    }
+
+
+
+
+
         
             public function destroy($id)
             {

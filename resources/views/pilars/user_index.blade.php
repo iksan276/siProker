@@ -71,16 +71,49 @@
         <h6 class="m-0 font-weight-bold text-primary">Struktur Pilar</h6>
     </div>
     <div class="card-body">
-    <div class="form-group mb-5">
-                <select id="renstraFilter" class="form-control select2-filter">
-                    <option value="">-- Pilih Renstra --</option>
-                    @foreach($renstras as $renstra)
-                        <option value="{{ $renstra->RenstraID }}" {{ isset($selectedRenstra) && $selectedRenstra == $renstra->RenstraID ? 'selected' : '' }}>
-                            {{ $renstra->Nama }}
-                        </option>
-                    @endforeach
-                </select>
+        <div class="row mb-5">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="renstraFilter">Renstra</label>
+                    <select id="renstraFilter" class="form-control select2-filter">
+                        <option value="">-- Pilih Renstra --</option>
+                        @foreach($renstras as $renstra)
+                            <option value="{{ $renstra->RenstraID }}" {{ isset($selectedRenstra) && $selectedRenstra == $renstra->RenstraID ? 'selected' : '' }}>
+                                {{ $renstra->Nama }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="treeLevelFilter">Level Tree</label>
+                    <select id="treeLevelFilter" class="form-control select2-filter">
+                        <option value="pilar" {{ isset($selectedTreeLevel) && $selectedTreeLevel == 'pilar' ? 'selected' : '' }}>Pilar</option>
+                        <option value="isu" {{ isset($selectedTreeLevel) && $selectedTreeLevel == 'isu' ? 'selected' : '' }}>Isu Strategis</option>
+                        <option value="program" {{ isset($selectedTreeLevel) && $selectedTreeLevel == 'program' ? 'selected' : '' }}>Program Pengembangan</option>
+                        <option value="rektor" {{ isset($selectedTreeLevel) && $selectedTreeLevel == 'rektor' ? 'selected' : '' }}>Program Rektor</option>
+                        <option value="kegiatan" {{ isset($selectedTreeLevel) && $selectedTreeLevel == 'kegiatan' ? 'selected' : '' }}>Kegiatan</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="searchFilter">Cari</label>
+                    <div class="input-group">
+                        <input type="text" id="searchFilter" class="form-control" placeholder="Cari berdasarkan nama...">
+                        <div class="input-group-append">
+                            <button id="searchButton" class="btn btn-primary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button id="resetSearchButton" class="btn btn-secondary" type="button">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="tree-grid-container" class="table-responsive">
             <table id="tree-grid" class="table table-bordered">
                 <thead>
@@ -247,6 +280,21 @@ tr[data-level="5"] .tree-indent::before {
 .tooltip {
     z-index: 9999;
 }
+
+/* Highlight search results */
+.search-highlight {
+    background-color: #ffff00;
+    padding: 2px;
+    border-radius: 3px;
+}
+
+/* No results message */
+.no-results {
+    padding: 20px;
+    text-align: center;
+    font-style: italic;
+    color: #6c757d;
+}
 </style>
 @endpush
 
@@ -255,8 +303,6 @@ tr[data-level="5"] .tree-indent::before {
 <script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
 <script>
     // Add this to your document ready function in the scripts section
-// Replace the existing mouseenter and mouseleave event handlers with this code
-// Replace the existing mouseenter and mouseleave event handlers with this code
 // Replace the existing mouseenter and mouseleave event handlers with this code
 $(document).on('mouseenter', '#tree-grid tbody tr', function() {
     // Store the original background color before changing it
@@ -278,22 +324,82 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
     var nodeRelationships = {}; // To store parent-child relationships
     var nodeLevels = {}; // To store node levels
     var nodeTypes = {}; // To store node types
+    var nodeHierarchy = {}; // To store complete hierarchy information
     var activeAccordion = null;
+    var previousTreeLevel = null; // Store the previous tree level
+    var allTreeData = []; // Store all tree data for searching
+    var currentSearchTerm = ''; // Store current search term
+    var levelHierarchy = {
+        'pilar': 0,
+        'isu': 1,
+        'program': 2,
+        'rektor': 3,
+        'kegiatan': 4,
+        'subkegiatan': 5,
+        'rab': 6
+    }; // Define level hierarchy for comparison
     
     $(document).ready(function() {
         $('#tree-grid th').addClass('text-dark');
 
+        // Store initial tree level
+        previousTreeLevel = $('#treeLevelFilter').val();
+        
         loadTreeData();
         
-        // Handle filter change
+        // Handle Renstra filter change
         $('#renstraFilter').on('change', function() {
             var renstraID = $(this).val();
             
             // Update URL without page refresh
-            updateUrlParameter('renstraID', renstraID);
+                   // Update URL without page refresh
+                    updateUrlParameter('renstraID', renstraID);
+            
+            // Reset search
+            $('#searchFilter').val('');
+            currentSearchTerm = '';
             
             // Reload tree data
+               // Reload tree data
             loadTreeData();
+        });
+        // Handle Tree Level filter change
+        $('#treeLevelFilter').on('change', function() {
+            var newTreeLevel = $(this).val();
+            var previousLevel = previousTreeLevel;
+            
+            // Update URL without page refresh
+            updateUrlParameter('treeLevel', newTreeLevel);
+            
+            // Store the current tree level for next change
+            previousTreeLevel = newTreeLevel;
+            
+            // Reset search
+            $('#searchFilter').val('');
+            currentSearchTerm = '';
+            
+            // Reload tree data with special handling for level changes
+            loadTreeData(previousLevel, newTreeLevel);
+        });
+        
+        // Handle search input (on Enter key press)
+        $('#searchFilter').on('keypress', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                performSearch();
+            }
+        });
+        
+        // Handle search button click
+        $('#searchButton').on('click', function() {
+            performSearch();
+        });
+        
+        // Handle reset search button click
+        $('#resetSearchButton').on('click', function() {
+            $('#searchFilter').val('');
+            currentSearchTerm = '';
+            resetSearch();
         });
         
         // Handle tooltip for node names - using direct event binding
@@ -390,7 +496,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Iya, yakin',
-cancelButtonText: 'Batal'
+                cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Perform AJAX delete
@@ -636,6 +742,170 @@ cancelButtonText: 'Batal'
         });
     });
     
+    // Function to perform search
+    function performSearch() {
+        var searchTerm = $('#searchFilter').val().trim().toLowerCase();
+        currentSearchTerm = searchTerm;
+        
+        if (searchTerm === '') {
+            resetSearch();
+            return;
+        }
+        
+        // Update URL parameter
+        updateUrlParameter('search', searchTerm);
+        
+        // First, remove any existing highlights
+        $('.search-highlight').each(function() {
+            var text = $(this).text();
+            $(this).replaceWith(text);
+        });
+        
+        // Hide all rows initially
+        $('#tree-grid tbody tr').hide();
+        
+        // Get the current tree level filter
+        var currentTreeLevel = $('#treeLevelFilter').val();
+        
+        // Keep track of matched nodes and their ancestors
+        var matchedNodes = new Set();
+        var nodesToShow = new Set();
+        
+        // Search through all rows
+        $('#tree-grid tbody tr').each(function() {
+            var $row = $(this);
+            var nodeId = $row.data('node-id');
+                     var nodeText = $row.find('td:nth-child(2)').text().toLowerCase();
+            var nodeType = $row.data('node-type');
+            
+            // Modified search logic: Search in the current tree level and show all descendants
+            if (nodeType === currentTreeLevel && nodeText.includes(searchTerm)) {
+                // This node matches the search
+                matchedNodes.add(nodeId);
+                
+                // Add all ancestors to nodes to show
+                if (nodeHierarchy[nodeId]) {
+                    nodeHierarchy[nodeId].ancestors.forEach(function(ancestorId) {
+                        nodesToShow.add(ancestorId);
+                    });
+                }
+                
+                // Add this node to nodes to show
+                nodesToShow.add(nodeId);
+                
+                // Add all descendants to nodes to show
+                if (nodeHierarchy[nodeId] && nodeHierarchy[nodeId].descendants) {
+                    nodeHierarchy[nodeId].descendants.forEach(function(descendantId) {
+                        nodesToShow.add(descendantId);
+                    });
+                }
+            }
+        });
+        
+        // If no matches found, show a message
+        if (matchedNodes.size === 0) {
+            $('#tree-grid tbody').append('<tr class="no-results"><td colspan="3">Tidak ada hasil yang ditemukan untuk "' + searchTerm + '"</td></tr>');
+            return;
+        }
+        
+        // Show all matched nodes, their ancestors, and their descendants
+        nodesToShow.forEach(function(nodeId) {
+            var $row = $('tr[data-node-id="' + nodeId + '"]');
+            $row.show();
+            
+            // If this node is a parent, expand it
+            var $expander = $row.find('.node-expander');
+            if ($expander.length && !$expander.hasClass('expanded') && 
+                (matchedNodes.has(nodeId) || // If this is a matched node
+                 // Or if any of its descendants is a matched node
+                 nodeHierarchy[nodeId] && nodeHierarchy[nodeId].descendants.some(id => matchedNodes.has(id)))) {
+                
+                $expander.addClass('expanded');
+                
+                // Update icon
+                var nodeType = nodeTypes[nodeId] || '';
+                var collapseTooltip = getCollapseTooltip(nodeType);
+                $expander.html('<i class="fas fa-chevron-down text-primary" data-toggle="tooltip" title="' + collapseTooltip + '"></i>');
+                
+                // Add to expanded nodes
+                expandedNodes[nodeId] = true;
+            }
+        });
+        
+        // Highlight the search term in matched nodes
+        matchedNodes.forEach(function(nodeId) {
+            var $row = $('tr[data-node-id="' + nodeId + '"]');
+            var $nameCell = $row.find('td:nth-child(2)');
+            var html = $nameCell.html();
+            
+            // Create a temporary div to manipulate the HTML safely
+            var $temp = $('<div>').html(html);
+            
+            // Find all text nodes and highlight the search term
+            $temp.find('*').addBack().contents().filter(function() {
+                return this.nodeType === 3; // Text node
+            }).each(function() {
+                var text = this.nodeValue;
+                var lowerText = text.toLowerCase();
+                var index = lowerText.indexOf(searchTerm);
+                
+                if (index >= 0) {
+                    var before = text.substring(0, index);
+                    var match = text.substring(index, index + searchTerm.length);
+                    var after = text.substring(index + searchTerm.length);
+                    
+                    var $newNode = $('<span>' + before + '<span class="search-highlight">' + match + '</span>' + after + '</span>');
+                    $(this).replaceWith($newNode);
+                }
+            });
+            
+            // Update the cell with the highlighted content
+            $nameCell.html($temp.html());
+        });
+        
+        // Save expanded state to localStorage
+        localStorage.setItem('expandedNodes', JSON.stringify(expandedNodes));
+        
+        // Initialize tooltips for newly visible elements
+        initTooltips();
+    }
+    
+    // Function to reset search and show all nodes according to normal expansion state
+    function resetSearch() {
+        // Remove search parameter from URL
+        updateUrlParameter('search', null);
+        
+        // Remove any "no results" message
+        $('.no-results').remove();
+        
+        // Remove any existing highlights
+        $('.search-highlight').each(function() {
+            var text = $(this).text();
+            $(this).replaceWith(text);
+        });
+        
+        // Reset the tree to its normal state
+        $('#tree-grid tbody tr').each(function() {
+            var $row = $(this);
+            var nodeId = $row.data('node-id');
+            var parentId = $row.data('parent');
+            
+            if (!parentId) {
+                // This is a root node, always show it
+                $row.show();
+            } else if (expandedNodes[parentId]) {
+                // Parent is expanded, show this node
+                $row.show();
+            } else {
+                // Parent is collapsed, hide this node
+                $row.hide();
+            }
+        });
+        
+        // Re-initialize tooltips
+        initTooltips();
+    }
+    
     // Function to reset UI state for all descendants of a node
     function resetDescendantUIState(nodeId) {
         // Find all descendants
@@ -748,14 +1018,147 @@ function getCollapseTooltip(nodeType) {
         $('tr[data-parent="' + nodeId + '"]').hide();
     }
     
-    function loadTreeData() {
+    // Function to build complete node hierarchy
+    function buildNodeHierarchy(treeData) {
+        // Reset the hierarchy
+        nodeHierarchy = {};
+        
+        // First pass: create entries for all nodes
+        treeData.forEach(function(item) {
+            nodeHierarchy[item.id] = {
+                id: item.id,
+                type: item.type,
+                level: item.level,
+                parent: item.parent || null,
+                children: [],
+                ancestors: [],
+                descendants: []
+            };
+        });
+        
+        // Second pass: populate children arrays and build ancestor chains
+        treeData.forEach(function(item) {
+            if (item.parent && nodeHierarchy[item.parent]) {
+                // Add this node to its parent's children
+                nodeHierarchy[item.parent].children.push(item.id);
+                
+                // Build ancestor chain
+                var currentParent = item.parent;
+                var ancestors = [];
+                
+                while (currentParent) {
+                    ancestors.push(currentParent);
+                    currentParent = nodeHierarchy[currentParent].parent;
+                }
+                
+                nodeHierarchy[item.id].ancestors = ancestors;
+            }
+        });
+        
+        // Third pass: populate descendant arrays
+        for (var nodeId in nodeHierarchy) {
+            var node = nodeHierarchy[nodeId];
+            node.descendants = getDescendants(nodeId);
+        }
+        
+        return nodeHierarchy;
+    }
+    
+    // Helper function to get all descendants of a node
+    function getDescendants(nodeId) {
+        var descendants = [];
+        var node = nodeHierarchy[nodeId];
+        
+        if (!node) return descendants;
+        
+        // Add direct children
+        descendants = descendants.concat(node.children);
+        
+        // Add children's descendants
+        node.children.forEach(function(childId) {
+            descendants = descendants.concat(getDescendants(childId));
+        });
+        
+        return descendants;
+    }
+    
+    // Function to ensure parent nodes are expanded when children are expanded
+    function ensureParentNodesExpanded() {
+        // Create a set of nodes that need to be expanded
+        var nodesToExpand = new Set();
+        
+        // For each expanded node, ensure all its ancestors are also expanded
+        for (var nodeId in expandedNodes) {
+            if (expandedNodes[nodeId] && nodeHierarchy[nodeId]) {
+                // Add all ancestors to the set of nodes to expand
+                nodeHierarchy[nodeId].ancestors.forEach(function(ancestorId) {
+                    nodesToExpand.add(ancestorId);
+                });
+            }
+        }
+        
+        // Add all these nodes to expandedNodes
+        nodesToExpand.forEach(function(nodeId) {
+            expandedNodes[nodeId] = true;
+        });
+    }
+    
+    // Function to preserve expanded state when changing tree levels
+    function preserveExpandedStateAcrossLevels(previousLevel, newLevel) {
+        // If moving from a lower level to a higher level (e.g., from kegiatan to program)
+        // we need to ensure that all parent nodes of expanded nodes remain expanded
+        if (levelHierarchy[previousLevel] > levelHierarchy[newLevel]) {
+            // Create a map to track which nodes should remain expanded in the new view
+            var expandedNodesInNewView = {};
+            
+            // For each currently expanded node
+            for (var nodeId in expandedNodes) {
+                if (expandedNodes[nodeId] && nodeHierarchy[nodeId]) {
+                    // Get the node type
+                    var nodeType = nodeTypes[nodeId];
+                    
+                    // If this node will still be visible in the new view, keep it expanded
+                    if (levelHierarchy[nodeType] <= levelHierarchy[newLevel]) {
+                        expandedNodesInNewView[nodeId] = true;
+                    }
+                    
+                    // For nodes that won't be visible, ensure their ancestors are expanded
+                    if (levelHierarchy[nodeType] > levelHierarchy[newLevel]) {
+                        // Find ancestors that will be visible in the new view
+                        nodeHierarchy[nodeId].ancestors.forEach(function(ancestorId) {
+                            var ancestorType = nodeTypes[ancestorId];
+                            if (levelHierarchy[ancestorType] <= levelHierarchy[newLevel]) {
+                                expandedNodesInNewView[ancestorId] = true;
+                            }
+                        });
+                    }
+                }
+            }
+            
+            // Update the expanded nodes
+            expandedNodes = expandedNodesInNewView;
+            
+            // Save to localStorage
+            localStorage.setItem('expandedNodes', JSON.stringify(expandedNodes));
+        }
+    }
+    
+    function loadTreeData(previousLevel, newLevel) {
         var renstraID = $('#renstraFilter').val();
+        var treeLevel = $('#treeLevelFilter').val();
+        var searchTerm = $('#searchFilter').val().trim();
+        
+        // If we're changing tree levels, preserve expanded state
+        if (previousLevel && newLevel && previousLevel !== newLevel) {
+            preserveExpandedStateAcrossLevels(previousLevel, newLevel);
+        }
         
         $.ajax({
             url: '{{ route('pilars.index') }}',
             type: 'GET',
             data: {
                 renstraID: renstraID,
+                treeLevel: treeLevel,
                 format: 'tree'
             },
             dataType: 'json',
@@ -769,10 +1172,11 @@ function getCollapseTooltip(nodeType) {
                 $('#tree-grid th').addClass('text-dark');
                 // Add rows to the table
                 var treeData = response.data || [];
+                allTreeData = treeData; // Store all tree data for searching
                 var tableBody = $('#tree-grid tbody');
                 
                 if (treeData.length === 0) {
-                    tableBody.html('<tr><td colspan="3" class="text-center">No data available</td></tr>');
+                                       tableBody.html('<tr><td colspan="3" class="text-center">No data available</td></tr>');
                     return;
                 }
                 
@@ -791,16 +1195,24 @@ function getCollapseTooltip(nodeType) {
                         nodeRelationships[item.id] = item.parent;
                     }
                     
-                    // Store node levels
+                               // Store node levels
                     nodeLevels[item.id] = item.level;
                     
                     // Store node types
                     nodeTypes[item.id] = item.type;
                 });
+                // Build complete hierarchy information
+                nodeHierarchy = buildNodeHierarchy(treeData);
+                
+                // Special handling for tree level changes
+                if (previousLevel && newLevel && previousLevel !== newLevel) {
+                    // When changing tree levels, we need to ensure parent nodes stay expanded
+                    // if their children were expanded in the previous view
+                    ensureParentNodesExpanded();
+                }
                 
                 // Process tree data to update tooltips based on node type
                 treeData.forEach(function(item) {
-                    console.log(item.type)
                     // Update tooltip based on node type
                     if (item.type === 'pilar') {
                         item.tooltip = 'Ini adalah Pilar';
@@ -831,10 +1243,10 @@ function getCollapseTooltip(nodeType) {
                     row.attr('data-level', item.level);
                     row.attr('data-has-children', item.has_children);
                     row.attr('data-node-type', item.type); // Add node type as data attribute
-                    
                     // Add node type class for styling
                     row.addClass('node-' + item.type);
-                                        // Apply background color directly based on node type
+                    
+                    // Apply background color directly based on node type
                     if (item.type === 'pilar') {
                         row.css('background-color', 'rgba(231, 74, 59, 0.1)'); // Light red
                     } else if (item.type === 'isu') {
@@ -848,9 +1260,9 @@ function getCollapseTooltip(nodeType) {
                     } else if (item.type === 'kegiatan') {
                         row.css('background-color', 'rgba(156, 39, 176, 0.1)'); // Light purple
                     }else if (item.type === 'subkegiatan') {
-                        row.css('background-color', 'rgba(255, 140, 0, 0.1)'); // Light purple
+                        row.css('background-color', 'rgba(255, 140, 0, 0.1)'); // Light orange
                     }else if (item.type === 'rab') {
-                        row.css('background-color', 'rgba(0, 0, 0, 0.1)'); // Light purple
+                        row.css('background-color', 'rgba(0, 0, 0, 0.1)'); // Light black
                     }
                     
                     // Add level class for styling
@@ -924,6 +1336,12 @@ function getCollapseTooltip(nodeType) {
                 
                 // Re-initialize event handlers for dynamic content
                 initEventHandlers();
+                
+                // Apply search if there's a search term
+                if (searchTerm) {
+                    $('#searchFilter').val(searchTerm);
+                    performSearch();
+                }
             },
             error: function(xhr) {
                 console.error('Error loading data:', xhr);
@@ -967,6 +1385,14 @@ function getCollapseTooltip(nodeType) {
     function expandNode(nodeId) {
         // Show all direct children of this node
         $('tr[data-parent="' + nodeId + '"]').show();
+        
+        // Also ensure that if any of these children are expanded, their children are shown too
+        $('tr[data-parent="' + nodeId + '"]').each(function() {
+            var childId = $(this).data('node-id');
+            if (expandedNodes[childId]) {
+                expandNode(childId);
+            }
+        });
     }
     
     function collapseNode(nodeId) {
@@ -1016,7 +1442,7 @@ function getCollapseTooltip(nodeType) {
         });
     }
     
-    
+    // Function to update URL parameters without page refresh
     function updateUrlParameter(key, value) {
         var url = new URL(window.location.href);
         
@@ -1047,5 +1473,46 @@ function getCollapseTooltip(nodeType) {
             $('.alert').alert('close');
         }, 5000);
     }
+    
+    // Function to ensure all parent nodes are expanded when a child is expanded
+    function ensureParentExpanded(nodeId) {
+        // Get the parent of this node
+        var parentId = nodeRelationships[nodeId];
+        
+        // If there's a parent and it exists in the DOM
+        if (parentId && $('tr[data-node-id="' + parentId + '"]').length) {
+            // Make sure the parent is expanded
+            var $parentExpander = $('tr[data-node-id="' + parentId + '"] .node-expander');
+            
+            if (!$parentExpander.hasClass('expanded')) {
+                // Expand the parent
+                expandNode(parentId);
+                $parentExpander.addClass('expanded');
+                
+                // Update icon with appropriate tooltip
+                var parentNodeType = nodeTypes[parentId] || '';
+                var collapseTooltip = getCollapseTooltip(parentNodeType);
+                $parentExpander.html('<i class="fas fa-chevron-down text-primary" data-toggle="tooltip" title="' + collapseTooltip + '"></i>');
+                
+                // Add to expanded nodes
+                expandedNodes[parentId] = true;
+            }
+            
+            // Recursively ensure this parent's parent is also expanded
+            ensureParentExpanded(parentId);
+        }
+    }
+    
+    
+    // Check for search parameter in URL on page load
+    $(document).ready(function() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var searchParam = urlParams.get('search');
+        
+        if (searchParam) {
+            $('#searchFilter').val(searchParam);
+            // Search will be performed after tree data is loaded
+        }
+    });
 </script>
 @endpush
