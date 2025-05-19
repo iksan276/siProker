@@ -100,7 +100,7 @@ class OAuthGoogleController extends Controller
                                 [
                                     'name' => $user['Nama'],
                                     'password' => bcrypt($user['Password']), // Note: This is not secure, consider a better approach
-                                    'level' => !$isAdmin ? 1 : 2, // 1 for admin, 2 for regular user
+                                    'level' => $isAdmin ? 1 : 2, // 1 for admin, 2 for regular user
                                 ]
                             );
                             
@@ -111,7 +111,7 @@ class OAuthGoogleController extends Controller
                             request()->session()->regenerate();
                             
                             // Redirect based on user role
-                            if (!$isAdmin) {
+                            if ($isAdmin) {
                                 return redirect('/dashboard');
                             } else {
                                 return redirect('/pilars');
