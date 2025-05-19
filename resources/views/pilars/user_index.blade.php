@@ -539,6 +539,65 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
             });
         });
 
+        // Add this to the document ready function in the scripts section
+        // Handle ajukan kegiatan button click
+        $(document).on('click', '.ajukan-kegiatan', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var kegiatanId = $(this).data('id');
+            var updateUrl = "{{ url('api/kegiatan') }}/" + kegiatanId + "/update-status";
+            
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Ajukan Kegiatan?',
+                text: "Apakah Anda yakin ingin mengajukan kegiatan ini?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Ajukan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Perform AJAX update
+                    $.ajax({
+                        url: updateUrl,
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                // Show success message
+                                Swal.fire({
+                                    title: 'Berhasil!',
+                                    text: response.message || 'Kegiatan berhasil diajukan.',
+                                    icon: 'success',
+                                    confirmButtonColor: '#3085d6',
+                                    confirmButtonText: 'OK'
+                                });
+                                
+                                // Reload tree data to update the UI
+                                loadTreeData();
+                            } else {
+                                // Show error message
+                                showAlert('danger', response.message || 'Gagal mengajukan kegiatan');
+                            }
+                        },
+                        error: function(xhr) {
+                            // Handle error response
+                            var message = 'Terjadi kesalahan';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            }
+                            showAlert('danger', message);
+                        }
+                    });
+                }
+            });
+        });
+
+
             // Handle delete sub-kegiatan button click
             $(document).on('click', '.delete-sub-kegiatan', function(e) {
             e.preventDefault();

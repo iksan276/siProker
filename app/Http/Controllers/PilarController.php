@@ -266,15 +266,41 @@ class PilarController extends Controller
                                 $kegiatanLevel = 1;
                             }
                             
+                              $statusBadge = '';
+                            if ($kegiatan->Status == 'Y') {
+                                    $statusBadge = '<span class="badge badge-success">Disetujui</span>';
+                                } elseif ($kegiatan->Status == 'T') {
+                                    $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
+                                } elseif ($kegiatan->Status == 'R') {
+                                    $statusBadge = '<span class="badge badge-info">Revisi</span>';
+                                } elseif ($kegiatan->Status == 'P') {
+                                    $statusBadge = '<span class="badge badge-primary">Pengajuan</span>';
+                                } elseif ($kegiatan->Status == 'PT') {
+                                    $statusBadge = '<span class="badge badge-warning">Pengajuan TOR</span>';
+                                } elseif ($kegiatan->Status == 'YT') {
+                                    $statusBadge = '<span class="badge badge-success">Pengajuan TOR Disetujui</span>';
+                                } elseif ($kegiatan->Status == 'TT') {
+                                    $statusBadge = '<span class="badge badge-danger">Pengajuan TOR Ditolak</span>';
+                                } elseif ($kegiatan->Status == 'RT') {
+                                    $statusBadge = '<span class="badge badge-info">Pengajuan TOR direvisi</span>';
+                                }
+                                $ajukanButton = '';
+                                if ($kegiatan->Status != 'P') {
+                                    $ajukanButton = '
+                                        <button class="btn btn-primary btn-square btn-sm ajukan-kegiatan" 
+                                            data-id="' . $kegiatan->KegiatanID . '">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>';
+                                }
                             $kegiatanNode = [
                                 'id' => 'kegiatan_' . $kegiatan->KegiatanID,
                                 'no' => $startLevel == 'kegiatan' ? $rowIndex++ : '',
-                                'nama' => $kegiatan->Nama,
+                                'nama' => '<span data-toggle="tooltip" title="Ini adalah Kegiatan">' . $kegiatan->Nama . '</span> ' . '</span> <span data-toggle="tooltip" title="'. $kegiatan->Feedback .'">' . $statusBadge . '</span>',
                                 'type' => 'kegiatan',
                                 'parent' => $kegiatanParent,
                                 'level' => $kegiatanLevel,
                                 'has_children' => $kegiatan->subKegiatans->count() > 0 || $kegiatan->rabs->whereNull('SubKegiatanID')->count() > 0,
-                                'actions' => '
+                                'actions' => $ajukanButton . '
                                     <button class="btn btn-primary btn-square btn-sm load-modal" 
                                         data-url="' . route('sub-kegiatans.create') . '?kegiatanID=' . $kegiatan->KegiatanID . '" 
                                         data-title="Tambah Sub Kegiatan">

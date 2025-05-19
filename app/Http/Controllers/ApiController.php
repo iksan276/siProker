@@ -178,4 +178,23 @@ public function getSubKegiatanDetails($id)
 }
 
 
+public function updateKegiatanStatus(Request $request, $id)
+{
+    $kegiatan = Kegiatan::find($id);
+    
+    if (!$kegiatan) {
+        return response()->json(['success' => false, 'message' => 'Kegiatan not found'], 404);
+    }
+    
+    // Update the status to 'P' (Pengajuan)
+    $kegiatan->Status = 'P';
+    $kegiatan->save();
+    
+    return response()->json([
+        'success' => true, 
+        'message' => 'Status kegiatan berhasil diubah menjadi Pengajuan',
+        'status' => $kegiatan->Status
+    ]);
+}
+
 }
