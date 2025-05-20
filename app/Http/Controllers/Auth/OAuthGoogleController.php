@@ -88,6 +88,9 @@ class OAuthGoogleController extends Controller
                         if (!empty($userData) && is_array($userData)) {
                             $user = $userData[0];
                             
+                            // Store complete user data in session
+                            session(['api_user_data' => $user]);
+                            
                             // Determine if user is admin based on position
                             $isAdmin = false;
                             if (isset($user['Posisi']) && isset($user['Posisi']['Nama'])) {

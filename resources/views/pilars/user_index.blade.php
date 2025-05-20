@@ -584,7 +584,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
             e.preventDefault();
             e.stopPropagation();
             var kegiatanId = $(this).data('id');
-            var updateUrl = "{{ url('api/kegiatan') }}/" + kegiatanId + "/update-status";
+            var updateUrl = "{{ url('api/kegiatan') }}/" + kegiatanId + "/update-status?status=P";
             
             // Show confirmation dialog
             Swal.fire({
