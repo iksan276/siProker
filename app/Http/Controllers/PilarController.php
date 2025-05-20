@@ -34,26 +34,27 @@ class PilarController extends Controller
         // Get the selected filter values (for re-populating the selects)
         $selectedRenstra = $request->renstraID;
         $selectedTreeLevel = $request->treeLevel ?? 'pilar';
+        $selectedStatus = $request->status;
         
         // If user is not admin, prepare tree grid data
         if (!auth()->user()->isAdmin()) {
             $userId = Auth::id();
             
             if ($request->ajax() && $request->wantsJson()) {
-                $treeData = $this->buildTreeData($pilars, $userId, $selectedTreeLevel);
+                $treeData = $this->buildTreeData($pilars, $userId, $selectedTreeLevel, $selectedStatus);
                 return response()->json([
                     'data' => $treeData
                 ]);
             }
             
-            return view('pilars.user_index', compact('pilars', 'renstras', 'selectedRenstra', 'selectedTreeLevel'));
+            return view('pilars.user_index', compact('pilars', 'renstras', 'selectedRenstra', 'selectedTreeLevel', 'selectedStatus'));
         }
         
         // If it's an AJAX request, return JSON data for DataTable
         if ($request->ajax() && $request->wantsJson()) {
             // If format=tree is requested, return tree data even for admin
             if ($request->has('format') && $request->format === 'tree') {
-                $treeData = $this->buildTreeData($pilars, Auth::id(), $selectedTreeLevel);
+                $treeData = $this->buildTreeData($pilars, Auth::id(), $selectedTreeLevel, $selectedStatus);
                 return response()->json([
                     'data' => $treeData
                 ]);
@@ -104,7 +105,7 @@ class PilarController extends Controller
         return view('pilars.index', compact('pilars', 'renstras', 'selectedRenstra'));
     }
     
-    private function buildTreeData($pilars, $userId, $startLevel = 'pilar')
+    private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusFilter = null)
     {
         $treeData = [];
         $rowIndex = 1;
@@ -194,10 +195,17 @@ class PilarController extends Controller
                     foreach ($program->programRektors as $rektor) {
                         if ($rektor->NA == 'Y') continue; // Skip non-active rektor programs
                         
-                        // Get kegiatan count directly from program rektor's ProgramRektorID
-                        $kegiatanCount = Kegiatan::where('ProgramRektorID', $rektor->ProgramRektorID)
-                                        ->where('UCreated', $userId)
-                                        ->count();
+                        // Get kegiatan query with status filter if applicable
+                        $kegiatanQuery = Kegiatan::where('ProgramRektorID', $rektor->ProgramRektorID)
+                                        ->where('UCreated', $userId);
+                        
+                        // Apply status filter if we're at kegiatan level and status is provided
+                        if ($startLevel == 'kegiatan' && $statusFilter) {
+                            $kegiatanQuery->where('Status', $statusFilter);
+                        }
+                        
+                        // Get kegiatan count
+                        $kegiatanCount = $kegiatanQuery->count();
                         
                         // Set parent and level based on startLevel
                         $rektorParent = null;
@@ -243,9 +251,15 @@ class PilarController extends Controller
                         }
                         
                         // Add Kegiatan directly under Program Rektor
-                        $kegiatans = Kegiatan::where('ProgramRektorID', $rektor->ProgramRektorID)
-                            ->where('UCreated', $userId)
-                            ->get();
+                        $kegiatanQuery = Kegiatan::where('ProgramRektorID', $rektor->ProgramRektorID)
+                            ->where('UCreated', $userId);
+                            
+                        // Apply status filter if provided
+                        if ($statusFilter) {
+                            $kegiatanQuery->where('Status', $statusFilter);
+                        }
+                        
+                        $kegiatans = $kegiatanQuery->get();
                             
                         foreach ($kegiatans as $kegiatan) {
                             // Set parent and level based on startLevel
@@ -264,6 +278,9 @@ class PilarController extends Controller
                             } else if ($startLevel == 'rektor') {
                                 $kegiatanParent = 'rektor_' . $rektor->ProgramRektorID;
                                 $kegiatanLevel = 1;
+                            } else if ($startLevel == 'kegiatan') {
+                                $kegiatanParent = null;
+                                $kegiatanLevel = 0;
                             }
                             
                               $statusBadge = '';

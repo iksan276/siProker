@@ -71,7 +71,7 @@
         <h6 class="m-0 font-weight-bold text-primary">Struktur Pilar</h6>
     </div>
     <div class="card-body">
-        <div class="row mb-5">
+        <div class="row">
             <div class="col-md-4">
                 <div class="form-group">
                     <label for="renstraFilter">Renstra</label>
@@ -99,7 +99,7 @@
             </div>
             <div class="col-md-4">
                 <div class="form-group">
-                    <label for="searchFilter">Cari</label>
+                    <label for="searchFilter">Cari Berdasarkan Level Tree yang dipilih</label>
                     <div class="input-group">
                         <input type="text" id="searchFilter" class="form-control" placeholder="Cari berdasarkan nama...">
                         <div class="input-group-append">
@@ -114,6 +114,28 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Status Filter - Only visible when tree level is 'kegiatan' -->
+        <div id="statusFilterContainer" class="row mb-3" style="display: none;">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="statusFilter">Status Kegiatan</label>
+                    <select id="statusFilter" class="form-control select2-filter">
+                        <option value="">Semua Status</option>
+                        <option value="N" {{ isset($selectedStatus) && $selectedStatus == 'N' ? 'selected' : '' }}>Menunggu</option>
+                        <option value="P" {{ isset($selectedStatus) && $selectedStatus == 'P' ? 'selected' : '' }}>Pengajuan</option>
+                        <option value="Y" {{ isset($selectedStatus) && $selectedStatus == 'Y' ? 'selected' : '' }}>Disetujui</option>
+                        <option value="T" {{ isset($selectedStatus) && $selectedStatus == 'T' ? 'selected' : '' }}>Ditolak</option>
+                        <option value="R" {{ isset($selectedStatus) && $selectedStatus == 'R' ? 'selected' : '' }}>Revisi</option>
+                        <option value="PT" {{ isset($selectedStatus) && $selectedStatus == 'PT' ? 'selected' : '' }}>Pengajuan TOR</option>
+                        <option value="YT" {{ isset($selectedStatus) && $selectedStatus == 'YT' ? 'selected' : '' }}>TOR Disetujui</option>
+                        <option value="TT" {{ isset($selectedStatus) && $selectedStatus == 'TT' ? 'selected' : '' }}>TOR Ditolak</option>
+                        <option value="RT" {{ isset($selectedStatus) && $selectedStatus == 'RT' ? 'selected' : '' }}>TOR Revisi</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
         <div id="tree-grid-container" class="table-responsive">
             <table id="tree-grid" class="table table-bordered">
                 <thead>
@@ -345,6 +367,9 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
         // Store initial tree level
         previousTreeLevel = $('#treeLevelFilter').val();
         
+        // Show/hide status filter based on tree level
+        toggleStatusFilter();
+        
         loadTreeData();
         
         // Handle Renstra filter change
@@ -374,12 +399,26 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
             // Store the current tree level for next change
             previousTreeLevel = newTreeLevel;
             
+            // Toggle status filter visibility
+            toggleStatusFilter();
+            
             // Reset search
             $('#searchFilter').val('');
             currentSearchTerm = '';
             
             // Reload tree data with special handling for level changes
             loadTreeData(previousLevel, newTreeLevel);
+        });
+        
+        // Handle status filter change
+        $('#statusFilter').on('change', function() {
+            var status = $(this).val();
+            
+            // Update URL without page refresh
+            updateUrlParameter('status', status);
+            
+            // Reload tree data
+            loadTreeData();
         });
         
         // Handle search input (on Enter key press)
@@ -801,6 +840,26 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
         });
     });
     
+    // Function to toggle status filter visibility based on tree level
+    function toggleStatusFilter() {
+        var treeLevel = $('#treeLevelFilter').val();
+        
+        if (treeLevel === 'kegiatan') {
+            $('#statusFilterContainer').slideDown();
+            
+            // Check if there's a status parameter in the URL
+            var urlParams = new URLSearchParams(window.location.search);
+            var statusParam = urlParams.get('status');
+            
+            if (statusParam) {
+                $('#statusFilter').val(statusParam);
+            }
+        } else {
+            $('#statusFilterContainer').slideUp();
+            $('#statusFilter').val(''); // Reset status filter
+        }
+    }
+    
     // Function to perform search
     function performSearch() {
         var searchTerm = $('#searchFilter').val().trim().toLowerCase();
@@ -1206,6 +1265,12 @@ function getCollapseTooltip(nodeType) {
         var renstraID = $('#renstraFilter').val();
         var treeLevel = $('#treeLevelFilter').val();
         var searchTerm = $('#searchFilter').val().trim();
+        var status = '';
+        
+        // Only include status filter if tree level is 'kegiatan'
+        if (treeLevel === 'kegiatan') {
+            status = $('#statusFilter').val();
+        }
         
         // If we're changing tree levels, preserve expanded state
         if (previousLevel && newLevel && previousLevel !== newLevel) {
@@ -1218,6 +1283,7 @@ function getCollapseTooltip(nodeType) {
             data: {
                 renstraID: renstraID,
                 treeLevel: treeLevel,
+                status: status,
                 format: 'tree'
             },
             dataType: 'json',
