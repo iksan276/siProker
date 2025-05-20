@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @section('content')
-<div class="container-fluid">
+
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Profile</h1>
@@ -55,23 +55,23 @@
                     
                     @if(isset($apiUserData))
                     <div class="user-details">
-                        <div class="detail-item d-flex justify-content-between py-2 border-bottom">
+                        <div class="detail-item d-flex flex-column flex-sm-row justify-content-between py-2 border-bottom">
                             <span class="text-gray-600"><i class="fas fa-briefcase mr-2"></i>POSISI</span>
                             <span class="">{{ $apiUserData['Posisi']['Nama'] ?? '' }}</span>
                         </div>
-                        <div class="detail-item d-flex justify-content-between py-2 border-bottom">
+                        <div class="detail-item d-flex flex-column flex-sm-row justify-content-between py-2 border-bottom">
                             <span class="text-gray-600"><i class="fas fa-user-tie mr-2"></i>JABATAN</span>
                             <span class="">{{ $apiUserData['Jabatan']['Nama'] ?? '' }}</span>
                         </div>
-                        <div class="detail-item d-flex justify-content-between py-2 border-bottom">
+                        <div class="detail-item d-flex flex-column flex-sm-row justify-content-between py-2 border-bottom">
                             <span class="text-gray-600"><i class="fas fa-id-card mr-2"></i>NIK</span>
                             <span class="">{{ $apiUserData['NIK'] ?? '-' }}</span>
                         </div>
-                        <div class="detail-item d-flex justify-content-between py-2 border-bottom">
+                        <div class="detail-item d-flex flex-column flex-sm-row justify-content-between py-2 border-bottom">
                             <span class="text-gray-600"><i class="fas fa-id-badge mr-2"></i>NIDN</span>
                             <span class="">{{ $apiUserData['NIDN'] ?? '-' }}</span>
                         </div>
-                        <div class="detail-item d-flex justify-content-between py-2 border-bottom">
+                        <div class="detail-item d-flex flex-column flex-sm-row justify-content-between py-2 border-bottom">
                             <span class="text-gray-600"><i class="fas fa-home mr-2"></i>HOMEBASE</span>
                             <span class="">{{ $apiUserData['Homebase'] ?? '-' }}</span>
                         </div>
@@ -144,41 +144,8 @@
           
         </div>
     </div>
-</div>
 
-<!-- Photo Upload Modal -->
-<div class="modal fade" id="photoUploadModal" tabindex="-1" role="dialog" aria-labelledby="photoUploadModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="photoUploadModalLabel">Change Profile Photo</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body text-center">
-                <div class="upload-area mb-3" id="uploadArea">
-                    <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
-                    <h5>Drag & Drop or Click to Upload</h5>
-                    <input type="file" id="fileUpload" class="d-none">
-                </div>
-                <div class="avatar-options">
-                    <h6 class="mb-3">Or choose an avatar:</h6>
-                    <div class="avatar-grid">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="avatar-option" alt="Avatar 1">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka" class="avatar-option" alt="Avatar 2">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mimi" class="avatar-option" alt="Avatar 3">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Peanut" class="avatar-option" alt="Avatar 4">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary">Save Changes</button>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
