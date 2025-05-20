@@ -114,8 +114,72 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
     $apiUserData = session('api_user_data');
     $userPositionId = $apiUserData['Posisi']['ID'] ?? null;
     
+    // First, collect all valid program rektors based on user's position ID
+    $validProgramRektorIds = [];
+    $validProgramPengembanganIds = [];
+    $validIsuIds = [];
+    $validPilarIds = [];
+    
+    // First pass: identify valid program rektors and their ancestors
     foreach ($pilars as $pilar) {
         if ($pilar->NA == 'Y') continue; // Skip non-active pilars
+        
+        $pilarHasValidPrograms = false;
+        
+        foreach ($pilar->isuStrategis as $isu) {
+            if ($isu->NA == 'Y') continue; // Skip non-active isu
+            
+            $isuHasValidPrograms = false;
+            
+            foreach ($isu->programPengembangans as $program) {
+                if ($program->NA == 'Y') continue; // Skip non-active programs
+                
+                $programHasValidRektors = false;
+                
+                foreach ($program->programRektors as $rektor) {
+                    if ($rektor->NA == 'Y') continue; // Skip non-active rektor programs
+                    
+                    // Check if user's position ID is in the PelaksanaID list
+                    $pelaksanaIds = explode(',', $rektor->PelaksanaID);
+                    if ($userPositionId && in_array($userPositionId, $pelaksanaIds)) {
+                        // This is a valid program rektor for this user
+                        $validProgramRektorIds[] = $rektor->ProgramRektorID;
+                        $validProgramPengembanganIds[] = $program->ProgramPengembanganID;
+                        $validIsuIds[] = $isu->IsuID;
+                        $validPilarIds[] = $pilar->PilarID;
+                        
+                        $programHasValidRektors = true;
+                        $isuHasValidPrograms = true;
+                        $pilarHasValidPrograms = true;
+                    }
+                }
+                
+                // Store the flag for this program
+                $program->hasValidRektors = $programHasValidRektors;
+            }
+            
+            // Store the flag for this isu
+            $isu->hasValidPrograms = $isuHasValidPrograms;
+        }
+        
+        // Store the flag for this pilar
+        $pilar->hasValidIsu = $pilarHasValidPrograms;
+    }
+    
+    // Convert arrays to unique sets
+    $validProgramRektorIds = array_unique($validProgramRektorIds);
+    $validProgramPengembanganIds = array_unique($validProgramPengembanganIds);
+    $validIsuIds = array_unique($validIsuIds);
+    $validPilarIds = array_unique($validPilarIds);
+    
+    // Second pass: build the tree with only valid nodes
+    foreach ($pilars as $pilar) {
+        if ($pilar->NA == 'Y') continue; // Skip non-active pilars
+        
+        // Skip this pilar if it doesn't have any valid program rektors
+        if (!in_array($pilar->PilarID, $validPilarIds)) {
+            continue;
+        }
         
         // Only add pilar node if startLevel is 'pilar'
         if ($startLevel == 'pilar') {
@@ -126,7 +190,9 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                 'type' => 'pilar',
                 'parent' => null,
                 'level' => 0,
-                'has_children' => count($pilar->isuStrategis->where('NA', 'N')) > 0,
+                'has_children' => count(array_filter($pilar->isuStrategis->toArray(), function($isu) use ($validIsuIds) {
+                    return $isu['NA'] == 'N' && in_array($isu['IsuID'], $validIsuIds);
+                })) > 0,
                 'actions' => '',
                 'row_class' => '',
                 'tooltip' => 'Lihat isu strategis'
@@ -138,6 +204,11 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
         // Add Isu Strategis
         foreach ($pilar->isuStrategis as $isu) {
             if ($isu->NA == 'Y') continue; // Skip non-active isu
+            
+            // Skip this isu if it doesn't have any valid program rektors
+            if (!in_array($isu->IsuID, $validIsuIds)) {
+                continue;
+            }
             
             // Set parent based on startLevel
             $isuParent = $startLevel == 'pilar' ? 'pilar_' . $pilar->PilarID : null;
@@ -152,7 +223,9 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                     'type' => 'isu',
                     'parent' => $isuParent,
                     'level' => $isuLevel,
-                    'has_children' => count($isu->programPengembangans->where('NA', 'N')) > 0,
+                    'has_children' => count(array_filter($isu->programPengembangans->toArray(), function($program) use ($validProgramPengembanganIds) {
+                        return $program['NA'] == 'N' && in_array($program['ProgramPengembanganID'], $validProgramPengembanganIds);
+                    })) > 0,
                     'actions' => '',
                     'row_class' => '',
                     'tooltip' => 'Lihat program pengembangan'
@@ -164,6 +237,11 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
             // Add Program Pengembangan
             foreach ($isu->programPengembangans as $program) {
                 if ($program->NA == 'Y') continue; // Skip non-active programs
+                
+                // Skip this program if it doesn't have any valid program rektors
+                if (!in_array($program->ProgramPengembanganID, $validProgramPengembanganIds)) {
+                    continue;
+                }
                 
                 // Set parent and level based on startLevel
                 $programParent = null;
@@ -186,7 +264,9 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                         'type' => 'program',
                         'parent' => $programParent,
                         'level' => $programLevel,
-                        'has_children' => count($program->programRektors->where('NA', 'N')) > 0,
+                        'has_children' => count(array_filter($program->programRektors->toArray(), function($rektor) use ($validProgramRektorIds) {
+                            return $rektor['NA'] == 'N' && in_array($rektor['ProgramRektorID'], $validProgramRektorIds);
+                        })) > 0,
                         'actions' => '',
                         'row_class' => '',
                         'tooltip' => 'Lihat program rektor'
@@ -199,10 +279,9 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                 foreach ($program->programRektors as $rektor) {
                     if ($rektor->NA == 'Y') continue; // Skip non-active rektor programs
                     
-                    // Check if user's position ID is in the PelaksanaID list
-                    $pelaksanaIds = explode(',', $rektor->PelaksanaID);
-                    if ($userPositionId && !in_array($userPositionId, $pelaksanaIds)) {
-                        continue; // Skip this program rektor if user's position is not in the pelaksana list
+                    // Skip this rektor if it's not in the valid list
+                    if (!in_array($rektor->ProgramRektorID, $validProgramRektorIds)) {
+                        continue;
                     }
                     
                     // Get kegiatan query with status filter if applicable
@@ -272,6 +351,7 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                     $kegiatans = $kegiatanQuery->get();
                         
                     foreach ($kegiatans as $kegiatan) {
+                        // The rest of the code for kegiatan, subkegiatan, and RAB remains the same
                         // Set parent and level based on startLevel
                         $kegiatanParent = null;
                         $kegiatanLevel = 0;
@@ -307,7 +387,7 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                         } elseif ($kegiatan->Status == 'YT') {
                             $statusBadge = '<span class="badge badge-success">Pengajuan TOR Disetujui</span>';
                         } elseif ($kegiatan->Status == 'TT') {
-                            $statusBadge = '<span class="badge badge-danger">Pengajuan TOR Ditolak</span>';
+                                                        $statusBadge = '<span class="badge badge-danger">Pengajuan TOR Ditolak</span>';
                         } elseif ($kegiatan->Status == 'RT') {
                             $statusBadge = '<span class="badge badge-info">Pengajuan TOR direvisi</span>';
                         }
@@ -370,7 +450,7 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                             'type' => 'kegiatan',
                             'parent' => $kegiatanParent,
                             'level' => $kegiatanLevel,
-                                                       'has_children' => $kegiatan->subKegiatans->count() > 0 || $kegiatan->rabs->whereNull('SubKegiatanID')->count() > 0,
+                            'has_children' => $kegiatan->subKegiatans->count() > 0 || $kegiatan->rabs->whereNull('SubKegiatanID')->count() > 0,
                             'actions' => $kegiatanActions,
                             'row_class' => '',
                             'tooltip' => 'Tanggal: ' . \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y') . ' s/d ' . 
@@ -378,9 +458,6 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                         ];
                         
                         $treeData[] = $kegiatanNode;
-                        
-                        // Check if kegiatan is approved (Y or YT)
-                        $isApproved = in_array($kegiatan->Status, ['Y', 'YT']);
                         
                         // Add Sub Kegiatans
                         foreach ($kegiatan->subKegiatans as $subKegiatan) {
@@ -524,7 +601,7 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                                 $statusBadge = '<span class="badge badge-success">Disetujui</span>';
                             } elseif ($rab->Status == 'T') {
                                 $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
-                            } elseif ($rab->Status == 'R') {
+                                                        } elseif ($rab->Status == 'R') {
                                 $statusBadge = '<span class="badge badge-info">Revisi</span>';
                             }
                             
@@ -579,6 +656,16 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                         }
                     }
                 }
+            }
+        }
+    }
+    
+    // If we're starting at a specific level, we need to adjust the row numbers
+    if ($startLevel != 'pilar') {
+        $rowIndex = 1;
+        foreach ($treeData as &$node) {
+            if ($node['parent'] === null) {
+                $node['no'] = $rowIndex++;
             }
         }
     }
