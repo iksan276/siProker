@@ -196,7 +196,7 @@ class KegiatanController extends Controller
                 ]);
             }
             
-            return view('kegiatans.user_index', compact(
+            return view('kegiatans.index', compact(
                 'kegiatans', 
                 'renstras', 
                 'pilars', 

@@ -62,4 +62,14 @@ class User extends Authenticatable
     {
         return $this->level === 2;
     }
+    
+    /**
+     * Check if user is super user
+     *
+     * @return bool
+     */
+    public function isSuperUser()
+    {
+        return $this->level === 3;
+    }
 }

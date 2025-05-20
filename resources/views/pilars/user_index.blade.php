@@ -71,10 +71,9 @@
         <h6 class="m-0 font-weight-bold text-primary">Struktur Pilar</h6>
     </div>
     <div class="card-body">
-        <div class="row">
+        <div class="row mb-2">
             <div class="col-md-4">
                 <div class="form-group">
-                    <label for="renstraFilter">Renstra</label>
                     <select id="renstraFilter" class="form-control select2-filter">
                         <option value="">-- Pilih Renstra --</option>
                         @foreach($renstras as $renstra)
@@ -87,8 +86,8 @@
             </div>
             <div class="col-md-4">
                 <div class="form-group">
-                    <label for="treeLevelFilter">Level Tree</label>
                     <select id="treeLevelFilter" class="form-control select2-filter">
+                        <option value="">-- Pilih Level Tree --</option>
                         <option value="pilar" {{ isset($selectedTreeLevel) && $selectedTreeLevel == 'pilar' ? 'selected' : '' }}>Pilar</option>
                         <option value="isu" {{ isset($selectedTreeLevel) && $selectedTreeLevel == 'isu' ? 'selected' : '' }}>Isu Strategis</option>
                         <option value="program" {{ isset($selectedTreeLevel) && $selectedTreeLevel == 'program' ? 'selected' : '' }}>Program Pengembangan</option>
@@ -99,17 +98,9 @@
             </div>
             <div class="col-md-4">
                 <div class="form-group">
-                    <label for="searchFilter">Cari Berdasarkan Level Tree yang dipilih</label>
                     <div class="input-group">
-                        <input type="text" id="searchFilter" class="form-control" placeholder="Cari berdasarkan nama...">
-                        <div class="input-group-append">
-                            <button id="searchButton" class="btn btn-primary" type="button">
-                                <i class="fas fa-search"></i>
-                            </button>
-                            <button id="resetSearchButton" class="btn btn-secondary" type="button">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
+                        <input type="text" id="searchFilter" class="form-control" placeholder="Cari berdasarkan level tree">
+                      
                     </div>
                 </div>
             </div>

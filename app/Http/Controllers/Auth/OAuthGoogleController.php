@@ -93,8 +93,23 @@ class OAuthGoogleController extends Controller
                             
                             // Determine if user is admin based on position
                             $isAdmin = false;
+                            $isSuperUser = false;
+                            
                             if (isset($user['Posisi']) && isset($user['Posisi']['Nama'])) {
                                 $isAdmin = (strpos($user['Posisi']['Nama'], 'Bagian Teknologi Informasi dan Komunikasi') !== false);
+                            }
+                            
+                            // Check if user is a super user based on JabatanID
+                            if (isset($user['JabatanID']) && in_array($user['JabatanID'], [1, 2, 3, 4, 5])) {
+                                $isSuperUser = true;
+                            }
+                            
+                            // Determine user level
+                            $userLevel = 2; // Default: regular user
+                            if ($isAdmin) {
+                                $userLevel = 1; // Admin
+                            } elseif ($isSuperUser) {
+                                $userLevel = 3; // Super user
                             }
                             
                             // Find or create user in our database
@@ -103,7 +118,8 @@ class OAuthGoogleController extends Controller
                                 [
                                     'name' => $user['Nama'],
                                     'password' => bcrypt($user['Password']), // Note: This is not secure, consider a better approach
-                                    'level' => $isAdmin ? 1 : 2, // 1 for admin, 2 for regular user
+                                    'level' => $userLevel,
+                                    'jabatan_id' => $user['JabatanID'] ?? null,
                                 ]
                             );
                             
@@ -113,8 +129,7 @@ class OAuthGoogleController extends Controller
                             // Regenerate session
                             request()->session()->regenerate();
                             
-                            
-                                return redirect('/dashboard');
+                            return redirect('/dashboard');
                             
                         }else {
                             return redirect('/login')->with('swal_error', 'Data pengguna tidak terdaftar');

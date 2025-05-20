@@ -106,6 +106,14 @@
             </div>
         </div>
     </li>
+    @elseif(auth()->user()->isSuperUser())
+    <!-- For super users, only show Dashboard and Kegiatan -->
+    <li class="nav-item {{ request()->is('kegiatans*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('kegiatans.index') }}">
+            <i class="fas fa-fw fa-calendar-alt"></i>
+            <span>Kegiatan</span>
+        </a>
+    </li>
     @else
     <!-- For non-admin users, only show Pilar -->
     <li class="nav-item {{ request()->is('pilars*') ? 'active' : '' }}">
