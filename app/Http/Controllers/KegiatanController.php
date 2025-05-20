@@ -284,7 +284,7 @@ class KegiatanController extends Controller
             } elseif ($kegiatan->Status == 'R') {
                 $statusBadge = '<span class="badge badge-info">Revisi</span>';
             } elseif ($kegiatan->Status == 'P') {
-                $statusBadge = '<span class="badge badge-primary">Proses</span>';
+                $statusBadge = '<span class="badge badge-primary">Pengajuan</span>';
             } elseif ($kegiatan->Status == 'PT') {
                 $statusBadge = '<span class="badge badge-warning">Pengajuan TOR</span>';
             } elseif ($kegiatan->Status == 'YT') {
@@ -301,6 +301,7 @@ class KegiatanController extends Controller
                 'nama' => '<span data-toggle="tooltip" title="Ini adalah Kegiatan">' . $kegiatan->Nama . '</span> ' . '</span> <span data-toggle="tooltip" title="'. $kegiatan->Feedback .'">' . $statusBadge . '</span>',
                 'program_rektor_id' => $kegiatan->ProgramRektorID,
                 'type' => 'kegiatan',
+                'status'=> $kegiatan->Status,
                 'parent' => null,
                 'level' => 0,
                 'has_children' => $kegiatan->subKegiatans->count() > 0 || $kegiatan->rabs->whereNull('SubKegiatanID')->count() > 0,

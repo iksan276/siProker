@@ -930,6 +930,62 @@
                 }
             });
         });
+
+          $(document).on('click', '.ajukan-tor-kegiatan', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var kegiatanId = $(this).data('id');
+            var updateUrl = "{{ url('api/kegiatan') }}/" + kegiatanId + "/update-status?status=PT";
+            
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Ajukan TOR Kegiatan?',
+                text: "Apakah Anda yakin ingin mengajukan TOR untuk kegiatan ini?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Ajukan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Perform AJAX update
+                    $.ajax({
+                        url: updateUrl,
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                // Show success message
+                                Swal.fire({
+                                    title: 'Berhasil!',
+                                    text: response.message || 'Kegiatan berhasil diajukan.',
+                                    icon: 'success',
+                                    confirmButtonColor: '#3085d6',
+                                    confirmButtonText: 'OK'
+                                });
+                                
+                                // Reload tree data to update the UI
+                                loadTreeData();
+                            } else {
+                                // Show error message
+                                showAlert('danger', response.message || 'Gagal mengajukan kegiatan');
+                            }
+                        },
+                        error: function(xhr) {
+                            // Handle error response
+                            var message = 'Terjadi kesalahan';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            }
+                            showAlert('danger', message);
+                        }
+                    });
+                }
+            });
+        });
         
         // Handle delete sub-kegiatan button click
         $(document).on('click', '.delete-sub-kegiatan', function(e) {
@@ -1344,8 +1400,17 @@
                         var kegiatanId = item.id.replace('kegiatan_', '');
                         // Add view, edit, delete buttons for kegiatan
                         // Plus add new buttons for adding sub-kegiatan and RAB directly
-                        actions = '<div class="action-btn-group">' +
-                                  '<button class="btn btn-primary btn-square btn-sm load-modal" ' +
+                        actions = '<div class="action-btn-group">'; 
+                           if (['Y', 'NT', 'RT', 'TT'].includes(item.status)) {
+                                actions += 
+                                    '<button data-toggle="tooltip" title="Ajukan TOR Kegiatan" class="btn btn-success btn-square btn-sm ajukan-tor-kegiatan" ' +
+                                    'data-id="' + kegiatanId + '">' +
+                                        '<i class="fas fa-paper-plane"></i>' +
+                                    '</button> ';
+                            }
+                                                    
+
+                                actions +=  '<button class="btn btn-primary btn-square btn-sm load-modal" ' +
                                   'data-url="' + "{{ route('sub-kegiatans.create') }}?kegiatanID=" + kegiatanId + '" ' +
                                   'data-title="Tambah Sub Kegiatan" data-toggle="tooltip" title="Tambah sub kegiatan baru">' +
                                   '<i class="fas fa-plus"></i>' +

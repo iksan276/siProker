@@ -225,12 +225,12 @@ class PilarController extends Controller
                                 'level' => $rektorLevel,
                                 'has_children' => $kegiatanCount > 0,
                                 'actions' => '
-                                    <button class="btn btn-info btn-square btn-sm load-modal" 
+                                    <button data-toggle="tooltip" title="Lihat Detail Program Rektor" class="btn btn-info btn-square btn-sm load-modal" 
                                         data-url="' . route('program-rektors.show', $rektor->ProgramRektorID) . '" 
                                         data-title="Detail Program Rektor">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button class="btn btn-primary btn-square btn-sm load-modal" 
+                                    <button data-toggle="tooltip" title="Tambah Kegiatan" class="btn btn-primary btn-square btn-sm load-modal" 
                                         data-url="' . route('kegiatans.create') . '?program_rektor=' . $rektor->ProgramRektorID . '" 
                                         data-title="Tambah Kegiatan">
                                         <i class="fas fa-plus"></i>
@@ -285,9 +285,9 @@ class PilarController extends Controller
                                     $statusBadge = '<span class="badge badge-info">Pengajuan TOR direvisi</span>';
                                 }
                                 $ajukanButton = '';
-                                if ($kegiatan->Status != 'P') {
+                                if ($kegiatan->Status != 'P' && $kegiatan->Status != 'Y' && $kegiatan->Status != 'YT') {
                                     $ajukanButton = '
-                                        <button class="btn btn-primary btn-square btn-sm ajukan-kegiatan" 
+                                        <button data-toggle="tooltip" title="Ajukan Kegiatan" class="btn btn-primary btn-square btn-sm ajukan-kegiatan" 
                                             data-id="' . $kegiatan->KegiatanID . '">
                                             <i class="fas fa-paper-plane"></i>
                                         </button>';
@@ -301,27 +301,27 @@ class PilarController extends Controller
                                 'level' => $kegiatanLevel,
                                 'has_children' => $kegiatan->subKegiatans->count() > 0 || $kegiatan->rabs->whereNull('SubKegiatanID')->count() > 0,
                                 'actions' => $ajukanButton . '
-                                    <button class="btn btn-primary btn-square btn-sm load-modal" 
+                                    <button data-toggle="tooltip" title="Tambah Sub Kegiatan" class="btn btn-primary btn-square btn-sm load-modal" 
                                         data-url="' . route('sub-kegiatans.create') . '?kegiatanID=' . $kegiatan->KegiatanID . '" 
                                         data-title="Tambah Sub Kegiatan">
                                         <i class="fas fa-plus"></i>
                                     </button>
-                                    <button class="btn btn-success btn-square btn-sm load-modal" 
+                                    <button data-toggle="tooltip" title="Tambah RAB Kegiatan" class="btn btn-success btn-square btn-sm load-modal" 
                                         data-url="' . route('rabs.create') . '?kegiatanID=' . $kegiatan->KegiatanID . '" 
                                         data-title="Tambah RAB">
                                         <i class="fas fa-plus"></i>
                                     </button>
-                                    <button class="btn btn-info btn-square btn-sm load-modal" 
+                                    <button data-toggle="tooltip" title="Lihat Detail Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
                                         data-url="' . route('kegiatans.show', $kegiatan->KegiatanID) . '" 
                                         data-title="Detail Kegiatan">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button class="btn btn-warning btn-square btn-sm load-modal" 
+                                    <button data-toggle="tooltip" title="Edit Kegiatan" class="btn btn-warning btn-square btn-sm load-modal" 
                                         data-url="' . route('kegiatans.edit', $kegiatan->KegiatanID) . '" 
                                         data-title="Edit Kegiatan">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" 
+                                    <button data-toggle="tooltip" title="Hapus Kegiatan" type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" 
                                         data-id="' . $kegiatan->KegiatanID . '">
                                         <i class="fas fa-trash"></i>
                                     </button>',
@@ -358,22 +358,22 @@ class PilarController extends Controller
                                     'level' => $subKegiatanLevel,
                                     'has_children' => $subKegiatan->rabs->count() > 0,
                                     'actions' => '
-                                        <button class="btn btn-success btn-square btn-sm load-modal" 
+                                        <button data-toggle="tooltip" title="Tambah RAB Sub Kegiatan" class="btn btn-success btn-square btn-sm load-modal" 
                                             data-url="' . route('rabs.create') . '?subKegiatanID=' . $subKegiatan->SubKegiatanID . '" 
                                             data-title="Tambah RAB">
                                             <i class="fas fa-plus"></i>
                                         </button>
-                                        <button class="btn btn-info btn-square btn-sm load-modal" 
+                                        <button data-toggle="tooltip" title="LIhat Detail Sub Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
                                             data-url="' . route('sub-kegiatans.show', $subKegiatan->SubKegiatanID) . '" 
                                             data-title="Detail Sub Kegiatan">
                                             <i class="fas fa-eye"></i>
                                         </button>
-                                        <button class="btn btn-warning btn-square btn-sm load-modal" 
+                                        <button data-toggle="tooltip" title="Edit Sub Kegiatan" class="btn btn-warning btn-square btn-sm load-modal" 
                                             data-url="' . route('sub-kegiatans.edit', $subKegiatan->SubKegiatanID) . '" 
                                             data-title="Edit Sub Kegiatan">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button type="button" class="btn btn-danger btn-square btn-sm delete-sub-kegiatan" 
+                                        <button data-toggle="tooltip" title="Hapus Sub Kegiatan" type="button" class="btn btn-danger btn-square btn-sm delete-sub-kegiatan" 
                                             data-id="' . $subKegiatan->SubKegiatanID . '">
                                             <i class="fas fa-trash"></i>
                                         </button>',
@@ -408,17 +408,17 @@ class PilarController extends Controller
                                         'level' => $subKegiatanLevel + 1,
                                         'has_children' => false,
                                         'actions' => '
-                                            <button class="btn btn-info btn-square btn-sm load-modal" 
+                                            <button data-toggle="tooltip" title="Lihat RAB Sub Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
                                                 data-url="' . route('rabs.show', $rab->RABID) . '" 
                                                 data-title="Detail RAB">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <button class="btn btn-warning btn-square btn-sm load-modal" 
+                                            <button data-toggle="tooltip" title="Edit RAB Sub Kegiatan" class="btn btn-warning btn-square btn-sm load-modal" 
                                                 data-url="' . route('rabs.edit', $rab->RABID) . '" 
                                                 data-title="Edit RAB">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            <button type="button" class="btn btn-danger btn-square btn-sm delete-rab" 
+                                            <button data-toggle="tooltip" title="Hapus RAB Sub Kegiatan" type="button" class="btn btn-danger btn-square btn-sm delete-rab" 
                                                 data-id="' . $rab->RABID . '">
                                                 <i class="fas fa-trash"></i>
                                             </button>',
@@ -459,17 +459,17 @@ class PilarController extends Controller
                                     'level' => $kegiatanLevel + 1,
                                     'has_children' => false,
                                     'actions' => '
-                                        <button class="btn btn-info btn-square btn-sm load-modal" 
+                                        <button data-toggle="tooltip" title="Lihat RAB Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
                                             data-url="' . route('rabs.show', $rab->RABID) . '" 
                                             data-title="Detail RAB">
                                             <i class="fas fa-eye"></i>
                                         </button>
-                                        <button class="btn btn-warning btn-square btn-sm load-modal" 
+                                        <button data-toggle="tooltip" title="Edit RAB Kegiatan" class="btn btn-warning btn-square btn-sm load-modal" 
                                             data-url="' . route('rabs.edit', $rab->RABID) . '" 
                                             data-title="Edit RAB">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button type="button" class="btn btn-danger btn-square btn-sm delete-rab" 
+                                        <button data-toggle="tooltip" title="Hapus RAB Kegiatan" type="button" class="btn btn-danger btn-square btn-sm delete-rab" 
                                             data-id="' . $rab->RABID . '">
                                             <i class="fas fa-trash"></i>
                                         </button>',

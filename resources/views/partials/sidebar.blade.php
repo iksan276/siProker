@@ -11,7 +11,7 @@
 
     <!-- Divider -->
     <hr class="sidebar-divider my-0">
-    @if(auth()->user()->isAdmin())
+
         <!-- Nav Item - Dashboard -->
         <li class="nav-item {{ request()->is('dashboard') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('dashboard') }}">
@@ -22,7 +22,7 @@
 
     <!-- Divider -->
     <hr class="sidebar-divider">
-    @endif
+  
     
     <!-- Heading -->
     <div class="sidebar-heading">

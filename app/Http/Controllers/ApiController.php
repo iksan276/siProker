@@ -185,16 +185,31 @@ public function updateKegiatanStatus(Request $request, $id)
     if (!$kegiatan) {
         return response()->json(['success' => false, 'message' => 'Kegiatan not found'], 404);
     }
-    
-    // Update the status to 'P' (Pengajuan)
-    $kegiatan->Status = 'P';
+
+    // Ambil status dari query parameter
+    $status = $request->query('status');
+
+    // Validasi jika status kosong
+    if (!$status) {
+        return response()->json(['success' => false, 'message' => 'Status is required'], 400);
+    }
+
+    // (Opsional) Validasi nilai status yang diperbolehkan
+    $allowedStatuses = ['P', 'PT']; // Tambahkan sesuai kebutuhan
+    if (!in_array($status, $allowedStatuses)) {
+        return response()->json(['success' => false, 'message' => 'Invalid status value'], 422);
+    }
+
+    // Update status kegiatan
+    $kegiatan->Status = $status;
     $kegiatan->save();
-    
+
     return response()->json([
         'success' => true, 
-        'message' => 'Status kegiatan berhasil diubah menjadi Pengajuan',
+        'message' => 'Status kegiatan berhasil diperbarui',
         'status' => $kegiatan->Status
     ]);
 }
+
 
 }

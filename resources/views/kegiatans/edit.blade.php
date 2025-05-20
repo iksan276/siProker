@@ -83,7 +83,7 @@
     <option value="Y" {{ $kegiatan->Status == 'Y' ? 'selected' : '' }}>Disetujui</option>
     <option value="T" {{ $kegiatan->Status == 'T' ? 'selected' : '' }}>Ditolak</option>
     <option value="R" {{ $kegiatan->Status == 'R' ? 'selected' : '' }}>Revisi</option>
-    <option value="P" {{ $kegiatan->Status == 'P' ? 'selected' : '' }}>Proses</option>
+    <option value="P" {{ $kegiatan->Status == 'P' ? 'selected' : '' }}>Pengajuan</option>
     <option value="PT" {{ $kegiatan->Status == 'PT' ? 'selected' : '' }}>Pengajuan TOR</option>
     <option value="YT" {{ $kegiatan->Status == 'YT' ? 'selected' : '' }}>Pengajuan TOR Disetujui</option>
     <option value="TT" {{ $kegiatan->Status == 'TT' ? 'selected' : '' }}>Pengajuan TOR Ditolak</option>
