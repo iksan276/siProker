@@ -4,6 +4,32 @@
             <th>ID</th>
             <td>{{ $kegiatan->KegiatanID }}</td>
         </tr>
+           <tr>
+            <th>Status</th>
+            <td>
+                @php
+                $statusBadge = '';
+                if ($kegiatan->Status == 'Y') {
+                    $statusBadge = '<span class="badge badge-success">Disetujui</span>';
+                } elseif ($kegiatan->Status == 'T') {
+                    $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
+                } elseif ($kegiatan->Status == 'R') {
+                    $statusBadge = '<span class="badge badge-info">Revisi</span>';
+                } elseif ($kegiatan->Status == 'P') {
+                    $statusBadge = '<span class="badge badge-primary">Pengajuan</span>';
+                } elseif ($kegiatan->Status == 'PT') {
+                    $statusBadge = '<span class="badge badge-warning">Pengajuan TOR</span>';
+                } elseif ($kegiatan->Status == 'YT') {
+                    $statusBadge = '<span class="badge badge-success">Pengajuan TOR Disetujui</span>';
+                } elseif ($kegiatan->Status == 'TT') {
+                    $statusBadge = '<span class="badge badge-danger">Pengajuan TOR Ditolak</span>';
+                } elseif ($kegiatan->Status == 'RT') {
+                    $statusBadge = '<span class="badge badge-info">Pengajuan TOR direvisi</span>';
+                }
+                @endphp
+                {!! $statusBadge !!}
+            </td>
+        </tr>
         <tr>
             <th>Renstra</th>
             <td>{{ $kegiatan->programRektor->programPengembangan->isuStrategis->pilar->renstra->Nama ?? 'N/A' }}</td>

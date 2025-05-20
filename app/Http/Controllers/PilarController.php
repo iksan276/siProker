@@ -105,355 +105,342 @@ class PilarController extends Controller
         return view('pilars.index', compact('pilars', 'renstras', 'selectedRenstra'));
     }
     
-    private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusFilter = null)
-    {
-        $treeData = [];
-        $rowIndex = 1;
+  private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusFilter = null)
+{
+    $treeData = [];
+    $rowIndex = 1;
+    
+    foreach ($pilars as $pilar) {
+        if ($pilar->NA == 'Y') continue; // Skip non-active pilars
         
-        foreach ($pilars as $pilar) {
-            if ($pilar->NA == 'Y') continue; // Skip non-active pilars
+        // Only add pilar node if startLevel is 'pilar'
+        if ($startLevel == 'pilar') {
+            $pilarNode = [
+                'id' => 'pilar_' . $pilar->PilarID,
+                'no' => $rowIndex++,
+                'nama' => $pilar->Nama,
+                'type' => 'pilar',
+                'parent' => null,
+                'level' => 0,
+                'has_children' => count($pilar->isuStrategis->where('NA', 'N')) > 0,
+                'actions' => '',
+                'row_class' => '',
+                'tooltip' => 'Lihat isu strategis'
+            ];
             
-            // Only add pilar node if startLevel is 'pilar'
-            if ($startLevel == 'pilar') {
-                $pilarNode = [
-                    'id' => 'pilar_' . $pilar->PilarID,
-                    'no' => $rowIndex++,
-                    'nama' => $pilar->Nama,
-                    'type' => 'pilar',
-                    'parent' => null,
-                    'level' => 0,
-                    'has_children' => count($pilar->isuStrategis->where('NA', 'N')) > 0,
+            $treeData[] = $pilarNode;
+        }
+        
+        // Add Isu Strategis
+        foreach ($pilar->isuStrategis as $isu) {
+            if ($isu->NA == 'Y') continue; // Skip non-active isu
+            
+            // Set parent based on startLevel
+            $isuParent = $startLevel == 'pilar' ? 'pilar_' . $pilar->PilarID : null;
+            $isuLevel = $startLevel == 'pilar' ? 1 : 0;
+            
+            // Only add isu node if startLevel is 'pilar' or 'isu'
+            if ($startLevel == 'pilar' || $startLevel == 'isu') {
+                $isuNode = [
+                    'id' => 'isu_' . $isu->IsuID,
+                    'no' => $startLevel == 'isu' ? $rowIndex++ : '',
+                    'nama' => $isu->Nama,
+                    'type' => 'isu',
+                    'parent' => $isuParent,
+                    'level' => $isuLevel,
+                    'has_children' => count($isu->programPengembangans->where('NA', 'N')) > 0,
                     'actions' => '',
                     'row_class' => '',
-                    'tooltip' => 'Lihat isu strategis'
+                    'tooltip' => 'Lihat program pengembangan'
                 ];
                 
-                $treeData[] = $pilarNode;
+                $treeData[] = $isuNode;
             }
             
-            // Add Isu Strategis
-            foreach ($pilar->isuStrategis as $isu) {
-                if ($isu->NA == 'Y') continue; // Skip non-active isu
+            // Add Program Pengembangan
+            foreach ($isu->programPengembangans as $program) {
+                if ($program->NA == 'Y') continue; // Skip non-active programs
                 
-                // Set parent based on startLevel
-                $isuParent = $startLevel == 'pilar' ? 'pilar_' . $pilar->PilarID : null;
-                $isuLevel = $startLevel == 'pilar' ? 1 : 0;
+                // Set parent and level based on startLevel
+                $programParent = null;
+                $programLevel = 0;
                 
-                // Only add isu node if startLevel is 'pilar' or 'isu'
-                if ($startLevel == 'pilar' || $startLevel == 'isu') {
-                    $isuNode = [
-                        'id' => 'isu_' . $isu->IsuID,
-                        'no' => $startLevel == 'isu' ? $rowIndex++ : '',
-                        'nama' => $isu->Nama,
-                        'type' => 'isu',
-                        'parent' => $isuParent,
-                        'level' => $isuLevel,
-                        'has_children' => count($isu->programPengembangans->where('NA', 'N')) > 0,
-                        'actions' => '',
-                        'row_class' => '',
-                        'tooltip' => 'Lihat program pengembangan'
-                    ];
-                    
-                    $treeData[] = $isuNode;
+                if ($startLevel == 'pilar') {
+                    $programParent = 'isu_' . $isu->IsuID;
+                    $programLevel = 2;
+                } else if ($startLevel == 'isu') {
+                    $programParent = 'isu_' . $isu->IsuID;
+                    $programLevel = 1;
                 }
                 
-                // Add Program Pengembangan
-                foreach ($isu->programPengembangans as $program) {
-                    if ($program->NA == 'Y') continue; // Skip non-active programs
+                // Only add program node if startLevel is 'pilar', 'isu', or 'program'
+                if (in_array($startLevel, ['pilar', 'isu', 'program'])) {
+                    $programNode = [
+                        'id' => 'program_' . $program->ProgramPengembanganID,
+                        'no' => $startLevel == 'program' ? $rowIndex++ : '',
+                        'nama' => $program->Nama,
+                        'type' => 'program',
+                        'parent' => $programParent,
+                        'level' => $programLevel,
+                        'has_children' => count($program->programRektors->where('NA', 'N')) > 0,
+                        'actions' => '',
+                        'row_class' => '',
+                        'tooltip' => 'Lihat program rektor'
+                    ];
+                    
+                    $treeData[] = $programNode;
+                }
+                
+                // Add Program Rektor
+                foreach ($program->programRektors as $rektor) {
+                    if ($rektor->NA == 'Y') continue; // Skip non-active rektor programs
+                    
+                    // Get kegiatan query with status filter if applicable
+                    $kegiatanQuery = Kegiatan::where('ProgramRektorID', $rektor->ProgramRektorID)
+                                    ->where('UCreated', $userId);
+                    
+                    // Apply status filter if we're at kegiatan level and status is provided
+                    if ($startLevel == 'kegiatan' && $statusFilter) {
+                        $kegiatanQuery->where('Status', $statusFilter);
+                    }
+                    
+                    // Get kegiatan count
+                    $kegiatanCount = $kegiatanQuery->count();
                     
                     // Set parent and level based on startLevel
-                    $programParent = null;
-                    $programLevel = 0;
+                    $rektorParent = null;
+                    $rektorLevel = 0;
                     
                     if ($startLevel == 'pilar') {
-                        $programParent = 'isu_' . $isu->IsuID;
-                        $programLevel = 2;
+                        $rektorParent = 'program_' . $program->ProgramPengembanganID;
+                        $rektorLevel = 3;
                     } else if ($startLevel == 'isu') {
-                        $programParent = 'isu_' . $isu->IsuID;
-                        $programLevel = 1;
+                        $rektorParent = 'program_' . $program->ProgramPengembanganID;
+                        $rektorLevel = 2;
+                    } else if ($startLevel == 'program') {
+                        $rektorParent = 'program_' . $program->ProgramPengembanganID;
+                        $rektorLevel = 1;
                     }
                     
-                    // Only add program node if startLevel is 'pilar', 'isu', or 'program'
-                    if (in_array($startLevel, ['pilar', 'isu', 'program'])) {
-                        $programNode = [
-                            'id' => 'program_' . $program->ProgramPengembanganID,
-                            'no' => $startLevel == 'program' ? $rowIndex++ : '',
-                            'nama' => $program->Nama,
-                            'type' => 'program',
-                            'parent' => $programParent,
-                            'level' => $programLevel,
-                            'has_children' => count($program->programRektors->where('NA', 'N')) > 0,
-                            'actions' => '',
+                    // Only add rektor node if startLevel is 'pilar', 'isu', 'program', or 'rektor'
+                    if (in_array($startLevel, ['pilar', 'isu', 'program', 'rektor'])) {
+                        $rektorNode = [
+                            'id' => 'rektor_' . $rektor->ProgramRektorID,
+                            'no' => $startLevel == 'rektor' ? $rowIndex++ : '',
+                            'nama' => $rektor->Nama,
+                            'type' => 'rektor',
+                            'parent' => $rektorParent,
+                            'level' => $rektorLevel,
+                            'has_children' => $kegiatanCount > 0,
+                            'actions' => '
+                                <button data-toggle="tooltip" title="Lihat Detail Program Rektor" class="btn btn-info btn-square btn-sm load-modal" 
+                                    data-url="' . route('program-rektors.show', $rektor->ProgramRektorID) . '" 
+                                    data-title="Detail Program Rektor">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button data-toggle="tooltip" title="Tambah Kegiatan" class="btn btn-primary btn-square btn-sm load-modal" 
+                                    data-url="' . route('kegiatans.create') . '?program_rektor=' . $rektor->ProgramRektorID . '" 
+                                    data-title="Tambah Kegiatan">
+                                    <i class="fas fa-plus"></i>
+                                </button>',
                             'row_class' => '',
-                            'tooltip' => 'Lihat program rektor'
+                            'tooltip' => 'Lihat kegiatan'
                         ];
                         
-                        $treeData[] = $programNode;
+                        $treeData[] = $rektorNode;
                     }
                     
-                    // Add Program Rektor
-                    foreach ($program->programRektors as $rektor) {
-                        if ($rektor->NA == 'Y') continue; // Skip non-active rektor programs
+                    // Add Kegiatan directly under Program Rektor
+                    $kegiatanQuery = Kegiatan::where('ProgramRektorID', $rektor->ProgramRektorID)
+                        ->where('UCreated', $userId);
                         
-                        // Get kegiatan query with status filter if applicable
-                        $kegiatanQuery = Kegiatan::where('ProgramRektorID', $rektor->ProgramRektorID)
-                                        ->where('UCreated', $userId);
+                    // Apply status filter if provided
+                    if ($statusFilter) {
+                        $kegiatanQuery->where('Status', $statusFilter);
+                    }
+                    
+                    $kegiatans = $kegiatanQuery->get();
                         
-                        // Apply status filter if we're at kegiatan level and status is provided
-                        if ($startLevel == 'kegiatan' && $statusFilter) {
-                            $kegiatanQuery->where('Status', $statusFilter);
-                        }
-                        
-                        // Get kegiatan count
-                        $kegiatanCount = $kegiatanQuery->count();
-                        
+                    foreach ($kegiatans as $kegiatan) {
                         // Set parent and level based on startLevel
-                        $rektorParent = null;
-                        $rektorLevel = 0;
+                        $kegiatanParent = null;
+                        $kegiatanLevel = 0;
                         
                         if ($startLevel == 'pilar') {
-                            $rektorParent = 'program_' . $program->ProgramPengembanganID;
-                            $rektorLevel = 3;
+                            $kegiatanParent = 'rektor_' . $rektor->ProgramRektorID;
+                            $kegiatanLevel = 4;
                         } else if ($startLevel == 'isu') {
-                            $rektorParent = 'program_' . $program->ProgramPengembanganID;
-                            $rektorLevel = 2;
+                            $kegiatanParent = 'rektor_' . $rektor->ProgramRektorID;
+                            $kegiatanLevel = 3;
                         } else if ($startLevel == 'program') {
-                            $rektorParent = 'program_' . $program->ProgramPengembanganID;
-                            $rektorLevel = 1;
-                        }
-                        
-                        // Only add rektor node if startLevel is 'pilar', 'isu', 'program', or 'rektor'
-                        if (in_array($startLevel, ['pilar', 'isu', 'program', 'rektor'])) {
-                            $rektorNode = [
-                                'id' => 'rektor_' . $rektor->ProgramRektorID,
-                                'no' => $startLevel == 'rektor' ? $rowIndex++ : '',
-                                'nama' => $rektor->Nama,
-                                'type' => 'rektor',
-                                'parent' => $rektorParent,
-                                'level' => $rektorLevel,
-                                'has_children' => $kegiatanCount > 0,
-                                'actions' => '
-                                    <button data-toggle="tooltip" title="Lihat Detail Program Rektor" class="btn btn-info btn-square btn-sm load-modal" 
-                                        data-url="' . route('program-rektors.show', $rektor->ProgramRektorID) . '" 
-                                        data-title="Detail Program Rektor">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button data-toggle="tooltip" title="Tambah Kegiatan" class="btn btn-primary btn-square btn-sm load-modal" 
-                                        data-url="' . route('kegiatans.create') . '?program_rektor=' . $rektor->ProgramRektorID . '" 
-                                        data-title="Tambah Kegiatan">
-                                        <i class="fas fa-plus"></i>
-                                    </button>',
-                                'row_class' => '',
-                                'tooltip' => 'Lihat kegiatan'
-                            ];
-                            
-                            $treeData[] = $rektorNode;
-                        }
-                        
-                        // Add Kegiatan directly under Program Rektor
-                        $kegiatanQuery = Kegiatan::where('ProgramRektorID', $rektor->ProgramRektorID)
-                            ->where('UCreated', $userId);
-                            
-                        // Apply status filter if provided
-                        if ($statusFilter) {
-                            $kegiatanQuery->where('Status', $statusFilter);
-                        }
-                        
-                        $kegiatans = $kegiatanQuery->get();
-                            
-                        foreach ($kegiatans as $kegiatan) {
-                            // Set parent and level based on startLevel
+                            $kegiatanParent = 'rektor_' . $rektor->ProgramRektorID;
+                            $kegiatanLevel = 2;
+                        } else if ($startLevel == 'rektor') {
+                            $kegiatanParent = 'rektor_' . $rektor->ProgramRektorID;
+                            $kegiatanLevel = 1;
+                        } else if ($startLevel == 'kegiatan') {
                             $kegiatanParent = null;
                             $kegiatanLevel = 0;
-                            
-                            if ($startLevel == 'pilar') {
-                                $kegiatanParent = 'rektor_' . $rektor->ProgramRektorID;
-                                $kegiatanLevel = 4;
-                            } else if ($startLevel == 'isu') {
-                                $kegiatanParent = 'rektor_' . $rektor->ProgramRektorID;
-                                $kegiatanLevel = 3;
-                            } else if ($startLevel == 'program') {
-                                $kegiatanParent = 'rektor_' . $rektor->ProgramRektorID;
-                                $kegiatanLevel = 2;
-                            } else if ($startLevel == 'rektor') {
-                                $kegiatanParent = 'rektor_' . $rektor->ProgramRektorID;
-                                $kegiatanLevel = 1;
-                            } else if ($startLevel == 'kegiatan') {
-                                $kegiatanParent = null;
-                                $kegiatanLevel = 0;
+                        }
+                        
+                        $statusBadge = '';
+                        if ($kegiatan->Status == 'Y') {
+                            $statusBadge = '<span class="badge badge-success">Disetujui</span>';
+                        } elseif ($kegiatan->Status == 'T') {
+                            $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
+                        } elseif ($kegiatan->Status == 'R') {
+                            $statusBadge = '<span class="badge badge-info">Revisi</span>';
+                        } elseif ($kegiatan->Status == 'P') {
+                            $statusBadge = '<span class="badge badge-primary">Pengajuan</span>';
+                        } elseif ($kegiatan->Status == 'PT') {
+                            $statusBadge = '<span class="badge badge-warning">Pengajuan TOR</span>';
+                        } elseif ($kegiatan->Status == 'YT') {
+                            $statusBadge = '<span class="badge badge-success">Pengajuan TOR Disetujui</span>';
+                        } elseif ($kegiatan->Status == 'TT') {
+                            $statusBadge = '<span class="badge badge-danger">Pengajuan TOR Ditolak</span>';
+                        } elseif ($kegiatan->Status == 'RT') {
+                            $statusBadge = '<span class="badge badge-info">Pengajuan TOR direvisi</span>';
+                        }
+                        
+                        // Check if kegiatan is approved (Y or YT)
+                        $isApproved = in_array($kegiatan->Status, ['Y', 'YT']);
+                        
+                        $ajukanButton = '';
+                        if (!$isApproved && $kegiatan->Status != 'P') {
+                            $ajukanButton = '
+                                <button data-toggle="tooltip" title="Ajukan Kegiatan" class="btn btn-primary btn-square btn-sm ajukan-kegiatan" 
+                                    data-id="' . $kegiatan->KegiatanID . '">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>';
+                        }
+                        
+                        // Determine actions based on approval status
+                        $kegiatanActions = '';
+                        if ($isApproved) {
+                            // Only show view button if approved
+                            $kegiatanActions = '
+                                <button data-toggle="tooltip" title="Lihat Detail Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
+                                    data-url="' . route('kegiatans.show', $kegiatan->KegiatanID) . '" 
+                                    data-title="Detail Kegiatan">
+                                    <i class="fas fa-eye"></i>
+                                </button>';
+                        } else {
+                            // Show all buttons if not approved
+                            $kegiatanActions = $ajukanButton . '
+                                <button data-toggle="tooltip" title="Tambah Sub Kegiatan" class="btn btn-primary btn-square btn-sm load-modal" 
+                                    data-url="' . route('sub-kegiatans.create') . '?kegiatanID=' . $kegiatan->KegiatanID . '" 
+                                    data-title="Tambah Sub Kegiatan">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <button data-toggle="tooltip" title="Tambah RAB Kegiatan" class="btn btn-success btn-square btn-sm load-modal" 
+                                    data-url="' . route('rabs.create') . '?kegiatanID=' . $kegiatan->KegiatanID . '" 
+                                    data-title="Tambah RAB">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <button data-toggle="tooltip" title="Lihat Detail Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
+                                    data-url="' . route('kegiatans.show', $kegiatan->KegiatanID) . '" 
+                                    data-title="Detail Kegiatan">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button data-toggle="tooltip" title="Edit Kegiatan" class="btn btn-warning btn-square btn-sm load-modal" 
+                                    data-url="' . route('kegiatans.edit', $kegiatan->KegiatanID) . '" 
+                                    data-title="Edit Kegiatan">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button data-toggle="tooltip" title="Hapus Kegiatan" type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" 
+                                    data-id="' . $kegiatan->KegiatanID . '">
+                                    <i class="fas fa-trash"></i>
+                                </button>';
+                        }
+                        
+                        $kegiatanNode = [
+                            'id' => 'kegiatan_' . $kegiatan->KegiatanID,
+                            'no' => $startLevel == 'kegiatan' ? $rowIndex++ : '',
+                            'nama' => '<span data-toggle="tooltip" title="Ini adalah Kegiatan">' . $kegiatan->Nama . '</span> ' . '</span> <span data-toggle="tooltip" title="'. $kegiatan->Feedback .'">' . $statusBadge . '</span>',
+                            'type' => 'kegiatan',
+                            'parent' => $kegiatanParent,
+                            'level' => $kegiatanLevel,
+                                                       'has_children' => $kegiatan->subKegiatans->count() > 0 || $kegiatan->rabs->whereNull('SubKegiatanID')->count() > 0,
+                            'actions' => $kegiatanActions,
+                            'row_class' => '',
+                            'tooltip' => 'Tanggal: ' . \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y') . ' s/d ' . 
+                                        \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y')
+                        ];
+                        
+                        $treeData[] = $kegiatanNode;
+                        
+                        // Check if kegiatan is approved (Y or YT)
+                        $isApproved = in_array($kegiatan->Status, ['Y', 'YT']);
+                        
+                        // Add Sub Kegiatans
+                        foreach ($kegiatan->subKegiatans as $subKegiatan) {
+                            $statusBadge = '';
+                            if ($subKegiatan->Status == 'N') {
+                                $statusBadge = '<span class="badge badge-warning">Menunggu</span>';
+                            } elseif ($subKegiatan->Status == 'Y') {
+                                $statusBadge = '<span class="badge badge-success">Disetujui</span>';
+                            } elseif ($subKegiatan->Status == 'T') {
+                                $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
+                            } elseif ($subKegiatan->Status == 'R') {
+                                $statusBadge = '<span class="badge badge-info">Revisi</span>';
                             }
                             
-                              $statusBadge = '';
-                            if ($kegiatan->Status == 'Y') {
-                                    $statusBadge = '<span class="badge badge-success">Disetujui</span>';
-                                } elseif ($kegiatan->Status == 'T') {
-                                    $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
-                                } elseif ($kegiatan->Status == 'R') {
-                                    $statusBadge = '<span class="badge badge-info">Revisi</span>';
-                                } elseif ($kegiatan->Status == 'P') {
-                                    $statusBadge = '<span class="badge badge-primary">Pengajuan</span>';
-                                } elseif ($kegiatan->Status == 'PT') {
-                                    $statusBadge = '<span class="badge badge-warning">Pengajuan TOR</span>';
-                                } elseif ($kegiatan->Status == 'YT') {
-                                    $statusBadge = '<span class="badge badge-success">Pengajuan TOR Disetujui</span>';
-                                } elseif ($kegiatan->Status == 'TT') {
-                                    $statusBadge = '<span class="badge badge-danger">Pengajuan TOR Ditolak</span>';
-                                } elseif ($kegiatan->Status == 'RT') {
-                                    $statusBadge = '<span class="badge badge-info">Pengajuan TOR direvisi</span>';
-                                }
-                                $ajukanButton = '';
-                                if ($kegiatan->Status != 'P' && $kegiatan->Status != 'Y' && $kegiatan->Status != 'YT') {
-                                    $ajukanButton = '
-                                        <button data-toggle="tooltip" title="Ajukan Kegiatan" class="btn btn-primary btn-square btn-sm ajukan-kegiatan" 
-                                            data-id="' . $kegiatan->KegiatanID . '">
-                                            <i class="fas fa-paper-plane"></i>
-                                        </button>';
-                                }
-                            $kegiatanNode = [
-                                'id' => 'kegiatan_' . $kegiatan->KegiatanID,
-                                'no' => $startLevel == 'kegiatan' ? $rowIndex++ : '',
-                                'nama' => '<span data-toggle="tooltip" title="Ini adalah Kegiatan">' . $kegiatan->Nama . '</span> ' . '</span> <span data-toggle="tooltip" title="'. $kegiatan->Feedback .'">' . $statusBadge . '</span>',
-                                'type' => 'kegiatan',
-                                'parent' => $kegiatanParent,
-                                'level' => $kegiatanLevel,
-                                'has_children' => $kegiatan->subKegiatans->count() > 0 || $kegiatan->rabs->whereNull('SubKegiatanID')->count() > 0,
-                                'actions' => $ajukanButton . '
-                                    <button data-toggle="tooltip" title="Tambah Sub Kegiatan" class="btn btn-primary btn-square btn-sm load-modal" 
-                                        data-url="' . route('sub-kegiatans.create') . '?kegiatanID=' . $kegiatan->KegiatanID . '" 
-                                        data-title="Tambah Sub Kegiatan">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                    <button data-toggle="tooltip" title="Tambah RAB Kegiatan" class="btn btn-success btn-square btn-sm load-modal" 
-                                        data-url="' . route('rabs.create') . '?kegiatanID=' . $kegiatan->KegiatanID . '" 
+                            // Set parent and level based on startLevel
+                            $subKegiatanParent = 'kegiatan_' . $kegiatan->KegiatanID;
+                            $subKegiatanLevel = $kegiatanLevel + 1;
+                            
+                            // Determine actions based on parent kegiatan approval status
+                            $subKegiatanActions = '';
+                            if ($isApproved) {
+                                // Only show view button if parent kegiatan is approved
+                                $subKegiatanActions = '
+                                    <button data-toggle="tooltip" title="Lihat Detail Sub Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
+                                        data-url="' . route('sub-kegiatans.show', $subKegiatan->SubKegiatanID) . '" 
+                                        data-title="Detail Sub Kegiatan">
+                                        <i class="fas fa-eye"></i>
+                                    </button>';
+                            } else {
+                                // Show all buttons if parent kegiatan is not approved
+                                $subKegiatanActions = '
+                                    <button data-toggle="tooltip" title="Tambah RAB Sub Kegiatan" class="btn btn-success btn-square btn-sm load-modal" 
+                                        data-url="' . route('rabs.create') . '?subKegiatanID=' . $subKegiatan->SubKegiatanID . '" 
                                         data-title="Tambah RAB">
                                         <i class="fas fa-plus"></i>
                                     </button>
-                                    <button data-toggle="tooltip" title="Lihat Detail Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
-                                        data-url="' . route('kegiatans.show', $kegiatan->KegiatanID) . '" 
-                                        data-title="Detail Kegiatan">
+                                    <button data-toggle="tooltip" title="Lihat Detail Sub Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
+                                        data-url="' . route('sub-kegiatans.show', $subKegiatan->SubKegiatanID) . '" 
+                                        data-title="Detail Sub Kegiatan">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button data-toggle="tooltip" title="Edit Kegiatan" class="btn btn-warning btn-square btn-sm load-modal" 
-                                        data-url="' . route('kegiatans.edit', $kegiatan->KegiatanID) . '" 
-                                        data-title="Edit Kegiatan">
+                                    <button data-toggle="tooltip" title="Edit Sub Kegiatan" class="btn btn-warning btn-square btn-sm load-modal" 
+                                        data-url="' . route('sub-kegiatans.edit', $subKegiatan->SubKegiatanID) . '" 
+                                        data-title="Edit Sub Kegiatan">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button data-toggle="tooltip" title="Hapus Kegiatan" type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" 
-                                        data-id="' . $kegiatan->KegiatanID . '">
+                                    <button data-toggle="tooltip" title="Hapus Sub Kegiatan" type="button" class="btn btn-danger btn-square btn-sm delete-sub-kegiatan" 
+                                        data-id="' . $subKegiatan->SubKegiatanID . '">
                                         <i class="fas fa-trash"></i>
-                                    </button>',
-                                'row_class' => '',
-                                'tooltip' => 'Tanggal: ' . \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y') . ' s/d ' . 
-                                            \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y')
-                            ];
-                            
-                            $treeData[] = $kegiatanNode;
-                            
-                            // Add Sub Kegiatans
-                            foreach ($kegiatan->subKegiatans as $subKegiatan) {
-                                                             $statusBadge = '';
-                                if ($subKegiatan->Status == 'N') {
-                                    $statusBadge = '<span class="badge badge-warning">Menunggu</span>';
-                                } elseif ($subKegiatan->Status == 'Y') {
-                                    $statusBadge = '<span class="badge badge-success">Disetujui</span>';
-                                } elseif ($subKegiatan->Status == 'T') {
-                                    $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
-                                } elseif ($subKegiatan->Status == 'R') {
-                                    $statusBadge = '<span class="badge badge-info">Revisi</span>';
-                                }
-                                
-                                // Set parent and level based on startLevel
-                                $subKegiatanParent = 'kegiatan_' . $kegiatan->KegiatanID;
-                                $subKegiatanLevel = $kegiatanLevel + 1;
-                                
-                                $subKegiatanNode = [
-                                    'id' => 'subkegiatan_' . $subKegiatan->SubKegiatanID,
-                                    'no' => '',
-                                    'nama' =>'<span data-toggle="tooltip" title="Ini adalah Sub Kegiatan">' . $subKegiatan->Nama . '</span> <span data-toggle="tooltip" title="'. $subKegiatan->Feedback .'">' . $statusBadge . '</span>',
-                                    'type' => 'subkegiatan',
-                                    'parent' => $subKegiatanParent,
-                                    'level' => $subKegiatanLevel,
-                                    'has_children' => $subKegiatan->rabs->count() > 0,
-                                    'actions' => '
-                                        <button data-toggle="tooltip" title="Tambah RAB Sub Kegiatan" class="btn btn-success btn-square btn-sm load-modal" 
-                                            data-url="' . route('rabs.create') . '?subKegiatanID=' . $subKegiatan->SubKegiatanID . '" 
-                                            data-title="Tambah RAB">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                        <button data-toggle="tooltip" title="LIhat Detail Sub Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
-                                            data-url="' . route('sub-kegiatans.show', $subKegiatan->SubKegiatanID) . '" 
-                                            data-title="Detail Sub Kegiatan">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button data-toggle="tooltip" title="Edit Sub Kegiatan" class="btn btn-warning btn-square btn-sm load-modal" 
-                                            data-url="' . route('sub-kegiatans.edit', $subKegiatan->SubKegiatanID) . '" 
-                                            data-title="Edit Sub Kegiatan">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button data-toggle="tooltip" title="Hapus Sub Kegiatan" type="button" class="btn btn-danger btn-square btn-sm delete-sub-kegiatan" 
-                                            data-id="' . $subKegiatan->SubKegiatanID . '">
-                                            <i class="fas fa-trash"></i>
-                                        </button>',
-                                    'row_class' => '',
-                                    'tooltip' => 'Jadwal: ' . \Carbon\Carbon::parse($subKegiatan->JadwalMulai)->format('d-m-Y') . ' s/d ' . 
-                                                \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('d-m-Y')
-                                ];
-                                
-                                $treeData[] = $subKegiatanNode;
-                                
-                                // Add RABs for this Sub Kegiatan
-                                foreach ($subKegiatan->rabs as $rab) {
-                                    $statusBadge = '';
-                                    if ($rab->Status == 'N') {
-                                        $statusBadge = '<span class="badge badge-warning">Menunggu</span>';
-                                    } elseif ($rab->Status == 'Y') {
-                                        $statusBadge = '<span class="badge badge-success">Disetujui</span>';
-                                    } elseif ($rab->Status == 'T') {
-                                        $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
-                                    } elseif ($rab->Status == 'R') {
-                                        $statusBadge = '<span class="badge badge-info">Revisi</span>';
-                                    }
-                                    
-                                    $total = $rab->Volume * $rab->HargaSatuan;
-                                    
-                                    $rabNode = [
-                                        'id' => 'rab_sub_' . $rab->RABID,
-                                        'no' => '',
-                                        'nama' =>'<span data-toggle="tooltip" title="Ini adalah RAB dari Sub Kegiatan">' . $rab->Komponen . '</span> <span data-toggle="tooltip" title="'. $rab->Feedback .'">' . $statusBadge . '</span>',
-                                        'type' => 'rab',
-                                        'parent' => 'subkegiatan_' . $subKegiatan->SubKegiatanID,
-                                        'level' => $subKegiatanLevel + 1,
-                                        'has_children' => false,
-                                        'actions' => '
-                                            <button data-toggle="tooltip" title="Lihat RAB Sub Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
-                                                data-url="' . route('rabs.show', $rab->RABID) . '" 
-                                                data-title="Detail RAB">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                            <button data-toggle="tooltip" title="Edit RAB Sub Kegiatan" class="btn btn-warning btn-square btn-sm load-modal" 
-                                                data-url="' . route('rabs.edit', $rab->RABID) . '" 
-                                                data-title="Edit RAB">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button data-toggle="tooltip" title="Hapus RAB Sub Kegiatan" type="button" class="btn btn-danger btn-square btn-sm delete-rab" 
-                                                data-id="' . $rab->RABID . '">
-                                                <i class="fas fa-trash"></i>
-                                            </button>',
-                                        'row_class' => '',
-                                        'tooltip' => 'Volume: ' . number_format($rab->Volume, 0, ',', '.') . ' ' . 
-                                                    ($rab->satuan ? $rab->satuan->Nama : '-') . ' x Rp ' . 
-                                                    number_format($rab->HargaSatuan, 0, ',', '.') . ' = Rp ' . 
-                                                    number_format($total, 0, ',', '.')
-                                    ];
-                                    
-                                    $treeData[] = $rabNode;
-                                }
+                                    </button>';
                             }
                             
-                            // Add direct RABs for this Kegiatan (if no sub kegiatans)
-                            $directRabs = $kegiatan->rabs()->whereNull('SubKegiatanID')->get();
+                            $subKegiatanNode = [
+                                'id' => 'subkegiatan_' . $subKegiatan->SubKegiatanID,
+                                'no' => '',
+                                'nama' =>'<span data-toggle="tooltip" title="Ini adalah Sub Kegiatan">' . $subKegiatan->Nama . '</span> <span data-toggle="tooltip" title="'. $subKegiatan->Feedback .'">' . $statusBadge . '</span>',
+                                'type' => 'subkegiatan',
+                                'parent' => $subKegiatanParent,
+                                'level' => $subKegiatanLevel,
+                                'has_children' => $subKegiatan->rabs->count() > 0,
+                                'actions' => $subKegiatanActions,
+                                'row_class' => '',
+                                'tooltip' => 'Jadwal: ' . \Carbon\Carbon::parse($subKegiatan->JadwalMulai)->format('d-m-Y') . ' s/d ' . 
+                                            \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('d-m-Y')
+                            ];
                             
-                            foreach ($directRabs as $rab) {
+                            $treeData[] = $subKegiatanNode;
+                            
+                            // Add RABs for this Sub Kegiatan
+                            foreach ($subKegiatan->rabs as $rab) {
                                 $statusBadge = '';
                                 if ($rab->Status == 'N') {
                                     $statusBadge = '<span class="badge badge-warning">Menunggu</span>';
@@ -467,29 +454,44 @@ class PilarController extends Controller
                                 
                                 $total = $rab->Volume * $rab->HargaSatuan;
                                 
-                                $rabNode = [
-                                    'id' => 'rab_' . $rab->RABID,
-                                    'no' => '',
-                                    'nama' =>'<span data-toggle="tooltip" title="Ini adalah RAB dari Kegiatan">' . $rab->Komponen . '</span> <span data-toggle="tooltip" title="'. $rab->Feedback .'">' . $statusBadge . '</span>',
-                                    'type' => 'rab',
-                                    'parent' => 'kegiatan_' . $kegiatan->KegiatanID,
-                                    'level' => $kegiatanLevel + 1,
-                                    'has_children' => false,
-                                    'actions' => '
-                                        <button data-toggle="tooltip" title="Lihat RAB Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
+                                // Determine actions based on parent kegiatan approval status
+                                $rabActions = '';
+                                if ($isApproved) {
+                                    // Only show view button if parent kegiatan is approved
+                                    $rabActions = '
+                                        <button data-toggle="tooltip" title="Lihat RAB Sub Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
+                                            data-url="' . route('rabs.show', $rab->RABID) . '" 
+                                            data-title="Detail RAB">
+                                            <i class="fas fa-eye"></i>
+                                        </button>';
+                                } else {
+                                    // Show all buttons if parent kegiatan is not approved
+                                    $rabActions = '
+                                        <button data-toggle="tooltip" title="Lihat RAB Sub Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
                                             data-url="' . route('rabs.show', $rab->RABID) . '" 
                                             data-title="Detail RAB">
                                             <i class="fas fa-eye"></i>
                                         </button>
-                                        <button data-toggle="tooltip" title="Edit RAB Kegiatan" class="btn btn-warning btn-square btn-sm load-modal" 
+                                        <button data-toggle="tooltip" title="Edit RAB Sub Kegiatan" class="btn btn-warning btn-square btn-sm load-modal" 
                                             data-url="' . route('rabs.edit', $rab->RABID) . '" 
                                             data-title="Edit RAB">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button data-toggle="tooltip" title="Hapus RAB Kegiatan" type="button" class="btn btn-danger btn-square btn-sm delete-rab" 
+                                        <button data-toggle="tooltip" title="Hapus RAB Sub Kegiatan" type="button" class="btn btn-danger btn-square btn-sm delete-rab" 
                                             data-id="' . $rab->RABID . '">
                                             <i class="fas fa-trash"></i>
-                                        </button>',
+                                        </button>';
+                                }
+                                
+                                $rabNode = [
+                                    'id' => 'rab_sub_' . $rab->RABID,
+                                    'no' => '',
+                                    'nama' =>'<span data-toggle="tooltip" title="Ini adalah RAB dari Sub Kegiatan">' . $rab->Komponen . '</span> <span data-toggle="tooltip" title="'. $rab->Feedback .'">' . $statusBadge . '</span>',
+                                    'type' => 'rab',
+                                    'parent' => 'subkegiatan_' . $subKegiatan->SubKegiatanID,
+                                    'level' => $subKegiatanLevel + 1,
+                                    'has_children' => false,
+                                    'actions' => $rabActions,
                                     'row_class' => '',
                                     'tooltip' => 'Volume: ' . number_format($rab->Volume, 0, ',', '.') . ' ' . 
                                                 ($rab->satuan ? $rab->satuan->Nama : '-') . ' x Rp ' . 
@@ -500,13 +502,79 @@ class PilarController extends Controller
                                 $treeData[] = $rabNode;
                             }
                         }
+                        
+                        // Add direct RABs for this Kegiatan (if no sub kegiatans)
+                        $directRabs = $kegiatan->rabs()->whereNull('SubKegiatanID')->get();
+                        
+                        foreach ($directRabs as $rab) {
+                            $statusBadge = '';
+                            if ($rab->Status == 'N') {
+                                $statusBadge = '<span class="badge badge-warning">Menunggu</span>';
+                            } elseif ($rab->Status == 'Y') {
+                                $statusBadge = '<span class="badge badge-success">Disetujui</span>';
+                            } elseif ($rab->Status == 'T') {
+                                $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
+                            } elseif ($rab->Status == 'R') {
+                                $statusBadge = '<span class="badge badge-info">Revisi</span>';
+                            }
+                            
+                            $total = $rab->Volume * $rab->HargaSatuan;
+                            
+                            // Determine actions based on parent kegiatan approval status
+                            $rabActions = '';
+                            if ($isApproved) {
+                                // Only show view button if parent kegiatan is approved
+                                $rabActions = '
+                                    <button data-toggle="tooltip" title="Lihat RAB Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
+                                        data-url="' . route('rabs.show', $rab->RABID) . '" 
+                                        data-title="Detail RAB">
+                                        <i class="fas fa-eye"></i>
+                                    </button>';
+                            } else {
+                                // Show all buttons if parent kegiatan is not approved
+                                $rabActions = '
+                                    <button data-toggle="tooltip" title="Lihat RAB Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
+                                        data-url="' . route('rabs.show', $rab->RABID) . '" 
+                                        data-title="Detail RAB">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button data-toggle="tooltip" title="Edit RAB Kegiatan" class="btn btn-warning btn-square btn-sm load-modal" 
+                                        data-url="' . route('rabs.edit', $rab->RABID) . '" 
+                                        data-title="Edit RAB">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button data-toggle="tooltip" title="Hapus RAB Kegiatan" type="button" class="btn btn-danger btn-square btn-sm delete-rab" 
+                                        data-id="' . $rab->RABID . '">
+                                        <i class="fas fa-trash"></i>
+                                    </button>';
+                            }
+                            
+                            $rabNode = [
+                                'id' => 'rab_' . $rab->RABID,
+                                'no' => '',
+                                'nama' =>'<span data-toggle="tooltip" title="Ini adalah RAB dari Kegiatan">' . $rab->Komponen . '</span> <span data-toggle="tooltip" title="'. $rab->Feedback .'">' . $statusBadge . '</span>',
+                                'type' => 'rab',
+                                'parent' => 'kegiatan_' . $kegiatan->KegiatanID,
+                                'level' => $kegiatanLevel + 1,
+                                'has_children' => false,
+                                'actions' => $rabActions,
+                                'row_class' => '',
+                                'tooltip' => 'Volume: ' . number_format($rab->Volume, 0, ',', '.') . ' ' . 
+                                            ($rab->satuan ? $rab->satuan->Nama : '-') . ' x Rp ' . 
+                                            number_format($rab->HargaSatuan, 0, ',', '.') . ' = Rp ' . 
+                                            number_format($total, 0, ',', '.')
+                            ];
+                            
+                            $treeData[] = $rabNode;
+                        }
                     }
                 }
             }
         }
-        
-        return $treeData;
     }
+    
+    return $treeData;
+}
     
 
     public function create()
