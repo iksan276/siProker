@@ -105,10 +105,14 @@ class PilarController extends Controller
         return view('pilars.index', compact('pilars', 'renstras', 'selectedRenstra'));
     }
     
-  private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusFilter = null)
+private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusFilter = null)
 {
     $treeData = [];
     $rowIndex = 1;
+    
+    // Get the user's position ID from session
+    $apiUserData = session('api_user_data');
+    $userPositionId = $apiUserData['Posisi']['ID'] ?? null;
     
     foreach ($pilars as $pilar) {
         if ($pilar->NA == 'Y') continue; // Skip non-active pilars
@@ -191,9 +195,15 @@ class PilarController extends Controller
                     $treeData[] = $programNode;
                 }
                 
-                // Add Program Rektor
+                // Add Program Rektor - FILTER BY USER POSITION ID
                 foreach ($program->programRektors as $rektor) {
                     if ($rektor->NA == 'Y') continue; // Skip non-active rektor programs
+                    
+                    // Check if user's position ID is in the PelaksanaID list
+                    $pelaksanaIds = explode(',', $rektor->PelaksanaID);
+                    if ($userPositionId && !in_array($userPositionId, $pelaksanaIds)) {
+                        continue; // Skip this program rektor if user's position is not in the pelaksana list
+                    }
                     
                     // Get kegiatan query with status filter if applicable
                     $kegiatanQuery = Kegiatan::where('ProgramRektorID', $rektor->ProgramRektorID)

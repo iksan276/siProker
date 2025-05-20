@@ -104,6 +104,7 @@ class OAuthGoogleController extends Controller
                                 $isSuperUser = true;
                             }
                             
+                              $isAdmin = false;
                             // Determine user level
                             $userLevel = 2; // Default: regular user
                             if ($isAdmin) {
