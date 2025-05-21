@@ -575,7 +575,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
             e.preventDefault();
             e.stopPropagation();
             var kegiatanId = $(this).data('id');
-            var updateUrl = "{{ url('api/kegiatan') }}/" + kegiatanId + "/update-status?status=P";
+            var updateUrl = "{{ url('api/kegiatan') }}/" + kegiatanId + "/update-status";
             
             // Show confirmation dialog
             Swal.fire({
@@ -594,7 +594,8 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                         url: updateUrl,
                         type: 'POST',
                         data: {
-                            _token: "{{ csrf_token() }}"
+                            _token: "{{ csrf_token() }}",
+                            status:"P",
                         },
                         success: function(response) {
                             if (response.success) {

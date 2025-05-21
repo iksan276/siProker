@@ -52,8 +52,11 @@ Route::middleware('auth')->prefix('api')->group(function() {
     Route::get('/sub-kegiatans-by-kegiatan', 'App\Http\Controllers\ApiController@getSubKegiatansByKegiatan')->name('api.sub-kegiatans-by-kegiatan');
     Route::get('/program-rektor-details/{id}', 'App\Http\Controllers\ApiController@getProgramRektorDetails')->name('api.program-rektor-details');
     Route::get('/kegiatan-details/{id}', 'App\Http\Controllers\ApiController@getKegiatanDetails')->name('api.kegiatan-details');
-    // Add this to the existing API routes
-    Route::post('/kegiatan/{id}/update-status', 'App\Http\Controllers\ApiController@updateKegiatanStatus')->name('api.kegiatan-update-status');
+    // API routes for status updates
+    Route::post('/kegiatan/{id}/update-status', 'App\Http\Controllers\ApiController@updateKegiatanStatus')->name('api.kegiatan.update-status');
+    Route::post('/subkegiatan/{id}/update-status', 'App\Http\Controllers\ApiController@updateSubKegiatanStatus')->name('api.subkegiatan.update-status');
+    Route::post('/rab/{id}/update-status', 'App\Http\Controllers\ApiController@updateRabStatus')->name('api.rab.update-status');
+
     Route::get('/sub-kegiatan-details/{id}', 'App\Http\Controllers\ApiController@getSubKegiatanDetails')->name('api.sub-kegiatan-details');
 });
 

@@ -42,6 +42,7 @@
     <div class="card-header py-3">
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
         <h6 class="m-0 font-weight-bold text-primary mb-2 mb-md-0 w-100">Kegiatan List</h6>
+         @if(auth()->user()->isAdmin())
         <div class="d-flex flex-wrap w-100 w-md-auto justify-content-start justify-content-md-end">
         <a href="{{ route('kegiatans.export.excel', request()->query()) }}" class="btn btn-success btn-sm mr-1">
                 <i class="fas fa-file-excel fa-sm"></i> Export Excel
@@ -50,6 +51,7 @@
                 <i class="fas fa-plus fa-sm"></i> Tambah Kegiatan
             </button>
         </div>
+        @endif
     </div>
 </div>
     <div class="card-body">
@@ -267,6 +269,7 @@
 
 @push('scripts')
 <script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
+
 <script>
     // Store expanded state
     var expandedNodes = JSON.parse(localStorage.getItem('expandedNodesKegiatan') || '{}');
@@ -935,7 +938,7 @@
             e.preventDefault();
             e.stopPropagation();
             var kegiatanId = $(this).data('id');
-            var updateUrl = "{{ url('api/kegiatan') }}/" + kegiatanId + "/update-status?status=PT";
+            var updateUrl = "{{ url('api/kegiatan') }}/" + kegiatanId + "/update-status";
             
             // Show confirmation dialog
             Swal.fire({
@@ -954,7 +957,8 @@
                         url: updateUrl,
                         type: 'POST',
                         data: {
-                            _token: "{{ csrf_token() }}"
+                            _token: "{{ csrf_token() }}",
+                            status: "PT",
                         },
                         success: function(response) {
                             if (response.success) {
@@ -987,6 +991,250 @@
             });
         });
         
+        // Add this code inside the existing $(document).ready function, after the existing event handlers
+
+// Handle status update for kegiatan
+$(document).on('click', '.update-status-kegiatan', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var kegiatanId = $(this).data('id');
+    
+    Swal.fire({
+        title: 'Update Status Kegiatan',
+        html: `
+            <div class="form-group text-left">
+                <label for="status">Status</label>
+                <select id="status" class="form-control">
+                    <option value="N">Menunggu</option>
+                    <option value="Y">Disetujui</option>
+                    <option value="T">Ditolak</option>
+                    <option value="R">Revisi</option>
+                    <option value="PT">Pengajuan TOR</option>
+                    <option value="YT">Pengajuan TOR Disetujui</option>
+                    <option value="TT">Pengajuan TOR Ditolak</option>
+                    <option value="RT">Pengajuan TOR direvisi</option>
+                </select>
+            </div>
+            <div id="feedback-container" class="form-group text-left" style="display:none;">
+                <label for="feedback">Feedback</label>
+                <textarea id="feedback" class="form-control" rows="3"></textarea>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Update',
+        cancelButtonText: 'Batal',
+        didOpen: () => {
+            // Show feedback field when status is Ditolak or Revisi
+            $('#status').on('change', function() {
+                var selectedStatus = $(this).val();
+                if (selectedStatus === 'T' || selectedStatus === 'R' || 
+                    selectedStatus === 'TT' || selectedStatus === 'RT') {
+                    $('#feedback-container').show();
+                } else {
+                    $('#feedback-container').hide();
+                }
+            });
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var status = $('#status').val();
+            var feedback = $('#feedback').val();
+            
+            // Call API to update status
+            $.ajax({
+                url: "{{ url('api/kegiatan') }}/" + kegiatanId + "/update-status",
+                type: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    status: status,
+                    feedback: feedback
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: response.message || 'Status kegiatan berhasil diupdate.',
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'OK'
+                        });
+                        
+                        // Reload tree data to update the UI
+                        loadTreeData();
+                    } else {
+                        showAlert('danger', response.message || 'Gagal mengupdate status kegiatan');
+                    }
+                },
+                error: function(xhr) {
+                    var message = 'Terjadi kesalahan';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        message = xhr.responseJSON.message;
+                    }
+                    showAlert('danger', message);
+                }
+            });
+        }
+    });
+});
+
+// Handle status update for sub kegiatan
+$(document).on('click', '.update-status-subkegiatan', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var subKegiatanId = $(this).data('id');
+    
+    Swal.fire({
+        title: 'Update Status Sub Kegiatan',
+        html: `
+            <div class="form-group text-left">
+                <label for="status">Status</label>
+                <select id="status" class="form-control">
+                    <option value="N">Menunggu</option>
+                    <option value="Y">Disetujui</option>
+                    <option value="T">Ditolak</option>
+                    <option value="R">Revisi</option>
+                </select>
+            </div>
+            <div id="feedback-container" class="form-group text-left" style="display:none;">
+                <label for="feedback">Feedback</label>
+                <textarea id="feedback" class="form-control" rows="3"></textarea>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Update',
+        cancelButtonText: 'Batal',
+        didOpen: () => {
+            // Show feedback field when status is Ditolak or Revisi
+            $('#status').on('change', function() {
+                var selectedStatus = $(this).val();
+                if (selectedStatus === 'T' || selectedStatus === 'R') {
+                    $('#feedback-container').show();
+                } else {
+                    $('#feedback-container').hide();
+                }
+            });
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var status = $('#status').val();
+            var feedback = $('#feedback').val();
+            
+            // Call API to update status
+            $.ajax({
+                url: "{{ url('api/subkegiatan') }}/" + subKegiatanId + "/update-status",
+                type: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    status: status,
+                    feedback: feedback
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: response.message || 'Status sub kegiatan berhasil diupdate.',
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'OK'
+                        });
+                        
+                        // Reload tree data to update the UI
+                        loadTreeData();
+                    } else {
+                        showAlert('danger', response.message || 'Gagal mengupdate status sub kegiatan');
+                    }
+                },
+                error: function(xhr) {
+                    var message = 'Terjadi kesalahan';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        message = xhr.responseJSON.message;
+                    }
+                    showAlert('danger', message);
+                }
+            });
+        }
+    });
+});
+
+// Handle status update for RAB
+$(document).on('click', '.update-status-rab', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var rabId = $(this).data('id');
+    
+    Swal.fire({
+        title: 'Update Status RAB',
+        html: `
+            <div class="form-group text-left">
+                <label for="status">Status</label>
+                <select id="status" class="form-control">
+                    <option value="N">Menunggu</option>
+                    <option value="Y">Disetujui</option>
+                    <option value="T">Ditolak</option>
+                    <option value="R">Revisi</option>
+                </select>
+            </div>
+            <div id="feedback-container" class="form-group text-left" style="display:none;">
+                <label for="feedback">Feedback</label>
+                <textarea id="feedback" class="form-control" rows="3"></textarea>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Update',
+        cancelButtonText: 'Batal',
+        didOpen: () => {
+            // Show feedback field when status is Ditolak or Revisi
+            $('#status').on('change', function() {
+                var selectedStatus = $(this).val();
+                if (selectedStatus === 'T' || selectedStatus === 'R') {
+                    $('#feedback-container').show();
+                } else {
+                    $('#feedback-container').hide();
+                }
+            });
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var status = $('#status').val();
+            var feedback = $('#feedback').val();
+            
+            // Call API to update status
+            $.ajax({
+                url: "{{ url('api/rab') }}/" + rabId + "/update-status",
+                type: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    status: status,
+                    feedback: feedback
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: response.message || 'Status RAB berhasil diupdate.',
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'OK'
+                        });
+                        
+                        // Reload tree data to update the UI
+                        loadTreeData();
+                    } else {
+                        showAlert('danger', response.message || 'Gagal mengupdate status RAB');
+                    }
+                },
+                error: function(xhr) {
+                    var message = 'Terjadi kesalahan';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        message = xhr.responseJSON.message;
+                    }
+                    showAlert('danger', message);
+                }
+            });
+        }
+    });
+});
+
         // Handle delete sub-kegiatan button click
         $(document).on('click', '.delete-sub-kegiatan', function(e) {
             e.preventDefault();
@@ -1401,93 +1649,177 @@
                         // Add view, edit, delete buttons for kegiatan
                         // Plus add new buttons for adding sub-kegiatan and RAB directly
                         actions = '<div class="action-btn-group">'; 
-                           if (['Y', 'NT', 'RT', 'TT'].includes(item.status)) {
+                           // Check if user is super user
+                            if ("{{ auth()->user()->isSuperUser() }}") {
+                                  if (['Y', 'NT', 'RT', 'TT'].includes(item.status)) {
                                 actions += 
                                     '<button data-toggle="tooltip" title="Ajukan TOR Kegiatan" class="btn btn-success btn-square btn-sm ajukan-tor-kegiatan" ' +
                                     'data-id="' + kegiatanId + '">' +
                                         '<i class="fas fa-paper-plane"></i>' +
                                     '</button> ';
                             }
-                                                    
-
-                                actions +=  '<button class="btn btn-primary btn-square btn-sm load-modal" ' +
-                                  'data-url="' + "{{ route('sub-kegiatans.create') }}?kegiatanID=" + kegiatanId + '" ' +
-                                  'data-title="Tambah Sub Kegiatan" data-toggle="tooltip" title="Tambah sub kegiatan baru">' +
-                                  '<i class="fas fa-plus"></i>' +
-                                  '</button> ' +
-                                  '<button class="btn btn-success btn-square btn-sm load-modal" ' +
-                                  'data-url="' + "{{ route('rabs.create') }}?kegiatanID=" + kegiatanId + '" ' +
-                                  'data-title="Tambah RAB" data-toggle="tooltip" title="Tambah RAB baru untuk kegiatan ini">' +
-                                  '<i class="fas fa-plus"></i>' +
-                                  '</button> '+
-                                  '<button class="btn btn-info btn-square btn-sm load-modal" ' +
-                                  'data-url="' + "{{ route('kegiatans.show', ':id') }}".replace(':id', kegiatanId) + '" ' +
-                                  'data-title="Detail Kegiatan" data-toggle="tooltip" title="Lihat detail kegiatan">' +
-                                  '<i class="fas fa-eye"></i>' +
-                                  '</button> ' +
-                                  '<button class="btn btn-warning btn-square btn-sm load-modal" ' +
-                                  'data-url="' + "{{ route('kegiatans.edit', ':id') }}".replace(':id', kegiatanId) + '" ' +
-                                  'data-title="Edit Kegiatan" data-toggle="tooltip" title="Edit kegiatan">' +
-                                  '<i class="fas fa-edit"></i>' +
-                                  '</button> ' +
-                                  '<button type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" ' +
-                                  'data-id="' + kegiatanId + '" data-toggle="tooltip" title="Hapus kegiatan">' +
-                                  '<i class="fas fa-trash"></i>' +
-                                  '</button>' +
-                                  '<span class="action-divider"></span>' +
-                                  '</div>';
-                    } else if (item.type === 'subkegiatan') {
-                        // Add view, edit, delete buttons for subkegiatan
-                        // Plus add new button for adding RAB to this subkegiatan
-                        var subKegiatanId = item.id.replace('subkegiatan_', '');
-                        actions = '<div class="action-btn-group">' +
-                                 '<button class="btn btn-success btn-square btn-sm load-modal" ' +
-                                  'data-url="' + "{{ route('rabs.create') }}?subKegiatanID=" + subKegiatanId + '" ' +
-                                  'data-title="Tambah RAB" data-toggle="tooltip" title="Tambah RAB baru untuk sub kegiatan ini">' +
-                                  '<i class="fas fa-plus"></i>' +
-                                  '</button> ' +
-                                  '<button class="btn btn-info btn-square btn-sm load-modal" ' +
-                                  'data-url="' + "{{ route('sub-kegiatans.show', ':id') }}".replace(':id', subKegiatanId) + '" ' +
-                                  'data-title="Detail Sub Kegiatan" data-toggle="tooltip" title="Lihat detail sub kegiatan">' +
-                                  '<i class="fas fa-eye"></i>' +
-                                  '</button> ' +
-                                  '<button class="btn btn-warning btn-square btn-sm load-modal" ' +
-                                  'data-url="' + "{{ route('sub-kegiatans.edit', ':id') }}".replace(':id', subKegiatanId) + '" ' +
-                                  'data-title="Edit Sub Kegiatan" data-toggle="tooltip" title="Edit sub kegiatan">' +
-                                  '<i class="fas fa-edit"></i>' +
-                                  '</button> ' +
-                                  '<button type="button" class="btn btn-danger btn-square btn-sm delete-sub-kegiatan" ' +
-                                  'data-id="' + subKegiatanId + '" data-toggle="tooltip" title="Hapus sub kegiatan">' +
-                                  '<i class="fas fa-trash"></i>' +
-                                  '</button>' +
-                                  '<span class="action-divider"></span>' +
-                                  '</div>';
-                    } else if (item.type === 'rab') {
-                        // Add view, edit, and delete buttons for RAB
-                        var rabId = '';
-                        if (item.id.startsWith('rab_sub_')) {
-                            rabId = item.id.replace('rab_sub_', '');
-                        } else {
-                            rabId = item.id.replace('rab_', '');
-                        }
-                        
-                        actions = '<div class="action-btn-group">' +
-                                  '<button class="btn btn-info btn-square btn-sm load-modal" ' +
-                                  'data-url="' + "{{ route('rabs.show', ':id') }}".replace(':id', rabId) + '" ' +
-                                  'data-title="Detail RAB" data-toggle="tooltip" title="Lihat detail RAB">' +
-                                  '<i class="fas fa-eye"></i>' +
-                                  '</button> ' +
-                                  '<button class="btn btn-warning btn-square btn-sm load-modal" ' +
-                                  'data-url="' + "{{ route('rabs.edit', ':id') }}".replace(':id', rabId) + '" ' +
-                                  'data-title="Edit RAB" data-toggle="tooltip" title="Edit RAB">' +
-                                  '<i class="fas fa-edit"></i>' +
-                                  '</button> ' +
-                                  '<button type="button" class="btn btn-danger btn-square btn-sm delete-rab" ' +
-                                  'data-id="' + rabId + '" data-toggle="tooltip" title="Hapus RAB">' +
-                                  '<i class="fas fa-trash"></i>' +
-                                  '</button>' +
-                                  '</div>';
-                    }
+                                // For super users, only show view and update status buttons
+                                actions += 
+                                    '<button class="btn btn-info btn-square btn-sm load-modal" ' +
+                                    'data-url="' + "{{ route('kegiatans.show', ':id') }}".replace(':id', kegiatanId) + '" ' +
+                                    'data-title="Detail Kegiatan" data-toggle="tooltip" title="Lihat detail kegiatan">' +
+                                    '<i class="fas fa-eye"></i>' +
+                                    '</button> ' +
+                                    '<button class="btn btn-warning btn-square btn-sm update-status-kegiatan" ' +
+                                    'data-id="' + kegiatanId + '" data-toggle="tooltip" title="Update status kegiatan">' +
+                                    '<i class="fas fa-edit"></i>' +
+                                    '</button>';
+                            }else if ("{{ auth()->user()->isAdmin() }}") {
+        // For admin users, show all buttons
+        if (['Y', 'NT', 'RT', 'TT'].includes(item.status)) {
+            actions += 
+                '<button data-toggle="tooltip" title="Ajukan TOR Kegiatan" class="btn btn-success btn-square btn-sm ajukan-tor-kegiatan" ' +
+                'data-id="' + kegiatanId + '">' +
+                    '<i class="fas fa-paper-plane"></i>' +
+                '</button> ';
+        }
+        
+        actions += '<button class="btn btn-primary btn-square btn-sm load-modal" ' +
+            'data-url="' + "{{ route('sub-kegiatans.create') }}?kegiatanID=" + kegiatanId + '" ' +
+            'data-title="Tambah Sub Kegiatan" data-toggle="tooltip" title="Tambah sub kegiatan baru">' +
+            '<i class="fas fa-plus"></i>' +
+            '</button> ' +
+            '<button class="btn btn-success btn-square btn-sm load-modal" ' +
+            'data-url="' + "{{ route('rabs.create') }}?kegiatanID=" + kegiatanId + '" ' +
+            'data-title="Tambah RAB" data-toggle="tooltip" title="Tambah RAB baru untuk kegiatan ini">' +
+            '<i class="fas fa-plus"></i>' +
+            '</button> '+
+            '<button class="btn btn-info btn-square btn-sm load-modal" ' +
+            'data-url="' + "{{ route('kegiatans.show', ':id') }}".replace(':id', kegiatanId) + '" ' +
+            'data-title="Detail Kegiatan" data-toggle="tooltip" title="Lihat detail kegiatan">' +
+            '<i class="fas fa-eye"></i>' +
+            '</button> ' +
+            '<button class="btn btn-warning btn-square btn-sm load-modal" ' +
+            'data-url="' + "{{ route('kegiatans.edit', ':id') }}".replace(':id', kegiatanId) + '" ' +
+            'data-title="Edit Kegiatan" data-toggle="tooltip" title="Edit kegiatan">' +
+            '<i class="fas fa-edit"></i>' +
+            '</button> ' +
+            '<button type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" ' +
+            'data-id="' + kegiatanId + '" data-toggle="tooltip" title="Hapus kegiatan">' +
+            '<i class="fas fa-trash"></i>' +
+            '</button>';
+    } else {
+        // For regular users, show only view button
+        actions += 
+            '<button class="btn btn-info btn-square btn-sm load-modal" ' +
+            'data-url="' + "{{ route('kegiatans.show', ':id') }}".replace(':id', kegiatanId) + '" ' +
+            'data-title="Detail Kegiatan" data-toggle="tooltip" title="Lihat detail kegiatan">' +
+            '<i class="fas fa-eye"></i>' +
+            '</button>';
+    }
+    
+    actions += '<span class="action-divider"></span></div>';
+} else if (item.type === 'subkegiatan') {
+    // Add view, edit, delete buttons for subkegiatan
+    // Plus add new button for adding RAB to this subkegiatan
+    var subKegiatanId = item.id.replace('subkegiatan_', '');
+    actions = '<div class="action-btn-group">';
+    
+    // Check if user is super user
+    if ("{{ auth()->user()->isSuperUser() }}") {
+        // For super users, only show view and update status buttons
+        actions += 
+            '<button class="btn btn-info btn-square btn-sm load-modal" ' +
+            'data-url="' + "{{ route('sub-kegiatans.show', ':id') }}".replace(':id', subKegiatanId) + '" ' +
+            'data-title="Detail Sub Kegiatan" data-toggle="tooltip" title="Lihat detail sub kegiatan">' +
+            '<i class="fas fa-eye"></i>' +
+            '</button> ' + 
+                           '<button class="btn btn-warning btn-square btn-sm update-status-subkegiatan" ' +
+            'data-id="' + subKegiatanId + '" data-toggle="tooltip" title="Update status sub kegiatan">' +
+            '<i class="fas fa-edit"></i>' +
+            '</button>';
+    } else if ("{{ auth()->user()->isAdmin() }}") {
+        // For admin users, show all buttons
+        actions += 
+            '<button class="btn btn-success btn-square btn-sm load-modal" ' +
+            'data-url="' + "{{ route('rabs.create') }}?subKegiatanID=" + subKegiatanId + '" ' +
+            'data-title="Tambah RAB" data-toggle="tooltip" title="Tambah RAB baru untuk sub kegiatan ini">' +
+            '<i class="fas fa-plus"></i>' +
+            '</button> ' +
+            '<button class="btn btn-info btn-square btn-sm load-modal" ' +
+            'data-url="' + "{{ route('sub-kegiatans.show', ':id') }}".replace(':id', subKegiatanId) + '" ' +
+            'data-title="Detail Sub Kegiatan" data-toggle="tooltip" title="Lihat detail sub kegiatan">' +
+            '<i class="fas fa-eye"></i>' +
+            '</button> ' +
+            '<button class="btn btn-warning btn-square btn-sm load-modal" ' +
+            'data-url="' + "{{ route('sub-kegiatans.edit', ':id') }}".replace(':id', subKegiatanId) + '" ' +
+            'data-title="Edit Sub Kegiatan" data-toggle="tooltip" title="Edit sub kegiatan">' +
+            '<i class="fas fa-edit"></i>' +
+            '</button> ' +
+            '<button type="button" class="btn btn-danger btn-square btn-sm delete-sub-kegiatan" ' +
+            'data-id="' + subKegiatanId + '" data-toggle="tooltip" title="Hapus sub kegiatan">' +
+            '<i class="fas fa-trash"></i>' +
+            '</button>';
+    } else {
+        // For regular users, show only view button
+        actions += 
+            '<button class="btn btn-info btn-square btn-sm load-modal" ' +
+            'data-url="' + "{{ route('sub-kegiatans.show', ':id') }}".replace(':id', subKegiatanId) + '" ' +
+            'data-title="Detail Sub Kegiatan" data-toggle="tooltip" title="Lihat detail sub kegiatan">' +
+            '<i class="fas fa-eye"></i>' +
+            '</button>';
+    }
+    
+    actions += '<span class="action-divider"></span></div>';
+} else if (item.type === 'rab') {
+    // Add view, edit, and delete buttons for RAB
+    var rabId = '';
+    if (item.id.startsWith('rab_sub_')) {
+        rabId = item.id.replace('rab_sub_', '');
+    } else {
+        rabId = item.id.replace('rab_', '');
+    }
+    
+    actions = '<div class="action-btn-group">';
+    
+    // Check if user is super user
+    if ("{{ auth()->user()->isSuperUser() }}") {
+        // For super users, only show view and update status buttons
+        actions += 
+            '<button class="btn btn-info btn-square btn-sm load-modal" ' +
+            'data-url="' + "{{ route('rabs.show', ':id') }}".replace(':id', rabId) + '" ' +
+            'data-title="Detail RAB" data-toggle="tooltip" title="Lihat detail RAB">' +
+            '<i class="fas fa-eye"></i>' +
+            '</button> ' +
+            '<button class="btn btn-warning btn-square btn-sm update-status-rab" ' +
+            'data-id="' + rabId + '" data-toggle="tooltip" title="Update status RAB">' +
+            '<i class="fas fa-edit"></i>' +
+            '</button>';
+    } else if ("{{ auth()->user()->isAdmin() }}") {
+        // For admin users, show all buttons
+        actions += 
+            '<button class="btn btn-info btn-square btn-sm load-modal" ' +
+            'data-url="' + "{{ route('rabs.show', ':id') }}".replace(':id', rabId) + '" ' +
+            'data-title="Detail RAB" data-toggle="tooltip" title="Lihat detail RAB">' +
+            '<i class="fas fa-eye"></i>' +
+            '</button> ' +
+            '<button class="btn btn-warning btn-square btn-sm load-modal" ' +
+            'data-url="' + "{{ route('rabs.edit', ':id') }}".replace(':id', rabId) + '" ' +
+            'data-title="Edit RAB" data-toggle="tooltip" title="Edit RAB">' +
+            '<i class="fas fa-edit"></i>' +
+            '</button> ' +
+            '<button type="button" class="btn btn-danger btn-square btn-sm delete-rab" ' +
+            'data-id="' + rabId + '" data-toggle="tooltip" title="Hapus RAB">' +
+            '<i class="fas fa-trash"></i>' +
+            '</button>';
+    } else {
+        // For regular users, show only view button
+        actions += 
+            '<button class="btn btn-info btn-square btn-sm load-modal" ' +
+            'data-url="' + "{{ route('rabs.show', ':id') }}".replace(':id', rabId) + '" ' +
+            'data-title="Detail RAB" data-toggle="tooltip" title="Lihat detail RAB">' +
+            '<i class="fas fa-eye"></i>' +
+            '</button>';
+    }
+    
+    actions += '</div>';
+}
+                                                              
                     
                     row.append('<td class="text-center" style="white-space:nowrap;width:1px;">' + actions + '</td>');
                     

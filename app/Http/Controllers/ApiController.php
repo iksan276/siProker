@@ -9,7 +9,9 @@ use App\Models\ProgramPengembangan;
 use App\Models\ProgramRektor;
 use App\Models\Kegiatan; // Add this import for the Kegiatan model
 use App\Models\SubKegiatan; // Also add this for completeness
+use App\Models\RAB; // Also add this for completeness
 use Illuminate\Support\Facades\Http; 
+use Illuminate\Support\Facades\Auth;
 
 class ApiController extends Controller
 {
@@ -178,37 +180,112 @@ public function getSubKegiatanDetails($id)
 }
 
 
+/**
+ * Update status for a Kegiatan
+ */
 public function updateKegiatanStatus(Request $request, $id)
 {
-    $kegiatan = Kegiatan::find($id);
-    
-    if (!$kegiatan) {
-        return response()->json(['success' => false, 'message' => 'Kegiatan not found'], 404);
-    }
-
-    // Ambil status dari query parameter
-    $status = $request->query('status');
-
-    // Validasi jika status kosong
-    if (!$status) {
-        return response()->json(['success' => false, 'message' => 'Status is required'], 400);
-    }
-
-    // (Opsional) Validasi nilai status yang diperbolehkan
-    $allowedStatuses = ['P', 'PT']; // Tambahkan sesuai kebutuhan
-    if (!in_array($status, $allowedStatuses)) {
-        return response()->json(['success' => false, 'message' => 'Invalid status value'], 422);
-    }
-
-    // Update status kegiatan
-    $kegiatan->Status = $status;
-    $kegiatan->save();
-
-    return response()->json([
-        'success' => true, 
-        'message' => 'Status kegiatan berhasil diperbarui',
-        'status' => $kegiatan->Status
+    // Validate request
+    $request->validate([
+        'status' => 'required|in:N,Y,T,R,P,PT,YT,TT,RT',
+        'feedback' => 'nullable|string',
     ]);
+
+    try {
+        $kegiatan = Kegiatan::findOrFail($id);
+        $kegiatan->Status = $request->status;
+        
+        // Only update feedback if provided
+        if ($request->has('feedback')) {
+            $kegiatan->Feedback = $request->feedback;
+        }
+        
+        $kegiatan->DEdited = now();
+        $kegiatan->UEdited = Auth::id();
+        $kegiatan->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status kegiatan berhasil diupdate'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengupdate status kegiatan: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * Update status for a SubKegiatan
+ */
+public function updateSubKegiatanStatus(Request $request, $id)
+{
+    // Validate request
+    $request->validate([
+        'status' => 'required|in:N,Y,T,R',
+        'feedback' => 'nullable|string',
+    ]);
+
+    try {
+        $subKegiatan = SubKegiatan::findOrFail($id);
+        $subKegiatan->Status = $request->status;
+        
+        // Only update feedback if provided
+        if ($request->has('feedback')) {
+            $subKegiatan->Feedback = $request->feedback;
+        }
+        
+        $subKegiatan->DEdited = now();
+        $subKegiatan->UEdited = Auth::id();
+        $subKegiatan->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status sub kegiatan berhasil diupdate'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengupdate status sub kegiatan: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * Update status for a RAB
+ */
+public function updateRabStatus(Request $request, $id)
+{
+    // Validate request
+    $request->validate([
+        'status' => 'required|in:N,Y,T,R',
+        'feedback' => 'nullable|string',
+    ]);
+
+    try {
+        $rab = RAB::findOrFail($id);
+        $rab->Status = $request->status;
+        
+        // Only update feedback if provided
+        if ($request->has('feedback')) {
+            $rab->Feedback = $request->feedback;
+        }
+        
+        $rab->DEdited = now();
+        $rab->UEdited = Auth::id();
+        $rab->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status RAB berhasil diupdate'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengupdate status RAB: ' . $e->getMessage()
+        ], 500);
+    }
 }
 
 
