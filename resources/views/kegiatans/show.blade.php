@@ -25,6 +25,8 @@
                     $statusBadge = '<span class="badge badge-danger">Pengajuan TOR Ditolak</span>';
                 } elseif ($kegiatan->Status == 'RT') {
                     $statusBadge = '<span class="badge badge-info">Pengajuan TOR direvisi</span>';
+                }  elseif ($kegiatan->Status == 'TP') {
+                    $statusBadge = '<span class="badge badge-warning">Tunda Pencairan</span>';
                 }
                 @endphp
                 {!! $statusBadge !!}
@@ -71,6 +73,10 @@
                 <th>Feedback</th>
                 <td>{!! nl2br($kegiatan->Feedback) !!}</td>
             </tr>
+             <tr>
+            <th>Tanggal Pencairan</th>
+            <td>{{ \Carbon\Carbon::parse($kegiatan->TanggalPencairan)->format('d-m-Y') }}</td>
+        </tr>
     </table>
 </div>
 

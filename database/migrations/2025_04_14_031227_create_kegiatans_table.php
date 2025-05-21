@@ -17,9 +17,10 @@ return new class extends Migration
             $table->text('Nama');
             $table->dateTime('TanggalMulai');
             $table->dateTime('TanggalSelesai');
+            $table->dateTime('TanggalPencairan');
             $table->text('RincianKegiatan');
             $table->text('Feedback')->nullable();
-            $table->enum('Status', ['N', 'Y', 'T', 'R', 'P', 'PT', 'YT', 'TT', 'RT'])->default('N');
+            $table->enum('Status', ['N', 'Y', 'T', 'R', 'P', 'PT', 'YT', 'TT', 'RT', 'TP'])->default('N');
             $table->dateTime('DCreated')->nullable();
             $table->unsignedBigInteger('UCreated')->nullable();
             $table->dateTime('DEdited')->nullable();

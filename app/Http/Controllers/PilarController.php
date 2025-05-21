@@ -390,6 +390,8 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                                                         $statusBadge = '<span class="badge badge-danger">Pengajuan TOR Ditolak</span>';
                         } elseif ($kegiatan->Status == 'RT') {
                             $statusBadge = '<span class="badge badge-info">Pengajuan TOR direvisi</span>';
+                        }elseif ($kegiatan->Status == 'TP') {
+                            $statusBadge = '<span class="badge badge-warning">Tunda Pencairan</span>';
                         }
                         
                         // Check if kegiatan is approved (Y or YT)

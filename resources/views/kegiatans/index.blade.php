@@ -994,6 +994,7 @@
         // Add this code inside the existing $(document).ready function, after the existing event handlers
 
 // Handle status update for kegiatan
+// Handle status update for kegiatan
 $(document).on('click', '.update-status-kegiatan', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -1013,11 +1014,16 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
                     <option value="YT">Pengajuan TOR Disetujui</option>
                     <option value="TT">Pengajuan TOR Ditolak</option>
                     <option value="RT">Pengajuan TOR direvisi</option>
+                    <option value="TP">Tunda Pencairan</option>
                 </select>
             </div>
             <div id="feedback-container" class="form-group text-left" style="display:none;">
                 <label for="feedback">Feedback</label>
                 <textarea id="feedback" class="form-control" rows="3"></textarea>
+            </div>
+            <div id="tanggal-pencairan-container" class="form-group text-left" style="display:none;">
+                <label for="tanggal_pencairan">Tanggal Pencairan</label>
+                <input type="date" id="tanggal_pencairan" class="form-control">
             </div>
         `,
         showCancelButton: true,
@@ -1027,11 +1033,20 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
             // Show feedback field when status is Ditolak or Revisi
             $('#status').on('change', function() {
                 var selectedStatus = $(this).val();
+                
+                // Show/hide feedback container based on status
                 if (selectedStatus === 'T' || selectedStatus === 'R' || 
                     selectedStatus === 'TT' || selectedStatus === 'RT') {
                     $('#feedback-container').show();
                 } else {
                     $('#feedback-container').hide();
+                }
+                
+                // Show/hide tanggal pencairan container based on status
+                if (selectedStatus === 'TP') {
+                    $('#tanggal-pencairan-container').show();
+                } else {
+                    $('#tanggal-pencairan-container').hide();
                 }
             });
         }
@@ -1039,6 +1054,22 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
         if (result.isConfirmed) {
             var status = $('#status').val();
             var feedback = $('#feedback').val();
+            var tanggalPencairan = null;
+            
+            // Get tanggal pencairan if status is TP
+            if (status === 'TP') {
+                tanggalPencairan = $('#tanggal_pencairan').val();
+                if (!tanggalPencairan) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Tanggal pencairan harus diisi untuk status Tunda Pencairan',
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+            }
             
             // Call API to update status
             $.ajax({
@@ -1047,7 +1078,8 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
                 data: {
                     _token: "{{ csrf_token() }}",
                     status: status,
-                    feedback: feedback
+                    feedback: feedback,
+                    tanggal_pencairan: tanggalPencairan
                 },
                 success: function(response) {
                     if (response.success) {
@@ -1076,6 +1108,7 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
         }
     });
 });
+
 
 // Handle status update for sub kegiatan
 $(document).on('click', '.update-status-subkegiatan', function(e) {

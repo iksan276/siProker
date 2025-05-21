@@ -122,6 +122,7 @@
                         <option value="YT" {{ isset($selectedStatus) && $selectedStatus == 'YT' ? 'selected' : '' }}>TOR Disetujui</option>
                         <option value="TT" {{ isset($selectedStatus) && $selectedStatus == 'TT' ? 'selected' : '' }}>TOR Ditolak</option>
                         <option value="RT" {{ isset($selectedStatus) && $selectedStatus == 'RT' ? 'selected' : '' }}>TOR Revisi</option>
+                        <option value="TP" {{ isset($selectedStatus) && $selectedStatus == 'RT' ? 'selected' : '' }}>Tunda Pencairan</option>
                     </select>
                 </div>
             </div>

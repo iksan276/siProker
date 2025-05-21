@@ -293,6 +293,8 @@ class KegiatanController extends Controller
                 $statusBadge = '<span class="badge badge-danger">Pengajuan TOR Ditolak</span>';
             } elseif ($kegiatan->Status == 'RT') {
                 $statusBadge = '<span class="badge badge-info">Pengajuan TOR direvisi</span>';
+            }elseif ($kegiatan->Status == 'TP') {
+                $statusBadge = '<span class="badge badge-warning">Tunda Pencairan</span>';
             }
 
             $kegiatanNode = [
@@ -689,7 +691,7 @@ class KegiatanController extends Controller
             'TanggalSelesai' => 'required|date|after_or_equal:TanggalMulai',
             'RincianKegiatan' => 'required|string',
             'has_sub_kegiatan' => 'required|in:yes,no',
-            'Status' => 'nullable|in:N,Y,T,R,P,PT,YT,TT,RT',
+            'Status' => 'nullable|in:N,Y,T,R,P,PT,YT,TT,RT,TP',
         ]);
 
         // Begin transaction
@@ -940,7 +942,7 @@ class KegiatanController extends Controller
             'TanggalSelesai' => 'required|date|after_or_equal:TanggalMulai',
             'RincianKegiatan' => 'required|string',
             'has_sub_kegiatan' => 'required|in:yes,no',
-            'Status' => 'nullable|in:N,Y,T,R,P,PT,YT,TT,RT',
+            'Status' => 'nullable|in:N,Y,T,R,P,PT,YT,TT,RT,TP',
         ]);
 
         // Begin transaction
@@ -952,6 +954,7 @@ class KegiatanController extends Controller
             $kegiatan->Nama = $request->Nama;
             $kegiatan->TanggalMulai = $request->TanggalMulai;
             $kegiatan->TanggalSelesai = $request->TanggalSelesai;
+            $kegiatan->TanggalPencairan = $request->TanggalPencairan;
             $kegiatan->RincianKegiatan = $request->RincianKegiatan;
             $kegiatan->Feedback = $request->Feedback;
             $kegiatan->Status = $request->Status ?? $kegiatan->Status; // Keep existing status if not provided

@@ -15,6 +15,7 @@ class Kegiatan extends Model
         'Nama',
         'TanggalMulai',
         'TanggalSelesai',
+        'TanggalPencairan',
         'RincianKegiatan',
         'Feedback',
          'Status',
@@ -207,6 +208,8 @@ class Kegiatan extends Model
                 return '<span class="badge badge-info">Revisi</span>';
             case 'PT':
                 return '<span class="badge badge-warning">Pengajuan TOR</span>';
+            case 'TP':
+                return '<span class="badge badge-warning">Tunda Pencairan</span>';
             case 'YT':
                 return '<span class="badge badge-success">Pengajuan TOR Disetujui</span>';
             case 'TT':

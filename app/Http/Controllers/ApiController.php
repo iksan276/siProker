@@ -183,12 +183,16 @@ public function getSubKegiatanDetails($id)
 /**
  * Update status for a Kegiatan
  */
+/**
+ * Update status for a Kegiatan
+ */
 public function updateKegiatanStatus(Request $request, $id)
 {
     // Validate request
     $request->validate([
-        'status' => 'required|in:N,Y,T,R,P,PT,YT,TT,RT',
+        'status' => 'required|in:N,Y,T,R,P,PT,YT,TT,RT,TP',
         'feedback' => 'nullable|string',
+        'tanggal_pencairan' => 'nullable|date',
     ]);
 
     try {
@@ -198,6 +202,11 @@ public function updateKegiatanStatus(Request $request, $id)
         // Only update feedback if provided
         if ($request->has('feedback')) {
             $kegiatan->Feedback = $request->feedback;
+        }
+        
+        // Update tanggal pencairan if status is TP (Tunda Pencairan)
+        if ($request->status === 'TP' && $request->has('tanggal_pencairan')) {
+            $kegiatan->TanggalPencairan = $request->tanggal_pencairan;
         }
         
         $kegiatan->DEdited = now();
@@ -215,6 +224,7 @@ public function updateKegiatanStatus(Request $request, $id)
         ], 500);
     }
 }
+
 
 /**
  * Update status for a SubKegiatan
