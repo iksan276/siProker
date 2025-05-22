@@ -23,233 +23,224 @@ use Illuminate\Support\Facades\Http;
 class KegiatanController extends Controller
 {
 
-    public function index(Request $request)
-    {
-        // Get all active renstras for the filter
-        $renstras = Renstra::where('NA', 'N')->get();
-        
-        // Get all active pilars for the filter
-        $pilars = Pilar::where('NA', 'N')->get();
-        
-        // Get all active isu strategis for the filter
-        $isuStrategis = IsuStrategis::where('NA', 'N')->get();
-        
-        // Get all program pengembangans for the filter
-        $programPengembangans = ProgramPengembangan::where('NA', 'N')->get();
-        
-        // Get all active program rektors for the filter
-        $programRektors = ProgramRektor::where('NA', 'N')->get();
-        
-        // Base query
-        $kegiatansQuery = Kegiatan::with([
-            'programRektor', 
-            'programRektor.programPengembangan.isuStrategis.pilar.renstra', 
-            'createdBy', 
-            'editedBy',
-            'subKegiatans',
-            'rabs'
-        ]);
-        
-        // Apply filter if renstraID is provided
-        if ($request->has('renstraID') && $request->renstraID) {
-            // Filter pilars by renstraID
-            $pilarIds = Pilar::where('RenstraID', $request->renstraID)
-                ->where('NA', 'N')
-                ->pluck('PilarID');
-                
-            // Filter isu strategis by pilar IDs
-            $isuIds = IsuStrategis::whereIn('PilarID', $pilarIds)
-                ->where('NA', 'N')
-                ->pluck('IsuID');
-                
-            // Filter program pengembangans by isu IDs
-            $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
-                ->where('NA', 'N')
-                ->pluck('ProgramPengembanganID');
-                
-            // Filter program rektors by program pengembangan IDs
-            $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
-                ->where('NA', 'N')
-                ->pluck('ProgramRektorID');
-                
-            $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
+  public function index(Request $request)
+{
+    // Get all active renstras for the filter
+    $renstras = Renstra::where('NA', 'N')->get();
+    
+    // Get all active pilars for the filter
+    $pilars = Pilar::where('NA', 'N')->get();
+    
+    // Get all active isu strategis for the filter
+    $isuStrategis = IsuStrategis::where('NA', 'N')->get();
+    
+    // Get all program pengembangans for the filter
+    $programPengembangans = ProgramPengembangan::where('NA', 'N')->get();
+    
+    // Get all active program rektors for the filter
+    $programRektors = ProgramRektor::where('NA', 'N')->get();
+    
+        // Get all Kegiatan IDs for the filter dropdown
+    $allKegiatanIds = Kegiatan::pluck('KegiatanID')->toArray();
+    
+    // Get units from API for the filter
+   // In the index method of KegiatanController.php
+
+// Get units from API for the filter
+        $units = [];
+        $ssoCode = session('sso_code');
+        if ($ssoCode) {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $ssoCode,
+            ])->get("https://webhook.itp.ac.id/api/units", [
+                'order_by' => 'Nama',
+                'sort' => 'asc',
+                'limit' => 100
+            ]);
             
-            // Update pilars list based on selected renstra
-            $pilars = Pilar::where('RenstraID', $request->renstraID)
-                ->where('NA', 'N')
-                ->get();
-                
-            // Update isu strategis list based on filtered pilars
-            $isuStrategis = IsuStrategis::whereIn('PilarID', $pilarIds)
-                ->where('NA', 'N')
-                ->get();
-                
-            // Update program pengembangans list based on filtered isus
-            $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
-                ->where('NA', 'N')
-                ->get();
-                
-            // Update program rektors list based on filtered program pengembangans
-            $programRektors = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
-                ->where('NA', 'N')
-                ->get();
-        }
-        
-        // Apply filter if pilarID is provided
-        if ($request->has('pilarID') && $request->pilarID) {
-            // Filter isu strategis by pilarID
-            $isuIds = IsuStrategis::where('PilarID', $request->pilarID)
-                ->where('NA', 'N')
-                ->pluck('IsuID');
-                
-            // Filter program pengembangans by isu IDs
-            $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
-                ->where('NA', 'N')
-                ->pluck('ProgramPengembanganID');
-                
-            // Filter program rektors by program pengembangan IDs
-            $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
-                ->where('NA', 'N')
-                ->pluck('ProgramRektorID');
-                
-            $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
-            
-            // Update isu strategis list based on selected pilar
-            $isuStrategis = IsuStrategis::where('PilarID', $request->pilarID)
-                ->where('NA', 'N')
-                ->get();
-                
-            // Update program pengembangans list based on filtered isus
-            $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
-                ->where('NA', 'N')
-                ->get();
-                
-            // Update program rektors list based on filtered program pengembangans
-            $programRektors = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
-                ->where('NA', 'N')
-                ->get();
-        }
-        
-        // Apply filter if isuID is provided
-        if ($request->has('isuID') && $request->isuID) {
-            // Filter program pengembangans by isuID
-            $programIds = ProgramPengembangan::where('IsuID', $request->isuID)
-                ->where('NA', 'N')
-                ->pluck('ProgramPengembanganID');
-                
-            // Filter program rektors by program pengembangan IDs
-            $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
-                ->where('NA', 'N')
-                ->pluck('ProgramRektorID');
-                
-            $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
-            
-            // Update program pengembangans list based on selected isu
-            $programPengembangans = ProgramPengembangan::where('IsuID', $request->isuID)
-                ->where('NA', 'N')
-                ->get();
-                
-            // Update program rektors list based on filtered program pengembangans
-            $programRektors = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
-                ->where('NA', 'N')
-                ->get();
-        }
-        
-        // Apply filter if programPengembanganID is provided
-        if ($request->has('programPengembanganID') && $request->programPengembanganID) {
-            // Filter program rektors by program pengembangan ID
-            $programRektorIds = ProgramRektor::where('ProgramPengembanganID', $request->programPengembanganID)
-                ->where('NA', 'N')
-                ->pluck('ProgramRektorID');
-                
-            $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
-            
-            // Update program rektors list based on selected program pengembangan
-            $programRektors = ProgramRektor::where('ProgramPengembanganID', $request->programPengembanganID)
-                ->where('NA', 'N')
-                ->get();
-        }
-        
-        // Apply filter if programRektorID is provided
-        if ($request->has('programRektorID') && $request->programRektorID) {
-            $kegiatansQuery->where('ProgramRektorID', $request->programRektorID);
-        }
-        
-        // Get the filtered results
-        $kegiatans = $kegiatansQuery->orderBy('KegiatanID', 'asc')->get();
-        
-        // Get the selected filter values (for re-populating the selects)
-        $selectedRenstra = $request->renstraID;
-        $selectedPilar = $request->pilarID;
-        $selectedIsu = $request->isuID;
-        $selectedProgramPengembangan = $request->programPengembanganID;
-        $selectedProgramRektor = $request->programRektorID;
-        
-        // If user is not admin, prepare tree grid data
-        if (!auth()->user()->isAdmin()) {
-            $userId = Auth::id();
-            
-            if ($request->ajax() && $request->wantsJson()) {
-                $treeData = $this->buildTreeData($kegiatans);
-                return response()->json([
-                    'data' => $treeData
-                ]);
+            if ($response->successful()) {
+                $units = $response->json();
+                // Let's log the first unit to see its structure
+                \Log::info('Unit structure:', [isset($units[0]) ? $units[0] : 'No units found']);
             }
-            
-            return view('kegiatans.index', compact(
-                'kegiatans', 
-                'renstras', 
-                'pilars', 
-                'isuStrategis', 
-                'programPengembangans', 
-                'programRektors', 
-                'selectedRenstra', 
-                'selectedPilar', 
-                'selectedIsu', 
-                'selectedProgramPengembangan', 
-                'selectedProgramRektor'
-            ));
         }
+
+    
+    // Base query
+    $kegiatansQuery = Kegiatan::with([
+        'programRektor', 
+        'programRektor.programPengembangan.isuStrategis.pilar.renstra', 
+        'createdBy', 
+        'editedBy',
+        'subKegiatans',
+        'rabs'
+    ]);
+    
+
+        if ($request->has('kegiatanID') && $request->kegiatanID) {
+        $kegiatanIds = explode(',', $request->kegiatanID);
+        $kegiatansQuery->whereIn('KegiatanID', $kegiatanIds);
+    }
+    // Apply filter if renstraID is provided
+    if ($request->has('renstraID') && $request->renstraID) {
+        // Filter pilars by renstraID
+        $pilarIds = Pilar::where('RenstraID', $request->renstraID)
+            ->where('NA', 'N')
+            ->pluck('PilarID');
+            
+        // Filter isu strategis by pilar IDs
+        $isuIds = IsuStrategis::whereIn('PilarID', $pilarIds)
+            ->where('NA', 'N')
+            ->pluck('IsuID');
+            
+        // Filter program pengembangans by isu IDs
+        $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
+            ->where('NA', 'N')
+            ->pluck('ProgramPengembanganID');
+            
+        // Filter program rektors by program pengembangan IDs
+        $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
+            ->where('NA', 'N')
+            ->pluck('ProgramRektorID');
+            
+        $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
         
-        // If it's an AJAX request, return JSON data for DataTable
-        if ($request->ajax()) {
-            // If format=tree is requested, return tree data
-            if ($request->has('format') && $request->format === 'tree') {
-                $treeData = $this->buildTreeData($kegiatans);
-                return response()->json([
-                    'data' => $treeData
-                ]);
-            }
+        // Update pilars list based on selected renstra
+        $pilars = Pilar::where('RenstraID', $request->renstraID)
+            ->where('NA', 'N')
+            ->get();
             
-            $data = [];
-            foreach ($kegiatans as $index => $kegiatan) {
-                // Match the exact styling from the Mata Anggaran page, but without td tags
-                $actions = '
-                    <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('kegiatans.show', $kegiatan->KegiatanID).'" data-title="Detail Kegiatan">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('kegiatans.edit', $kegiatan->KegiatanID).'" data-title="Edit Kegiatan">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" data-id="'.$kegiatan->KegiatanID.'">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                ';
-                
-                $data[] = [
-                    'no' => $index + 1,
-                    'program_rektor' => nl2br($kegiatan->programRektor->Nama),
-                    'nama' => nl2br($kegiatan->Nama),
-                    'tanggal_mulai' => \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y'),
-                    'tanggal_selesai' => \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y'),
-                    'rincian_kegiatan' => nl2br($kegiatan->RincianKegiatan),
-                    'feedback' => nl2br($kegiatan->Feedback),
-                    'actions' => $actions
-                ];
-            }
+        // Update isu strategis list based on filtered pilars
+        $isuStrategis = IsuStrategis::whereIn('PilarID', $pilarIds)
+            ->where('NA', 'N')
+            ->get();
             
+        // Update program pengembangans list based on filtered isus
+        $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
+            ->where('NA', 'N')
+            ->get();
+            
+        // Update program rektors list based on filtered program pengembangans
+        $programRektors = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
+            ->where('NA', 'N')
+            ->get();
+    }
+    
+    // Apply filter if pilarID is provided
+    if ($request->has('pilarID') && $request->pilarID) {
+        // Filter isu strategis by pilarID
+        $isuIds = IsuStrategis::where('PilarID', $request->pilarID)
+            ->where('NA', 'N')
+            ->pluck('IsuID');
+            
+        // Filter program pengembangans by isu IDs
+        $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
+            ->where('NA', 'N')
+            ->pluck('ProgramPengembanganID');
+            
+        // Filter program rektors by program pengembangan IDs
+        $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
+            ->where('NA', 'N')
+            ->pluck('ProgramRektorID');
+            
+        $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
+        
+        // Update isu strategis list based on selected pilar
+        $isuStrategis = IsuStrategis::where('PilarID', $request->pilarID)
+            ->where('NA', 'N')
+            ->get();
+            
+        // Update program pengembangans list based on filtered isus
+        $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
+            ->where('NA', 'N')
+            ->get();
+            
+        // Update program rektors list based on filtered program pengembangans
+        $programRektors = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
+            ->where('NA', 'N')
+            ->get();
+    }
+    
+    // Apply filter if isuID is provided
+    if ($request->has('isuID') && $request->isuID) {
+        // Filter program pengembangans by isuID
+        $programIds = ProgramPengembangan::where('IsuID', $request->isuID)
+            ->where('NA', 'N')
+            ->pluck('ProgramPengembanganID');
+            
+        // Filter program rektors by program pengembangan IDs
+        $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
+            ->where('NA', 'N')
+            ->pluck('ProgramRektorID');
+            
+        $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
+        
+        // Update program pengembangans list based on selected isu
+        $programPengembangans = ProgramPengembangan::where('IsuID', $request->isuID)
+            ->where('NA', 'N')
+            ->get();
+            
+        // Update program rektors list based on filtered program pengembangans
+        $programRektors = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
+            ->where('NA', 'N')
+            ->get();
+    }
+    
+    // Apply filter if programPengembanganID is provided
+    if ($request->has('programPengembanganID') && $request->programPengembanganID) {
+        // Filter program rektors by program pengembangan ID
+        $programRektorIds = ProgramRektor::where('ProgramPengembanganID', $request->programPengembanganID)
+            ->where('NA', 'N')
+            ->pluck('ProgramRektorID');
+            
+        $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
+        
+        // Update program rektors list based on selected program pengembangan
+        $programRektors = ProgramRektor::where('ProgramPengembanganID', $request->programPengembanganID)
+            ->where('NA', 'N')
+            ->get();
+    }
+    
+    // Apply filter if programRektorID is provided
+    if ($request->has('programRektorID') && $request->programRektorID) {
+        $kegiatansQuery->where('ProgramRektorID', $request->programRektorID);
+    }
+    
+
+    if ($request->has('unitID') && $request->unitID) {
+        $unitIds = explode(',', $request->unitID);
+        $kegiatansQuery->whereHas('programRektor', function($query) use ($unitIds) {
+            $query->where(function($q) use ($unitIds) {
+                foreach ($unitIds as $unitId) {
+                    $q->orWhere('PelaksanaID', $unitId)
+                    ->orWhere('PelaksanaID', 'LIKE', $unitId.',%')
+                    ->orWhere('PelaksanaID', 'LIKE', '%,'.$unitId.',%')
+                    ->orWhere('PelaksanaID', 'LIKE', '%,'.$unitId);
+                }
+            });
+        });
+}
+
+    // Get the filtered results
+    $kegiatans = $kegiatansQuery->orderBy('KegiatanID', 'asc')->get();
+    
+    // Get the selected filter values (for re-populating the selects)
+    $selectedRenstra = $request->renstraID;
+    $selectedPilar = $request->pilarID;
+    $selectedIsu = $request->isuID;
+    $selectedProgramPengembangan = $request->programPengembanganID;
+    $selectedProgramRektor = $request->programRektorID;
+    $selectedUnit = $request->unitID;
+    $selectedKegiatanIds = $request->kegiatanID;
+    
+    // If user is not admin, prepare tree grid data
+    if (!auth()->user()->isAdmin()) {
+        $userId = Auth::id();
+        
+        if ($request->ajax() && $request->wantsJson()) {
+            $treeData = $this->buildTreeData($kegiatans);
             return response()->json([
-                'data' => $data
+                'data' => $treeData
             ]);
         }
         
@@ -259,14 +250,78 @@ class KegiatanController extends Controller
             'pilars', 
             'isuStrategis', 
             'programPengembangans', 
-            'programRektors', 
+            'programRektors',
+            'units',
+            'allKegiatanIds',
             'selectedRenstra', 
             'selectedPilar', 
             'selectedIsu', 
             'selectedProgramPengembangan', 
-            'selectedProgramRektor'
+            'selectedProgramRektor',
+            'selectedUnit',
+        'selectedKegiatanIds'
         ));
     }
+    
+    // If it's an AJAX request, return JSON data for DataTable
+    if ($request->ajax()) {
+        // If format=tree is requested, return tree data
+        if ($request->has('format') && $request->format === 'tree') {
+            $treeData = $this->buildTreeData($kegiatans);
+            return response()->json([
+                'data' => $treeData
+            ]);
+        }
+        
+        $data = [];
+        foreach ($kegiatans as $index => $kegiatan) {
+            // Match the exact styling from the Mata Anggaran page, but without td tags
+            $actions = '
+                <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('kegiatans.show', $kegiatan->KegiatanID).'" data-title="Detail Kegiatan">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('kegiatans.edit', $kegiatan->KegiatanID).'" data-title="Edit Kegiatan">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" data-id="'.$kegiatan->KegiatanID.'">
+                    <i class="fas fa-trash"></i>
+                </button>
+            ';
+            
+            $data[] = [
+                'no' => $index + 1,
+                'program_rektor' => nl2br($kegiatan->programRektor->Nama),
+                'nama' => nl2br($kegiatan->Nama),
+                'tanggal_mulai' => \Carbon\Carbon::parse($kegiatan->TanggalMulai)->format('d-m-Y'),
+                'tanggal_selesai' => \Carbon\Carbon::parse($kegiatan->TanggalSelesai)->format('d-m-Y'),
+                'rincian_kegiatan' => nl2br($kegiatan->RincianKegiatan),
+                'feedback' => nl2br($kegiatan->Feedback),
+                'actions' => $actions
+            ];
+        }
+        
+        return response()->json([
+            'data' => $data
+        ]);
+    }
+    
+    return view('kegiatans.index', compact(
+        'kegiatans', 
+        'renstras', 
+        'pilars', 
+        'isuStrategis', 
+        'programPengembangans', 
+        'programRektors',
+        'units',
+        'selectedRenstra', 
+        'selectedPilar', 
+        'selectedIsu', 
+        'selectedProgramPengembangan', 
+        'selectedProgramRektor',
+        'selectedUnit'
+    ));
+}
+
     
    
      private function buildTreeData($kegiatans)

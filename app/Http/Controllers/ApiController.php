@@ -205,7 +205,7 @@ public function updateKegiatanStatus(Request $request, $id)
         }
         
         // Update tanggal pencairan if status is TP (Tunda Pencairan)
-        if ($request->status === 'TP' && $request->has('tanggal_pencairan')) {
+        if (($request->status === 'TP' || $request->status === 'YT') && $request->has('tanggal_pencairan')) {
             $kegiatan->TanggalPencairan = $request->tanggal_pencairan;
         }
         

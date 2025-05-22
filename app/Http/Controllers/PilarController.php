@@ -396,8 +396,9 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                         
                         // Check if kegiatan is approved (Y or YT)
                         $isApproved = in_array($kegiatan->Status, ['Y', 'YT']);
+                        $isTor = in_array($kegiatan->Status, ['Y', 'NT', 'RT', 'TT']);
                         
-                        $ajukanButton = '';
+                        $ajukanButtonKegiatan = '';
                         if (!$isApproved && $kegiatan->Status != 'P') {
                             $ajukanButton = '
                                 <button data-toggle="tooltip" title="Ajukan Kegiatan" class="btn btn-primary btn-square btn-sm ajukan-kegiatan" 
@@ -405,6 +406,15 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                                     <i class="fas fa-paper-plane"></i>
                                 </button>';
                         }
+
+                        $ajukanButtonTorKegiatan='';
+                            if ($isTor) {
+                                 $ajukanButtonTorKegiatan=
+                                    '<button data-toggle="tooltip" title="Ajukan TOR Kegiatan" class="btn btn-success btn-square btn-sm ajukan-tor-kegiatan" 
+                                    data-id="' . $kegiatan->KegiatanID . '">
+                                    <i class="fas fa-paper-plane"></i>
+                                    </button> ';
+                            }
                         
                         // Determine actions based on approval status
                         $kegiatanActions = '';

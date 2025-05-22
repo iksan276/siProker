@@ -199,4 +199,20 @@ class ProgramRektor extends Model
               ->orWhereYear('TanggalSelesai', $year);
         });
     }
+    // Add this scope method to the ProgramRektor class
+    public function scopeByUnit($query, $unitId)
+    {
+        if (!$unitId) {
+            return $query;
+        }
+        
+        return $query->where(function($q) use ($unitId) {
+            $q->where('PelaksanaID', $unitId)
+            ->orWhere('PelaksanaID', 'LIKE', $unitId.',%')
+            ->orWhere('PelaksanaID', 'LIKE', '%,'.$unitId.',%')
+            ->orWhere('PelaksanaID', 'LIKE', '%,'.$unitId);
+        });
+    }
+
+
 }

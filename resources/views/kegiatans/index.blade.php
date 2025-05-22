@@ -100,7 +100,7 @@
             </select>
         </div>
         
-        <div class="form-group mb-5">
+        <div class="form-group">
            <select id="programRektorFilter" class="form-control select2-filter" {{ empty($selectedProgramPengembangan) ? 'disabled' : '' }}>
                 <option value="">-- Pilih Program Rektor --</option>
                 @foreach($programRektors as $programRektor)
@@ -110,6 +110,34 @@
                 @endforeach
             </select>
         </div>
+
+        <div class="form-group">
+        <select id="unitFilter" class="form-control select2-filter" multiple>
+            <option value="">-- Pilih Unit --</option>
+            @foreach($units as $unit)
+                <option value="{{ $unit['PosisiID'] ?? $unit['id'] ?? '' }}" 
+                    {{ isset($selectedUnit) && in_array(($unit['PosisiID'] ?? $unit['id'] ?? ''), explode(',', $selectedUnit)) ? 'selected' : '' }}>
+                    {{ $unit['Nama'] ?? $unit['nama'] ?? 'Unknown Unit' }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+            <!-- Add this after the Unit filter dropdown -->
+        <div class="form-group mb-5">
+            <select id="kegiatanFilter" class="form-control select2-filter" multiple>
+                <option value="">-- Pilih ID Kegiatan --</option>
+                @foreach($allKegiatanIds as $kegiatanId)
+                    <option value="{{ $kegiatanId }}" 
+                        {{ isset($selectedKegiatanIds) && in_array($kegiatanId, explode(',', $selectedKegiatanIds)) ? 'selected' : '' }}>
+                        {{ $kegiatanId }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+
+
         
         <!-- Tree Grid Table -->
         <div id="tree-grid-container" class="table-responsive">
@@ -282,7 +310,8 @@
     var selectedIsuId = getCookie('selected_isu') || "{{ $selectedIsu ?? '' }}";
     var selectedProgramPengembanganId = getCookie('selected_program_pengembangan') || "{{ $selectedProgramPengembangan ?? '' }}";
     var selectedProgramRektorId = getCookie('selected_program_rektor') || "{{ $selectedProgramRektor ?? '' }}";
-    
+    var selectedUnitIds = getCookie('selected_units') || "{{ $selectedUnit ?? '' }}";
+    var selectedKegiatanIds = getCookie('selected_kegiatan_ids') || "{{ $selectedKegiatanIds ?? '' }}";
     // Function to load pilars for a selected renstra
      // Function to load pilars for a renstra
      function loadPilarsForRenstra(renstraID, selectedPilarId) {
@@ -516,7 +545,17 @@
             $('#renstraFilter').val(selectedRenstraId).trigger('change');
             loadPilarsForRenstra(selectedRenstraId, selectedPilarId);
         }
+
+            if (selectedKegiatanIds) {
+        var kegiatanIdArray = selectedKegiatanIds.split(',');
+        $('#kegiatanFilter').val(kegiatanIdArray).trigger('change');
+    }
         
+        if (selectedUnitIds) {
+            var unitIdArray = selectedUnitIds.split(',');
+            $('#unitFilter').val(unitIdArray).trigger('change');
+        }
+
         if (selectedPilarId) {
             $('#pilarFilter').val(selectedPilarId).trigger('change');
             loadIsusForPilar(selectedPilarId, selectedIsuId);
@@ -540,7 +579,48 @@
 
         loadTreeData();
         
-        // Handle filter changes
+        $('#unitFilter').on('change', function() {
+            var unitIDs = $(this).val();
+            
+            // Store selected Unit IDs in global variable and cookie
+            selectedUnitIds = unitIDs ? unitIDs.join(',') : '';
+            
+            // If units are selected, store them
+            if (unitIDs && unitIDs.length > 0) {
+                setCookie('selected_units', selectedUnitIds, 30);
+                updateUrlParameter('unitID', selectedUnitIds);
+            } else {
+                // Clear selections if units are cleared
+                eraseCookie('selected_units');
+                updateUrlParameter('unitID', null);
+            }
+            
+            // Reload TreeTable with unit filter
+            isFiltering = true;
+            loadTreeData();
+        });
+
+            $('#kegiatanFilter').on('change', function() {
+        var kegiatanIDs = $(this).val();
+        
+        // Store selected Kegiatan IDs in global variable and cookie
+        selectedKegiatanIds = kegiatanIDs ? kegiatanIDs.join(',') : '';
+        
+        // If kegiatan IDs are selected, store them
+        if (kegiatanIDs && kegiatanIDs.length > 0) {
+            setCookie('selected_kegiatan_ids', selectedKegiatanIds, 30);
+            updateUrlParameter('kegiatanID', selectedKegiatanIds);
+        } else {
+            // Clear selections if kegiatan IDs are cleared
+            eraseCookie('selected_kegiatan_ids');
+            updateUrlParameter('kegiatanID', null);
+        }
+        
+        // Reload TreeTable with kegiatan ID filter
+        isFiltering = true;
+        loadTreeData();
+    });
+                // Handle filter changes
         $('#renstraFilter').on('change', function() {
             var renstraID = $(this).val();
             
@@ -934,62 +1014,7 @@
             });
         });
 
-          $(document).on('click', '.ajukan-tor-kegiatan', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            var kegiatanId = $(this).data('id');
-            var updateUrl = "{{ url('api/kegiatan') }}/" + kegiatanId + "/update-status";
-            
-            // Show confirmation dialog
-            Swal.fire({
-                title: 'Ajukan TOR Kegiatan?',
-                text: "Apakah Anda yakin ingin mengajukan TOR untuk kegiatan ini?",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, Ajukan!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Perform AJAX update
-                    $.ajax({
-                        url: updateUrl,
-                        type: 'POST',
-                        data: {
-                            _token: "{{ csrf_token() }}",
-                            status: "PT",
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                // Show success message
-                                Swal.fire({
-                                    title: 'Berhasil!',
-                                    text: response.message || 'Kegiatan berhasil diajukan.',
-                                    icon: 'success',
-                                    confirmButtonColor: '#3085d6',
-                                    confirmButtonText: 'OK'
-                                });
-                                
-                                // Reload tree data to update the UI
-                                loadTreeData();
-                            } else {
-                                // Show error message
-                                showAlert('danger', response.message || 'Gagal mengajukan kegiatan');
-                            }
-                        },
-                        error: function(xhr) {
-                            // Handle error response
-                            var message = 'Terjadi kesalahan';
-                            if (xhr.responseJSON && xhr.responseJSON.message) {
-                                message = xhr.responseJSON.message;
-                            }
-                            showAlert('danger', message);
-                        }
-                    });
-                }
-            });
-        });
+        
         
         // Add this code inside the existing $(document).ready function, after the existing event handlers
 
@@ -1043,7 +1068,7 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
                 }
                 
                 // Show/hide tanggal pencairan container based on status
-                if (selectedStatus === 'TP') {
+                if (selectedStatus === 'TP' || selectedStatus === 'YT') {
                     $('#tanggal-pencairan-container').show();
                 } else {
                     $('#tanggal-pencairan-container').hide();
@@ -1057,7 +1082,7 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
             var tanggalPencairan = null;
             
             // Get tanggal pencairan if status is TP
-            if (status === 'TP') {
+            if (status === 'TP' || status === 'YT') {
                 tanggalPencairan = $('#tanggal_pencairan').val();
                 if (!tanggalPencairan) {
                     Swal.fire({
@@ -1556,6 +1581,8 @@ $(document).on('click', '.update-status-rab', function(e) {
             isuID: selectedIsuId,
             programPengembanganID: selectedProgramPengembanganId,
             programRektorID: selectedProgramRektorId,
+            unitID: selectedUnitIds,
+            kegiatanID: selectedKegiatanIds,
             format: 'tree'
         };
         
@@ -1684,13 +1711,7 @@ $(document).on('click', '.update-status-rab', function(e) {
                         actions = '<div class="action-btn-group">'; 
                            // Check if user is super user
                             if ("{{ auth()->user()->isSuperUser() }}") {
-                                  if (['Y', 'NT', 'RT', 'TT'].includes(item.status)) {
-                                actions += 
-                                    '<button data-toggle="tooltip" title="Ajukan TOR Kegiatan" class="btn btn-success btn-square btn-sm ajukan-tor-kegiatan" ' +
-                                    'data-id="' + kegiatanId + '">' +
-                                        '<i class="fas fa-paper-plane"></i>' +
-                                    '</button> ';
-                            }
+                        
                                 // For super users, only show view and update status buttons
                                 actions += 
                                     '<button class="btn btn-info btn-square btn-sm load-modal" ' +
@@ -1704,13 +1725,7 @@ $(document).on('click', '.update-status-rab', function(e) {
                                     '</button>';
                             }else if ("{{ auth()->user()->isAdmin() }}") {
         // For admin users, show all buttons
-        if (['Y', 'NT', 'RT', 'TT'].includes(item.status)) {
-            actions += 
-                '<button data-toggle="tooltip" title="Ajukan TOR Kegiatan" class="btn btn-success btn-square btn-sm ajukan-tor-kegiatan" ' +
-                'data-id="' + kegiatanId + '">' +
-                    '<i class="fas fa-paper-plane"></i>' +
-                '</button> ';
-        }
+      
         
         actions += '<button class="btn btn-primary btn-square btn-sm load-modal" ' +
             'data-url="' + "{{ route('sub-kegiatans.create') }}?kegiatanID=" + kegiatanId + '" ' +
