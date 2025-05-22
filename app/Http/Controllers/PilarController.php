@@ -395,12 +395,13 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                         }
                         
                         // Check if kegiatan is approved (Y or YT)
-                        $isApproved = in_array($kegiatan->Status, ['Y', 'YT']);
+                        $isKegiatan = in_array($kegiatan->Status, ['Y', 'YT', 'NT', 'RT', 'TT', 'TP','PT', 'P']);
+                        $isApproved = in_array($kegiatan->Status, ['Y', 'YT',]);
                         $isTor = in_array($kegiatan->Status, ['Y', 'NT', 'RT', 'TT']);
                         
                         $ajukanButtonKegiatan = '';
-                        if (!$isApproved && $kegiatan->Status != 'P') {
-                            $ajukanButton = '
+                        if (!$isKegiatan) {
+                            $ajukanButtonKegiatan = '
                                 <button data-toggle="tooltip" title="Ajukan Kegiatan" class="btn btn-primary btn-square btn-sm ajukan-kegiatan" 
                                     data-id="' . $kegiatan->KegiatanID . '">
                                     <i class="fas fa-paper-plane"></i>
@@ -418,9 +419,9 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                         
                         // Determine actions based on approval status
                         $kegiatanActions = '';
-                        if ($isApproved) {
+                        if ($isApproved ) {
                             // Only show view button if approved
-                            $kegiatanActions = '
+                            $kegiatanActions = $ajukanButtonTorKegiatan . '
                                 <button data-toggle="tooltip" title="Lihat Detail Kegiatan" class="btn btn-info btn-square btn-sm load-modal" 
                                     data-url="' . route('kegiatans.show', $kegiatan->KegiatanID) . '" 
                                     data-title="Detail Kegiatan">
@@ -428,7 +429,7 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                                 </button>';
                         } else {
                             // Show all buttons if not approved
-                            $kegiatanActions = $ajukanButton . '
+                            $kegiatanActions = $ajukanButtonKegiatan . $ajukanButtonTorKegiatan . '
                                 <button data-toggle="tooltip" title="Tambah Sub Kegiatan" class="btn btn-primary btn-square btn-sm load-modal" 
                                     data-url="' . route('sub-kegiatans.create') . '?kegiatanID=' . $kegiatan->KegiatanID . '" 
                                     data-title="Tambah Sub Kegiatan">
