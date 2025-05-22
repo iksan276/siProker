@@ -1033,7 +1033,18 @@ class KegiatanController extends Controller
             $kegiatan->Status = $request->Status ?? $kegiatan->Status; // Keep existing status if not provided
             $kegiatan->DEdited = now();
             $kegiatan->UEdited = Auth::id();
+             $old = Kegiatan::findOrFail($kegiatan->KegiatanID);
             $kegiatan->save();
+             // Add log entry when feedback is changed
+                if (isset($request->Feedback) && $request->Feedback !== $old->Feedback) {
+                    $requestLog = new \App\Models\Request();
+                    $requestLog->KegiatanID = $kegiatan->KegiatanID;
+                    $requestLog->Feedback = $request->Feedback;
+                    $requestLog->DCreated = now();
+                    $requestLog->UCreated = Auth::id();
+                    $requestLog->save();
+                }
+        
             
             // Process Sub Kegiatans
             if ($request->has_sub_kegiatan === 'yes') {
@@ -1052,7 +1063,18 @@ class KegiatanController extends Controller
                             $subKegiatan->Status = $subKegiatanData['Status'] ?? 'N';
                             $subKegiatan->DEdited = now();
                             $subKegiatan->UEdited = Auth::id();
+                             $old = SubKegiatan::findOrFail($subKegiatan->SubKegiatanID);
                             $subKegiatan->save();
+
+                               if (isset($subKegiatanData['Feedback']) && $old->Feedback !== $subKegiatanData['Feedback']) {
+                            $requestLog = new \App\Models\Request();
+                            $requestLog->SubKegiatanID = $subKegiatan->SubKegiatanID;
+                            $requestLog->Feedback = $subKegiatanData['Feedback'];
+                            $requestLog->DCreated = now();
+                            $requestLog->UCreated = Auth::id();
+                            $requestLog->save();
+                        }
+                        
                             
                             // Handle existing RABs for this sub kegiatan
                             if (isset($subKegiatanData['existing_rabs']) && is_array($subKegiatanData['existing_rabs'])) {
@@ -1070,7 +1092,18 @@ class KegiatanController extends Controller
                                         $rab->Status = $rabData['Status'] ?? 'N';
                                         $rab->DEdited = now();
                                         $rab->UEdited = Auth::id();
+                                         $old = RAB::findOrFail($rab->RABID);
                                         $rab->save();
+
+                                          // Add log entry when feedback is changed for RAB
+                                    if (isset($rabData['Feedback']) && $old->Feedback !== $rabData['Feedback']) {
+                                        $requestLog = new \App\Models\Request();
+                                        $requestLog->RABID = $rab->RABID;
+                                        $requestLog->Feedback = $rabData['Feedback'];
+                                        $requestLog->DCreated = now();
+                                        $requestLog->UCreated = Auth::id();
+                                        $requestLog->save();
+                                    }
                                     }
                                 }
                             }
@@ -1093,6 +1126,15 @@ class KegiatanController extends Controller
                                     $rab->DCreated = now();
                                     $rab->UCreated = Auth::id();
                                     $rab->save();
+                                              // Add log entry when feedback is changed for RAB
+                                    if (isset($rabData['Feedback'])) {
+                                        $requestLog = new \App\Models\Request();
+                                        $requestLog->RABID = $rab->RABID;
+                                        $requestLog->Feedback = $rabData['Feedback'];
+                                        $requestLog->DCreated = now();
+                                        $requestLog->UCreated = Auth::id();
+                                        $requestLog->save();
+                                    }
                                 }
                             }
                         }
@@ -1115,6 +1157,14 @@ class KegiatanController extends Controller
                         $subKegiatan->DCreated = now();
                         $subKegiatan->UCreated = Auth::id();
                         $subKegiatan->save();
+                        if (isset($subKegiatanData['Feedback'])) {
+                            $requestLog = new \App\Models\Request();
+                            $requestLog->SubKegiatanID = $subKegiatan->SubKegiatanID;
+                            $requestLog->Feedback = $subKegiatanData['Feedback'];
+                            $requestLog->DCreated = now();
+                            $requestLog->UCreated = Auth::id();
+                            $requestLog->save();
+                        }
                         
                         // Process RABs for this new SubKegiatan if any
                         if (isset($subKegiatanData['rabs']) && is_array($subKegiatanData['rabs'])) {
@@ -1134,6 +1184,15 @@ class KegiatanController extends Controller
                                 $rab->DCreated = now();
                                 $rab->UCreated = Auth::id();
                                 $rab->save();
+
+                                   if (isset($rabData['Feedback'])) {
+                                    $requestLog = new \App\Models\Request();
+                                    $requestLog->RABID = $rab->RABID;
+                                    $requestLog->Feedback = $rabData['Feedback'];
+                                    $requestLog->DCreated = now();
+                                    $requestLog->UCreated = Auth::id();
+                                    $requestLog->save();
+                                }
                             }
                         }
                     }
@@ -1156,7 +1215,18 @@ class KegiatanController extends Controller
                         $rab->Status = $rabData['Status'] ?? 'N';
                         $rab->DEdited = now();
                         $rab->UEdited = Auth::id();
-                        $rab->save();
+                        $old = RAB::findOrFail($rab->RABID);
+                         $rab->save();
+
+                                          // Add log entry when feedback is changed for RAB
+                    if (isset($rabData['Feedback']) && $old->Feedback !== $rabData['Feedback']) {
+                        $requestLog = new \App\Models\Request();
+                        $requestLog->RABID = $rab->RABID;
+                        $requestLog->Feedback = $rabData['Feedback'];
+                        $requestLog->DCreated = now();
+                        $requestLog->UCreated = Auth::id();
+                        $requestLog->save();
+                    }
                     }
                 }
             }
@@ -1179,6 +1249,14 @@ class KegiatanController extends Controller
                     $rab->DCreated = now();
                     $rab->UCreated = Auth::id();
                     $rab->save();
+                      if (isset($rabData['Feedback'])) {
+                                    $requestLog = new \App\Models\Request();
+                                    $requestLog->RABID = $rab->RABID;
+                                    $requestLog->Feedback = $rabData['Feedback'];
+                                    $requestLog->DCreated = now();
+                                    $requestLog->UCreated = Auth::id();
+                                    $requestLog->save();
+                 }
                 }
             }
             

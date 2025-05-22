@@ -63,6 +63,9 @@ Route::middleware('auth')->prefix('api')->group(function() {
 Route::get('/auth/oauth_google', [OAuthGoogleController::class, 'authenticate']);
 
 Route::middleware('auth')->group(function () {
+    // Add this to the middleware('auth') group
+    Route::resource('requests', RequestController::class);
+
     Route::resource('sub-kegiatans', SubKegiatanController::class);
     
     // RAB routes

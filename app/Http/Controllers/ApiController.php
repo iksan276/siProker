@@ -186,6 +186,9 @@ public function getSubKegiatanDetails($id)
 /**
  * Update status for a Kegiatan
  */
+/**
+ * Update status for a Kegiatan
+ */
 public function updateKegiatanStatus(Request $request, $id)
 {
     // Validate request
@@ -197,6 +200,7 @@ public function updateKegiatanStatus(Request $request, $id)
 
     try {
         $kegiatan = Kegiatan::findOrFail($id);
+        $oldFeedback = $kegiatan->Feedback; // Store old feedback for comparison
         $kegiatan->Status = $request->status;
         
         // Only update feedback if provided
@@ -213,6 +217,16 @@ public function updateKegiatanStatus(Request $request, $id)
         $kegiatan->UEdited = Auth::id();
         $kegiatan->save();
 
+        // Log the feedback change in the Request table if feedback was changed
+        if ($request->has('feedback') && $oldFeedback !== $request->feedback) {
+            $requestLog = new \App\Models\Request();
+            $requestLog->KegiatanID = $kegiatan->KegiatanID;
+            $requestLog->Feedback = $request->feedback;
+            $requestLog->DCreated = now();
+            $requestLog->UCreated = Auth::id();
+            $requestLog->save();
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Status kegiatan berhasil diupdate'
@@ -224,7 +238,6 @@ public function updateKegiatanStatus(Request $request, $id)
         ], 500);
     }
 }
-
 
 /**
  * Update status for a SubKegiatan
@@ -239,6 +252,7 @@ public function updateSubKegiatanStatus(Request $request, $id)
 
     try {
         $subKegiatan = SubKegiatan::findOrFail($id);
+        $oldFeedback = $subKegiatan->Feedback; // Store old feedback for comparison
         $subKegiatan->Status = $request->status;
         
         // Only update feedback if provided
@@ -249,6 +263,16 @@ public function updateSubKegiatanStatus(Request $request, $id)
         $subKegiatan->DEdited = now();
         $subKegiatan->UEdited = Auth::id();
         $subKegiatan->save();
+
+        // Log the feedback change in the Request table if feedback was changed
+        if ($request->has('feedback') && $oldFeedback !== $request->feedback) {
+            $requestLog = new \App\Models\Request();
+            $requestLog->SubKegiatanID = $subKegiatan->SubKegiatanID;
+            $requestLog->Feedback = $request->feedback;
+            $requestLog->DCreated = now();
+            $requestLog->UCreated = Auth::id();
+            $requestLog->save();
+        }
 
         return response()->json([
             'success' => true,
@@ -275,6 +299,7 @@ public function updateRabStatus(Request $request, $id)
 
     try {
         $rab = RAB::findOrFail($id);
+        $oldFeedback = $rab->Feedback; // Store old feedback for comparison
         $rab->Status = $request->status;
         
         // Only update feedback if provided
@@ -285,6 +310,16 @@ public function updateRabStatus(Request $request, $id)
         $rab->DEdited = now();
         $rab->UEdited = Auth::id();
         $rab->save();
+
+        // Log the feedback change in the Request table if feedback was changed
+        if ($request->has('feedback') && $oldFeedback !== $request->feedback) {
+            $requestLog = new \App\Models\Request();
+            $requestLog->RABID = $rab->RABID;
+            $requestLog->Feedback = $request->feedback;
+            $requestLog->DCreated = now();
+            $requestLog->UCreated = Auth::id();
+            $requestLog->save();
+        }
 
         return response()->json([
             'success' => true,

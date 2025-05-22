@@ -132,8 +132,16 @@ class SubKegiatanController extends Controller
         $subKegiatan->Status = isset($request->Status) ? $request->Status : 'N';
         $subKegiatan->DEdited = now();
         $subKegiatan->UEdited = Auth::id();
+        $old = SubKegiatan::findOrFail($subKegiatan->SubKegiatanID);
         $subKegiatan->save();
-
+        if (isset($request->Feedback) && $old->Feedback !== $request->Feedback) {
+                $requestLog = new \App\Models\Request();
+                $requestLog->SubKegiatanID = $subKegiatan->SubKegiatanID;
+                $requestLog->Feedback = $request->Feedback;
+                $requestLog->DCreated = now();
+                $requestLog->UCreated = Auth::id();
+                $requestLog->save();
+            }
         if ($request->ajax()) {
             return response()->json(['success' => true, 'message' => 'Sub Kegiatan berhasil diupdate', 'subKegiatan' => $subKegiatan]);
         }

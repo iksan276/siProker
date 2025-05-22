@@ -1703,7 +1703,7 @@ $(document).on('click', '.update-status-rab', function(e) {
                     
                     // For RAB nodes, show details in separate columns
                   if (item.type === 'rab') {
-                    var nameText = indentPrefix + '<span class="node-name" data-html="true" data-toggle="tooltip" title="Nama">' + item.nama + '</span>' + "&nbsp;&nbsp;" + expander;
+                    var nameText = indentPrefix + '<span class="node-name" data-html="true">' + item.nama + '</span>' + "&nbsp;&nbsp;" + expander;
                     row.append('<td>' + nameText + '</td>');
                     row.append('<td class="text-center"><span data-toggle="tooltip" title="Volume">' + (item.volume || '') + '</span></td>');
                     row.append('<td class="text-center"><span data-toggle="tooltip" title="Satuan">' + (item.satuan || '') + '</span></td>');
@@ -1711,7 +1711,7 @@ $(document).on('click', '.update-status-rab', function(e) {
                     row.append('<td class="text-right"><span data-toggle="tooltip" title="Jumlah">' + (item.jumlah || '') + '</span></td>');
                 } else {
                     // For kegiatan and subkegiatan, span across all detail columns
-                    var nameText = indentPrefix + '<span class="node-name" data-html="true" data-toggle="tooltip" title="Nama">' + item.nama + '</span>' + "&nbsp;&nbsp;" + expander;
+                    var nameText = indentPrefix + '<span class="node-name" data-html="true">' + item.nama + '</span>' + "&nbsp;&nbsp;" + expander;
                     row.append('<td colspan="5">' + nameText + '</td>');
                 }
 

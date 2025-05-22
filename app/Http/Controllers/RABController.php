@@ -207,8 +207,18 @@ class RABController extends Controller
         $rab->Status = isset($request->Status) ? $request->Status : 'N';
         $rab->DEdited = now();
         $rab->UEdited = Auth::id();
+        $old = RAB::findOrFail($rab->RABID);
         $rab->save();
-    
+      
+        if (isset($request->Feedback) && $old->Feedback !== $request->Feedback) {
+            $requestLog = new \App\Models\Request();
+            $requestLog->RABID = $rab->RABID;
+            $requestLog->Feedback = $request->Feedback;
+            $requestLog->DCreated = now();
+            $requestLog->UCreated = Auth::id();
+            $requestLog->save();
+        }
+
         if ($request->ajax()) {
             return response()->json(['success' => true, 'message' => 'RAB berhasil diupdate', 'rab' => $rab]);
         }
