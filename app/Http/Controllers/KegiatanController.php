@@ -41,7 +41,7 @@ class KegiatanController extends Controller
     $programRektors = ProgramRektor::where('NA', 'N')->get();
     
         // Get all Kegiatan IDs for the filter dropdown
-    $allKegiatanIds = Kegiatan::pluck('KegiatanID')->toArray();
+    $allKegiatan = Kegiatan::select('KegiatanID', 'Nama')->get();
     
     // Get units from API for the filter
    // In the index method of KegiatanController.php
@@ -252,7 +252,7 @@ class KegiatanController extends Controller
             'programPengembangans', 
             'programRektors',
             'units',
-            'allKegiatanIds',
+            'allKegiatan',
             'selectedRenstra', 
             'selectedPilar', 
             'selectedIsu', 
@@ -316,7 +316,7 @@ class KegiatanController extends Controller
         'selectedRenstra', 
         'selectedPilar', 
         'selectedIsu', 
-        'allKegiatanIds',
+        'allKegiatan',
         'selectedProgramPengembangan', 
         'selectedProgramRektor',
         'selectedUnit',

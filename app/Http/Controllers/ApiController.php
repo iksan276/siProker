@@ -189,8 +189,7 @@ public function getSubKegiatanDetails($id)
 /**
  * Update status for a Kegiatan
  */
-public function updateKegiatanStatus(Request $request, $id)
-{
+public function updateKegiatanStatus(Request $request, $id){
     // Validate request
     $request->validate([
         'status' => 'required|in:N,Y,T,R,P,PT,YT,TT,RT,TP',
@@ -226,6 +225,17 @@ public function updateKegiatanStatus(Request $request, $id)
             $requestLog->DCreated = now();
             $requestLog->UCreated = Auth::id();
             $requestLog->save();
+        }
+
+        // If status is not rejected (T or TT), update sub kegiatan status as well
+        if (!in_array($request->status, ['T', 'TT'])) {
+            SubKegiatan::where('KegiatanID', $kegiatan->KegiatanID)
+                ->whereNotIn('Status', ['T', 'TT']) // Don't update already rejected sub kegiatan
+                ->update([
+                    'Status' => $request->status,
+                    'DEdited' => now(),
+                    'UEdited' => Auth::id()
+                ]);
         }
 
         // If approve_all_rabs is true, update all RABs directly under this kegiatan
@@ -269,6 +279,7 @@ public function updateKegiatanStatus(Request $request, $id)
         ], 500);
     }
 }
+
 
 /**
  * Update status for a SubKegiatan

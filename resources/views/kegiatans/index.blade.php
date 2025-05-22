@@ -124,17 +124,18 @@
     </div>
 
             <!-- Add this after the Unit filter dropdown -->
-        <div class="form-group mb-5">
+                <div class="form-group mb-5">
             <select id="kegiatanFilter" class="form-control select2-filter" multiple>
-                <option value="">-- Pilih ID Kegiatan --</option>
-                @foreach($allKegiatanIds as $kegiatanId)
-                    <option value="{{ $kegiatanId }}" 
-                        {{ isset($selectedKegiatanIds) && in_array($kegiatanId, explode(',', $selectedKegiatanIds)) ? 'selected' : '' }}>
-                        {{ $kegiatanId }}
+                <option value="">-- Pilih Kegiatan --</option>
+                @foreach($allKegiatan as $kegiatan)
+                    <option value="{{ $kegiatan->KegiatanID }}"
+                        {{ isset($selectedKegiatanIds) && in_array($kegiatan->id, explode(',', $selectedKegiatanIds)) ? 'selected' : '' }}>
+                        {{ $kegiatan->Nama }}
                     </option>
                 @endforeach
             </select>
         </div>
+
 
 
 
