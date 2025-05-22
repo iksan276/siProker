@@ -145,7 +145,11 @@
                 <thead>
                     <tr>
                         <th class="text-center" style="width: 5%;">No</th>
-                        <th class="text-center">Nama</th>
+                        <th class="text-center" colspan="5">Nama</th>
+                        <th class="text-center"></th>
+                        <th class="text-center"></th>
+                        <th class="text-center"></th>
+                        <th class="text-center"></th>
                         <th class="text-center" style="width: 20%;">Actions</th>
                     </tr>
                 </thead>
@@ -1596,8 +1600,9 @@ $(document).on('click', '.update-status-rab', function(e) {
             },
             success: function(response) {
                 // Clear container
-                $('#tree-grid-container').html('<table id="tree-grid" class="table table-bordered"><thead><tr><th class="text-center" style="width: 5%;">No</th><th class="text-center">Nama</th><th class="text-center" style="width: 20%;">Actions</th></tr></thead><tbody></tbody></table>');
-                
+              // Clear container
+                    $('#tree-grid-container').html('<table id="tree-grid" class="table table-bordered"><thead><tr><th class="text-center" style="width: 5%;">No</th><th class="text-center" colspan="5">Nama</th><th class="text-center" style="width: 20%;">Actions</th></tr></thead><tbody></tbody></table>');
+
                 $('#tree-grid th').addClass('text-dark');
                 // Add rows to the table
                 var treeData = response.data || [];
@@ -1696,10 +1701,22 @@ $(document).on('click', '.update-status-rab', function(e) {
                     // Create tooltip text that includes both the original tooltip and the node type information
                     //var tooltipText = getNodeTypeTooltip(item.type);
                     
-                    nameText = indentPrefix + '<span class="node-name" data-html="true">' + item.nama + '</span>';
-                    
-                    var nameCell = '<td>' + nameText + "&nbsp;&nbsp;" + expander + '</td>';
-                    row.append(nameCell);
+                    // For RAB nodes, show details in separate columns
+                  if (item.type === 'rab') {
+                    var nameText = indentPrefix + '<span class="node-name" data-html="true" data-toggle="tooltip" title="Nama">' + item.nama + '</span>' + "&nbsp;&nbsp;" + expander;
+                    row.append('<td>' + nameText + '</td>');
+                    row.append('<td class="text-center"><span data-toggle="tooltip" title="Volume">' + (item.volume || '') + '</span></td>');
+                    row.append('<td class="text-center"><span data-toggle="tooltip" title="Satuan">' + (item.satuan || '') + '</span></td>');
+                    row.append('<td class="text-right"><span data-toggle="tooltip" title="Harga Satuan">' + (item.harga_satuan || '') + '</span></td>');
+                    row.append('<td class="text-right"><span data-toggle="tooltip" title="Jumlah">' + (item.jumlah || '') + '</span></td>');
+                } else {
+                    // For kegiatan and subkegiatan, span across all detail columns
+                    var nameText = indentPrefix + '<span class="node-name" data-html="true" data-toggle="tooltip" title="Nama">' + item.nama + '</span>' + "&nbsp;&nbsp;" + expander;
+                    row.append('<td colspan="5">' + nameText + '</td>');
+                }
+
+
+            
                     
                     // Add action buttons based on node type
                     var actions = '';
