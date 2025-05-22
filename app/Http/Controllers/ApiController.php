@@ -208,7 +208,7 @@ public function updateKegiatanStatus(Request $request, $id)
             $kegiatan->Feedback = $request->feedback;
         }
         
-        // Update tanggal pencairan if status is TP (Tunda Pencairan)
+        // Update tanggal pencairan if status is TP (Tunda Pencairan) or YT
         if (($request->status === 'TP' || $request->status === 'YT') && $request->has('tanggal_pencairan')) {
             $kegiatan->TanggalPencairan = $request->tanggal_pencairan;
         }
@@ -217,8 +217,8 @@ public function updateKegiatanStatus(Request $request, $id)
         $kegiatan->UEdited = Auth::id();
         $kegiatan->save();
 
-        // Log the feedback change in the Request table if feedback was changed
-        if ($request->has('feedback') && $oldFeedback !== $request->feedback) {
+        // Log the feedback change in the Request table if feedback was changed and not empty
+        if ($request->has('feedback') && $oldFeedback !== $request->feedback && !empty($request->feedback)) {
             $requestLog = new \App\Models\Request();
             $requestLog->KegiatanID = $kegiatan->KegiatanID;
             $requestLog->Feedback = $request->feedback;
@@ -264,8 +264,8 @@ public function updateSubKegiatanStatus(Request $request, $id)
         $subKegiatan->UEdited = Auth::id();
         $subKegiatan->save();
 
-        // Log the feedback change in the Request table if feedback was changed
-        if ($request->has('feedback') && $oldFeedback !== $request->feedback) {
+        // Log the feedback change in the Request table if feedback was changed and not empty
+        if ($request->has('feedback') && $oldFeedback !== $request->feedback && !empty($request->feedback)) {
             $requestLog = new \App\Models\Request();
             $requestLog->SubKegiatanID = $subKegiatan->SubKegiatanID;
             $requestLog->Feedback = $request->feedback;
@@ -311,8 +311,8 @@ public function updateRabStatus(Request $request, $id)
         $rab->UEdited = Auth::id();
         $rab->save();
 
-        // Log the feedback change in the Request table if feedback was changed
-        if ($request->has('feedback') && $oldFeedback !== $request->feedback) {
+        // Log the feedback change in the Request table if feedback was changed and not empty
+        if ($request->has('feedback') && $oldFeedback !== $request->feedback && !empty($request->feedback)) {
             $requestLog = new \App\Models\Request();
             $requestLog->RABID = $rab->RABID;
             $requestLog->Feedback = $request->feedback;
@@ -332,6 +332,7 @@ public function updateRabStatus(Request $request, $id)
         ], 500);
     }
 }
+
 
 
 }
