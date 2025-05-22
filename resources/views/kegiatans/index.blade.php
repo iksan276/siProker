@@ -296,6 +296,19 @@
         background-color: #e3e6f0;
         margin: 0 5px;
     }
+
+    tr.rab-header td {
+        font-weight: bold;
+        border-bottom: 2px solid #dee2e6;
+        padding-top: 15px;
+        color: #4e73df;
+    }
+
+   
+    tr.rab-header + tr.node-rab {
+        border-top: 1px solid #e3e6f0;
+    }
+
 </style>
 @endpush
 
@@ -1891,6 +1904,57 @@ $(document).on('click', '.update-status-rab', function(e) {
                     tableBody.append(row);
                 });
                 
+                // In the loadTreeData() function, modify the code that processes the tree data
+
+// Find the section where you're adding rows to the table (around line 1000-1100)
+// After the first pass that adds all rows, add a second pass to insert header rows
+
+// Add this code after the first treeData.forEach loop that creates all the rows:
+
+// Second pass: add header rows for RAB sections
+var tableRows = $('#tree-grid tbody tr');
+var insertedHeaders = {}; // Track where we've already inserted headers
+
+tableRows.each(function(index) {
+    var row = $(this);
+    var nodeType = row.attr('data-node-type');
+    var nodeId = row.attr('data-node-id');
+    var parentId = row.attr('data-parent');
+    
+    // If this is a RAB row and we haven't added a header before it for this parent
+    if (nodeType === 'rab' && !insertedHeaders[parentId]) {
+        // Create a header row
+        var headerRow = $('<tr class="rab-header"></tr>');
+        headerRow.css('background-color', 'rgba(0, 0, 0, 0.05)');
+        
+        // Add header cells
+        headerRow.append('<th class="text-center"></th>');
+        headerRow.append('<th class="text-center">Nama</th>');
+        headerRow.append('<th class="text-center">Volume</th>');
+        headerRow.append('<th class="text-center">Satuan</th>');
+        headerRow.append('<th class="text-center">Harga Satuan</th>');
+        headerRow.append('<th class="text-center">Jumlah</th>');
+        headerRow.append('<th class="text-center"></th>');
+        
+        // Set data attributes to match parent for proper show/hide behavior
+        headerRow.attr('data-parent', parentId);
+        headerRow.attr('data-node-id', 'header_' + parentId);
+        headerRow.attr('data-level', row.attr('data-level'));
+        headerRow.addClass('child-node');
+        
+        // Initially hide if parent is collapsed
+        if (!expandedNodes[parentId]) {
+            headerRow.hide();
+        }
+        
+        // Insert header before this row
+        row.before(headerRow);
+        
+        // Mark this parent as having a header
+        insertedHeaders[parentId] = true;
+    }
+});
+
                 // Initialize tooltips
                 initTooltips();
                 
@@ -1954,14 +2018,17 @@ $(document).on('click', '.update-status-rab', function(e) {
         $('tr[data-parent="' + nodeId + '"]').show();
     }
     
-    function collapseNode(nodeId) {
+        function collapseNode(nodeId) {
         // First, recursively collapse all descendants
         $('tr[data-parent="' + nodeId + '"]').each(function() {
             var childId = $(this).data('node-id');
-            collapseNode(childId);
-            
-            // Remove from expanded nodes
-            delete expandedNodes[childId];
+            // Skip header rows when recursively collapsing
+            if (!childId.toString().startsWith('header_')) {
+                collapseNode(childId);
+                
+                // Remove from expanded nodes
+                delete expandedNodes[childId];
+            }
         });
         
         // Then hide direct children
