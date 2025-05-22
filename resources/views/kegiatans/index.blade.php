@@ -1038,6 +1038,7 @@
 
 // Handle status update for kegiatan
 // Handle status update for kegiatan
+// Handle status update for kegiatan
 $(document).on('click', '.update-status-kegiatan', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -1071,18 +1072,24 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
             <div class="form-group text-left">
                 <div class="custom-control custom-checkbox">
                     <input type="checkbox" class="custom-control-input" id="approve_all_rabs">
-                    <label class="custom-control-label" for="approve_all_rabs">Setujui semua RAB</label>
+                    <label class="custom-control-label" for="approve_all_rabs">Semua RAB <span id="status-text">disetujui</span></label>
                 </div>
-                <small class="form-text text-muted">Jika dicentang, semua RAB kegiatan dan RAB sub kegiatan yang tidak ditolak akan mengikuti status ini.</small>
+                <small class="form-text text-muted">Jika dicentang, semua RAB kegiatan dan RAB sub kegiatan yang status subkegiatannya tidak ditolak akan berubah menjadi status <b id="status-description">Menunggu</b>.</small>
             </div>
         `,
         showCancelButton: true,
         confirmButtonText: 'Update',
         cancelButtonText: 'Batal',
         didOpen: () => {
+            // Update status text based on initial selection
+            updateStatusText($('#status').val());
+            
             // Show feedback field when status is Ditolak or Revisi
             $('#status').on('change', function() {
                 var selectedStatus = $(this).val();
+                
+                // Update the status text in the checkbox label and description
+                updateStatusText(selectedStatus);
                 
                 // Show/hide feedback container based on status
                 if (selectedStatus === 'T' || selectedStatus === 'R' || 
@@ -1099,6 +1106,57 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
                     $('#tanggal-pencairan-container').hide();
                 }
             });
+            
+            // Function to update status text
+            function updateStatusText(status) {
+                let statusText = '';
+                let statusDescription = '';
+                
+                switch(status) {
+                    case 'N':
+                        statusText = 'menunggu';
+                        statusDescription = 'Menunggu';
+                        break;
+                    case 'Y':
+                        statusText = 'disetujui';
+                        statusDescription = 'Disetujui';
+                        break;
+                    case 'T':
+                        statusText = 'ditolak';
+                        statusDescription = 'Ditolak';
+                        break;
+                    case 'R':
+                        statusText = 'direvisi';
+                        statusDescription = 'Revisi';
+                        break;
+                    case 'PT':
+                        statusText = 'pengajuan TOR';
+                        statusDescription = 'Pengajuan TOR';
+                        break;
+                    case 'YT':
+                        statusText = 'pengajuan TOR disetujui';
+                        statusDescription = 'Pengajuan TOR Disetujui';
+                        break;
+                    case 'TT':
+                        statusText = 'pengajuan TOR ditolak';
+                        statusDescription = 'Pengajuan TOR Ditolak';
+                        break;
+                    case 'RT':
+                        statusText = 'pengajuan TOR direvisi';
+                        statusDescription = 'Pengajuan TOR direvisi';
+                        break;
+                    case 'TP':
+                        statusText = 'tunda pencairan';
+                        statusDescription = 'Tunda Pencairan';
+                        break;
+                    default:
+                        statusText = 'disetujui';
+                        statusDescription = 'Disetujui';
+                }
+                
+                $('#status-text').text(statusText);
+                $('#status-description').text(statusDescription);
+            }
         }
     }).then((result) => {
         if (result.isConfirmed) {
@@ -1160,7 +1218,6 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
     });
 });
 
-
 // Handle status update for sub kegiatan
 $(document).on('click', '.update-status-subkegiatan', function(e) {
     e.preventDefault();
@@ -1186,24 +1243,62 @@ $(document).on('click', '.update-status-subkegiatan', function(e) {
             <div class="form-group text-left">
                 <div class="custom-control custom-checkbox">
                     <input type="checkbox" class="custom-control-input" id="approve_all_rabs">
-                    <label class="custom-control-label" for="approve_all_rabs">Setujui semua RAB</label>
+                    <label class="custom-control-label" for="approve_all_rabs">Semua RAB <span id="status-text">disetujui</span></label>
                 </div>
-                <small class="form-text text-muted">Jika dicentang, semua RAB sub kegiatan ini akan mengikuti status ini.</small>
+                <small class="form-text text-muted">Jika dicentang, semua RAB sub kegiatan ini akan berubah menjadi status <b id="status-description">Menunggu</b>.</small>
             </div>
         `,
         showCancelButton: true,
         confirmButtonText: 'Update',
         cancelButtonText: 'Batal',
         didOpen: () => {
+            // Update status text based on initial selection
+            updateStatusText($('#status').val());
+            
             // Show feedback field when status is Ditolak or Revisi
             $('#status').on('change', function() {
                 var selectedStatus = $(this).val();
+                
+                // Update the status text in the checkbox label and description
+                updateStatusText(selectedStatus);
+                
                 if (selectedStatus === 'T' || selectedStatus === 'R') {
                     $('#feedback-container').show();
                 } else {
                     $('#feedback-container').hide();
                 }
             });
+            
+            // Function to update status text
+            function updateStatusText(status) {
+                let statusText = '';
+                let statusDescription = '';
+                
+                switch(status) {
+                    case 'N':
+                        statusText = 'menunggu';
+                        statusDescription = 'Menunggu';
+                        break;
+                    case 'Y':
+                        statusText = 'disetujui';
+                        statusDescription = 'Disetujui';
+                        break;
+                    case 'T':
+                        statusText = 'ditolak';
+                        statusDescription = 'Ditolak';
+                        break;
+                    case 'R':
+                        statusText = 'direvisi';
+                        statusDescription = 'Revisi';
+                        break;
+                    default:
+                        statusText = 'disetujui';
+                        statusDescription = 'Disetujui';
+                }
+                
+                $('#status-text').text(statusText);
+                $('#status-description').text(statusDescription);
+            }
         }
     }).then((result) => {
         if (result.isConfirmed) {
@@ -1232,7 +1327,7 @@ $(document).on('click', '.update-status-subkegiatan', function(e) {
                         });
                         
                         // Reload tree data to update the UI
-                                                loadTreeData();
+                        loadTreeData();
                     } else {
                         showAlert('danger', response.message || 'Gagal mengupdate status sub kegiatan');
                     }
