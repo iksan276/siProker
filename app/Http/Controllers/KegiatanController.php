@@ -316,9 +316,11 @@ class KegiatanController extends Controller
         'selectedRenstra', 
         'selectedPilar', 
         'selectedIsu', 
+        'allKegiatanIds',
         'selectedProgramPengembangan', 
         'selectedProgramRektor',
-        'selectedUnit'
+        'selectedUnit',
+        'selectedKegiatanIds'
     ));
 }
 
