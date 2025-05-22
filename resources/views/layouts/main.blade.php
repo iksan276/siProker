@@ -20,7 +20,82 @@
     <!-- Tambahkan TreeGrid CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-treegrid/0.2.0/css/jquery.treegrid.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-      <style>
+     
+     <style>
+    /* Enhanced Tooltip Styling */
+.fas.fa-info-circle.text-primary {
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.3s ease, color 0.3s ease;
+  position: relative;
+}
+
+.fas.fa-info-circle.text-primary:hover {
+  transform: scale(1.2);
+  color: #007bff !important;
+  animation: pulse 1.5s infinite;
+}
+
+/* Custom tooltip styling */
+.tooltip-inner {
+  max-width: 350px;
+  padding: 15px;
+  color: #fff;
+  background-color: rgba(33, 37, 41, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* Tooltip arrow styling */
+.tooltip .arrow::before {
+  border-top-color: rgba(33, 37, 41, 0.95);
+}
+
+/* Feedback history styling */
+.tooltip-inner span {
+  display: block;
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 5px;
+}
+
+.tooltip-inner ul {
+  margin: 0;
+  padding: 0;
+}
+
+.tooltip-inner li {
+  margin-bottom: 8px;
+  padding-left: 5px;
+  border-left: 3px solid #007bff;
+  list-style-type: none;
+}
+
+.tooltip-inner .text-muted {
+  font-size: 0.75rem;
+  color: #adb5bd !important;
+  margin-left: 5px;
+}
+
+/* Pulse animation for the icon */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+  }
+}
+
+</style>
+     <style>
       /* Apply dark text color to all text elements */
       body, p, h1, h2, h3, h4, h5, h6, input, select, textarea, 
     table, th, td, label, .card-title, .form-control {

@@ -863,56 +863,94 @@ class KegiatanController extends Controller
         }
     }
         
-           public function show($id)
-{
-    $kegiatan = Kegiatan::with([
-        'programRektor', 
-        'programRektor.programPengembangan', 
-        'programRektor.programPengembangan.isuStrategis', 
-        'programRektor.programPengembangan.isuStrategis.pilar',
-        'programRektor.programPengembangan.isuStrategis.pilar.renstra',
-        'createdBy', 
-        'editedBy',
-        'subKegiatans.rabs.satuanRelation',
-        'rabs.satuanRelation'
-    ])->findOrFail($id);
-    
-    // Get penanggung jawab name if available
-    $penanggungJawabName = '-';
-    if ($kegiatan->programRektor && $kegiatan->programRektor->PenanggungJawabID) {
-        // Get SSO code from session for API
-        $ssoCode = session('sso_code');
-        
-        if ($ssoCode) {
-            // Get unit data from API
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $ssoCode,
-            ])->get("https://webhook.itp.ac.id/api/units", [
-                'order_by' => 'Nama',
-                'sort' => 'asc',
-                'limit' => 100
-            ]);
-            
-            if ($response->successful()) {
-                $units = $response->json();
+            public function show($id)
+            {
+                $kegiatan = Kegiatan::with([
+                    'programRektor', 
+                    'programRektor.programPengembangan', 
+                    'programRektor.programPengembangan.isuStrategis', 
+                    'programRektor.programPengembangan.isuStrategis.pilar',
+                    'programRektor.programPengembangan.isuStrategis.pilar.renstra',
+                    'createdBy', 
+                    'editedBy',
+                    'subKegiatans.rabs.satuanRelation',
+                    'rabs.satuanRelation'
+                ])->findOrFail($id);
                 
-                // Find penanggung jawab name from API data
-                foreach ($units as $unit) {
-                    if (isset($unit['PosisiID']) && $unit['PosisiID'] == $kegiatan->programRektor->PenanggungJawabID) {
-                        $penanggungJawabName = $unit['Nama'];
-                        break;
+                // Get penanggung jawab name if available
+                $penanggungJawabName = '-';
+                if ($kegiatan->programRektor && $kegiatan->programRektor->PenanggungJawabID) {
+                    // Get SSO code from session for API
+                    $ssoCode = session('sso_code');
+                    
+                    if ($ssoCode) {
+                        // Get unit data from API
+                        $response = Http::withHeaders([
+                            'Authorization' => 'Bearer ' . $ssoCode,
+                        ])->get("https://webhook.itp.ac.id/api/units", [
+                            'order_by' => 'Nama',
+                            'sort' => 'asc',
+                            'limit' => 100
+                        ]);
+                        
+                        if ($response->successful()) {
+                            $units = $response->json();
+                            
+                            // Find penanggung jawab name from API data
+                            foreach ($units as $unit) {
+                                if (isset($unit['PosisiID']) && $unit['PosisiID'] == $kegiatan->programRektor->PenanggungJawabID) {
+                                    $penanggungJawabName = $unit['Nama'];
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
+                
+                // Get feedback history for kegiatan
+                $kegiatanFeedbackHistory = \App\Models\Request::where('KegiatanID', $id)
+                    ->orderBy('DCreated', 'asc')
+                    ->get();
+                
+                // Get feedback history for sub kegiatans
+                $subKegiatanIds = $kegiatan->subKegiatans->pluck('SubKegiatanID')->toArray();
+                $subKegiatanFeedbackHistory = \App\Models\Request::whereIn('SubKegiatanID', $subKegiatanIds)
+                    ->orderBy('DCreated', 'asc')
+                    ->get()
+                    ->groupBy('SubKegiatanID');
+                
+                // Get feedback history for RABs
+                $rabIds = $kegiatan->rabs->pluck('RABID')
+                    ->merge($kegiatan->subKegiatans->flatMap(function ($subKegiatan) {
+                        return $subKegiatan->rabs->pluck('RABID');
+                    }))
+                    ->toArray();
+                
+                $rabFeedbackHistory = \App\Models\Request::whereIn('RABID', $rabIds)
+                    ->orderBy('DCreated', 'asc')
+                    ->get()
+                    ->groupBy('RABID');
+                
+                // Pass the penanggung jawab name and feedback history to the view
+                if (request()->ajax()) {
+                    return view('kegiatans.show', compact(
+                        'kegiatan', 
+                        'penanggungJawabName', 
+                        'kegiatanFeedbackHistory', 
+                        'subKegiatanFeedbackHistory', 
+                        'rabFeedbackHistory'
+                    ))->render();
+                }
+                
+                return view('kegiatans.show', compact(
+                    'kegiatan', 
+                    'penanggungJawabName', 
+                    'kegiatanFeedbackHistory', 
+                    'subKegiatanFeedbackHistory', 
+                    'rabFeedbackHistory'
+                ));
             }
-        }
-    }
-    
-    // Pass the penanggung jawab name to the view
-    if (request()->ajax()) {
-        return view('kegiatans.show', compact('kegiatan', 'penanggungJawabName'))->render();
-    }
-    return view('kegiatans.show', compact('kegiatan', 'penanggungJawabName'));
-}
+
 
         
             public function edit($id)

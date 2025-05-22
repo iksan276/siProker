@@ -1,3 +1,4 @@
+
 <div class="table-responsive">
     <table class="table table-bordered">
         <tr>
@@ -69,13 +70,28 @@
             <td>{!! nl2br($kegiatan->RincianKegiatan) !!}</td>
         </tr>
      
-            <tr>
-                <th>Feedback</th>
-                <td>{!! nl2br($kegiatan->Feedback) !!}</td>
-            </tr>
-             <tr>
+        <tr>
+            <th>Feedback2</th>
+            <td>
+               
+                @if(isset($kegiatanFeedbackHistory) && $kegiatanFeedbackHistory->count() > 0)
+                
+                <i class="fas fa-info-circle text-primary ml-2 text-left"
+   data-toggle="tooltip"
+   data-html="true"
+   title="<div class='text-center'><span class='badge badge-primary'>Riwayat Feedback:</span><ul class='text-left' style='margin-top:5px;'>
+           @foreach($kegiatanFeedbackHistory as $history)
+               <li class='text-left'>{!! nl2br($history->Feedback) !!} <span class='text-muted'>[{{ \Carbon\Carbon::parse($history->DCreated)->format('d-m-Y H:i') }}]</span></li>
+           @endforeach
+       </ul></div>"></i>
+
+
+                @endif
+            </td>
+        </tr>
+        <tr>
             <th>Tanggal Pencairan</th>
-            <td>{{ \Carbon\Carbon::parse($kegiatan->TanggalPencairan)->format('d-m-Y') }}</td>
+            <td>{{ $kegiatan->TanggalPencairan ? \Carbon\Carbon::parse($kegiatan->TanggalPencairan)->format('d-m-Y') : '-' }}</td>
         </tr>
     </table>
 </div>
@@ -135,7 +151,21 @@
                     <td>{{ \Carbon\Carbon::parse($subKegiatan->JadwalMulai)->format('d-m-Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('d-m-Y') }}</td>
                     <td>{!! nl2br($subKegiatan->Catatan) !!}</td>
-                    <td>{!! nl2br($subKegiatan->Feedback) !!}</td>
+                    <td>
+                    
+                        
+                        @if(isset($subKegiatanFeedbackHistory) && isset($subKegiatanFeedbackHistory[$subKegiatan->SubKegiatanID]) && $subKegiatanFeedbackHistory[$subKegiatan->SubKegiatanID]->count() > 0)
+                            <i class="fas fa-info-circle text-primary ml-2 text-left" 
+                               data-toggle="tooltip" 
+                               data-html="true" 
+                               title="<div style='text-align:center'><span class='badge badge-primary'>Riwayat Feedback:</span><ul style='margin-top:5px;'>
+                                   @foreach($subKegiatanFeedbackHistory[$subKegiatan->SubKegiatanID] as $history)
+                                                <li class='text-left'>{!! nl2br($history->Feedback) !!} <span class='text-muted'>[{{ \Carbon\Carbon::parse($history->DCreated)->format('d-m-Y H:i') }}]</span></li>
+       
+                                   @endforeach
+                               </ul></div>"></i>
+                        @endif
+                    </td>
                     <td>{!! $subKegiatan->StatusLabel !!}</td>
                 </tr>
                 @if($subKegiatan->rabs->count() > 0)
@@ -152,7 +182,7 @@
                                         <th>Satuan</th>
                                         <th>Harga Satuan</th>
                                         <th>Jumlah</th>
-                                        <th>Feedback</th>
+                                                                            <th>Feedback</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -165,7 +195,21 @@
                                         <td>{{ $rab->satuanRelation->Nama ?? '' }}</td>
                                         <td class="text-right">{{ $rab->FormattedHargaSatuan }}</td>
                                         <td class="text-right">{{ $rab->FormattedJumlah }}</td>
-                                        <td>{!! nl2br($rab->Feedback) !!}</td>
+                                        <td>
+                                         
+                                            
+                                            @if(isset($rabFeedbackHistory) && isset($rabFeedbackHistory[$rab->RABID]) && $rabFeedbackHistory[$rab->RABID]->count() > 0)
+                                                <i class="fas fa-info-circle text-primary ml-2" 
+                                                   data-toggle="tooltip" 
+                                                   data-html="true" 
+                                                   title="<div style='text-align:center'><span class='badge badge-primary'>Riwayat Feedback:</span><ul style='margin-top:5px;'>
+                                                       @foreach($rabFeedbackHistory[$rab->RABID] as $history)
+                                                                    <li class='text-left'>{!! nl2br($history->Feedback) !!} <span class='text-muted'>[{{ \Carbon\Carbon::parse($history->DCreated)->format('d-m-Y H:i') }}]</span></li>
+       
+                                                       @endforeach
+                                                   </ul></div>"></i>
+                                            @endif
+                                        </td>
                                         <td>{!! $rab->StatusLabel !!}</td>
                                     </tr>
                                     @endforeach
@@ -214,7 +258,20 @@
                     <td>{{ $rab->satuanRelation->Nama ?? '' }}</td>
                     <td class="text-right">{{ $rab->FormattedHargaSatuan }}</td>
                     <td class="text-right">{{ $rab->FormattedJumlah }}</td>
-                    <td>{!! nl2br($rab->Feedback) !!}</td>
+                    <td>
+                     
+                        @if(isset($rabFeedbackHistory) && isset($rabFeedbackHistory[$rab->RABID]) && $rabFeedbackHistory[$rab->RABID]->count() > 0)
+                            <i class="fas fa-info-circle text-primary ml-2" 
+                               data-toggle="tooltip" 
+                               data-html="true" 
+                               title="<div style='text-align:center'><span class='badge badge-primary'>Riwayat Feedback:</span><ul style='margin-top:5px;'>
+                                   @foreach($rabFeedbackHistory[$rab->RABID] as $history)
+                                                <li class='text-left'>{!! nl2br($history->Feedback) !!} <span class='text-muted'>[{{ \Carbon\Carbon::parse($history->DCreated)->format('d-m-Y H:i') }}]</span></li>
+       
+                                   @endforeach
+                               </ul></div>"></i>
+                        @endif
+                    </td>
                     <td>{!! $rab->StatusLabel !!}</td>
                 </tr>
                 @endforeach
@@ -242,7 +299,10 @@
 </div>
 
 <script>
-     setTimeout(function() {
-            $('.alert').alert('close');
-        }, 10000000);
+    // Initialize tooltips
+
+    
+    setTimeout(function() {
+        $('.alert').alert('close');
+    }, 10000000);
 </script>
