@@ -467,8 +467,8 @@ class KegiatanController extends Controller
                             // Add RAB-specific columns
                             'volume' => number_format($rab->Volume, 0, ',', '.'),
                             'satuan' => $rab->satuanRelation ? $rab->satuanRelation->Nama : '-',
-                            'harga_satuan' => 'Rp ' . number_format($rab->HargaSatuan, 0, ',', '.'),
-                            'jumlah' => 'Rp ' . number_format($rab->Jumlah, 0, ',', '.')
+                            'harga_satuan' =>  number_format($rab->HargaSatuan, 0, ',', '.'),
+                            'jumlah' =>  number_format($rab->Jumlah, 0, ',', '.')
                         ];
                         
                         $treeData[] = $rabNode;
@@ -515,8 +515,8 @@ class KegiatanController extends Controller
                     // Add RAB-specific columns
                     'volume' => number_format($rab->Volume, 0, ',', '.'),
                     'satuan' => $rab->satuanRelation ? $rab->satuanRelation->Nama : '-',
-                    'harga_satuan' => 'Rp ' . number_format($rab->HargaSatuan, 0, ',', '.'),
-                    'jumlah' => 'Rp ' . number_format($rab->Jumlah, 0, ',', '.')
+                    'harga_satuan' =>  number_format($rab->HargaSatuan, 0, ',', '.'),
+                    'jumlah' =>  number_format($rab->Jumlah, 0, ',', '.')
                 ];
                 
                 $treeData[] = $rabNode;

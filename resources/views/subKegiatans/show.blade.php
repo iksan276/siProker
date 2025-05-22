@@ -96,28 +96,28 @@
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>No</th>
-                                <th>Komponen</th>
-                                <th>Volume</th>
-                                <th>Satuan</th>
-                                <th>Harga Satuan</th>
-                                <th>Jumlah</th>
-                                <th>Feedback</th>
-                                <th>Status</th>
+                                <th class="text-center">No</th>
+                                <th class="text-center">Komponen</th>
+                                <th class="text-center">Vol</th>
+                                <th class="text-center">Satuan</th>
+                                <th class="text-center">Harga Satuan (Rp)</th>
+                                <th class="text-center">Jumlah (Rp)</th>
+                                <th class="text-center">Feedback</th>
+                                <th class="text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             @php $total = 0; @endphp
                             @foreach($subKegiatan->rabs as $index => $rab)
                             <tr>
-                                <td>{{ $index + 1 }}</td>
+                                <td class="text-center">{{ $index + 1 }}</td>
                                 <td>{{ $rab->Komponen }}</td>
-                                <td>{{ number_format($rab->Volume, 0, ',', '.') }}</td>
-                                <td>{{ $rab->satuanRelation ? $rab->satuanRelation->Nama : 'N/A' }}</td>
-                                <td>Rp {{ number_format($rab->HargaSatuan, 0, ',', '.') }}</td>
-                                <td>Rp {{ number_format($rab->Jumlah, 0, ',', '.') }}</td>
-                                <td>{!! nl2br($rab->Feedback) !!}</td>
-                                <td>{!! $rab->status_label !!}</td>
+                                <td class="text-center">{{ number_format($rab->Volume, 0, ',', '.') }}</td>
+                                <td class="text-center">{{ $rab->satuanRelation ? $rab->satuanRelation->Nama : 'N/A' }}</td>
+                                <td class="text-center">{{ number_format($rab->HargaSatuan, 0, ',', '.') }}</td>
+                                <td class="text-center">{{ number_format($rab->Jumlah, 0, ',', '.') }}</td>
+                                <td class="text-center">{!! nl2br($rab->Feedback) !!}</td>
+                                <td class="text-center">{!! $rab->status_label !!}</td>
                             </tr>
                             @if($rab->Status == 'Y' || $rab->Status == 'N')
                                 @php $total += $rab->Jumlah; @endphp
@@ -126,7 +126,7 @@
                             @endforeach
                             <tr class="font-weight-bold">
                                 <td colspan="5" class="text-right">Total</td>
-                                <td>Rp {{ number_format($total, 0, ',', '.') }}</td>
+                                <td>{{ number_format($total, 0, ',', '.') }}</td>
                                 <td></td>
                                 <td></td>
                             </tr>

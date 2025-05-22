@@ -1952,8 +1952,8 @@ tableRows.each(function(index) {
         headerRow.append('<th class="text-center">Nama</th>');
         headerRow.append('<th class="text-center">Volume</th>');
         headerRow.append('<th class="text-center">Satuan</th>');
-        headerRow.append('<th class="text-center">Harga Satuan</th>');
-        headerRow.append('<th class="text-center">Jumlah</th>');
+        headerRow.append('<th class="text-center">Harga Satuan (Rp)</th>');
+        headerRow.append('<th class="text-center">Jumlah (Rp)</th>');
         headerRow.append('<th class="text-center"></th>');
         
         // Set data attributes to match parent for proper show/hide behavior

@@ -134,24 +134,24 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>No</th>
-                    <th>Nama</th>
-                    <th>Jadwal Mulai</th>
-                    <th>Jadwal Selesai</th>
-                    <th>Catatan</th>
-                    <th>Feedback</th>
-                    <th>Status</th>
+                    <th class="text-center">No</th>
+                    <th class="text-center">Nama</th>
+                    <th class="text-center">Jadwal Mulai</th>
+                    <th class="text-center">Jadwal Selesai</th>
+                    <th class="text-center">Catatan</th>
+                    <th class="text-center">Feedback</th>
+                    <th class="text-center">Status</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($kegiatan->subKegiatans as $index => $subKegiatan)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
+                    <td class="text-center">{{ $index + 1 }}</td>
                     <td>{!! nl2br($subKegiatan->Nama) !!}</td>
-                    <td>{{ \Carbon\Carbon::parse($subKegiatan->JadwalMulai)->format('d-m-Y') }}</td>
-                    <td>{{ \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('d-m-Y') }}</td>
+                    <td class="text-center">{{ \Carbon\Carbon::parse($subKegiatan->JadwalMulai)->format('d-m-Y') }}</td>
+                    <td class="text-center">{{ \Carbon\Carbon::parse($subKegiatan->JadwalSelesai)->format('d-m-Y') }}</td>
                     <td>{!! nl2br($subKegiatan->Catatan) !!}</td>
-                    <td>
+                    <td class="text-center">
                     
                         
                         @if(isset($subKegiatanFeedbackHistory) && isset($subKegiatanFeedbackHistory[$subKegiatan->SubKegiatanID]) && $subKegiatanFeedbackHistory[$subKegiatan->SubKegiatanID]->count() > 0)
@@ -176,26 +176,26 @@
                             <table class="table table-sm table-bordered">
                                 <thead class="thead-light">
                                     <tr>
-                                        <th>No</th>
-                                        <th>Komponen</th>
-                                        <th>Volume</th>
-                                        <th>Satuan</th>
-                                        <th>Harga Satuan</th>
-                                        <th>Jumlah</th>
-                                                                            <th>Feedback</th>
-                                        <th>Status</th>
+                                        <th class="text-center">No</th>
+                                        <th class="text-center">Komponen</th>
+                                        <th class="text-center">Vol</th>
+                                        <th class="text-center">Satuan</th>
+                                        <th class="text-center">Harga Satuan (Rp)</th>
+                                        <th class="text-center">Jumlah (Rp)</th>
+                                        <th class="text-center">Feedback</th>
+                                        <th class="text-center">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($subKegiatan->rabs as $rabIndex => $rab)
                                     <tr>
-                                        <td>{{ $rabIndex + 1 }}</td>
+                                        <td class="text-center">{{ $rabIndex + 1 }}</td>
                                         <td>{{ $rab->Komponen }}</td>
-                                        <td class="text-right">{{ number_format($rab->Volume, 0, ',', '.') }}</td>
+                                        <td class="text-center">{{ number_format($rab->Volume, 0, ',', '.') }}</td>
                                         <td>{{ $rab->satuanRelation->Nama ?? '' }}</td>
-                                        <td class="text-right">{{ $rab->FormattedHargaSatuan }}</td>
-                                        <td class="text-right">{{ $rab->FormattedJumlah }}</td>
-                                        <td>
+                                        <td class="text-center">{{ number_format($rab->HargaSatuan, 0, ',', '.') }}</td>
+                                        <td class="text-center">{{ number_format($rab->Jumlah, 0, ',', '.') }}</td>
+                                        <td class="text-center">
                                          
                                             
                                             @if(isset($rabFeedbackHistory) && isset($rabFeedbackHistory[$rab->RABID]) && $rabFeedbackHistory[$rab->RABID]->count() > 0)
@@ -215,7 +215,7 @@
                                     @endforeach
                                     <tr class="font-weight-bold">
                                         <td colspan="5" class="text-right">Total</td>
-                                        <td class="text-right">Rp {{ number_format($subKegiatan->rabs->whereIn('Status', ['Y', 'N'])->sum('Jumlah'), 0, ',', '.') }}</td>
+                                        <td class="text-center">{{ number_format($subKegiatan->rabs->whereIn('Status', ['Y', 'N'])->sum('Jumlah'), 0, ',', '.') }}</td>
                                         <td></td>
                                         <td></td>
                                     </tr>
@@ -239,26 +239,26 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>No</th>
-                    <th>Komponen</th>
-                    <th>Volume</th>
-                    <th>Satuan</th>
-                    <th>Harga Satuan</th>
-                    <th>Jumlah</th>
-                    <th>Feedback</th>
-                    <th>Status</th>
+                    <th class="text-center">No</th>
+                    <th class="text-center">Komponen</th>
+                    <th class="text-center">Vol</th>
+                    <th class="text-center">Satuan</th>
+                    <th class="text-center">Harga Satuan (Rp)</th>
+                    <th class="text-center">Jumlah (Rp)</th>
+                    <th class="text-center">Feedback</th>
+                    <th class="text-center">Status</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($kegiatan->rabs->whereNull('SubKegiatanID') as $index => $rab)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
+                    <td class="text-center">{{ $index + 1 }}</td>
                     <td>{{ $rab->Komponen }}</td>
-                    <td class="text-right">{{ number_format($rab->Volume, 0, ',', '.') }}</td>
+                    <td class="text-center">{{ number_format($rab->Volume, 0, ',', '.') }}</td>
                     <td>{{ $rab->satuanRelation->Nama ?? '' }}</td>
-                    <td class="text-right">{{ $rab->FormattedHargaSatuan }}</td>
-                    <td class="text-right">{{ $rab->FormattedJumlah }}</td>
-                    <td>
+                    <td class="text-center">{{ number_format($rab->HargaSatuan, 0, ',', '.') }}</td>
+                    <td class="text-center">{{ number_format($rab->Jumlah, 0, ',', '.') }}</td>
+                    <td class="text-center">
                      
                         @if(isset($rabFeedbackHistory) && isset($rabFeedbackHistory[$rab->RABID]) && $rabFeedbackHistory[$rab->RABID]->count() > 0)
                             <i class="fas fa-info-circle text-primary ml-2" 
@@ -277,7 +277,7 @@
                 @endforeach
                 <tr class="font-weight-bold">
                     <td colspan="5" class="text-right">Total</td>
-                    <td class="text-right">Rp {{ number_format($kegiatan->rabs->whereNull('SubKegiatanID')->whereIn('Status', ['Y', 'N'])->sum('Jumlah'), 0, ',', '.') }}</td>
+                    <td class="text-right">{{ number_format($kegiatan->rabs->whereNull('SubKegiatanID')->whereIn('Status', ['Y', 'N'])->sum('Jumlah'), 0, ',', '.') }}</td>
                     <td></td>
                     <td></td>
                 </tr>
