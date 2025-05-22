@@ -1067,6 +1067,13 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
                 <label for="tanggal_pencairan">Tanggal Pencairan</label>
                 <input type="date" id="tanggal_pencairan" class="form-control">
             </div>
+            <div class="form-group text-left">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="approve_all_rabs">
+                    <label class="custom-control-label" for="approve_all_rabs">Setujui semua RAB</label>
+                </div>
+                <small class="form-text text-muted">Jika dicentang, semua RAB kegiatan dan RAB sub kegiatan yang tidak ditolak akan mengikuti status ini.</small>
+            </div>
         `,
         showCancelButton: true,
         confirmButtonText: 'Update',
@@ -1097,7 +1104,7 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
             var status = $('#status').val();
             var feedback = $('#feedback').val();
             var tanggalPencairan = null;
-            
+            var approveAllRabs = $('#approve_all_rabs').is(':checked') ? true : false;
             // Get tanggal pencairan if status is TP
             if (status === 'TP' || status === 'YT') {
                 tanggalPencairan = $('#tanggal_pencairan').val();
@@ -1121,7 +1128,8 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
                     _token: "{{ csrf_token() }}",
                     status: status,
                     feedback: feedback,
-                    tanggal_pencairan: tanggalPencairan
+                    tanggal_pencairan: tanggalPencairan,
+                    approve_all_rabs: approveAllRabs
                 },
                 success: function(response) {
                     if (response.success) {
@@ -1174,6 +1182,13 @@ $(document).on('click', '.update-status-subkegiatan', function(e) {
                 <label for="feedback">Feedback</label>
                 <textarea id="feedback" class="form-control" rows="3"></textarea>
             </div>
+            <div class="form-group text-left">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="approve_all_rabs">
+                    <label class="custom-control-label" for="approve_all_rabs">Setujui semua RAB</label>
+                </div>
+                <small class="form-text text-muted">Jika dicentang, semua RAB sub kegiatan ini akan mengikuti status ini.</small>
+            </div>
         `,
         showCancelButton: true,
         confirmButtonText: 'Update',
@@ -1193,6 +1208,7 @@ $(document).on('click', '.update-status-subkegiatan', function(e) {
         if (result.isConfirmed) {
             var status = $('#status').val();
             var feedback = $('#feedback').val();
+            var approveAllRabs = $('#approve_all_rabs').is(':checked') ? true : false;
             
             // Call API to update status
             $.ajax({
@@ -1201,7 +1217,8 @@ $(document).on('click', '.update-status-subkegiatan', function(e) {
                 data: {
                     _token: "{{ csrf_token() }}",
                     status: status,
-                    feedback: feedback
+                    feedback: feedback,
+                    approve_all_rabs: approveAllRabs
                 },
                 success: function(response) {
                     if (response.success) {
@@ -1214,7 +1231,7 @@ $(document).on('click', '.update-status-subkegiatan', function(e) {
                         });
                         
                         // Reload tree data to update the UI
-                        loadTreeData();
+                                                loadTreeData();
                     } else {
                         showAlert('danger', response.message || 'Gagal mengupdate status sub kegiatan');
                     }
@@ -1230,6 +1247,8 @@ $(document).on('click', '.update-status-subkegiatan', function(e) {
         }
     });
 });
+
+
 
 // Handle status update for RAB
 $(document).on('click', '.update-status-rab', function(e) {
@@ -1720,8 +1739,8 @@ $(document).on('click', '.update-status-rab', function(e) {
                     row.append('<td>' + nameText + '</td>');
                     row.append('<td class="text-center"><span data-toggle="tooltip" title="Volume">' + (item.volume || '') + '</span></td>');
                     row.append('<td class="text-center"><span data-toggle="tooltip" title="Satuan">' + (item.satuan || '') + '</span></td>');
-                    row.append('<td class="text-right"><span data-toggle="tooltip" title="Harga Satuan">' + (item.harga_satuan || '') + '</span></td>');
-                    row.append('<td class="text-right"><span data-toggle="tooltip" title="Jumlah">' + (item.jumlah || '') + '</span></td>');
+                    row.append('<td class="text-center"><span data-toggle="tooltip" title="Harga Satuan">' + (item.harga_satuan || '') + '</span></td>');
+                    row.append('<td class="text-center"><span data-toggle="tooltip" title="Jumlah">' + (item.jumlah || '') + '</span></td>');
                 } else {
                     // For kegiatan and subkegiatan, span across all detail columns
                     var nameText = indentPrefix + '<span class="node-name" data-html="true">' + item.nama + '</span>' + "&nbsp;&nbsp;" + expander;
@@ -1925,7 +1944,7 @@ tableRows.each(function(index) {
     if (nodeType === 'rab' && !insertedHeaders[parentId]) {
         // Create a header row
         var headerRow = $('<tr class="rab-header"></tr>');
-        headerRow.css('background-color', 'rgba(0, 0, 0, 0.05)');
+       
         
         // Add header cells
         headerRow.append('<th class="text-center"></th>');

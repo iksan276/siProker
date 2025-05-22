@@ -196,6 +196,7 @@ public function updateKegiatanStatus(Request $request, $id)
         'status' => 'required|in:N,Y,T,R,P,PT,YT,TT,RT,TP',
         'feedback' => 'nullable|string',
         'tanggal_pencairan' => 'nullable|date',
+        'approve_all_rabs' => 'nullable|string',
     ]);
 
     try {
@@ -227,6 +228,36 @@ public function updateKegiatanStatus(Request $request, $id)
             $requestLog->save();
         }
 
+        // If approve_all_rabs is true, update all RABs directly under this kegiatan
+        if ($request->approve_all_rabs == 'true') {
+            // Update direct RABs of this kegiatan
+            RAB::where('KegiatanID', $kegiatan->KegiatanID)
+                ->whereNull('SubKegiatanID')
+                ->update([
+                    'Status' => $request->status,
+                    'DEdited' => now(),
+                    'UEdited' => Auth::id()
+                ]);
+            
+            // For subkegiatans, only update their RABs if the kegiatan status is not rejected
+            if (!in_array($request->status, ['T', 'TT'])) {
+                // Get all subkegiatans that are not rejected
+                $subKegiatans = SubKegiatan::where('KegiatanID', $kegiatan->KegiatanID)
+                    ->whereNotIn('Status', ['T', 'TT'])
+                    ->get();
+                
+                foreach ($subKegiatans as $subKegiatan) {
+                    // Update all RABs of this subkegiatan
+                    RAB::where('SubKegiatanID', $subKegiatan->SubKegiatanID)
+                        ->update([
+                            'Status' => $request->status,
+                            'DEdited' => now(),
+                            'UEdited' => Auth::id()
+                        ]);
+                }
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Status kegiatan berhasil diupdate'
@@ -248,6 +279,7 @@ public function updateSubKegiatanStatus(Request $request, $id)
     $request->validate([
         'status' => 'required|in:N,Y,T,R',
         'feedback' => 'nullable|string',
+        'approve_all_rabs' => 'nullable|string',
     ]);
 
     try {
@@ -274,6 +306,16 @@ public function updateSubKegiatanStatus(Request $request, $id)
             $requestLog->save();
         }
 
+        // If approve_all_rabs is true, update all RABs of this subkegiatan
+        if ($request->approve_all_rabs == "true") {
+            RAB::where('SubKegiatanID', $subKegiatan->SubKegiatanID)
+                ->update([
+                    'Status' => $request->status,
+                    'DEdited' => now(),
+                    'UEdited' => Auth::id()
+                ]);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Status sub kegiatan berhasil diupdate'
@@ -285,6 +327,7 @@ public function updateSubKegiatanStatus(Request $request, $id)
         ], 500);
     }
 }
+
 
 /**
  * Update status for a RAB

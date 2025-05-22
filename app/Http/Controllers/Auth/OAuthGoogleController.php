@@ -100,10 +100,10 @@ class OAuthGoogleController extends Controller
                             }
                             
                             // Check if user is a super user based on JabatanID
-                            if (isset($user['JabatanID']) && in_array($user['JabatanID'], [1, 2, 3, 4, 5])) {
+                            if (isset($user['JabatanID']) && in_array($user['JabatanID'], [37, 2, 3, 4, 5])) {
                                 $isSuperUser = true;
                             }
-                              //$isAdmin = false;
+                              $isAdmin = false;
                             
                             // Determine user level
                             $userLevel = 2; // Default: regular user
