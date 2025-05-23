@@ -1855,23 +1855,8 @@ $(document).on('click', '.update-status-rab', function(e) {
                         // Plus add new buttons for adding sub-kegiatan and RAB directly
                         actions = '<div class="action-btn-group">'; 
                            // Check if user is super user
-                            if ("{{ auth()->user()->isSuperUser() }}") {
-                        
-                                // For super users, only show view and update status buttons
-                                actions += 
-                                    '<button class="btn btn-info btn-square btn-sm load-modal" ' +
-                                    'data-url="' + "{{ route('kegiatans.show', ':id') }}".replace(':id', kegiatanId) + '" ' +
-                                    'data-title="Detail Kegiatan" data-toggle="tooltip" title="Lihat detail kegiatan">' +
-                                    '<i class="fas fa-eye"></i>' +
-                                    '</button> ' +
-                                    '<button class="btn btn-warning btn-square btn-sm update-status-kegiatan" ' +
-                                    'data-id="' + kegiatanId + '" data-toggle="tooltip" title="Update status kegiatan">' +
-                                    '<i class="fas fa-edit"></i>' +
-                                    '</button>';
-                            }else if ("{{ auth()->user()->isAdmin() }}") {
-        // For admin users, show all buttons
-      
-        
+                            if ("{{ auth()->user()->isSuperUser() }}" || "{{ auth()->user()->isAdmin() }}") {
+
         actions += '<button class="btn btn-primary btn-square btn-sm load-modal" ' +
             'data-url="' + "{{ route('sub-kegiatans.create') }}?kegiatanID=" + kegiatanId + '" ' +
             'data-title="Tambah Sub Kegiatan" data-toggle="tooltip" title="Tambah sub kegiatan baru">' +
@@ -1892,6 +1877,10 @@ $(document).on('click', '.update-status-rab', function(e) {
             'data-title="Edit Kegiatan" data-toggle="tooltip" title="Edit kegiatan">' +
             '<i class="fas fa-edit"></i>' +
             '</button> ' +
+             '<button class="btn btn-primary btn-square btn-sm update-status-kegiatan" ' +
+            'data-id="' + kegiatanId + '" data-toggle="tooltip" title="Update status kegiatan">' +
+            '<i class="fas fa-edit"></i>' +
+            '</button> '+
             '<button type="button" class="btn btn-danger btn-square btn-sm delete-kegiatan" ' +
             'data-id="' + kegiatanId + '" data-toggle="tooltip" title="Hapus kegiatan">' +
             '<i class="fas fa-trash"></i>' +
@@ -1914,19 +1903,9 @@ $(document).on('click', '.update-status-rab', function(e) {
     actions = '<div class="action-btn-group">';
     
     // Check if user is super user
-    if ("{{ auth()->user()->isSuperUser() }}") {
+    if ("{{ auth()->user()->isSuperUser() }}" || "{{ auth()->user()->isAdmin() }}") {
         // For super users, only show view and update status buttons
-        actions += 
-            '<button class="btn btn-info btn-square btn-sm load-modal" ' +
-            'data-url="' + "{{ route('sub-kegiatans.show', ':id') }}".replace(':id', subKegiatanId) + '" ' +
-            'data-title="Detail Sub Kegiatan" data-toggle="tooltip" title="Lihat detail sub kegiatan">' +
-            '<i class="fas fa-eye"></i>' +
-            '</button> ' + 
-                           '<button class="btn btn-warning btn-square btn-sm update-status-subkegiatan" ' +
-            'data-id="' + subKegiatanId + '" data-toggle="tooltip" title="Update status sub kegiatan">' +
-            '<i class="fas fa-edit"></i>' +
-            '</button>';
-    } else if ("{{ auth()->user()->isAdmin() }}") {
+       
         // For admin users, show all buttons
         actions += 
             '<button class="btn btn-success btn-square btn-sm load-modal" ' +
@@ -1944,6 +1923,10 @@ $(document).on('click', '.update-status-rab', function(e) {
             'data-title="Edit Sub Kegiatan" data-toggle="tooltip" title="Edit sub kegiatan">' +
             '<i class="fas fa-edit"></i>' +
             '</button> ' +
+              '<button class="btn btn-primary btn-square btn-sm update-status-subkegiatan" ' +
+            'data-id="' + subKegiatanId + '" data-toggle="tooltip" title="Update status sub kegiatan">' +
+            '<i class="fas fa-edit"></i>' +
+            '</button> '+
             '<button type="button" class="btn btn-danger btn-square btn-sm delete-sub-kegiatan" ' +
             'data-id="' + subKegiatanId + '" data-toggle="tooltip" title="Hapus sub kegiatan">' +
             '<i class="fas fa-trash"></i>' +
@@ -1971,19 +1954,9 @@ $(document).on('click', '.update-status-rab', function(e) {
     actions = '<div class="action-btn-group">';
     
     // Check if user is super user
-    if ("{{ auth()->user()->isSuperUser() }}") {
+    if ("{{ auth()->user()->isSuperUser() }}" || "{{ auth()->user()->isAdmin() }}") {
         // For super users, only show view and update status buttons
-        actions += 
-            '<button class="btn btn-info btn-square btn-sm load-modal" ' +
-            'data-url="' + "{{ route('rabs.show', ':id') }}".replace(':id', rabId) + '" ' +
-            'data-title="Detail RAB" data-toggle="tooltip" title="Lihat detail RAB">' +
-            '<i class="fas fa-eye"></i>' +
-            '</button> ' +
-            '<button class="btn btn-warning btn-square btn-sm update-status-rab" ' +
-            'data-id="' + rabId + '" data-toggle="tooltip" title="Update status RAB">' +
-            '<i class="fas fa-edit"></i>' +
-            '</button>';
-    } else if ("{{ auth()->user()->isAdmin() }}") {
+    
         // For admin users, show all buttons
         actions += 
             '<button class="btn btn-info btn-square btn-sm load-modal" ' +
@@ -1996,6 +1969,10 @@ $(document).on('click', '.update-status-rab', function(e) {
             'data-title="Edit RAB" data-toggle="tooltip" title="Edit RAB">' +
             '<i class="fas fa-edit"></i>' +
             '</button> ' +
+             '<button class="btn btn-primary btn-square btn-sm update-status-rab" ' +
+            'data-id="' + rabId + '" data-toggle="tooltip" title="Update status RAB">' +
+            '<i class="fas fa-edit"></i>' +
+            '</button> '+
             '<button type="button" class="btn btn-danger btn-square btn-sm delete-rab" ' +
             'data-id="' + rabId + '" data-toggle="tooltip" title="Hapus RAB">' +
             '<i class="fas fa-trash"></i>' +
