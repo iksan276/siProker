@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Http;
 class KegiatanController extends Controller
 {
 
-  public function index(Request $request)
+ public function index(Request $request)
 {
     // Get all active renstras for the filter
     $renstras = Renstra::where('NA', 'N')->get();
@@ -40,31 +40,41 @@ class KegiatanController extends Controller
     // Get all active program rektors for the filter
     $programRektors = ProgramRektor::where('NA', 'N')->get();
     
-        // Get all Kegiatan IDs for the filter dropdown
+    // Get all Kegiatan IDs for the filter dropdown
     $allKegiatan = Kegiatan::select('KegiatanID', 'Nama')->get();
     
     // Get units from API for the filter
-   // In the index method of KegiatanController.php
-
-// Get units from API for the filter
-        $units = [];
-        $ssoCode = session('sso_code');
-        if ($ssoCode) {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $ssoCode,
-            ])->get("https://webhook.itp.ac.id/api/units", [
-                'order_by' => 'Nama',
-                'sort' => 'asc',
-                'limit' => 100
-            ]);
-            
-            if ($response->successful()) {
-                $units = $response->json();
-                // Let's log the first unit to see its structure
-                \Log::info('Unit structure:', [isset($units[0]) ? $units[0] : 'No units found']);
-            }
+    $units = [];
+    $ssoCode = session('sso_code');
+    if ($ssoCode) {
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $ssoCode,
+        ])->get("https://webhook.itp.ac.id/api/units", [
+            'order_by' => 'Nama',
+            'sort' => 'asc',
+            'limit' => 100
+        ]);
+        
+        if ($response->successful()) {
+            $units = $response->json();
+            // Let's log the first unit to see its structure
+            \Log::info('Unit structure:', [isset($units[0]) ? $units[0] : 'No units found']);
         }
+    }
 
+    // Define status options for the filter
+    $statusOptions = [
+        'N' => 'Menunggu',
+        'Y' => 'Disetujui',
+        'T' => 'Ditolak',
+        'R' => 'Revisi',
+        'P' => 'Pengajuan',
+        'PT' => 'Pengajuan TOR',
+        'YT' => 'Pengajuan TOR Disetujui',
+        'TT' => 'Pengajuan TOR Ditolak',
+        'RT' => 'Pengajuan TOR direvisi',
+        'TP' => 'Tunda Pencairan'
+    ];
     
     // Base query
     $kegiatansQuery = Kegiatan::with([
@@ -76,11 +86,16 @@ class KegiatanController extends Controller
         'rabs'
     ]);
     
-
-        if ($request->has('kegiatanID') && $request->kegiatanID) {
+    if ($request->has('kegiatanID') && $request->kegiatanID) {
         $kegiatanIds = explode(',', $request->kegiatanID);
         $kegiatansQuery->whereIn('KegiatanID', $kegiatanIds);
     }
+    
+    // Apply filter if status is provided
+    if ($request->has('status') && $request->status) {
+        $kegiatansQuery->where('Status', $request->status);
+    }
+    
     // Apply filter if renstraID is provided
     if ($request->has('renstraID') && $request->renstraID) {
         // Filter pilars by renstraID
@@ -206,7 +221,6 @@ class KegiatanController extends Controller
         $kegiatansQuery->where('ProgramRektorID', $request->programRektorID);
     }
     
-
     if ($request->has('unitID') && $request->unitID) {
         $unitIds = explode(',', $request->unitID);
         $kegiatansQuery->whereHas('programRektor', function($query) use ($unitIds) {
@@ -219,10 +233,13 @@ class KegiatanController extends Controller
                 }
             });
         });
-}
+    }
 
     // Get the filtered results
     $kegiatans = $kegiatansQuery->orderBy('KegiatanID', 'asc')->get();
+    
+    // Calculate summary data
+    $summary = $this->calculateSummary($kegiatans);
     
     // Get the selected filter values (for re-populating the selects)
     $selectedRenstra = $request->renstraID;
@@ -232,6 +249,7 @@ class KegiatanController extends Controller
     $selectedProgramRektor = $request->programRektorID;
     $selectedUnit = $request->unitID;
     $selectedKegiatanIds = $request->kegiatanID;
+    $selectedStatus = $request->status;
     
     // If user is not admin, prepare tree grid data
     if (!auth()->user()->isAdmin()) {
@@ -240,7 +258,8 @@ class KegiatanController extends Controller
         if ($request->ajax() && $request->wantsJson()) {
             $treeData = $this->buildTreeData($kegiatans);
             return response()->json([
-                'data' => $treeData
+                'data' => $treeData,
+                'summary' => $summary
             ]);
         }
         
@@ -253,13 +272,16 @@ class KegiatanController extends Controller
             'programRektors',
             'units',
             'allKegiatan',
+            'statusOptions',
+            'summary',
             'selectedRenstra', 
             'selectedPilar', 
             'selectedIsu', 
             'selectedProgramPengembangan', 
             'selectedProgramRektor',
             'selectedUnit',
-        'selectedKegiatanIds'
+            'selectedKegiatanIds',
+            'selectedStatus'
         ));
     }
     
@@ -269,7 +291,8 @@ class KegiatanController extends Controller
         if ($request->has('format') && $request->format === 'tree') {
             $treeData = $this->buildTreeData($kegiatans);
             return response()->json([
-                'data' => $treeData
+                'data' => $treeData,
+                'summary' => $summary
             ]);
         }
         
@@ -301,7 +324,8 @@ class KegiatanController extends Controller
         }
         
         return response()->json([
-            'data' => $data
+            'data' => $data,
+            'summary' => $summary
         ]);
     }
     
@@ -313,18 +337,134 @@ class KegiatanController extends Controller
         'programPengembangans', 
         'programRektors',
         'units',
+        'allKegiatan',
+        'statusOptions',
+        'summary',
         'selectedRenstra', 
         'selectedPilar', 
         'selectedIsu', 
-        'allKegiatan',
         'selectedProgramPengembangan', 
         'selectedProgramRektor',
         'selectedUnit',
-        'selectedKegiatanIds'
+        'selectedKegiatanIds',
+        'selectedStatus'
     ));
 }
 
+/**
+ * Calculate summary data for the dashboard
+ * 
+ * @param Collection $kegiatans
+ * @return array
+ */
+
+/**
+ * Calculate summary data for the dashboard
+ * 
+ * @param Collection $kegiatans
+ * @return array
+ */
+private function calculateSummary($kegiatans)
+{
+    // Initialize summary data structure with all possible status types
+    $summary = [
+        'kegiatan' => [
+            'total' => 0,
+            'status' => [
+                'N' => 0, // Menunggu
+                'Y' => 0, // Disetujui
+                'T' => 0, // Ditolak
+                'R' => 0, // Revisi
+                'P' => 0, // Pengajuan
+                'PT' => 0, // Pengajuan TOR
+                'YT' => 0, // Pengajuan TOR Disetujui
+                'TT' => 0, // Pengajuan TOR Ditolak
+                'RT' => 0, // Pengajuan TOR direvisi
+                'TP' => 0, // Tunda Pencairan
+            ]
+        ],
+        'subKegiatan' => [
+            'total' => 0,
+            'status' => [
+                'N' => 0, // Menunggu
+                'Y' => 0, // Disetujui
+                'T' => 0, // Ditolak
+                'R' => 0, // Revisi
+            ]
+        ],
+        'rab' => [
+            'kegiatan' => [
+                'total' => 0,
+                'status' => [
+                    'N' => 0, // Menunggu
+                    'Y' => 0, // Disetujui
+                    'T' => 0, // Ditolak
+                    'R' => 0, // Revisi
+                ],
+                'jumlah' => 0 // Total amount
+            ],
+            'subKegiatan' => [
+                'total' => 0,
+                'status' => [
+                    'N' => 0, // Menunggu
+                    'Y' => 0, // Disetujui
+                    'T' => 0, // Ditolak
+                    'R' => 0, // Revisi
+                ],
+                'jumlah' => 0 // Total amount
+            ]
+        ]
+    ];
     
+    // Count kegiatans
+    $summary['kegiatan']['total'] = $kegiatans->count();
+    
+    // Count kegiatans by status
+    foreach ($kegiatans as $kegiatan) {
+        // Ensure the status exists in our summary array
+        if (isset($summary['kegiatan']['status'][$kegiatan->Status])) {
+            $summary['kegiatan']['status'][$kegiatan->Status]++;
+        }
+        
+        // Count sub kegiatans
+        $subKegiatans = $kegiatan->subKegiatans;
+        $summary['subKegiatan']['total'] += $subKegiatans->count();
+        
+        // Count sub kegiatans by status
+        foreach ($subKegiatans as $subKegiatan) {
+            if (isset($summary['subKegiatan']['status'][$subKegiatan->Status])) {
+                $summary['subKegiatan']['status'][$subKegiatan->Status]++;
+            }
+            
+            // Count RABs for sub kegiatan
+            $subKegiatanRabs = $subKegiatan->rabs;
+            $summary['rab']['subKegiatan']['total'] += $subKegiatanRabs->count();
+            
+            // Count RABs for sub kegiatan by status and sum amounts
+            foreach ($subKegiatanRabs as $rab) {
+                if (isset($summary['rab']['subKegiatan']['status'][$rab->Status])) {
+                    $summary['rab']['subKegiatan']['status'][$rab->Status]++;
+                }
+                $summary['rab']['subKegiatan']['jumlah'] += $rab->Jumlah;
+            }
+        }
+        
+        // Count direct RABs for kegiatan
+        $directRabs = $kegiatan->rabs()->whereNull('SubKegiatanID')->get();
+        $summary['rab']['kegiatan']['total'] += $directRabs->count();
+        
+        // Count direct RABs for kegiatan by status and sum amounts
+        foreach ($directRabs as $rab) {
+            if (isset($summary['rab']['kegiatan']['status'][$rab->Status])) {
+                $summary['rab']['kegiatan']['status'][$rab->Status]++;
+            }
+            $summary['rab']['kegiatan']['jumlah'] += $rab->Jumlah;
+        }
+    }
+    
+    return $summary;
+}
+
    
      private function buildTreeData($kegiatans)
     {

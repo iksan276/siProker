@@ -71,7 +71,7 @@
         </tr>
      
         <tr>
-            <th>Feedback2</th>
+            <th>Feedback</th>
             <td>
                
                 @if(isset($kegiatanFeedbackHistory) && $kegiatanFeedbackHistory->count() > 0)

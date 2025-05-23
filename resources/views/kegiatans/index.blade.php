@@ -70,20 +70,20 @@
             </select>
         </div>
 
-        <div class="form-group">
-        <select id="unitFilter" class="form-control select2-filter" multiple>
-            <option value="">-- Pilih Unit --</option>
-            @foreach($units as $unit)
-                <option value="{{ $unit['PosisiID'] ?? $unit['id'] ?? '' }}" 
-                    {{ isset($selectedUnit) && in_array(($unit['PosisiID'] ?? $unit['id'] ?? ''), explode(',', $selectedUnit)) ? 'selected' : '' }}>
-                    {{ $unit['Nama'] ?? $unit['nama'] ?? 'Unknown Unit' }}
-                </option>
-            @endforeach
-        </select>
-    </div>
+            <div class="form-group">
+            <select id="unitFilter" class="form-control select2-filter" multiple>
+                <option value="">-- Pilih Unit --</option>
+                @foreach($units as $unit)
+                    <option value="{{ $unit['PosisiID'] ?? $unit['id'] ?? '' }}" 
+                        {{ isset($selectedUnit) && in_array(($unit['PosisiID'] ?? $unit['id'] ?? ''), explode(',', $selectedUnit)) ? 'selected' : '' }}>
+                        {{ $unit['Nama'] ?? $unit['nama'] ?? 'Unknown Unit' }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
 
             <!-- Add this after the Unit filter dropdown -->
-                <div class="form-group">
+        <div class="form-group">
             <select id="kegiatanFilter" class="form-control select2-filter" multiple>
                 <option value="">-- Pilih Kegiatan --</option>
                 @foreach($allKegiatan as $kegiatan)
@@ -95,8 +95,261 @@
             </select>
         </div>
 
+        <!-- Add this to your filter section -->
+       <!-- Replace the existing status filter with this -->
+        <div class="form-group">
+            <select id="statusFilter" class="form-control select2-filter">
+                 <option value="">-- Pilih Status Kegiatan --</option>
+                @foreach($statusOptions as $value => $label)
+                    <option value="{{ $value }}" {{ isset($selectedStatus) && $selectedStatus == $value ? 'selected' : '' }}>
+                        {{ $label }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+
     </div>
 </div>
+
+<div class="card shadow mb-3">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Resume</h6>
+    </div>
+    <div class="card-body">
+     
+      <div class="container-fluid p-0">
+    <!-- Summary Cards Row -->
+    <div class="row mb-3">
+        <!-- Kegiatan Card -->
+       <div class="col-xl-3 col-md-6 mb-2">
+    <div class="card border-left-primary shadow h-100 py-1">
+        <div class="card-body py-2">
+            <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                        Kegiatan <span class="badge badge-primary ml-1">{{ $summary['kegiatan']['total'] }}</span>
+                    </div>
+                    <div class="row mt-2 no-gutters">
+                        <div class="col-auto pr-2">
+                            <span class="badge badge-warning">{{ $summary['kegiatan']['status']['N'] }}</span> Menunggu
+                        </div>
+                        <div class="col-auto pr-2">
+                            <span class="badge badge-success">{{ $summary['kegiatan']['status']['Y'] }}</span> Disetujui
+                        </div>
+                        <div class="col-auto">
+                            <span class="badge badge-danger">{{ $summary['kegiatan']['status']['T'] }}</span> Ditolak
+                        </div>
+                    </div>
+                    <div class="row mt-1 no-gutters">
+                        <div class="col-auto pr-2">
+                            <span class="badge badge-info">{{ $summary['kegiatan']['status']['R'] }}</span> Revisi
+                        </div>
+                        <div class="col-auto pr-2">
+                            <span class="badge badge-primary">{{ $summary['kegiatan']['status']['P'] }}</span> Pengajuan
+                        </div>
+                    </div>
+                    <div class="row mt-1 no-gutters">
+                        <div class="col-auto pr-2">
+                            <span class="badge badge-warning">{{ $summary['kegiatan']['status']['PT'] }}</span> TOR
+                        </div>
+                        <div class="col-auto pr-2">
+                            <span class="badge badge-success">{{ $summary['kegiatan']['status']['YT'] }}</span> TOR Disetujui
+                        </div>
+                    </div>
+                    <div class="row mt-1 no-gutters">
+                        <div class="col-auto pr-2">
+                            <span class="badge badge-danger">{{ $summary['kegiatan']['status']['TT'] }}</span> TOR Ditolak
+                        </div>
+                        <div class="col-auto pr-2">
+                            <span class="badge badge-info">{{ $summary['kegiatan']['status']['RT'] }}</span> TOR Revisi
+                        </div>
+                        <div class="col-auto">
+                            <span class="badge badge-warning">{{ $summary['kegiatan']['status']['TP'] }}</span> Tunda
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <!-- Sub Kegiatan Card -->
+        <div class="col-xl-3 col-md-6 mb-2">
+            <div class="card border-left-warning shadow h-100 py-1">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Sub Kegiatan <span class="badge badge-warning ml-1">{{ $summary['subKegiatan']['total'] }}</span>
+                            </div>
+                            <div class="row mt-2 no-gutters">
+                                <div class="col-auto pr-2">
+                                    <span class="badge badge-warning">{{ $summary['subKegiatan']['status']['N'] }}</span> Menunggu
+                                </div>
+                                <div class="col-auto pr-2">
+                                    <span class="badge badge-success">{{ $summary['subKegiatan']['status']['Y'] }}</span> Disetujui
+                                </div>
+                                <div class="col-auto">
+                                    <span class="badge badge-danger">{{ $summary['subKegiatan']['status']['T'] }}</span> Ditolak
+                                </div>
+                            </div>
+                            <div class="row mt-1 no-gutters">
+                                <div class="col-auto">
+                                    <span class="badge badge-info">{{ $summary['subKegiatan']['status']['R'] }}</span> Revisi
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tasks fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RAB Kegiatan Card -->
+        <div class="col-xl-3 col-md-6 mb-2">
+            <div class="card border-left-success shadow h-100 py-1">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                RAB Kegiatan <span class="badge badge-success ml-1">{{ $summary['rab']['kegiatan']['total'] }}</span>
+                            </div>
+                            <div class="row mt-2 no-gutters">
+                                <div class="col-auto pr-2">
+                                    <span class="badge badge-warning">{{ $summary['rab']['kegiatan']['status']['N'] }}</span> Menunggu
+                                </div>
+                                <div class="col-auto pr-2">
+                                    <span class="badge badge-success">{{ $summary['rab']['kegiatan']['status']['Y'] }}</span> Disetujui
+                                </div>
+                                <div class="col-auto">
+                                    <span class="badge badge-danger">{{ $summary['rab']['kegiatan']['status']['T'] }}</span> Ditolak
+                                </div>
+                            </div>
+                            <div class="row mt-1 no-gutters">
+                                <div class="col-auto">
+                                    <span class="badge badge-info">{{ $summary['rab']['kegiatan']['status']['R'] }}</span> Revisi
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RAB Sub Kegiatan Card -->
+        <div class="col-xl-3 col-md-6 mb-2">
+            <div class="card border-left-info shadow h-100 py-1">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                RAB Sub Kegiatan <span class="badge badge-info ml-1">{{ $summary['rab']['subKegiatan']['total'] }}</span>
+                            </div>
+                            <div class="row mt-2 no-gutters">
+                                <div class="col-auto pr-2">
+                                    <span class="badge badge-warning">{{ $summary['rab']['subKegiatan']['status']['N'] }}</span> Menunggu
+                                </div>
+                                <div class="col-auto pr-2">
+                                    <span class="badge badge-success">{{ $summary['rab']['subKegiatan']['status']['Y'] }}</span> Disetujui
+                                </div>
+                                <div class="col-auto">
+                                    <span class="badge badge-danger">{{ $summary['rab']['subKegiatan']['status']['T'] }}</span> Ditolak
+                                </div>
+                            </div>
+                            <div class="row mt-1 no-gutters">
+                                <div class="col-auto">
+                                    <span class="badge badge-info">{{ $summary['rab']['subKegiatan']['status']['R'] }}</span> Revisi
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total RAB Summary Card -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-left-dark shadow mb-2">
+                <div class="card-body py-3">
+                    <div class="row align-items-center">
+                        <div class="col-auto pr-4">
+                            <i class="fas fa-money-bill-wave fa-3x text-gray-300"></i>
+                        </div>
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">Total Anggaran RAB</div>
+                            <div class="h4 mb-0 font-weight-bold text-gray-800">
+                                Rp {{ number_format($summary['rab']['kegiatan']['jumlah'] + $summary['rab']['subKegiatan']['jumlah'], 0, ',', '.') }}
+                            </div>
+                            <div class="progress progress-sm mt-2 mb-1">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ ($summary['rab']['kegiatan']['jumlah'] / ($summary['rab']['kegiatan']['jumlah'] + $summary['rab']['subKegiatan']['jumlah'])) * 100 }}%"></div>
+                                <div class="progress-bar bg-info" role="progressbar" style="width: {{ ($summary['rab']['subKegiatan']['jumlah'] / ($summary['rab']['kegiatan']['jumlah'] + $summary['rab']['subKegiatan']['jumlah'])) * 100 }}%"></div>
+                            </div>
+                            <div class="row no-gutters">
+                                <div class="col-md-6">
+                                    <small class="text-success">
+                                        <i class="fas fa-circle fa-sm"></i> RAB Kegiatan: Rp {{ number_format($summary['rab']['kegiatan']['jumlah'], 0, ',', '.') }}
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-info">
+                                        <i class="fas fa-circle fa-sm"></i> RAB Sub Kegiatan: Rp {{ number_format($summary['rab']['subKegiatan']['jumlah'], 0, ',', '.') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="row no-gutters">
+                                <div class="col-6 text-center border-right">
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $summary['rab']['kegiatan']['total'] + $summary['rab']['subKegiatan']['total'] }}</div>
+                                    <div class="text-xs text-muted">Total RAB</div>
+                                </div>
+                                <div class="col-6 text-center">
+                                    <div class="h5 mb-0 font-weight-bold text-success">{{ $summary['rab']['kegiatan']['status']['Y'] + $summary['rab']['subKegiatan']['status']['Y'] }}</div>
+                                    <div class="text-xs text-muted">Disetujui</div>
+                                </div>
+                            </div>
+                            <hr class="my-1">
+                            <div class="row no-gutters">
+                                <div class="col-4 text-center">
+                                    <div class="h6 mb-0 font-weight-bold text-warning">{{ $summary['rab']['kegiatan']['status']['N'] + $summary['rab']['subKegiatan']['status']['N'] }}</div>
+                                    <div class="text-xs text-muted">Menunggu</div>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <div class="h6 mb-0 font-weight-bold text-danger">{{ $summary['rab']['kegiatan']['status']['T'] + $summary['rab']['subKegiatan']['status']['T'] }}</div>
+                                    <div class="text-xs text-muted">Ditolak</div>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <div class="h6 mb-0 font-weight-bold text-info">{{ $summary['rab']['kegiatan']['status']['R'] + $summary['rab']['subKegiatan']['status']['R'] }}</div>
+                                    <div class="text-xs text-muted">Revisi</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    </div>
+</div>
+
 
 <!-- DataTales Card -->
 <div class="card shadow mb-4">
@@ -116,7 +369,8 @@
     </div>
 </div>
     <div class="card-body">
-          <div class="d-flex flex-wrap justify-content-between mb-5">
+
+          <div class="d-flex flex-wrap justify-content-between mb-2">
             <div class="mb-2">
                 <div class="d-flex align-items-center">
                     <div class="tree-legend-line" style="background-color: rgba(156, 39, 176, 0.1); height: 30px; width: 30px;"></div>
@@ -136,10 +390,6 @@
                 </div>
             </div>
         </div>
-    
-
-
-
         
         <!-- Tree Grid Table -->
         <div id="tree-grid-container" class="table-responsive">
@@ -331,6 +581,7 @@
     var selectedProgramRektorId = getCookie('selected_program_rektor') || "{{ $selectedProgramRektor ?? '' }}";
     var selectedUnitIds = getCookie('selected_units') || "{{ $selectedUnit ?? '' }}";
     var selectedKegiatanIds = getCookie('selected_kegiatan_ids') || "{{ $selectedKegiatanIds ?? '' }}";
+    var selectedStatus = getCookie('selected_status') || "{{ $selectedStatus ?? '' }}";
     // Function to load pilars for a selected renstra
      // Function to load pilars for a renstra
      function loadPilarsForRenstra(renstraID, selectedPilarId) {
@@ -565,6 +816,10 @@
             loadPilarsForRenstra(selectedRenstraId, selectedPilarId);
         }
 
+        if (selectedStatus) {
+    $('#statusFilter').val(selectedStatus).trigger('change');
+}
+
             if (selectedKegiatanIds) {
         var kegiatanIdArray = selectedKegiatanIds.split(',');
         $('#kegiatanFilter').val(kegiatanIdArray).trigger('change');
@@ -639,6 +894,27 @@
         isFiltering = true;
         loadTreeData();
     });
+
+    $('#statusFilter').on('change', function() {
+    var status = $(this).val();
+    
+    // Store selected Status in global variable and cookie
+    selectedStatus = status;
+    
+    // If status is selected, store it
+    if (status) {
+        setCookie('selected_status', status, 30);
+        updateUrlParameter('status', status);
+    } else {
+        // Clear selections if status is cleared
+        eraseCookie('selected_status');
+        updateUrlParameter('status', null);
+    }
+    
+    // Reload TreeTable with status filter
+    isFiltering = true;
+    loadTreeData();
+});
                 // Handle filter changes
         $('#renstraFilter').on('change', function() {
             var renstraID = $(this).val();
@@ -1716,6 +1992,7 @@ $(document).on('click', '.update-status-rab', function(e) {
             programRektorID: selectedProgramRektorId,
             unitID: selectedUnitIds,
             kegiatanID: selectedKegiatanIds,
+                status: selectedStatus, 
             format: 'tree'
         };
         
