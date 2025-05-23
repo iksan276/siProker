@@ -11,67 +11,10 @@
 <!-- Color Legend Card -->
 <div class="card shadow mb-3">
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Keterangan Warna</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Filter</h6>
     </div>
     <div class="card-body">
-        <div class="d-flex flex-wrap justify-content-between">
-            <!-- Warna yang sudah ada -->
-            <div class="mb-2">
-                <div class="d-flex align-items-center">
-                    <div class="tree-legend-line" style="background-color: rgba(231, 74, 59, 0.1); height: 5px; width: 30px;"></div>
-                    <span class="ml-2">Pilar</span>
-                </div>
-            </div>
-            <div class="mb-2">
-                <div class="d-flex align-items-center">
-                    <div class="tree-legend-line" style="background-color: rgba(246, 194, 62, 0.1); height: 5px; width: 30px;"></div>
-                    <span class="ml-2">Isu Strategis</span>
-                </div>
-            </div>
-            <div class="mb-2">
-                <div class="d-flex align-items-center">
-                    <div class="tree-legend-line" style="background-color: rgba(28, 200, 138, 0.1); height: 5px; width: 30px;"></div>
-                    <span class="ml-2">Program Pengembangan</span>
-                </div>
-            </div>
-            <div class="mb-2">
-                <div class="d-flex align-items-center">
-                    <div class="tree-legend-line" style="background-color: rgba(10, 63, 223, 0.1); height: 5px; width: 30px;"></div>
-                    <span class="ml-2">Program Rektor</span>
-                </div>
-            </div>
-            <div class="mb-2">
-                <div class="d-flex align-items-center">
-                    <div class="tree-legend-line" style="background-color: rgba(156, 39, 176, 0.1); height: 5px; width: 30px;"></div>
-                    <span class="ml-2">Kegiatan</span>
-                </div>
-            </div>
-            <!-- Tambahan Warna Baru -->
-            <div class="mb-2">
-                <div class="d-flex align-items-center">
-                    <div class="tree-legend-line" style="background-color: rgba(255, 140, 0, 0.1); height: 5px; width: 30px;"></div>
-                    <span class="ml-2">Sub Kegiatan</span>
-                </div>
-            </div>
-            <div class="mb-2">
-                <div class="d-flex align-items-center">
-                    <div class="tree-legend-line" style="background-color: rgba(0, 0, 0, 0.1); height: 5px; width: 30px;"></div>
-                    <span class="ml-2">RAB</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-<!-- DataTales Card -->
-<div class="card shadow mb-4">
-    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-primary">Struktur Pilar</h6>
-    </div>
-    <div class="card-body">
-        <div class="row mb-2">
+         <div class="row mb-2">
             <div class="col-md-4">
                 <div class="form-group">
                     <select id="renstraFilter" class="form-control select2-filter">
@@ -110,9 +53,8 @@
         <div id="statusFilterContainer" class="row mb-3" style="display: none;">
             <div class="col-md-12">
                 <div class="form-group">
-                    <label for="statusFilter">Status Kegiatan</label>
                     <select id="statusFilter" class="form-control select2-filter">
-                        <option value="">Semua Status</option>
+                        <option value="">Pilih Status Kegiatan</option>
                         <option value="N" {{ isset($selectedStatus) && $selectedStatus == 'N' ? 'selected' : '' }}>Menunggu</option>
                         <option value="P" {{ isset($selectedStatus) && $selectedStatus == 'P' ? 'selected' : '' }}>Pengajuan</option>
                         <option value="Y" {{ isset($selectedStatus) && $selectedStatus == 'Y' ? 'selected' : '' }}>Disetujui</option>
@@ -128,6 +70,64 @@
             </div>
         </div>
         
+    </div>
+</div>
+
+
+
+<!-- DataTales Card -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">Struktur Pilar</h6>
+    </div>
+    <div class="card-body">
+         <div class="d-flex flex-wrap justify-content-between mb-3">
+            <!-- Warna yang sudah ada -->
+            <div class="mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(231, 74, 59, 0.1); height: 30px; width: 30px;"></div>
+                    <span class="ml-2">Pilar</span>
+                </div>
+            </div>
+            <div class="mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(246, 194, 62, 0.1); height: 30px; width: 30px;"></div>
+                    <span class="ml-2">Isu Strategis</span>
+                </div>
+            </div>
+            <div class="mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(28, 200, 138, 0.1); height: 30px; width: 30px;"></div>
+                    <span class="ml-2">Program Pengembangan</span>
+                </div>
+            </div>
+            <div class="mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(10, 63, 223, 0.1); height: 30px; width: 30px;"></div>
+                    <span class="ml-2">Program Rektor</span>
+                </div>
+            </div>
+            <div class="mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(156, 39, 176, 0.1); height: 30px; width: 30px;"></div>
+                    <span class="ml-2">Kegiatan</span>
+                </div>
+            </div>
+            <!-- Tambahan Warna Baru -->
+            <div class="mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(255, 140, 0, 0.1); height: 30px; width: 30px;"></div>
+                    <span class="ml-2">Sub Kegiatan</span>
+                </div>
+            </div>
+            <div class="mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(0, 0, 0, 0.1); height: 30px; width: 30px;"></div>
+                    <span class="ml-2">RAB</span>
+                </div>
+            </div>
+        </div>
+      
         <div id="tree-grid-container" class="table-responsive">
             <table id="tree-grid" class="table table-bordered">
                 <thead>

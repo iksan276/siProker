@@ -11,51 +11,10 @@
 <!-- Color Legend Card -->
 <div class="card shadow mb-3">
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Keterangan Warna</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Filter</h6>
     </div>
     <div class="card-body">
-        <div class="d-flex flex-wrap justify-content-between">
-            <div class="mb-2">
-                <div class="d-flex align-items-center">
-                    <div class="tree-legend-line" style="background-color: rgba(156, 39, 176, 0.1); height: 5px; width: 30px;"></div>
-                    <span class="ml-2">Kegiatan</span>
-                </div>
-            </div>
-            <div class="mb-2">
-                <div class="d-flex align-items-center">
-                    <div class="tree-legend-line" style="background-color: rgba(255, 140, 0, 0.1); height: 5px; width: 30px;"></div>
-                    <span class="ml-2">Sub Kegiatan</span>
-                </div>
-            </div>
-            <div class="mb-2">
-                <div class="d-flex align-items-center">
-                    <div class="tree-legend-line" style="background-color: rgba(0, 0, 0, 0.1); height: 5px; width: 30px;"></div>
-                    <span class="ml-2">RAB</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- DataTales Card -->
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-primary mb-2 mb-md-0 w-100">Kegiatan List</h6>
-         @if(auth()->user()->isAdmin())
-        <div class="d-flex flex-wrap w-100 w-md-auto justify-content-start justify-content-md-end">
-        <a href="{{ route('kegiatans.export.excel', request()->query()) }}" class="btn btn-success btn-sm mr-1">
-                <i class="fas fa-file-excel fa-sm"></i> Export Excel
-            </a>
-            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('kegiatans.create') }}" data-title="Tambah Kegiatan" data-toggle="tooltip" title="Tambah kegiatan baru">
-                <i class="fas fa-plus fa-sm"></i> Tambah Kegiatan
-            </button>
-        </div>
-        @endif
-    </div>
-</div>
-    <div class="card-body">
-        <!-- Filters -->
+          <!-- Filters -->
         <div class="form-group">
            <select id="renstraFilter" class="form-control select2-filter">
                 <option value="">-- Pilih Renstra --</option>
@@ -124,7 +83,7 @@
     </div>
 
             <!-- Add this after the Unit filter dropdown -->
-                <div class="form-group mb-5">
+                <div class="form-group">
             <select id="kegiatanFilter" class="form-control select2-filter" multiple>
                 <option value="">-- Pilih Kegiatan --</option>
                 @foreach($allKegiatan as $kegiatan)
@@ -136,6 +95,48 @@
             </select>
         </div>
 
+    </div>
+</div>
+
+<!-- DataTales Card -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary mb-2 mb-md-0 w-100">Kegiatan List</h6>
+         @if(auth()->user()->isAdmin())
+        <div class="d-flex flex-wrap w-100 w-md-auto justify-content-start justify-content-md-end">
+        <a href="{{ route('kegiatans.export.excel', request()->query()) }}" class="btn btn-success btn-sm mr-1">
+                <i class="fas fa-file-excel fa-sm"></i> Export Excel
+            </a>
+            <button class="btn btn-primary btn-sm load-modal" data-url="{{ route('kegiatans.create') }}" data-title="Tambah Kegiatan" data-toggle="tooltip" title="Tambah kegiatan baru">
+                <i class="fas fa-plus fa-sm"></i> Tambah Kegiatan
+            </button>
+        </div>
+        @endif
+    </div>
+</div>
+    <div class="card-body">
+          <div class="d-flex flex-wrap justify-content-between mb-5">
+            <div class="mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(156, 39, 176, 0.1); height: 30px; width: 30px;"></div>
+                    <span class="ml-2">Kegiatan</span>
+                </div>
+            </div>
+            <div class="mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(255, 140, 0, 0.1); height: 30px; width: 30px;"></div>
+                    <span class="ml-2">Sub Kegiatan</span>
+                </div>
+            </div>
+            <div class="mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="tree-legend-line" style="background-color: rgba(0, 0, 0, 0.1); height: 30px; width: 30px;"></div>
+                    <span class="ml-2">RAB</span>
+                </div>
+            </div>
+        </div>
+    
 
 
 
