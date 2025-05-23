@@ -63,6 +63,36 @@ Route::middleware('auth')->prefix('api')->group(function() {
 Route::get('/auth/oauth_google', [OAuthGoogleController::class, 'authenticate']);
 
 Route::middleware('auth')->group(function () {
+
+     Route::get('/summary', function(Request $request) {
+        $kegiatanController = new \App\Http\Controllers\KegiatanController();
+        
+        // Build the query based on filters
+        $kegiatansQuery = Kegiatan::with([
+            'programRektor',
+            'programRektor.programPengembangan.isuStrategis.pilar.renstra',
+            'subKegiatans',
+            'rabs'
+        ]);
+        
+        // Apply the same filters as in the index method
+        // (You can extract this to a separate method to avoid duplication)
+        if ($request->has('kegiatanID') && $request->kegiatanID) {
+            $kegiatanIds = explode(',', $request->kegiatanID);
+            $kegiatansQuery->whereIn('KegiatanID', $kegiatanIds);
+        }
+        
+        if ($request->has('status') && $request->status) {
+            $kegiatansQuery->where('Status', $request->status);
+        }
+        
+        // Apply other filters as needed...
+        
+        $kegiatans = $kegiatansQuery->get();
+        $summary = $kegiatanController->calculateSummary($kegiatans);
+        
+        return response()->json(['summary' => $summary]);
+    })->name('api.summary');
     // Add this to the middleware('auth') group
     Route::resource('requests', RequestController::class);
 

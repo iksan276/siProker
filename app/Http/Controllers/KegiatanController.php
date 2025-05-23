@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Http;
 class KegiatanController extends Controller
 {
 
- public function index(Request $request)
+public function index(Request $request)
 {
     // Get all active renstras for the filter
     $renstras = Renstra::where('NA', 'N')->get();
@@ -61,7 +61,7 @@ class KegiatanController extends Controller
             \Log::info('Unit structure:', [isset($units[0]) ? $units[0] : 'No units found']);
         }
     }
-
+    
     // Define status options for the filter
     $statusOptions = [
         'N' => 'Menunggu',
@@ -78,9 +78,9 @@ class KegiatanController extends Controller
     
     // Base query
     $kegiatansQuery = Kegiatan::with([
-        'programRektor', 
-        'programRektor.programPengembangan.isuStrategis.pilar.renstra', 
-        'createdBy', 
+        'programRektor',
+        'programRektor.programPengembangan.isuStrategis.pilar.renstra',
+        'createdBy',
         'editedBy',
         'subKegiatans',
         'rabs'
@@ -102,39 +102,39 @@ class KegiatanController extends Controller
         $pilarIds = Pilar::where('RenstraID', $request->renstraID)
             ->where('NA', 'N')
             ->pluck('PilarID');
-            
+        
         // Filter isu strategis by pilar IDs
         $isuIds = IsuStrategis::whereIn('PilarID', $pilarIds)
             ->where('NA', 'N')
             ->pluck('IsuID');
-            
+        
         // Filter program pengembangans by isu IDs
         $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
             ->where('NA', 'N')
             ->pluck('ProgramPengembanganID');
-            
+        
         // Filter program rektors by program pengembangan IDs
         $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
             ->where('NA', 'N')
             ->pluck('ProgramRektorID');
-            
+        
         $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
         
         // Update pilars list based on selected renstra
         $pilars = Pilar::where('RenstraID', $request->renstraID)
             ->where('NA', 'N')
             ->get();
-            
+        
         // Update isu strategis list based on filtered pilars
         $isuStrategis = IsuStrategis::whereIn('PilarID', $pilarIds)
             ->where('NA', 'N')
             ->get();
-            
+        
         // Update program pengembangans list based on filtered isus
         $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
             ->where('NA', 'N')
             ->get();
-            
+        
         // Update program rektors list based on filtered program pengembangans
         $programRektors = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
             ->where('NA', 'N')
@@ -147,29 +147,29 @@ class KegiatanController extends Controller
         $isuIds = IsuStrategis::where('PilarID', $request->pilarID)
             ->where('NA', 'N')
             ->pluck('IsuID');
-            
+        
         // Filter program pengembangans by isu IDs
         $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
             ->where('NA', 'N')
             ->pluck('ProgramPengembanganID');
-            
+        
         // Filter program rektors by program pengembangan IDs
         $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
             ->where('NA', 'N')
             ->pluck('ProgramRektorID');
-            
+        
         $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
         
         // Update isu strategis list based on selected pilar
         $isuStrategis = IsuStrategis::where('PilarID', $request->pilarID)
             ->where('NA', 'N')
             ->get();
-            
+        
         // Update program pengembangans list based on filtered isus
         $programPengembangans = ProgramPengembangan::whereIn('IsuID', $isuIds)
             ->where('NA', 'N')
             ->get();
-            
+        
         // Update program rektors list based on filtered program pengembangans
         $programRektors = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
             ->where('NA', 'N')
@@ -182,19 +182,19 @@ class KegiatanController extends Controller
         $programIds = ProgramPengembangan::where('IsuID', $request->isuID)
             ->where('NA', 'N')
             ->pluck('ProgramPengembanganID');
-            
+        
         // Filter program rektors by program pengembangan IDs
         $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
             ->where('NA', 'N')
             ->pluck('ProgramRektorID');
-            
+        
         $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
         
         // Update program pengembangans list based on selected isu
         $programPengembangans = ProgramPengembangan::where('IsuID', $request->isuID)
             ->where('NA', 'N')
             ->get();
-            
+        
         // Update program rektors list based on filtered program pengembangans
         $programRektors = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
             ->where('NA', 'N')
@@ -207,7 +207,7 @@ class KegiatanController extends Controller
         $programRektorIds = ProgramRektor::where('ProgramPengembanganID', $request->programPengembanganID)
             ->where('NA', 'N')
             ->pluck('ProgramRektorID');
-            
+        
         $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
         
         // Update program rektors list based on selected program pengembangan
@@ -234,11 +234,11 @@ class KegiatanController extends Controller
             });
         });
     }
-
+    
     // Get the filtered results
     $kegiatans = $kegiatansQuery->orderBy('KegiatanID', 'asc')->get();
     
-    // Calculate summary data
+    // Calculate summary data based on filtered kegiatans
     $summary = $this->calculateSummary($kegiatans);
     
     // Get the selected filter values (for re-populating the selects)
@@ -264,20 +264,20 @@ class KegiatanController extends Controller
         }
         
         return view('kegiatans.index', compact(
-            'kegiatans', 
-            'renstras', 
-            'pilars', 
-            'isuStrategis', 
-            'programPengembangans', 
+            'kegiatans',
+            'renstras',
+            'pilars',
+            'isuStrategis',
+            'programPengembangans',
             'programRektors',
             'units',
             'allKegiatan',
             'statusOptions',
             'summary',
-            'selectedRenstra', 
-            'selectedPilar', 
-            'selectedIsu', 
-            'selectedProgramPengembangan', 
+            'selectedRenstra',
+            'selectedPilar',
+            'selectedIsu',
+            'selectedProgramPengembangan',
             'selectedProgramRektor',
             'selectedUnit',
             'selectedKegiatanIds',
@@ -330,20 +330,20 @@ class KegiatanController extends Controller
     }
     
     return view('kegiatans.index', compact(
-        'kegiatans', 
-        'renstras', 
-        'pilars', 
-        'isuStrategis', 
-        'programPengembangans', 
+        'kegiatans',
+        'renstras',
+        'pilars',
+        'isuStrategis',
+        'programPengembangans',
         'programRektors',
         'units',
         'allKegiatan',
         'statusOptions',
         'summary',
-        'selectedRenstra', 
-        'selectedPilar', 
-        'selectedIsu', 
-        'selectedProgramPengembangan', 
+        'selectedRenstra',
+        'selectedPilar',
+        'selectedIsu',
+        'selectedProgramPengembangan',
         'selectedProgramRektor',
         'selectedUnit',
         'selectedKegiatanIds',
@@ -351,12 +351,6 @@ class KegiatanController extends Controller
     ));
 }
 
-/**
- * Calculate summary data for the dashboard
- * 
- * @param Collection $kegiatans
- * @return array
- */
 
 /**
  * Calculate summary data for the dashboard
@@ -464,6 +458,7 @@ private function calculateSummary($kegiatans)
     
     return $summary;
 }
+
 
    
      private function buildTreeData($kegiatans)
