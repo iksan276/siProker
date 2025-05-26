@@ -358,6 +358,12 @@ public function index(Request $request)
  * @param Collection $kegiatans
  * @return array
  */
+/**
+ * Calculate summary data for the dashboard
+ * 
+ * @param Collection $kegiatans
+ * @return array
+ */
 private function calculateSummary($kegiatans)
 {
     // Initialize summary data structure with all possible status types
@@ -395,7 +401,8 @@ private function calculateSummary($kegiatans)
                     'T' => 0, // Ditolak
                     'R' => 0, // Revisi
                 ],
-                'jumlah' => 0 // Total amount
+                'jumlah' => 0, // Total amount for Y and N status only
+                'jumlah_all' => 0 // Total amount for all status
             ],
             'subKegiatan' => [
                 'total' => 0,
@@ -405,7 +412,8 @@ private function calculateSummary($kegiatans)
                     'T' => 0, // Ditolak
                     'R' => 0, // Revisi
                 ],
-                'jumlah' => 0 // Total amount
+                'jumlah' => 0, // Total amount for Y and N status only
+                'jumlah_all' => 0 // Total amount for all status
             ]
         ]
     ];
@@ -439,7 +447,14 @@ private function calculateSummary($kegiatans)
                 if (isset($summary['rab']['subKegiatan']['status'][$rab->Status])) {
                     $summary['rab']['subKegiatan']['status'][$rab->Status]++;
                 }
-                $summary['rab']['subKegiatan']['jumlah'] += $rab->Jumlah;
+                
+                // Add to total amount for all status
+                $summary['rab']['subKegiatan']['jumlah_all'] += $rab->Jumlah;
+                
+                // Only add to jumlah if status is Y (Disetujui) or N (Menunggu)
+                if (in_array($rab->Status, ['Y', 'N'])) {
+                    $summary['rab']['subKegiatan']['jumlah'] += $rab->Jumlah;
+                }
             }
         }
         
@@ -452,12 +467,20 @@ private function calculateSummary($kegiatans)
             if (isset($summary['rab']['kegiatan']['status'][$rab->Status])) {
                 $summary['rab']['kegiatan']['status'][$rab->Status]++;
             }
-            $summary['rab']['kegiatan']['jumlah'] += $rab->Jumlah;
+            
+            // Add to total amount for all status
+            $summary['rab']['kegiatan']['jumlah_all'] += $rab->Jumlah;
+            
+            // Only add to jumlah if status is Y (Disetujui) or N (Menunggu)
+            if (in_array($rab->Status, ['Y', 'N'])) {
+                $summary['rab']['kegiatan']['jumlah'] += $rab->Jumlah;
+            }
         }
     }
     
     return $summary;
 }
+
 
 
    
@@ -663,6 +686,107 @@ private function calculateSummary($kegiatans)
 }
 
     
+public function getSummary(Request $request)
+{
+    // Use the same filtering logic as in the index method
+    $kegiatansQuery = Kegiatan::with([
+        'programRektor',
+        'programRektor.programPengembangan.isuStrategis.pilar.renstra',
+        'createdBy',
+        'editedBy',
+        'subKegiatans',
+        'rabs'
+    ]);
+
+    // Apply all the same filters as in index method
+    if ($request->has('kegiatanID') && $request->kegiatanID) {
+        $kegiatanIds = explode(',', $request->kegiatanID);
+        $kegiatansQuery->whereIn('KegiatanID', $kegiatanIds);
+    }
+
+    if ($request->has('status') && $request->status) {
+        $kegiatansQuery->where('Status', $request->status);
+    }
+
+    if ($request->has('renstraID') && $request->renstraID) {
+        $pilarIds = Pilar::where('RenstraID', $request->renstraID)
+            ->where('NA', 'N')
+            ->pluck('PilarID');
+        
+        $isuIds = IsuStrategis::whereIn('PilarID', $pilarIds)
+            ->where('NA', 'N')
+            ->pluck('IsuID');
+        
+        $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
+            ->where('NA', 'N')
+            ->pluck('ProgramPengembanganID');
+        
+        $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
+            ->where('NA', 'N')
+            ->pluck('ProgramRektorID');
+        
+        $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
+    }
+
+    if ($request->has('pilarID') && $request->pilarID) {
+        $isuIds = IsuStrategis::where('PilarID', $request->pilarID)
+            ->where('NA', 'N')
+            ->pluck('IsuID');
+        
+        $programIds = ProgramPengembangan::whereIn('IsuID', $isuIds)
+            ->where('NA', 'N')
+            ->pluck('ProgramPengembanganID');
+        
+        $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
+            ->where('NA', 'N')
+            ->pluck('ProgramRektorID');
+        
+        $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
+    }
+
+    if ($request->has('isuID') && $request->isuID) {
+        $programIds = ProgramPengembangan::where('IsuID', $request->isuID)
+            ->where('NA', 'N')
+            ->pluck('ProgramPengembanganID');
+        
+        $programRektorIds = ProgramRektor::whereIn('ProgramPengembanganID', $programIds)
+            ->where('NA', 'N')
+            ->pluck('ProgramRektorID');
+        
+        $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
+    }
+
+    if ($request->has('programPengembanganID') && $request->programPengembanganID) {
+        $programRektorIds = ProgramRektor::where('ProgramPengembanganID', $request->programPengembanganID)
+            ->where('NA', 'N')
+            ->pluck('ProgramRektorID');
+        
+        $kegiatansQuery->whereIn('ProgramRektorID', $programRektorIds);
+    }
+
+    if ($request->has('programRektorID') && $request->programRektorID) {
+        $kegiatansQuery->where('ProgramRektorID', $request->programRektorID);
+    }
+
+    if ($request->has('unitID') && $request->unitID) {
+        $unitIds = explode(',', $request->unitID);
+        $kegiatansQuery->whereHas('programRektor', function($query) use ($unitIds) {
+            $query->where(function($q) use ($unitIds) {
+                foreach ($unitIds as $unitId) {
+                    $q->orWhere('PelaksanaID', $unitId)
+                    ->orWhere('PelaksanaID', 'LIKE', $unitId.',%')
+                    ->orWhere('PelaksanaID', 'LIKE', '%,'.$unitId.',%')
+                    ->orWhere('PelaksanaID', 'LIKE', '%,'.$unitId);
+                }
+            });
+        });
+    }
+
+    $kegiatans = $kegiatansQuery->orderBy('KegiatanID', 'asc')->get();
+    $summary = $this->calculateSummary($kegiatans);
+
+    return response()->json(['summary' => $summary]);
+}
 
 
     

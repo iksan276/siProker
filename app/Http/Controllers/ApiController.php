@@ -189,9 +189,6 @@ public function getSubKegiatanDetails($id)
 /**
  * Update status for a Kegiatan
  */
-/**
- * Update status for a Kegiatan
- */
 public function updateKegiatanStatus(Request $request, $id){
     // Validate request
     $request->validate([
@@ -271,20 +268,9 @@ public function updateKegiatanStatus(Request $request, $id){
             }
         }
 
-        // Get updated kegiatan with all related data for summary calculation
-        $updatedKegiatan = Kegiatan::with([
-            'subKegiatans.rabs',
-            'rabs'
-        ])->find($id);
-        
-        // Calculate updated summary for this kegiatan
-        $kegiatanController = new \App\Http\Controllers\KegiatanController();
-        $summary = $kegiatanController->calculateSummary(collect([$updatedKegiatan]));
-
         return response()->json([
             'success' => true,
-            'message' => 'Status kegiatan berhasil diupdate',
-            'summary' => $summary
+            'message' => 'Status kegiatan berhasil diupdate'
         ]);
     } catch (\Exception $e) {
         return response()->json([
@@ -293,6 +279,7 @@ public function updateKegiatanStatus(Request $request, $id){
         ], 500);
     }
 }
+
 
 /**
  * Update status for a SubKegiatan
@@ -340,20 +327,9 @@ public function updateSubKegiatanStatus(Request $request, $id)
                 ]);
         }
 
-        // Get the parent kegiatan with all related data for summary calculation
-        $kegiatan = Kegiatan::with([
-            'subKegiatans.rabs',
-            'rabs'
-        ])->find($subKegiatan->KegiatanID);
-        
-        // Calculate updated summary for this kegiatan
-        $kegiatanController = new \App\Http\Controllers\KegiatanController();
-        $summary = $kegiatanController->calculateSummary(collect([$kegiatan]));
-
         return response()->json([
             'success' => true,
-            'message' => 'Status sub kegiatan berhasil diupdate',
-            'summary' => $summary
+            'message' => 'Status sub kegiatan berhasil diupdate'
         ]);
     } catch (\Exception $e) {
         return response()->json([
@@ -362,6 +338,7 @@ public function updateSubKegiatanStatus(Request $request, $id)
         ], 500);
     }
 }
+
 
 /**
  * Update status for a RAB
@@ -398,20 +375,9 @@ public function updateRabStatus(Request $request, $id)
             $requestLog->save();
         }
 
-        // Get the parent kegiatan with all related data for summary calculation
-        $kegiatan = Kegiatan::with([
-            'subKegiatans.rabs',
-            'rabs'
-        ])->find($rab->KegiatanID);
-        
-        // Calculate updated summary for this kegiatan
-        $kegiatanController = new \App\Http\Controllers\KegiatanController();
-        $summary = $kegiatanController->calculateSummary(collect([$kegiatan]));
-
         return response()->json([
             'success' => true,
-            'message' => 'Status RAB berhasil diupdate',
-            'summary' => $summary
+            'message' => 'Status RAB berhasil diupdate'
         ]);
     } catch (\Exception $e) {
         return response()->json([
@@ -420,7 +386,6 @@ public function updateRabStatus(Request $request, $id)
         ], 500);
     }
 }
-
 
 
 
