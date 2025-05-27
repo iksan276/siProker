@@ -113,197 +113,207 @@
 </div>
 
 <div class="card shadow mb-3">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Resume</h6>
+    <div class="card-header py-3" id="resumeHeading">
+        <h6 class="m-0 font-weight-bold text-primary d-flex justify-content-between align-items-center" 
+            data-toggle="collapse" 
+            data-target="#resumeCollapse" 
+            aria-expanded="false" 
+            aria-controls="resumeCollapse"
+            style="cursor: pointer;">
+            Resume
+            <i class="fas fa-chevron-up collapse-icon"></i>
+        </h6>
     </div>
-    <div class="card-body">
-        <div class="container-fluid p-0">
-            <!-- Summary Cards Row -->
-            <div class="row mb-3">
-                <!-- Kegiatan Card -->
-                <div class="col-xl-3 col-md-6 mb-2">
-                    <div class="card border-left-primary shadow h-100 py-1">
-                        <div class="card-body py-2">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                        Kegiatan <span class="badge badge-primary ml-1 kegiatan-total">{{ $summary['kegiatan']['total'] }}</span>
+    <div id="resumeCollapse" class="collapse" aria-labelledby="resumeHeading">
+        <div class="card-body">
+            <div class="container-fluid p-0">
+                <!-- Summary Cards Row -->
+                <div class="row mb-3">
+                    <!-- Kegiatan Card -->
+                    <div class="col-xl-3 col-md-6 mb-2">
+                        <div class="card border-left-primary shadow h-100 py-1">
+                            <div class="card-body py-2">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            Kegiatan <span class="badge badge-primary ml-1 kegiatan-total">{{ $summary['kegiatan']['total'] }}</span>
+                                        </div>
+                                        <div class="row mt-2 no-gutters">
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-warning kegiatan-menunggu">{{ $summary['kegiatan']['status']['N'] }}</span> Menunggu
+                                            </div>
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-success kegiatan-disetujui">{{ $summary['kegiatan']['status']['Y'] }}</span> Disetujui
+                                            </div>
+                                            <div class="col-auto">
+                                                <span class="badge badge-danger kegiatan-ditolak">{{ $summary['kegiatan']['status']['T'] }}</span> Ditolak
+                                            </div>
+                                        </div>
+                                        <div class="row mt-1 no-gutters">
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-info kegiatan-revisi">{{ $summary['kegiatan']['status']['R'] }}</span> Revisi
+                                            </div>
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-primary kegiatan-pengajuan">{{ $summary['kegiatan']['status']['P'] }}</span> Pengajuan
+                                            </div>
+                                        </div>
+                                        <div class="row mt-1 no-gutters">
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-warning kegiatan-tor">{{ $summary['kegiatan']['status']['PT'] }}</span> TOR
+                                            </div>
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-success kegiatan-tor-disetujui">{{ $summary['kegiatan']['status']['YT'] }}</span> TOR Disetujui
+                                            </div>
+                                        </div>
+                                        <div class="row mt-1 no-gutters">
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-danger kegiatan-tor-ditolak">{{ $summary['kegiatan']['status']['TT'] }}</span> TOR Ditolak
+                                            </div>
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-info kegiatan-tor-revisi">{{ $summary['kegiatan']['status']['RT'] }}</span> TOR Revisi
+                                            </div>
+                                            <div class="col-auto">
+                                                <span class="badge badge-warning kegiatan-tunda">{{ $summary['kegiatan']['status']['TP'] }}</span> Tunda
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="row mt-2 no-gutters">
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-warning kegiatan-menunggu">{{ $summary['kegiatan']['status']['N'] }}</span> Menunggu
-                                        </div>
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-success kegiatan-disetujui">{{ $summary['kegiatan']['status']['Y'] }}</span> Disetujui
-                                        </div>
-                                        <div class="col-auto">
-                                            <span class="badge badge-danger kegiatan-ditolak">{{ $summary['kegiatan']['status']['T'] }}</span> Ditolak
-                                        </div>
-                                    </div>
-                                    <div class="row mt-1 no-gutters">
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-info kegiatan-revisi">{{ $summary['kegiatan']['status']['R'] }}</span> Revisi
-                                        </div>
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-primary kegiatan-pengajuan">{{ $summary['kegiatan']['status']['P'] }}</span> Pengajuan
-                                        </div>
-                                    </div>
-                                    <div class="row mt-1 no-gutters">
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-warning kegiatan-tor">{{ $summary['kegiatan']['status']['PT'] }}</span> TOR
-                                        </div>
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-success kegiatan-tor-disetujui">{{ $summary['kegiatan']['status']['YT'] }}</span> TOR Disetujui
-                                        </div>
-                                    </div>
-                                    <div class="row mt-1 no-gutters">
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-danger kegiatan-tor-ditolak">{{ $summary['kegiatan']['status']['TT'] }}</span> TOR Ditolak
-                                        </div>
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-info kegiatan-tor-revisi">{{ $summary['kegiatan']['status']['RT'] }}</span> TOR Revisi
-                                        </div>
-                                        <div class="col-auto">
-                                            <span class="badge badge-warning kegiatan-tunda">{{ $summary['kegiatan']['status']['TP'] }}</span> Tunda
-                                        </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
                                     </div>
                                 </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sub Kegiatan Card -->
+                    <div class="col-xl-3 col-md-6 mb-2">
+                        <div class="card border-left-success shadow h-100 py-1">
+                            <div class="card-body py-2">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                            Sub Kegiatan <span class="badge badge-success ml-1 subkegiatan-total">{{ $summary['subKegiatan']['total'] }}</span>
+                                        </div>
+                                        <div class="row mt-2 no-gutters">
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-warning subkegiatan-menunggu">{{ $summary['subKegiatan']['status']['N'] }}</span> Menunggu
+                                            </div>
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-success subkegiatan-disetujui">{{ $summary['subKegiatan']['status']['Y'] }}</span> Disetujui
+                                            </div>
+                                        </div>
+                                        <div class="row mt-1 no-gutters">
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-danger subkegiatan-ditolak">{{ $summary['subKegiatan']['status']['T'] }}</span> Ditolak
+                                            </div>
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-info subkegiatan-revisi">{{ $summary['subKegiatan']['status']['R'] }}</span> Revisi
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-tasks fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RAB Kegiatan Card -->
+                    <div class="col-xl-3 col-md-6 mb-2">
+                        <div class="card border-left-info shadow h-100 py-1">
+                            <div class="card-body py-2">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                            RAB Kegiatan <span class="badge badge-info ml-1 rab-kegiatan-total">{{ $summary['rab']['kegiatan']['total'] }}</span>
+                                        </div>
+                                        <div class="text-xs font-weight-bold text-gray-800 mb-2">
+                                            Total: <span class="rab-kegiatan-jumlah">Rp {{ number_format($summary['rab']['kegiatan']['jumlah'], 0, ',', '.') }}</span>
+                                        </div>
+                                        <div class="row mt-1 no-gutters">
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-warning rab-kegiatan-menunggu">{{ $summary['rab']['kegiatan']['status']['N'] }}</span> Menunggu
+                                            </div>
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-success rab-kegiatan-disetujui">{{ $summary['rab']['kegiatan']['status']['Y'] }}</span> Disetujui
+                                            </div>
+                                        </div>
+                                        <div class="row mt-1 no-gutters">
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-danger rab-kegiatan-ditolak">{{ $summary['rab']['kegiatan']['status']['T'] }}</span> Ditolak
+                                            </div>
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-info rab-kegiatan-revisi">{{ $summary['rab']['kegiatan']['status']['R'] }}</span> Revisi
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RAB Sub Kegiatan Card -->
+                    <div class="col-xl-3 col-md-6 mb-2">
+                        <div class="card border-left-warning shadow h-100 py-1">
+                            <div class="card-body py-2">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                            RAB Sub Kegiatan <span class="badge badge-warning ml-1 rab-subkegiatan-total">{{ $summary['rab']['subKegiatan']['total'] }}</span>
+                                        </div>
+                                        <div class="text-xs font-weight-bold text-gray-800 mb-2">
+                                            Total: <span class="rab-subkegiatan-jumlah">Rp {{ number_format($summary['rab']['subKegiatan']['jumlah'], 0, ',', '.') }}</span>
+                                        </div>
+                                        <div class="row mt-1 no-gutters">
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-warning rab-subkegiatan-menunggu">{{ $summary['rab']['subKegiatan']['status']['N'] }}</span> Menunggu
+                                            </div>
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-success rab-subkegiatan-disetujui">{{ $summary['rab']['subKegiatan']['status']['Y'] }}</span> Disetujui
+                                            </div>
+                                        </div>
+                                        <div class="row mt-1 no-gutters">
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-danger rab-subkegiatan-ditolak">{{ $summary['rab']['subKegiatan']['status']['T'] }}</span> Ditolak
+                                            </div>
+                                            <div class="col-auto pr-2">
+                                                <span class="badge badge-info rab-subkegiatan-revisi">{{ $summary['rab']['subKegiatan']['status']['R'] }}</span> Revisi
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-calculator fa-2x text-gray-300"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sub Kegiatan Card -->
-                <div class="col-xl-3 col-md-6 mb-2">
-                    <div class="card border-left-success shadow h-100 py-1">
-                        <div class="card-body py-2">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                        Sub Kegiatan <span class="badge badge-success ml-1 subkegiatan-total">{{ $summary['subKegiatan']['total'] }}</span>
-                                    </div>
-                                    <div class="row mt-2 no-gutters">
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-warning subkegiatan-menunggu">{{ $summary['subKegiatan']['status']['N'] }}</span> Menunggu
+                <!-- Total Summary Row -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-left-dark shadow py-1">
+                            <div class="card-body py-2">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">
+                                            Total Anggaran Keseluruhan
                                         </div>
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-success subkegiatan-disetujui">{{ $summary['subKegiatan']['status']['Y'] }}</span> Disetujui
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800 total-anggaran-keseluruhan">
+                                            Rp {{ number_format($summary['rab']['kegiatan']['jumlah'] + $summary['rab']['subKegiatan']['jumlah'], 0, ',', '.') }}
                                         </div>
-                                    </div>
-                                    <div class="row mt-1 no-gutters">
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-danger subkegiatan-ditolak">{{ $summary['subKegiatan']['status']['T'] }}</span> Ditolak
-                                        </div>
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-info subkegiatan-revisi">{{ $summary['subKegiatan']['status']['R'] }}</span> Revisi
+                                        <div class="text-xs text-gray-600 mt-1">
+                                            Total Item RAB: <span class="total-item-rab">{{ $summary['rab']['kegiatan']['total'] + $summary['rab']['subKegiatan']['total'] }}</span>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-tasks fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- RAB Kegiatan Card -->
-                <div class="col-xl-3 col-md-6 mb-2">
-                    <div class="card border-left-info shadow h-100 py-1">
-                        <div class="card-body py-2">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                        RAB Kegiatan <span class="badge badge-info ml-1 rab-kegiatan-total">{{ $summary['rab']['kegiatan']['total'] }}</span>
+                                    <div class="col-auto">
+                                        <i class="fas fa-chart-pie fa-2x text-gray-300"></i>
                                     </div>
-                                    <div class="text-xs font-weight-bold text-gray-800 mb-2">
-                                        Total: <span class="rab-kegiatan-jumlah">Rp {{ number_format($summary['rab']['kegiatan']['jumlah'], 0, ',', '.') }}</span>
-                                    </div>
-                                    <div class="row mt-1 no-gutters">
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-warning rab-kegiatan-menunggu">{{ $summary['rab']['kegiatan']['status']['N'] }}</span> Menunggu
-                                        </div>
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-success rab-kegiatan-disetujui">{{ $summary['rab']['kegiatan']['status']['Y'] }}</span> Disetujui
-                                        </div>
-                                    </div>
-                                    <div class="row mt-1 no-gutters">
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-danger rab-kegiatan-ditolak">{{ $summary['rab']['kegiatan']['status']['T'] }}</span> Ditolak
-                                        </div>
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-info rab-kegiatan-revisi">{{ $summary['rab']['kegiatan']['status']['R'] }}</span> Revisi
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- RAB Sub Kegiatan Card -->
-                <div class="col-xl-3 col-md-6 mb-2">
-                    <div class="card border-left-warning shadow h-100 py-1">
-                        <div class="card-body py-2">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                        RAB Sub Kegiatan <span class="badge badge-warning ml-1 rab-subkegiatan-total">{{ $summary['rab']['subKegiatan']['total'] }}</span>
-                                    </div>
-                                    <div class="text-xs font-weight-bold text-gray-800 mb-2">
-                                        Total: <span class="rab-subkegiatan-jumlah">Rp {{ number_format($summary['rab']['subKegiatan']['jumlah'], 0, ',', '.') }}</span>
-                                    </div>
-                                    <div class="row mt-1 no-gutters">
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-warning rab-subkegiatan-menunggu">{{ $summary['rab']['subKegiatan']['status']['N'] }}</span> Menunggu
-                                        </div>
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-success rab-subkegiatan-disetujui">{{ $summary['rab']['subKegiatan']['status']['Y'] }}</span> Disetujui
-                                        </div>
-                                    </div>
-                                    <div class="row mt-1 no-gutters">
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-danger rab-subkegiatan-ditolak">{{ $summary['rab']['subKegiatan']['status']['T'] }}</span> Ditolak
-                                        </div>
-                                        <div class="col-auto pr-2">
-                                            <span class="badge badge-info rab-subkegiatan-revisi">{{ $summary['rab']['subKegiatan']['status']['R'] }}</span> Revisi
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-calculator fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Total Summary Row -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card border-left-dark shadow py-1">
-                        <div class="card-body py-2">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">
-                                        Total Anggaran Keseluruhan
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800 total-anggaran-keseluruhan">
-                                        Rp {{ number_format($summary['rab']['kegiatan']['jumlah'] + $summary['rab']['subKegiatan']['jumlah'], 0, ',', '.') }}
-                                    </div>
-                                    <div class="text-xs text-gray-600 mt-1">
-                                        Total Item RAB: <span class="total-item-rab">{{ $summary['rab']['kegiatan']['total'] + $summary['rab']['subKegiatan']['total'] }}</span>
-                                    </div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-chart-pie fa-2x text-gray-300"></i>
                                 </div>
                             </div>
                         </div>
@@ -313,6 +323,7 @@
         </div>
     </div>
 </div>
+
 
 
 
@@ -382,6 +393,26 @@
 @push('styles')
 <link href="{{ asset('vendor/treegrid/css/jquery.treegrid.css') }}" rel="stylesheet">
 <style>
+    /* Accordion collapse icon animation */
+.collapse-icon {
+    transition: transform 0.3s ease;
+}
+
+
+
+/* Hover effect for accordion header */
+.card-header h6[data-toggle="collapse"]:hover {
+    background-color: rgba(78, 115, 223, 0.1);
+    border-radius: 5px;
+    padding: 5px;
+    transition: all 0.3s ease;
+}
+
+/* Smooth collapse animation */
+.collapse {
+    transition: all 0.3s ease;
+}
+
     /* Column styling */
     #tree-grid th {
         text-align: center;
@@ -550,6 +581,100 @@
     // Function to load pilars for a selected renstra
      // Function to load pilars for a renstra
      // Function to update the summary cards with new data
+function updateStatusVisibility() {
+    var selectedStatus = $('#statusFilter').val();
+    
+    // Reset semua status menjadi visible
+    $('.kegiatan-menunggu, .kegiatan-disetujui, .kegiatan-ditolak, .kegiatan-revisi, .kegiatan-pengajuan, .kegiatan-tor, .kegiatan-tor-disetujui, .kegiatan-tor-ditolak, .kegiatan-tor-revisi, .kegiatan-tunda').parent().show();
+    
+    // Jika ada status yang dipilih, sembunyikan yang lain
+    if (selectedStatus) {
+        // Sembunyikan semua status terlebih dahulu
+        $('.kegiatan-menunggu, .kegiatan-disetujui, .kegiatan-ditolak, .kegiatan-revisi, .kegiatan-pengajuan, .kegiatan-tor, .kegiatan-tor-disetujui, .kegiatan-tor-ditolak, .kegiatan-tor-revisi, .kegiatan-tunda').parent().hide();
+        
+        // Tampilkan hanya status yang sesuai dengan filter
+        switch(selectedStatus) {
+            case 'N':
+                $('.kegiatan-menunggu').parent().show();
+                break;
+            case 'Y':
+                $('.kegiatan-disetujui').parent().show();
+                break;
+            case 'T':
+                $('.kegiatan-ditolak').parent().show();
+                break;
+            case 'R':
+                $('.kegiatan-revisi').parent().show();
+                break;
+            case 'P':
+                $('.kegiatan-pengajuan').parent().show();
+                break;
+            case 'PT':
+                $('.kegiatan-tor').parent().show();
+                break;
+            case 'YT':
+                $('.kegiatan-tor-disetujui').parent().show();
+                break;
+            case 'TT':
+                $('.kegiatan-tor-ditolak').parent().show();
+                break;
+            case 'RT':
+                $('.kegiatan-tor-revisi').parent().show();
+                break;
+            case 'TP':
+                $('.kegiatan-tunda').parent().show();
+                break;
+        }
+    }
+}
+
+// Handle accordion collapse icon rotation
+$(document).ready(function() {
+    // Handle collapse events
+    $('#resumeCollapse').on('show.bs.collapse', function () {
+        // When expanding, change to chevron-down
+        $('.collapse-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+    });
+    
+    $('#resumeCollapse').on('hide.bs.collapse', function () {
+        // When collapsing, change back to chevron-up
+        $('.collapse-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+    });
+    
+    // Optional: Save collapse state to localStorage
+    $('#resumeCollapse').on('shown.bs.collapse', function () {
+        localStorage.setItem('resumeCollapseState', 'expanded');
+    });
+    
+    $('#resumeCollapse').on('hidden.bs.collapse', function () {
+        localStorage.setItem('resumeCollapseState', 'collapsed');
+    });
+    
+    // Optional: Restore collapse state from localStorage
+    var savedState = localStorage.getItem('resumeCollapseState');
+    if (savedState === 'expanded') {
+        $('#resumeCollapse').collapse('show');
+        $('.collapse-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+    }
+    
+    // Handle click on header to toggle collapse
+    $('[data-toggle="collapse"]').on('click', function() {
+        var target = $(this).attr('data-target');
+        var isExpanded = $(target).hasClass('show');
+        
+        // Update aria-expanded attribute
+        $(this).attr('aria-expanded', !isExpanded);
+    });
+});
+
+function autoExpandResumeOnFilter() {
+    if (!$('#resumeCollapse').hasClass('show')) {
+        $('#resumeCollapse').collapse('show');
+        $('.collapse-icon').removeClass('collapsed');
+    }
+}
+
+// Modifikasi fungsi updateSummaryCards untuk memanggil updateStatusVisibility
 function updateSummaryCards(summary) {
     // Update Kegiatan card
     $('.kegiatan-total').text(summary.kegiatan.total);
@@ -580,7 +705,6 @@ function updateSummaryCards(summary) {
     $('.rab-kegiatan-revisi').text(summary.rab.kegiatan.status.R);
 
     // Update RAB Sub Kegiatan card
-     // Update RAB Sub Kegiatan card
     $('.rab-subkegiatan-total').text(summary.rab.subKegiatan.total);
     $('.rab-subkegiatan-jumlah').text('Rp ' + new Intl.NumberFormat('id-ID').format(summary.rab.subKegiatan.jumlah));
     $('.rab-subkegiatan-menunggu').text(summary.rab.subKegiatan.status.N);
@@ -589,13 +713,13 @@ function updateSummaryCards(summary) {
     $('.rab-subkegiatan-revisi').text(summary.rab.subKegiatan.status.R);
 
     // Update Total Summary
-     const totalAnggaranYN = summary.rab.kegiatan.jumlah + summary.rab.subKegiatan.jumlah;
+    const totalAnggaranYN = summary.rab.kegiatan.jumlah + summary.rab.subKegiatan.jumlah;
     const totalAnggaranSemua = summary.rab.kegiatan.jumlah_all + summary.rab.subKegiatan.jumlah_all;
     const totalItemRabYN = (summary.rab.kegiatan.status.Y + summary.rab.kegiatan.status.N) + 
                           (summary.rab.subKegiatan.status.Y + summary.rab.subKegiatan.status.N);
     const totalItemRab = summary.rab.kegiatan.total + summary.rab.subKegiatan.total;
     
-  $('.total-anggaran-keseluruhan').text('Rp ' + new Intl.NumberFormat('id-ID').format(totalAnggaranYN));
+    $('.total-anggaran-keseluruhan').text('Rp ' + new Intl.NumberFormat('id-ID').format(totalAnggaranYN));
     $('.total-item-rab-yn').text(totalItemRabYN);
     $('.total-item-rab').text(totalItemRab);
     $('.total-anggaran-semua').text('Rp ' + new Intl.NumberFormat('id-ID').format(totalAnggaranSemua));
@@ -605,7 +729,11 @@ function updateSummaryCards(summary) {
     setTimeout(function() {
         $('.kegiatan-total, .subkegiatan-total, .rab-kegiatan-total, .rab-subkegiatan-total, .total-anggaran-keseluruhan').addClass('summary-update');
     }, 100);
+
+    // Update status visibility berdasarkan filter yang aktif
+    updateStatusVisibility();
 }
+
 
 // Function to update summary based on current filters
 function updateSummary() {
@@ -1013,6 +1141,8 @@ $(document).ready(function() {
         eraseCookie('selected_status');
         updateUrlParameter('status', null);
     }
+    
+      updateStatusVisibility();
     
     // Reload TreeTable with status filter
     isFiltering = true;
