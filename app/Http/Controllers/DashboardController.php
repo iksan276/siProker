@@ -15,6 +15,9 @@ use App\Models\Renstra;
 use App\Models\Satuan;
 use App\Models\Unit;
 use App\Models\User;
+use App\Imports\MultiSheetImport;
+use App\Exports\MultiSheetExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DashboardController extends Controller
 {
@@ -187,5 +190,38 @@ class DashboardController extends Controller
             'programPengembangans',
             'jenisKegiatans'
         ));
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        try {
+            Excel::import(new MultiSheetImport, $request->file('file'));
+            
+            return redirect()->route('dashboard')->with('success', 'Data berhasil diimport!');
+        } catch (\Exception $e) {
+            return redirect()->route('dashboard')->with('error', 'Error importing data: ' . $e->getMessage());
+        }
+    }
+
+    public function export()
+    {
+        try {
+            return Excel::download(new MultiSheetExport, 'dashboard_data_' . date('Y-m-d_H-i-s') . '.xlsx');
+        } catch (\Exception $e) {
+            return redirect()->route('dashboard')->with('error', 'Error exporting data: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        try {
+            return Excel::download(new MultiSheetExport, 'template_dashboard_data.xlsx');
+        } catch (\Exception $e) {
+            return redirect()->route('dashboard')->with('error', 'Error downloading template: ' . $e->getMessage());
+        }
     }
 }

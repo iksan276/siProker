@@ -4,10 +4,50 @@
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-3 text-gray-800">Dashboard</h1>
-    <button class="btn btn-sm btn-primary shadow-sm mb-3" data-toggle="modal" data-target="#filterModal">
-        <i class="fas fa-filter fa-sm text-white-50"></i> Filter Data
+    <div class="d-flex">
+        <button class="btn btn-sm btn-primary shadow-sm mb-3 mr-2" data-toggle="modal" data-target="#filterModal">
+            <i class="fas fa-filter fa-sm text-white-50"></i> Filter Data
+        </button>
+        @if(auth()->user()->level == 1)
+        <div class="dropdown">
+            <button class="btn btn-sm btn-success shadow-sm mb-3 dropdown-toggle" type="button" id="importExportDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-file-excel fa-sm text-white-50"></i> Import/Export
+            </button>
+            <div class="dropdown-menu" aria-labelledby="importExportDropdown">
+                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#importModal">
+                    <i class="fas fa-upload fa-sm text-gray-400"></i> Import Data
+                </a>
+                <!-- <a class="dropdown-item" href="{{ route('dashboard.export') }}">
+                    <i class="fas fa-download fa-sm text-gray-400"></i> Export Data
+                </a> -->
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{{ route('dashboard.template') }}">
+                    <i class="fas fa-file-download fa-sm text-gray-400"></i> Download Template
+                </a>
+            </div>
+        </div>
+        @endif
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ session('success') }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
     </button>
 </div>
+@endif
+
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ session('error') }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+@endif
 
 <!-- Filter Summary -->
 @if($renstraId || $pilarId || $isuId || $programPengembanganId || $jenisKegiatanId || $year != date('Y'))
@@ -173,6 +213,7 @@
                 </div>
             </div>
             <!-- Card Body -->
+                     <!-- Card Body -->
             <div class="card-body">
                 <div class="chart-bar">
                     <canvas id="jenisKegiatanBarChart"></canvas>
@@ -255,6 +296,54 @@
     </div>
 </div>
 
+<!-- Import Modal -->
+@if(auth()->user()->level == 1)
+<div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">Import Data</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('dashboard.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="file">Select Excel File</label>
+                        <input type="file" class="form-control-file" id="file" name="file" accept=".xlsx,.xls" required>
+                        <small class="form-text text-muted">
+                            File harus berformat Excel (.xlsx atau .xls) dengan multiple sheets sesuai urutan:
+                            <br>1. Renstra
+                            <br>2. Pilar  
+                            <br>3. Isu Strategis
+                            <br>4. Program Pengembangan
+                            <br>5. Indikator Kinerja
+                            <br>6. Program Rektor
+                            <br>7. Kegiatan
+                        </small>
+                    </div>
+                    <div class="alert alert-warning">
+                        <strong>Perhatian:</strong>
+                        <ul class="mb-0">
+                            <li>Pastikan data diimport sesuai urutan sheet</li>
+                            <li>Data akan diimport secara berurutan untuk menjaga referensi foreign key</li>
+                            <li>Download template terlebih dahulu untuk melihat format yang benar</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Import Data
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
 
 <!-- Filter Modal -->
 <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
@@ -405,7 +494,7 @@
                         maxTicksLimit: 7
                     }
                 }],
-                yAxes: [{
+                              yAxes: [{
                     ticks: {
                         maxTicksLimit: 5,
                         padding: 10,
@@ -643,6 +732,11 @@
                 $('#program_pengembangan_id').append('<option value="">All Program Pengembangan</option>');
             }
         });
+
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 10000000);
     });
 </script>
 @endpush

@@ -43,6 +43,13 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+// Dashboard Import/Export routes
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::post('/dashboard/import', [DashboardController::class, 'import'])->name('dashboard.import');
+    Route::get('/dashboard/export', [DashboardController::class, 'export'])->name('dashboard.export');
+    Route::get('/dashboard/template', [DashboardController::class, 'downloadTemplate'])->name('dashboard.template');
+});
+
 // API routes for dashboard filters
 Route::middleware('auth')->prefix('api')->group(function() {
     Route::get('/pilars-by-renstra', 'App\Http\Controllers\ApiController@getPilarsByRenstra')->name('api.pilars-by-renstra');
