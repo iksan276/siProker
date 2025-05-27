@@ -418,7 +418,7 @@ function loadPilarsForRenstra(renstraID, selectedPilarId) {
         // Initialize DataTable with AJAX
         isuStrategisTable = $('#isuStrategisTable').DataTable({
             processing: true,
-            serverSide: false, // We're handling the data ourselves
+            serverSide: true, // We're handling the data ourselves
             ajax: {
                 url: '{{ route('isu-strategis.index') }}',
                 type: 'GET',

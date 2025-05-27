@@ -12,14 +12,28 @@ use Illuminate\Database\QueryException;
 
 class IsuStrategisController extends Controller
 {
-    public function index(Request $request)
-    {
-        // Get all active renstras for the filter
-        $renstras = Renstra::where('NA', 'N')->get();
-        
-        // Get all active pilars for the filter
-        $pilars = Pilar::where('NA', 'N')->get();
-        
+   public function index(Request $request)
+{
+    // Get all active renstras for the filter
+    $renstras = Renstra::where('NA', 'N')->get();
+    
+    // Get all active pilars for the filter
+    $pilars = Pilar::where('NA', 'N')->get();
+    
+    // Apply filter if renstraID is provided
+    if ($request->has('renstraID') && $request->renstraID) {
+        // Update pilars list based on selected renstra
+        $pilars = Pilar::where('RenstraID', $request->renstraID)
+            ->where('NA', 'N')
+            ->get();
+    }
+    
+    // Get the selected filter values (for re-populating the selects)
+    $selectedRenstra = $request->renstraID;
+    $selectedPilar = $request->pilarID;
+    
+    // If it's an AJAX request for DataTable, return JSON data
+    if ($request->ajax() && $request->wantsJson()) {
         // Base query
         $isuStrategisQuery = IsuStrategis::with(['pilar.renstra', 'createdBy', 'editedBy']);
         
@@ -31,11 +45,6 @@ class IsuStrategisController extends Controller
                 ->pluck('PilarID');
                 
             $isuStrategisQuery->whereIn('PilarID', $pilarIds);
-            
-            // Update pilars list based on selected renstra
-            $pilars = Pilar::where('RenstraID', $request->renstraID)
-                ->where('NA', 'N')
-                ->get();
         }
         
         // Apply filter if pilarID is provided
@@ -43,55 +52,93 @@ class IsuStrategisController extends Controller
             $isuStrategisQuery->where('PilarID', $request->pilarID);
         }
         
-        // Get the filtered results
-        $isuStrategis = $isuStrategisQuery->orderBy('IsuID', 'asc')->get();
+        // Handle DataTable server-side processing
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
+        $searchValue = $request->input('search.value');
+        $orderColumn = $request->input('order.0.column', 0);
+        $orderDirection = $request->input('order.0.dir', 'asc');
         
-        // Get the selected filter values (for re-populating the selects)
-        $selectedRenstra = $request->renstraID;
-        $selectedPilar = $request->pilarID;
+        // Define searchable columns
+        $searchableColumns = ['Nama'];
         
-        // If it's an AJAX request, return JSON data for DataTable
-        if ($request->ajax() && $request->wantsJson()) {
-            $data = [];
-            foreach ($isuStrategis as $index => $isu) {
-                // Format the actions HTML
-                $actions = '
-                    <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('isu-strategis.show', $isu->IsuID).'" data-title="Detail Isu Strategis">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('isu-strategis.edit', $isu->IsuID).'" data-title="Edit Isu Strategis">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button type="button" class="btn btn-danger btn-square btn-sm delete-isu" data-id="'.$isu->IsuID.'">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                ';
-                
-                // Format the NA status
-                $naStatus = '';
-                if ($isu->NA == 'Y') {
-                    $naStatus = '<span class="badge badge-danger">Non Aktif</span>';
-                } else if ($isu->NA == 'N') {
-                    $naStatus = '<span class="badge badge-success">Aktif</span>';
+        // Apply search filter
+        if (!empty($searchValue)) {
+            $isuStrategisQuery->where(function($query) use ($searchValue, $searchableColumns) {
+                foreach ($searchableColumns as $column) {
+                    $query->orWhere($column, 'like', '%' . $searchValue . '%');
                 }
-                
-                $data[] = [
-                    'no' => $index + 1,
-                    'pilar' => nl2br($isu->pilar->Nama),
-                    'nama' => nl2br($isu->Nama),
-                    'na' => $naStatus,
-                    'actions' => $actions,
-                    'row_class' => $isu->NA == 'Y' ? 'bg-light text-muted' : ''
-                ];
-            }
-            
-            return response()->json([
-                'data' => $data
-            ]);
+                // Also search in pilar name
+                $query->orWhereHas('pilar', function($q) use ($searchValue) {
+                    $q->where('Nama', 'like', '%' . $searchValue . '%');
+                });
+            });
         }
         
-        return view('isuStrategis.index', compact('isuStrategis', 'renstras', 'pilars', 'selectedRenstra', 'selectedPilar'));
+        // Get total records before pagination
+        $totalRecords = IsuStrategis::count();
+        $filteredRecords = $isuStrategisQuery->count();
+        
+        // Define sortable columns
+        $sortableColumns = ['IsuID', 'Nama', 'NA'];
+        
+        // Apply sorting
+        if (isset($sortableColumns[$orderColumn])) {
+            $isuStrategisQuery->orderBy($sortableColumns[$orderColumn], $orderDirection);
+        } else {
+            $isuStrategisQuery->orderBy('IsuID', 'asc');
+        }
+        
+        // Apply pagination
+        $isuStrategis = $isuStrategisQuery->skip($start)->take($length)->get();
+        
+        $data = [];
+        foreach ($isuStrategis as $index => $isu) {
+            // Format the actions HTML
+            $actions = '
+                <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('isu-strategis.show', $isu->IsuID).'" data-title="Detail Isu Strategis">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('isu-strategis.edit', $isu->IsuID).'" data-title="Edit Isu Strategis">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button type="button" class="btn btn-danger btn-square btn-sm delete-isu" data-id="'.$isu->IsuID.'">
+                    <i class="fas fa-trash"></i>
+                </button>
+            ';
+            
+            // Format the NA status
+            $naStatus = '';
+            if ($isu->NA == 'Y') {
+                $naStatus = '<span class="badge badge-danger">Non Aktif</span>';
+            } else if ($isu->NA == 'N') {
+                $naStatus = '<span class="badge badge-success">Aktif</span>';
+            }
+            
+            $data[] = [
+                'no' => $start + $index + 1,
+                'pilar' => nl2br($isu->pilar->Nama),
+                'nama' => nl2br($isu->Nama),
+                'na' => $naStatus,
+                'actions' => $actions,
+                'row_class' => $isu->NA == 'Y' ? 'bg-light text-muted' : ''
+            ];
+        }
+        
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $data
+        ]);
     }
+    
+    // For non-AJAX requests, get initial data for display
+    $isuStrategis = collect(); // Empty collection for initial load
+    
+    return view('isuStrategis.index', compact('isuStrategis', 'renstras', 'pilars', 'selectedRenstra', 'selectedPilar'));
+}
+
 
     public function create()
 {

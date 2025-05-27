@@ -15,11 +15,13 @@ use App\Models\RAB;
 
 class PilarController extends Controller
 {
-    public function index(Request $request)
-    {
-        // Get all active renstras for the filter
-        $renstras = Renstra::where('NA', 'N')->get();
-        
+   public function index(Request $request)
+{
+    // Get all active renstras for the filter
+    $renstras = Renstra::where('NA', 'N')->get();
+    
+    // If it's an AJAX request, return JSON data for DataTable
+    if ($request->ajax() && $request->wantsJson()) {
         // Base query
         $pilarsQuery = Pilar::with(['renstra', 'createdBy', 'editedBy', 'isuStrategis.programPengembangans.programRektors']);
         
@@ -28,82 +30,138 @@ class PilarController extends Controller
             $pilarsQuery->where('RenstraID', $request->renstraID);
         }
         
-              // Get the filtered results
-        $pilars = $pilarsQuery->orderBy('PilarID', 'asc')->get();
-        
-        // Get the selected filter values (for re-populating the selects)
-        $selectedRenstra = $request->renstraID;
-        $selectedTreeLevel = $request->treeLevel ?? 'pilar';
-        $selectedStatus = $request->status;
-        
-        // If user is not admin, prepare tree grid data
-        if (!auth()->user()->isAdmin()) {
-            $userId = Auth::id();
-            
-            if ($request->ajax() && $request->wantsJson()) {
-                $treeData = $this->buildTreeData($pilars, $userId, $selectedTreeLevel, $selectedStatus);
-                return response()->json([
-                    'data' => $treeData
-                ]);
-            }
-            
-            return view('pilars.user_index', compact('pilars', 'renstras', 'selectedRenstra', 'selectedTreeLevel', 'selectedStatus'));
+        // Handle search
+        if ($request->has('search') && $request->search['value']) {
+            $searchValue = $request->search['value'];
+            $pilarsQuery->where(function($query) use ($searchValue) {
+                $query->where('Nama', 'like', '%' . $searchValue . '%')
+                      ->orWhereHas('renstra', function($q) use ($searchValue) {
+                          $q->where('Nama', 'like', '%' . $searchValue . '%');
+                      });
+            });
         }
         
-        // If it's an AJAX request, return JSON data for DataTable
-        if ($request->ajax() && $request->wantsJson()) {
-            // If format=tree is requested, return tree data even for admin
-            if ($request->has('format') && $request->format === 'tree') {
-                $treeData = $this->buildTreeData($pilars, Auth::id(), $selectedTreeLevel, $selectedStatus);
-                return response()->json([
-                    'data' => $treeData
-                ]);
-            }
+        // Handle ordering
+        if ($request->has('order')) {
+            $orderColumn = $request->order[0]['column'];
+            $orderDirection = $request->order[0]['dir'];
             
-            // Otherwise return regular datatable format
-            $data = [];
-            foreach ($pilars as $index => $pilar) {
-                // Format the actions HTML
-                $actions = '';
-                if (auth()->user()->isAdmin()) {
-                    $actions = '
-                        <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('pilars.show', $pilar->PilarID).'" data-title="Detail Pilar">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('pilars.edit', $pilar->PilarID).'" data-title="Edit Pilar">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button type="button" class="btn btn-danger btn-square btn-sm delete-pilar" data-id="'.$pilar->PilarID.'">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    ';
-                }
-                
-                // Format the NA status
-                $naStatus = '';
-                if ($pilar->NA == 'Y') {
-                    $naStatus = '<span class="badge badge-danger">Non Aktif</span>';
-                } else if ($pilar->NA == 'N') {
-                    $naStatus = '<span class="badge badge-success">Aktif</span>';
-                }
-                
-                $data[] = [
-                    'no' => $index + 1,
-                    'renstra' => $pilar->renstra->Nama,
-                    'nama' => nl2br($pilar->Nama),
-                    'na' => $naStatus,
-                    'actions' => $actions,
-                    'row_class' => $pilar->NA == 'Y' ? 'bg-light text-muted' : ''
-                ];
+            switch ($orderColumn) {
+                case 0: // No column - don't sort
+                    break;
+                case 1: // Nama column
+                    $pilarsQuery->orderBy('Nama', $orderDirection);
+                    break;
+                case 2: // NA column
+                    $pilarsQuery->orderBy('NA', $orderDirection);
+                    break;
+                default:
+                    $pilarsQuery->orderBy('PilarID', 'asc');
+                    break;
             }
+        } else {
+            $pilarsQuery->orderBy('PilarID', 'asc');
+        }
+        
+        // Get total count before pagination
+        $totalRecords = Pilar::count();
+        $filteredRecords = $pilarsQuery->count();
+        
+        // Handle pagination
+        $start = $request->start ?? 0;
+        $length = $request->length ?? 10;
+        
+        $pilars = $pilarsQuery->skip($start)->take($length)->get();
+        
+        // If format=tree is requested, return tree data even for admin
+        if ($request->has('format') && $request->format === 'tree') {
+            $userId = Auth::id();
+            $selectedTreeLevel = $request->treeLevel ?? 'pilar';
+            $selectedStatus = $request->status;
             
+            $treeData = $this->buildTreeData($pilars, $userId, $selectedTreeLevel, $selectedStatus);
             return response()->json([
-                'data' => $data
+                'draw' => intval($request->draw),
+                'recordsTotal' => $totalRecords,
+                'recordsFiltered' => $filteredRecords,
+                'data' => $treeData
             ]);
         }
         
-        return view('pilars.index', compact('pilars', 'renstras', 'selectedRenstra'));
+        // Format data for DataTable
+        $data = [];
+        foreach ($pilars as $index => $pilar) {
+            // Format the actions HTML
+            $actions = '';
+            if (auth()->user()->isAdmin()) {
+                $actions = '
+                    <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('pilars.show', $pilar->PilarID).'" data-title="Detail Pilar">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('pilars.edit', $pilar->PilarID).'" data-title="Edit Pilar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger btn-square btn-sm delete-pilar" data-id="'.$pilar->PilarID.'">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                ';
+            }
+            
+            // Format the NA status
+            $naStatus = '';
+            if ($pilar->NA == 'Y') {
+                $naStatus = '<span class="badge badge-danger">Non Aktif</span>';
+            } else if ($pilar->NA == 'N') {
+                $naStatus = '<span class="badge badge-success">Aktif</span>';
+            }
+            
+            $data[] = [
+                'no' => $start + $index + 1,
+                'nama' => nl2br($pilar->Nama),
+                'na' => $naStatus,
+                'actions' => $actions,
+                'row_class' => $pilar->NA == 'Y' ? 'bg-light text-muted' : ''
+            ];
+        }
+        
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $data
+        ]);
     }
+    
+    // Get the selected filter values (for re-populating the selects)
+    $selectedRenstra = $request->renstraID;
+    $selectedTreeLevel = $request->treeLevel ?? 'pilar';
+    $selectedStatus = $request->status;
+    
+    // If user is not admin, prepare tree grid data
+    if (!auth()->user()->isAdmin()) {
+        // Base query for non-admin users
+        $pilarsQuery = Pilar::with(['renstra', 'createdBy', 'editedBy', 'isuStrategis.programPengembangans.programRektors']);
+        
+        // Apply filter if renstraID is provided
+        if ($request->has('renstraID') && $request->renstraID) {
+            $pilarsQuery->where('RenstraID', $request->renstraID);
+        }
+        
+        $pilars = $pilarsQuery->orderBy('PilarID', 'asc')->get();
+        
+        if ($request->ajax() && $request->wantsJson()) {
+            $treeData = $this->buildTreeData($pilars, Auth::id(), $selectedTreeLevel, $selectedStatus);
+            return response()->json([
+                'data' => $treeData
+            ]);
+        }
+        
+        return view('pilars.user_index', compact('pilars', 'renstras', 'selectedRenstra', 'selectedTreeLevel', 'selectedStatus'));
+    }
+    
+    return view('pilars.index', compact('renstras', 'selectedRenstra'));
+}
+
     
 private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusFilter = null)
 {

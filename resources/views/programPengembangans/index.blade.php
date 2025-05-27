@@ -504,7 +504,7 @@
         // Initialize DataTable with AJAX
         programTable = $('#programPengembanganTable').DataTable({
             processing: true,
-            serverSide: false, // We're handling the data ourselves
+            serverSide: true, // We're handling the data ourselves
             ajax: {
                 url: '{{ route('program-pengembangans.index') }}',
                 type: 'GET',

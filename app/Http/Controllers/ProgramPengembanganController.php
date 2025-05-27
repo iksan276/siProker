@@ -13,115 +13,146 @@ use Illuminate\Database\QueryException;
 
 class ProgramPengembanganController extends Controller
 {
-    public function index(Request $request)
-    {
-        // Get all active renstras for the filter
-        $renstras = Renstra::where('NA', 'N')->get();
+   public function index(Request $request)
+{
+    // Get all active renstras for the filter
+    $renstras = Renstra::where('NA', 'N')->get();
+    
+    // Get all active pilars for the filter
+    $pilars = Pilar::where('NA', 'N')->get();
+    
+    // Get all active isu strategis for the filter
+    $isuStrategis = IsuStrategis::where('NA', 'N')->get();
+    
+    // Apply filter logic for dropdowns
+    if ($request->has('renstraID') && $request->renstraID) {
+        $pilarIds = Pilar::where('RenstraID', $request->renstraID)
+            ->where('NA', 'N')
+            ->pluck('PilarID');
+            
+        $pilars = Pilar::where('RenstraID', $request->renstraID)
+            ->where('NA', 'N')
+            ->get();
+            
+        $isuStrategis = IsuStrategis::whereIn('PilarID', $pilarIds)
+            ->where('NA', 'N')
+            ->get();
+    }
+    
+    if ($request->has('pilarID') && $request->pilarID) {
+        $isuStrategis = IsuStrategis::where('PilarID', $request->pilarID)
+            ->where('NA', 'N')
+            ->get();
+    }
+    
+    // Get the selected filter values
+    $selectedRenstra = $request->renstraID;
+    $selectedPilar = $request->pilarID;
+    $selectedIsu = $request->isuID;
+    
+    // If it's an AJAX request for DataTable
+    if ($request->ajax() && $request->wantsJson()) {
+        // Base query with relationships
+        $query = ProgramPengembangan::with(['isuStrategis.pilar.renstra', 'createdBy', 'editedBy']);
         
-        // Get all active pilars for the filter
-        $pilars = Pilar::where('NA', 'N')->get();
-        
-        // Get all active isu strategis for the filter
-        $isuStrategis = IsuStrategis::where('NA', 'N')->get();
-        
-        // Base query
-        $programPengembangansQuery = ProgramPengembangan::with(['isuStrategis.pilar.renstra', 'createdBy', 'editedBy']);
-        
-        // Apply filter if renstraID is provided
+        // Apply filters
         if ($request->has('renstraID') && $request->renstraID) {
-            // Filter pilars by renstraID
             $pilarIds = Pilar::where('RenstraID', $request->renstraID)
                 ->where('NA', 'N')
                 ->pluck('PilarID');
                 
-            // Filter isu strategis by pilar IDs
             $isuIds = IsuStrategis::whereIn('PilarID', $pilarIds)
                 ->where('NA', 'N')
                 ->pluck('IsuID');
                 
-            $programPengembangansQuery->whereIn('IsuID', $isuIds);
-            
-            // Update pilars list based on selected renstra
-            $pilars = Pilar::where('RenstraID', $request->renstraID)
-                ->where('NA', 'N')
-                ->get();
-                
-            // Update isu strategis list based on filtered pilars
-            $isuStrategis = IsuStrategis::whereIn('PilarID', $pilarIds)
-                ->where('NA', 'N')
-                ->get();
+            $query->whereIn('IsuID', $isuIds);
         }
         
-        // Apply filter if pilarID is provided
         if ($request->has('pilarID') && $request->pilarID) {
-            // Filter isu strategis by pilarID
             $isuIds = IsuStrategis::where('PilarID', $request->pilarID)
                 ->where('NA', 'N')
                 ->pluck('IsuID');
                 
-            $programPengembangansQuery->whereIn('IsuID', $isuIds);
-            
-            // Update isu strategis list based on selected pilar
-            $isuStrategis = IsuStrategis::where('PilarID', $request->pilarID)
-                ->where('NA', 'N')
-                ->get();
+            $query->whereIn('IsuID', $isuIds);
         }
         
-        // Apply filter if isuID is provided
         if ($request->has('isuID') && $request->isuID) {
-            $programPengembangansQuery->where('IsuID', $request->isuID);
+            $query->where('IsuID', $request->isuID);
         }
         
-        // Get the filtered results
-        $programPengembangans = $programPengembangansQuery->orderBy('ProgramPengembanganID', 'asc')->get();
+        // Handle DataTable parameters
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
+        $searchValue = $request->input('search.value');
+        $orderColumn = $request->input('order.0.column', 0);
+        $orderDirection = $request->input('order.0.dir', 'asc');
         
-        // Get the selected filter values (for re-populating the selects)
-        $selectedRenstra = $request->renstraID;
-        $selectedPilar = $request->pilarID;
-        $selectedIsu = $request->isuID;
+        // Define columns for ordering
+        $columns = ['ProgramPengembanganID', 'Nama', 'NA'];
+        $orderBy = isset($columns[$orderColumn]) ? $columns[$orderColumn] : 'ProgramPengembanganID';
         
-        // If it's an AJAX request, return JSON data for DataTable
-        if ($request->ajax() && $request->wantsJson()) {
-            $data = [];
-            foreach ($programPengembangans as $index => $program) {
-                // Format the actions HTML
-                $actions = '
-                    <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('program-pengembangans.show', $program->ProgramPengembanganID).'" data-title="Detail Program Pengembangan (PP)">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('program-pengembangans.edit', $program->ProgramPengembanganID).'" data-title="Edit Program Pengembangan (PP)">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button type="button" class="btn btn-danger btn-square btn-sm delete-program" data-id="'.$program->ProgramPengembanganID.'">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                ';
-                
-                // Format the NA status
-                $naStatus = '';
-                if ($program->NA == 'Y') {
-                    $naStatus = '<span class="badge badge-danger">Non Aktif</span>';
-                } else if ($program->NA == 'N') {
-                    $naStatus = '<span class="badge badge-success">Aktif</span>';
-                }
-                
-                $data[] = [
-                    'no' => $index + 1,
-                    'isu_strategis' => nl2br($program->isuStrategis->Nama),
-                    'nama' => nl2br($program->Nama),
-                    'na' => $naStatus,
-                    'actions' => $actions,
-                    'row_class' => $program->NA == 'Y' ? 'bg-light text-muted' : ''
-                ];
+        // Apply search
+        if (!empty($searchValue)) {
+            $query->where(function($q) use ($searchValue) {
+                $q->where('Nama', 'like', "%{$searchValue}%")
+                  ->orWhereHas('isuStrategis', function($subQ) use ($searchValue) {
+                      $subQ->where('Nama', 'like', "%{$searchValue}%");
+                  });
+            });
+        }
+        
+        // Get total records before pagination
+        $totalRecords = ProgramPengembangan::count();
+        $filteredRecords = $query->count();
+        
+        // Apply ordering and pagination
+        $programs = $query->orderBy($orderBy, $orderDirection)
+                         ->skip($start)
+                         ->take($length)
+                         ->get();
+        
+        // Format data for DataTable
+        $data = [];
+        foreach ($programs as $index => $program) {
+            $actions = '
+                <button class="btn btn-info btn-square btn-sm load-modal" data-url="'.route('program-pengembangans.show', $program->ProgramPengembanganID).'" data-title="Detail Program Pengembangan (PP)">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-warning btn-square btn-sm load-modal" data-url="'.route('program-pengembangans.edit', $program->ProgramPengembanganID).'" data-title="Edit Program Pengembangan (PP)">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button type="button" class="btn btn-danger btn-square btn-sm delete-program" data-id="'.$program->ProgramPengembanganID.'">
+                    <i class="fas fa-trash"></i>
+                </button>
+            ';
+            
+            $naStatus = '';
+            if ($program->NA == 'Y') {
+                $naStatus = '<span class="badge badge-danger">Non Aktif</span>';
+            } else if ($program->NA == 'N') {
+                $naStatus = '<span class="badge badge-success">Aktif</span>';
             }
             
-            return response()->json([
-                'data' => $data
-            ]);
+            $data[] = [
+                'no' => $start + $index + 1,
+                'nama' => nl2br($program->Nama),
+                'na' => $naStatus,
+                'actions' => $actions,
+                'row_class' => $program->NA == 'Y' ? 'bg-light text-muted' : ''
+            ];
         }
         
-        return view('programPengembangans.index', compact('programPengembangans', 'renstras', 'pilars', 'isuStrategis', 'selectedRenstra', 'selectedPilar', 'selectedIsu'));
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $data
+        ]);
     }
+    
+    return view('programPengembangans.index', compact('renstras', 'pilars', 'isuStrategis', 'selectedRenstra', 'selectedPilar', 'selectedIsu'));
+}
+
 
     public function create()
     {

@@ -247,7 +247,7 @@
         // Initialize DataTable with AJAX
         pilarTable = $('#pilarTable').DataTable({
             processing: true,
-            serverSide: false, // We're handling the data ourselves
+            serverSide: true, // We're handling the data ourselves
             ajax: {
                 url: '{{ route('pilars.index') }}',
                 type: 'GET',
