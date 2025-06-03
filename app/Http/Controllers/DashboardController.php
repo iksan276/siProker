@@ -217,11 +217,24 @@ class DashboardController extends Controller
     }
 
     public function downloadTemplate()
-    {
-        try {
-            return Excel::download(new MultiSheetExport, 'template_dashboard_data.xlsx');
-        } catch (\Exception $e) {
-            return redirect()->route('dashboard')->with('error', 'Error downloading template: ' . $e->getMessage());
+{
+    try {
+        $fileName = 'template_dashboard_data.xlsx';
+        $filePath = public_path('templates/' . $fileName);
+        
+        // Check if file exists
+        if (!file_exists($filePath)) {
+            return redirect()->route('dashboard')->with('error', 'Template file not found.');
         }
+        
+        // Return file download response
+        return response()->download($filePath, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+        
+    } catch (\Exception $e) {
+        return redirect()->route('dashboard')->with('error', 'Error downloading template: ' . $e->getMessage());
     }
+}
+
 }

@@ -17,9 +17,9 @@
                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#importModal">
                     <i class="fas fa-upload fa-sm text-gray-400"></i> Import Data
                 </a>
-                <!-- <a class="dropdown-item" href="{{ route('dashboard.export') }}">
+                <a class="dropdown-item" href="{{ route('dashboard.export') }}">
                     <i class="fas fa-download fa-sm text-gray-400"></i> Export Data
-                </a> -->
+                </a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="{{ route('dashboard.template') }}">
                     <i class="fas fa-file-download fa-sm text-gray-400"></i> Download Template

@@ -1326,7 +1326,7 @@ public function getSummary(Request $request)
             $kegiatan->TanggalSelesai = $request->TanggalSelesai;
             $kegiatan->TanggalPencairan = $request->TanggalPencairan;
             $kegiatan->RincianKegiatan = $request->RincianKegiatan;
-            $kegiatan->Feedback = $request->Feedback;
+            $kegiatan->Feedback = $request->Feedback ?? '';
             $kegiatan->Status = $request->Status ?? $kegiatan->Status; // Keep existing status if not provided
             $kegiatan->DEdited = now();
             $kegiatan->UEdited = Auth::id();
@@ -1336,7 +1336,7 @@ public function getSummary(Request $request)
                 if (isset($request->Feedback) && $request->Feedback !== $old->Feedback) {
                     $requestLog = new \App\Models\Request();
                     $requestLog->KegiatanID = $kegiatan->KegiatanID;
-                    $requestLog->Feedback = $request->Feedback;
+                    $requestLog->Feedback = $request->Feedback ?? '';
                     $requestLog->DCreated = now();
                     $requestLog->UCreated = Auth::id();
                     $requestLog->save();
@@ -1356,7 +1356,7 @@ public function getSummary(Request $request)
                             $subKegiatan->JadwalMulai = $subKegiatanData['JadwalMulai'];
                             $subKegiatan->JadwalSelesai = $subKegiatanData['JadwalSelesai'];
                             $subKegiatan->Catatan = $subKegiatanData['Catatan'];
-                            $subKegiatan->Feedback = $subKegiatanData['Feedback'];
+                            $subKegiatan->Feedback = $subKegiatanData['Feedback']??'';
                             $subKegiatan->Status = $subKegiatanData['Status'] ?? 'N';
                             $subKegiatan->DEdited = now();
                             $subKegiatan->UEdited = Auth::id();
@@ -1366,7 +1366,7 @@ public function getSummary(Request $request)
                                if (isset($subKegiatanData['Feedback']) && $old->Feedback !== $subKegiatanData['Feedback']) {
                             $requestLog = new \App\Models\Request();
                             $requestLog->SubKegiatanID = $subKegiatan->SubKegiatanID;
-                            $requestLog->Feedback = $subKegiatanData['Feedback'];
+                            $requestLog->Feedback = $subKegiatanData['Feedback']??'';
                             $requestLog->DCreated = now();
                             $requestLog->UCreated = Auth::id();
                             $requestLog->save();
@@ -1385,7 +1385,7 @@ public function getSummary(Request $request)
                                         $rab->Satuan = $rabData['Satuan'];
                                         $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
                                         $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
-                                        $rab->Feedback = $rabData['Feedback'];
+                                        $rab->Feedback = $rabData['Feedback']??'';
                                         $rab->Status = $rabData['Status'] ?? 'N';
                                         $rab->DEdited = now();
                                         $rab->UEdited = Auth::id();
@@ -1396,7 +1396,7 @@ public function getSummary(Request $request)
                                     if (isset($rabData['Feedback']) && $old->Feedback !== $rabData['Feedback']) {
                                         $requestLog = new \App\Models\Request();
                                         $requestLog->RABID = $rab->RABID;
-                                        $requestLog->Feedback = $rabData['Feedback'];
+                                        $requestLog->Feedback = $rabData['Feedback']??'';
                                         $requestLog->DCreated = now();
                                         $requestLog->UCreated = Auth::id();
                                         $requestLog->save();
@@ -1418,7 +1418,7 @@ public function getSummary(Request $request)
                                     $rab->Satuan = $rabData['Satuan'];
                                     $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
                                     $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
-                                    $rab->Feedback = $rabData['Feedback'];
+                                    $rab->Feedback = $rabData['Feedback']??'';
                                     $rab->Status = $rabData['Status'] ?? 'N';// Default status is Menunggu
                                     $rab->DCreated = now();
                                     $rab->UCreated = Auth::id();
@@ -1427,7 +1427,7 @@ public function getSummary(Request $request)
                                     if (isset($rabData['Feedback'])) {
                                         $requestLog = new \App\Models\Request();
                                         $requestLog->RABID = $rab->RABID;
-                                        $requestLog->Feedback = $rabData['Feedback'];
+                                        $requestLog->Feedback = $rabData['Feedback']??'';
                                         $requestLog->DCreated = now();
                                         $requestLog->UCreated = Auth::id();
                                         $requestLog->save();
@@ -1450,14 +1450,14 @@ public function getSummary(Request $request)
                         $subKegiatan->JadwalSelesai = $subKegiatanData['JadwalSelesai'];
                         $subKegiatan->Catatan = $subKegiatanData['Catatan'];
                         $subKegiatan->Status = $subKegiatanData['Status'] ?? 'N';
-                        $subKegiatan->Feedback = $subKegiatanData['Feedback'];
+                        $subKegiatan->Feedback = $subKegiatanData['Feedback']??'';
                         $subKegiatan->DCreated = now();
                         $subKegiatan->UCreated = Auth::id();
                         $subKegiatan->save();
                         if (isset($subKegiatanData['Feedback'])) {
                             $requestLog = new \App\Models\Request();
                             $requestLog->SubKegiatanID = $subKegiatan->SubKegiatanID;
-                            $requestLog->Feedback = $subKegiatanData['Feedback'];
+                            $requestLog->Feedback = $subKegiatanData['Feedback']??'';
                             $requestLog->DCreated = now();
                             $requestLog->UCreated = Auth::id();
                             $requestLog->save();
@@ -1476,7 +1476,7 @@ public function getSummary(Request $request)
                                 $rab->Satuan = $rabData['Satuan'];
                                 $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
                                 $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
-                                $rab->Feedback = $rabData['Feedback'];
+                                $rab->Feedback = $rabData['Feedback']??'';
                                 $rab->Status = $rabData['Status'] ?? 'N';// Default status is Menunggu
                                 $rab->DCreated = now();
                                 $rab->UCreated = Auth::id();
@@ -1485,7 +1485,7 @@ public function getSummary(Request $request)
                                    if (isset($rabData['Feedback'])) {
                                     $requestLog = new \App\Models\Request();
                                     $requestLog->RABID = $rab->RABID;
-                                    $requestLog->Feedback = $rabData['Feedback'];
+                                    $requestLog->Feedback = $rabData['Feedback']??'';
                                     $requestLog->DCreated = now();
                                     $requestLog->UCreated = Auth::id();
                                     $requestLog->save();
@@ -1508,7 +1508,7 @@ public function getSummary(Request $request)
                         $rab->Satuan = $rabData['Satuan'];
                         $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
                         $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
-                        $rab->Feedback = $rabData['Feedback'];
+                        $rab->Feedback = $rabData['Feedback']??'';
                         $rab->Status = $rabData['Status'] ?? 'N';
                         $rab->DEdited = now();
                         $rab->UEdited = Auth::id();
@@ -1519,7 +1519,7 @@ public function getSummary(Request $request)
                     if (isset($rabData['Feedback']) && $old->Feedback !== $rabData['Feedback']) {
                         $requestLog = new \App\Models\Request();
                         $requestLog->RABID = $rab->RABID;
-                        $requestLog->Feedback = $rabData['Feedback'];
+                        $requestLog->Feedback = $rabData['Feedback']??'';
                         $requestLog->DCreated = now();
                         $requestLog->UCreated = Auth::id();
                         $requestLog->save();
@@ -1541,7 +1541,7 @@ public function getSummary(Request $request)
                     $rab->Satuan = $rabData['Satuan'];
                     $rab->HargaSatuan = str_replace('.', '', $rabData['HargaSatuan']);
                     $rab->Jumlah = str_replace('.', '', $rabData['Volume']) * str_replace('.', '', $rabData['HargaSatuan']);
-                    $rab->Feedback = $rabData['Feedback'];
+                    $rab->Feedback = $rabData['Feedback']??'';
                     $rab->Status = $rabData['Status'] ?? 'N';
                     $rab->DCreated = now();
                     $rab->UCreated = Auth::id();
@@ -1549,7 +1549,7 @@ public function getSummary(Request $request)
                       if (isset($rabData['Feedback'])) {
                                     $requestLog = new \App\Models\Request();
                                     $requestLog->RABID = $rab->RABID;
-                                    $requestLog->Feedback = $rabData['Feedback'];
+                                    $requestLog->Feedback = $rabData['Feedback']??'';
                                     $requestLog->DCreated = now();
                                     $requestLog->UCreated = Auth::id();
                                     $requestLog->save();

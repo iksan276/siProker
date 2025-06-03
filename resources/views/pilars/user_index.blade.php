@@ -51,7 +51,7 @@
         
         <!-- Status Filter - Only visible when tree level is 'kegiatan' -->
         <div id="statusFilterContainer" class="row mb-3" style="display: none;">
-            <div class="col-md-12">
+            <div class="col-md-6">
                 <div class="form-group">
                     <select id="statusFilter" class="form-control select2-filter">
                         <option value="">Pilih Status Kegiatan</option>
@@ -65,6 +65,18 @@
                         <option value="TT" {{ isset($selectedStatus) && $selectedStatus == 'TT' ? 'selected' : '' }}>TOR Ditolak</option>
                         <option value="RT" {{ isset($selectedStatus) && $selectedStatus == 'RT' ? 'selected' : '' }}>TOR Revisi</option>
                         <option value="TP" {{ isset($selectedStatus) && $selectedStatus == 'RT' ? 'selected' : '' }}>Tunda Pencairan</option>
+                    </select>
+                </div>
+            </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                    <select id="kegiatanFilter" class="form-control select2-filter">
+                        <option value="">Pilih Kegiatan</option>
+                        @foreach($kegiatans as $kegiatan)
+                                            <option value="{{ $kegiatan->KegiatanID }}" {{ isset($selectedKegiatan) && $selectedKegiatan == $kegiatan->KegiatanID ? 'selected' : '' }}>
+                                {{ $kegiatan->Nama }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
             </div>
@@ -413,6 +425,18 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
             loadTreeData();
         });
         
+        $('#kegiatanFilter').on('change', function() {
+            var kegiatanID = $(this).val();
+            
+            // Update URL without page refresh
+            updateUrlParameter('kegiatanID', kegiatanID);
+            
+            // Reset search
+            $('#searchFilter').val('');
+            
+            // Reload tree data
+            loadTreeData();
+        });
         // Handle search input (on Enter key press)
         $('#searchFilter').on('keypress', function(e) {
             if (e.which === 13) {
@@ -900,13 +924,18 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
             // Check if there's a status parameter in the URL
             var urlParams = new URLSearchParams(window.location.search);
             var statusParam = urlParams.get('status');
+            var kegiatanParam = urlParams.get('kegiatanID');
             
             if (statusParam) {
                 $('#statusFilter').val(statusParam);
             }
+             if (kegiatanParam) {
+            $('#kegiatanFilter').val(kegiatanParam);
+        }
         } else {
             $('#statusFilterContainer').slideUp();
             $('#statusFilter').val(''); // Reset status filter
+            $('#kegiatanFilter').val('');
         }
     }
     
@@ -1316,12 +1345,16 @@ function getCollapseTooltip(nodeType) {
         var treeLevel = $('#treeLevelFilter').val();
         var searchTerm = $('#searchFilter').val().trim();
         var status = '';
+        var kegiatanID = '';
         
         // Only include status filter if tree level is 'kegiatan'
         if (treeLevel === 'kegiatan') {
             status = $('#statusFilter').val();
+            kegiatanID = $('#kegiatanFilter').val();
         }
-        
+         if (!kegiatanID) {
+        kegiatanID = $('#kegiatanFilter').val();
+    }
         // If we're changing tree levels, preserve expanded state
         if (previousLevel && newLevel && previousLevel !== newLevel) {
             preserveExpandedStateAcrossLevels(previousLevel, newLevel);
@@ -1334,6 +1367,7 @@ function getCollapseTooltip(nodeType) {
                 renstraID: renstraID,
                 treeLevel: treeLevel,
                 status: status,
+                kegiatanID: kegiatanID,
                 format: 'tree'
             },
             dataType: 'json',
@@ -1683,11 +1717,15 @@ function getCollapseTooltip(nodeType) {
     $(document).ready(function() {
         var urlParams = new URLSearchParams(window.location.search);
         var searchParam = urlParams.get('search');
-        
+        var kegiatanParam = urlParams.get('kegiatanID');
+
         if (searchParam) {
             $('#searchFilter').val(searchParam);
             // Search will be performed after tree data is loaded
         }
+        if (kegiatanParam) {
+        $('#kegiatanFilter').val(kegiatanParam);
+    }
     });
 </script>
 @endpush

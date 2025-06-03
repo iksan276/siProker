@@ -15,10 +15,20 @@ use App\Models\RAB;
 
 class PilarController extends Controller
 {
-   public function index(Request $request)
+public function index(Request $request)
 {
     // Get all active renstras for the filter
     $renstras = Renstra::where('NA', 'N')->get();
+    
+    // Get kegiatans for filter - only for current user
+    $kegiatans = collect();
+    if (auth()->user() && !auth()->user()->isAdmin()) {
+        $userId = Auth::id();
+        $kegiatans = Kegiatan::where('UCreated', $userId)
+            ->select('KegiatanID', 'Nama')
+            ->orderBy('Nama')
+            ->get();
+    }
     
     // If it's an AJAX request, return JSON data for DataTable
     if ($request->ajax() && $request->wantsJson()) {
@@ -78,8 +88,9 @@ class PilarController extends Controller
             $userId = Auth::id();
             $selectedTreeLevel = $request->treeLevel ?? 'pilar';
             $selectedStatus = $request->status;
+            $selectedKegiatan = $request->kegiatanID; // Add kegiatan filter
             
-            $treeData = $this->buildTreeData($pilars, $userId, $selectedTreeLevel, $selectedStatus);
+            $treeData = $this->buildTreeData($pilars, $userId, $selectedTreeLevel, $selectedStatus, $selectedKegiatan);
             return response()->json([
                 'draw' => intval($request->draw),
                 'recordsTotal' => $totalRecords,
@@ -136,6 +147,7 @@ class PilarController extends Controller
     $selectedRenstra = $request->renstraID;
     $selectedTreeLevel = $request->treeLevel ?? 'pilar';
     $selectedStatus = $request->status;
+    $selectedKegiatan = $request->kegiatanID; // Add kegiatan filter
     
     // If user is not admin, prepare tree grid data
     if (!auth()->user()->isAdmin()) {
@@ -150,20 +162,19 @@ class PilarController extends Controller
         $pilars = $pilarsQuery->orderBy('PilarID', 'asc')->get();
         
         if ($request->ajax() && $request->wantsJson()) {
-            $treeData = $this->buildTreeData($pilars, Auth::id(), $selectedTreeLevel, $selectedStatus);
+            $treeData = $this->buildTreeData($pilars, Auth::id(), $selectedTreeLevel, $selectedStatus, $selectedKegiatan);
             return response()->json([
                 'data' => $treeData
             ]);
         }
         
-        return view('pilars.user_index', compact('pilars', 'renstras', 'selectedRenstra', 'selectedTreeLevel', 'selectedStatus'));
+        return view('pilars.user_index', compact('pilars', 'renstras', 'kegiatans', 'selectedRenstra', 'selectedTreeLevel', 'selectedStatus', 'selectedKegiatan'));
     }
     
     return view('pilars.index', compact('renstras', 'selectedRenstra'));
 }
 
-    
-private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusFilter = null)
+private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusFilter = null, $kegiatanFilter = null)
 {
     $treeData = [];
     $rowIndex = 1;
@@ -322,7 +333,7 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                         'type' => 'program',
                         'parent' => $programParent,
                         'level' => $programLevel,
-                        'has_children' => count(array_filter($program->programRektors->toArray(), function($rektor) use ($validProgramRektorIds) {
+                                                'has_children' => count(array_filter($program->programRektors->toArray(), function($rektor) use ($validProgramRektorIds) {
                             return $rektor['NA'] == 'N' && in_array($rektor['ProgramRektorID'], $validProgramRektorIds);
                         })) > 0,
                         'actions' => '',
@@ -349,6 +360,11 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                     // Apply status filter if we're at kegiatan level and status is provided
                     if ($startLevel == 'kegiatan' && $statusFilter) {
                         $kegiatanQuery->where('Status', $statusFilter);
+                    }
+                    
+                    // Apply kegiatan filter if provided
+                    if ($kegiatanFilter) {
+                        $kegiatanQuery->where('KegiatanID', $kegiatanFilter);
                     }
                     
                     // Get kegiatan count
@@ -406,6 +422,11 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                         $kegiatanQuery->where('Status', $statusFilter);
                     }
                     
+                    // Apply kegiatan filter if provided
+                    if ($kegiatanFilter) {
+                        $kegiatanQuery->where('KegiatanID', $kegiatanFilter);
+                    }
+                    
                     $kegiatans = $kegiatanQuery->get();
                         
                     foreach ($kegiatans as $kegiatan) {
@@ -445,7 +466,7 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                         } elseif ($kegiatan->Status == 'YT') {
                             $statusBadge = '<span class="badge badge-success">Pengajuan TOR Disetujui</span>';
                         } elseif ($kegiatan->Status == 'TT') {
-                                                        $statusBadge = '<span class="badge badge-danger">Pengajuan TOR Ditolak</span>';
+                            $statusBadge = '<span class="badge badge-danger">Pengajuan TOR Ditolak</span>';
                         } elseif ($kegiatan->Status == 'RT') {
                             $statusBadge = '<span class="badge badge-info">Pengajuan TOR direvisi</span>';
                         }elseif ($kegiatan->Status == 'TP') {
@@ -530,6 +551,7 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                         
                         $treeData[] = $kegiatanNode;
                         
+                        // Rest of the code for sub kegiatans and RABs remains the same...
                         // Add Sub Kegiatans
                         foreach ($kegiatan->subKegiatans as $subKegiatan) {
                             $statusBadge = '';
@@ -547,6 +569,7 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                             $subKegiatanParent = 'kegiatan_' . $kegiatan->KegiatanID;
                             $subKegiatanLevel = $kegiatanLevel + 1;
                             
+                            // Determine actions base
                             // Determine actions based on parent kegiatan approval status
                             $subKegiatanActions = '';
                             if ($isApproved) {
@@ -672,7 +695,7 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                                 $statusBadge = '<span class="badge badge-success">Disetujui</span>';
                             } elseif ($rab->Status == 'T') {
                                 $statusBadge = '<span class="badge badge-danger">Ditolak</span>';
-                                                        } elseif ($rab->Status == 'R') {
+                            } elseif ($rab->Status == 'R') {
                                 $statusBadge = '<span class="badge badge-info">Revisi</span>';
                             }
                             
@@ -743,6 +766,7 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
     
     return $treeData;
 }
+
     
 
     public function create()
