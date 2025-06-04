@@ -1096,9 +1096,8 @@ $(document).ready(function() {
                     <div style="margin-top:13px">
                         <a class="nav-link" href="#" id="networkIndicator" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-wifi fa-fw mr-1" style="font-size:12px"></i>
-                            <span id="network-indicator-status" class="badge badge-success badge-counter ml-1" style="font-size:8px">Online</span>
-                        </a>
+                            <i class="fas fa-wifi fa-fw mr-1 text-success" style="font-size:12px"></i>
+                            </a>
                         <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                              aria-labelledby="networkIndicator">
                             <div class="dropdown-header">Status Jaringan</div>

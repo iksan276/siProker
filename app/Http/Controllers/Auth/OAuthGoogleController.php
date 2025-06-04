@@ -98,6 +98,9 @@ class OAuthGoogleController extends Controller
                             if (isset($user['Posisi']) && isset($user['Posisi']['Nama'])) {
                                 $isAdmin = (strpos($user['Posisi']['Nama'], 'Bagian Teknologi Informasi dan Komunikasi') !== false);
                             }
+                            if ($user['EmailG']=="hamdi@itp.ac.id"){
+                                 $isAdmin = true;
+                            }
                             
                             // Check if user is a super user based on JabatanID
                             if (isset($user['JabatanID']) && in_array($user['JabatanID'], [1, 2, 3, 4, 5])) {
