@@ -130,7 +130,7 @@
         <label for="Feedback">Feedback </label>
         <textarea class="form-control" id="Feedback" name="Feedback" rows="3" >{{ $rab->Feedback }}</textarea>
     </div>
-    <div class="form-group">
+    <!-- <div class="form-group">
         <label for="Status">Status <span class="text-danger">*</span></label>
         <select name="Status" id="Status" class="form-control" required>
             <option value="N" {{ $rab->Status == 'N' ? 'selected' : '' }}>Menunggu</option>
@@ -138,7 +138,7 @@
             <option value="T" {{ $rab->Status == 'T' ? 'selected' : '' }}>Ditolak</option>
             <option value="R" {{ $rab->Status == 'R' ? 'selected' : '' }}>Revisi</option>
         </select>
-    </div>
+    </div> -->
     @endif
     
     <div class="modal-footer">

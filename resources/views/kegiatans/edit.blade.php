@@ -76,7 +76,7 @@
         <label for="Feedback">Feedback </label>
         <textarea class="form-control" id="Feedback" name="Feedback" rows="3">{{ $kegiatan->Feedback }}</textarea>
     </div>
-     <div class="form-group">
+     <!-- <div class="form-group">
             <label>Status</label>
             <select name="Status" class="form-control">
             <option value="N" {{ $kegiatan->Status == 'N' ? 'selected' : '' }}>Menunggu</option>
@@ -91,7 +91,7 @@
             <option value="TP" {{ $kegiatan->Status == 'TP' ? 'selected' : '' }}>Tunda Pencairan</option>
         </select>
 
-        </div>
+        </div> -->
          <div class="form-group">
         <label for="TanggalPencairan">Tanggal Pencairan </label>
         <input type="date" class="form-control" id="TanggalPencairan" name="TanggalPencairan" value="{{ \Carbon\Carbon::parse($kegiatan->TanggalPencairan)->format('Y-m-d') }}" />
@@ -145,7 +145,7 @@
                             <label for="Feedback">Feedback </label>
                             <textarea class="form-control" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][Feedback]" rows="3">{{ $subKegiatan->Feedback }}</textarea>
                         </div>
-                        <div class="form-group">
+                        <!-- <div class="form-group">
                             <label>Status</label>
                             <select name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][Status]" class="form-control">
                                 <option value="N" {{ $subKegiatan->Status == 'N' ? 'selected' : '' }}>Menunggu</option>
@@ -153,7 +153,7 @@
                                 <option value="T" {{ $subKegiatan->Status == 'T' ? 'selected' : '' }}>Ditolak</option>
                                 <option value="R" {{ $subKegiatan->Status == 'R' ? 'selected' : '' }}>Revisi</option>
                             </select>
-                        </div>
+                        </div> -->
                         @endif
                         
                         <div class="mt-3">
@@ -214,7 +214,7 @@
                                                         <label for="Feedback">Feedback </label>
                                                         <textarea class="form-control" name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][existing_rabs][{{ $rab->RABID }}][Feedback]" rows="3">{{ $rab->Feedback }}</textarea>
                                                     </div>
-                                                    <div class="form-group mb-0">
+                                                    <!-- <div class="form-group mb-0">
                                                         <label class="small">Status</label>
                                                         <select name="existing_sub_kegiatans[{{ $subKegiatan->SubKegiatanID }}][existing_rabs][{{ $rab->RABID }}][Status]" class="form-control form-control-sm">
                                                             <option value="N" {{ $rab->Status == 'N' ? 'selected' : '' }}>Menunggu</option>
@@ -222,7 +222,7 @@
                                                             <option value="T" {{ $rab->Status == 'T' ? 'selected' : '' }}>Ditolak</option>
                                                             <option value="R" {{ $rab->Status == 'R' ? 'selected' : '' }}>Revisi</option>
                                                         </select>
-                                                    </div>
+                                                    </div> -->
                                                 </div>
                                             </div>
                                             @endif
@@ -299,10 +299,10 @@
                         <div class="row mt-2">
                             <div class="col-md-12">
                             <div class="form-group">
-                                                        <label for="Feedback">Feedback </label>
-                                                        <textarea class="form-control" name="existing_rabs[{{ $rab->RABID }}][Feedback]" rows="3">{{ $rab->Feedback }}</textarea>
-                                                    </div>
-                                <div class="form-group mb-0">
+                            <label for="Feedback">Feedback </label>
+                            <textarea class="form-control" name="existing_rabs[{{ $rab->RABID }}][Feedback]" rows="3">{{ $rab->Feedback }}</textarea>
+                        </div>
+                                <!-- <div class="form-group mb-0">
                                     <label>Status</label>
                                     <select name="existing_rabs[{{ $rab->RABID }}][Status]" class="form-control">
                                         <option value="N" {{ $rab->Status == 'N' ? 'selected' : '' }}>Menunggu</option>
@@ -310,7 +310,7 @@
                                         <option value="T" {{ $rab->Status == 'T' ? 'selected' : '' }}>Ditolak</option>
                                         <option value="R" {{ $rab->Status == 'R' ? 'selected' : '' }}>Revisi</option>
                                     </select>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         @endif
@@ -534,18 +534,7 @@ $(document).ready(function() {
                         <label >Feedback </label>
                         <textarea class="form-control" name="new_sub_kegiatans[${index}][Feedback]" rows="3"></textarea>
                     </div>
-                     ${isAdmin ? `
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select name="new_sub_kegiatans[${index}][Status]" class="form-control">
-                            <option value="N" selected>Menunggu</option>
-                            <option value="Y">Disetujui</option>
-                            <option value="T">Ditolak</option>
-                            <option value="R">Revisi</option>
-                        </select>
-                    </div>
-                    ` : ''}
-                    
+                   
                     <div class="mt-3">
                         <h6>RAB Sub Kegiatan</h6>
                         <div class="rab-sub-container">
@@ -688,15 +677,7 @@ $(document).ready(function() {
                         <label >Feedback </label>
                         <textarea class="form-control" name="new_sub_kegiatans[${subKegiatanIndex}][rabs][${rabIndex}][Feedback]" rows="3"></textarea>
                     </div>
-                            <div class="form-group mb-0">
-                                <label class="small">Status</label>
-                                <select name="new_sub_kegiatans[${subKegiatanIndex}][rabs][${rabIndex}][Status]" class="form-control form-control-sm">
-                                    <option value="N" selected>Menunggu</option>
-                                    <option value="Y">Disetujui</option>
-                                    <option value="T">Ditolak</option>
-                                                                     <option value="R">Revisi</option>
-                                </select>
-                            </div>
+                          
                         </div>
                     </div>
                     ` : ''}
@@ -834,15 +815,7 @@ $(document).ready(function() {
                         <label >Feedback </label>
                         <textarea class="form-control" name="existing_sub_kegiatans[${subKegiatanId}][new_rabs][${rabIndex}][Feedback]" rows="3"></textarea>
                     </div>
-                            <div class="form-group mb-0">
-                                <label class="small">Status</label>
-                                <select name="existing_sub_kegiatans[${subKegiatanId}][new_rabs][${rabIndex}][Status]" class="form-control form-control-sm">
-                                    <option value="N" selected>Menunggu</option>
-                                    <option value="Y">Disetujui</option>
-                                    <option value="T">Ditolak</option>
-                                    <option value="R">Revisi</option>
-                                </select>
-                            </div>
+                          
                         </div>
                     </div>
                     ` : ''}
@@ -980,15 +953,7 @@ $(document).ready(function() {
                         <label >Feedback </label>
                         <textarea class="form-control" name="new_rabs[${index}][Feedback]" rows="3"></textarea>
                     </div>
-                            <div class="form-group mb-0">
-                                <label>Status</label>
-                                <select name="new_rabs[${index}][Status]" class="form-control">
-                                    <option value="N" selected>Menunggu</option>
-                                    <option value="Y">Disetujui</option>
-                                    <option value="T">Ditolak</option>
-                                    <option value="R">Revisi</option>
-                                </select>
-                            </div>
+                           
                         </div>
                     </div>
                      ` : ''}
