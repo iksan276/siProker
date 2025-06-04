@@ -368,7 +368,7 @@ public function updateKegiatanStatus(Request $request, $id)
         }
     }
 
-    public function updateRabStatus(Request $request, $id)
+       public function updateRabStatus(Request $request, $id)
     {
         $request->validate([
             'status' => 'required|in:N,Y,T,R',
@@ -376,9 +376,10 @@ public function updateKegiatanStatus(Request $request, $id)
         ]);
 
         try {
-            $rab = RAB::findOrFail($id);
-            $oldFeedback = $rab->Feedback;
+            $rab = RAB::with(['kegiatan', 'subKegiatan'])->findOrFail($id);
+            $oldStatus = $rab->Status;
             $rab->Status = $request->status;
+            $oldFeedback = $rab->Feedback;
             
             if ($request->has('feedback')) {
                 $rab->Feedback = $request->feedback;
@@ -397,6 +398,34 @@ public function updateKegiatanStatus(Request $request, $id)
                 $requestLog->save();
             }
 
+            // Send notification when status changes and current user is admin/super user
+            if ($oldStatus !== $request->status) {
+                try {
+                    $currentUser = Auth::user();
+                    
+                    // Check if current user is admin or super user updating a regular user's RAB
+                    if (in_array($currentUser->level, [1, 3])) {
+                        Log::info("Admin/Super user updating RAB status", [
+                            'rab_id' => $rab->RABID,
+                            'rab_komponen' => $rab->Komponen,
+                            'old_status' => $oldStatus,
+                            'new_status' => $request->status,
+                            'admin_id' => $currentUser->id,
+                            'admin_name' => $currentUser->name
+                        ]);
+                        
+                        $this->notificationService->sendRabNotification($rab, 'status_updated');
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Failed to send RAB notification', [
+                        'rab_id' => $rab->RABID,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                    // Don't fail the main operation if notification fails
+                }
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Status RAB berhasil diupdate'
@@ -409,6 +438,7 @@ public function updateKegiatanStatus(Request $request, $id)
             ], 500);
         }
     }
+
 
     public function getSubKegiatansByKegiatan(Request $request)
     {

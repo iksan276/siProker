@@ -1549,6 +1549,7 @@ $(document).ready(function() {
 // Handle status update for kegiatan
 // Handle status update for kegiatan
 // Handle status update for kegiatan
+// Handle status update for kegiatan
 $(document).on('click', '.update-status-kegiatan', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -1674,6 +1675,7 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
             var feedback = $('#feedback').val();
             var tanggalPencairan = null;
             var approveAllRabs = $('#approve_all_rabs').is(':checked') ? true : false;
+            
             // Get tanggal pencairan if status is TP
             if (status === 'TP' || status === 'YT') {
                 tanggalPencairan = $('#tanggal_pencairan').val();
@@ -1689,6 +1691,18 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
                 }
             }
             
+            // Show loading indicator
+            Swal.fire({
+                title: 'Memproses...',
+                text: 'Sedang mengupdate status kegiatan',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
             // Call API to update status
             $.ajax({
                 url: "{{ url('api/kegiatan') }}/" + kegiatanId + "/update-status",
@@ -1701,6 +1715,8 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
                     approve_all_rabs: approveAllRabs
                 },
                 success: function(response) {
+                    Swal.close(); // Close loading
+                    
                     if (response.success) {
                         Swal.fire({
                             title: 'Berhasil!',
@@ -1713,15 +1729,30 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
                         // Reload tree data to update the UI
                         loadTreeData();
                     } else {
-                        showAlert('danger', response.message || 'Gagal mengupdate status kegiatan');
+                        Swal.fire({
+                            title: 'Gagal!',
+                            text: response.message || 'Gagal mengupdate status kegiatan',
+                            icon: 'error',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'OK'
+                        });
                     }
                 },
                 error: function(xhr) {
+                    Swal.close(); // Close loading
+                    
                     var message = 'Terjadi kesalahan';
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         message = xhr.responseJSON.message;
                     }
-                    showAlert('danger', message);
+                    
+                    Swal.fire({
+                        title: 'Error!',
+                        text: message,
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
+                    });
                 }
             });
         }
@@ -1816,6 +1847,18 @@ $(document).on('click', '.update-status-subkegiatan', function(e) {
             var feedback = $('#feedback').val();
             var approveAllRabs = $('#approve_all_rabs').is(':checked') ? true : false;
             
+            // Show loading indicator
+            Swal.fire({
+                title: 'Memproses...',
+                text: 'Sedang mengupdate status sub kegiatan',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
             // Call API to update status
             $.ajax({
                 url: "{{ url('api/subkegiatan') }}/" + subKegiatanId + "/update-status",
@@ -1827,6 +1870,8 @@ $(document).on('click', '.update-status-subkegiatan', function(e) {
                     approve_all_rabs: approveAllRabs
                 },
                 success: function(response) {
+                    Swal.close(); // Close loading
+                    
                     if (response.success) {
                         Swal.fire({
                             title: 'Berhasil!',
@@ -1839,15 +1884,30 @@ $(document).on('click', '.update-status-subkegiatan', function(e) {
                         // Reload tree data to update the UI
                         loadTreeData();
                     } else {
-                        showAlert('danger', response.message || 'Gagal mengupdate status sub kegiatan');
+                        Swal.fire({
+                            title: 'Gagal!',
+                            text: response.message || 'Gagal mengupdate status sub kegiatan',
+                            icon: 'error',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'OK'
+                        });
                     }
                 },
                 error: function(xhr) {
+                    Swal.close(); // Close loading
+                    
                     var message = 'Terjadi kesalahan';
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         message = xhr.responseJSON.message;
                     }
-                    showAlert('danger', message);
+                    
+                    Swal.fire({
+                        title: 'Error!',
+                        text: message,
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
+                    });
                 }
             });
         }
@@ -1856,6 +1916,7 @@ $(document).on('click', '.update-status-subkegiatan', function(e) {
 
 
 
+// Handle status update for RAB
 // Handle status update for RAB
 $(document).on('click', '.update-status-rab', function(e) {
     e.preventDefault();
@@ -1898,6 +1959,18 @@ $(document).on('click', '.update-status-rab', function(e) {
             var status = $('#status').val();
             var feedback = $('#feedback').val();
             
+            // Show loading indicator
+            Swal.fire({
+                title: 'Memproses...',
+                text: 'Sedang mengupdate status RAB',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
             // Call API to update status
             $.ajax({
                 url: "{{ url('api/rab') }}/" + rabId + "/update-status",
@@ -1908,6 +1981,8 @@ $(document).on('click', '.update-status-rab', function(e) {
                     feedback: feedback
                 },
                 success: function(response) {
+                    Swal.close(); // Close loading
+                    
                     if (response.success) {
                         Swal.fire({
                             title: 'Berhasil!',
@@ -1920,20 +1995,36 @@ $(document).on('click', '.update-status-rab', function(e) {
                         // Reload tree data to update the UI
                         loadTreeData();
                     } else {
-                        showAlert('danger', response.message || 'Gagal mengupdate status RAB');
+                        Swal.fire({
+                            title: 'Gagal!',
+                            text: response.message || 'Gagal mengupdate status RAB',
+                            icon: 'error',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'OK'
+                        });
                     }
                 },
                 error: function(xhr) {
+                    Swal.close(); // Close loading
+                    
                     var message = 'Terjadi kesalahan';
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         message = xhr.responseJSON.message;
                     }
-                    showAlert('danger', message);
+                    
+                    Swal.fire({
+                        title: 'Error!',
+                        text: message,
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
+                    });
                 }
             });
         }
     });
 });
+
 
         // Handle delete sub-kegiatan button click
         $(document).on('click', '.delete-sub-kegiatan', function(e) {

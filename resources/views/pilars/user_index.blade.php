@@ -596,6 +596,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
 
         // Add this to the document ready function in the scripts section
         // Handle ajukan kegiatan button click
+               // Handle ajukan kegiatan button click
         $(document).on('click', '.ajukan-kegiatan', function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -614,6 +615,19 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Show loading indicator
+                    Swal.fire({
+                        title: 'Memproses...',
+                        text: 'Sedang mengajukan kegiatan, mohon tunggu...',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
                     // Perform AJAX update
                     $.ajax({
                         url: updateUrl,
@@ -637,7 +651,13 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                                 loadTreeData();
                             } else {
                                 // Show error message
-                                showAlert('danger', response.message || 'Gagal mengajukan kegiatan');
+                                Swal.fire({
+                                    title: 'Gagal!',
+                                    text: response.message || 'Gagal mengajukan kegiatan',
+                                    icon: 'error',
+                                    confirmButtonColor: '#d33',
+                                    confirmButtonText: 'OK'
+                                });
                             }
                         },
                         error: function(xhr) {
@@ -646,14 +666,21 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                             if (xhr.responseJSON && xhr.responseJSON.message) {
                                 message = xhr.responseJSON.message;
                             }
-                            showAlert('danger', message);
+                            
+                            Swal.fire({
+                                title: 'Error!',
+                                text: message,
+                                icon: 'error',
+                                confirmButtonColor: '#d33',
+                                confirmButtonText: 'OK'
+                            });
                         }
                     });
                 }
             });
         });
 
-          $(document).on('click', '.ajukan-tor-kegiatan', function(e) {
+        $(document).on('click', '.ajukan-tor-kegiatan', function(e) {
             e.preventDefault();
             e.stopPropagation();
             var kegiatanId = $(this).data('id');
@@ -671,6 +698,19 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Show loading indicator
+                    Swal.fire({
+                        title: 'Memproses...',
+                        text: 'Sedang mengajukan TOR kegiatan, mohon tunggu...',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
                     // Perform AJAX update
                     $.ajax({
                         url: updateUrl,
@@ -684,7 +724,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                                 // Show success message
                                 Swal.fire({
                                     title: 'Berhasil!',
-                                    text: response.message || 'Kegiatan berhasil diajukan.',
+                                    text: response.message || 'TOR kegiatan berhasil diajukan.',
                                     icon: 'success',
                                     confirmButtonColor: '#3085d6',
                                     confirmButtonText: 'OK'
@@ -694,7 +734,13 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                                 loadTreeData();
                             } else {
                                 // Show error message
-                                showAlert('danger', response.message || 'Gagal mengajukan kegiatan');
+                                Swal.fire({
+                                    title: 'Gagal!',
+                                    text: response.message || 'Gagal mengajukan TOR kegiatan',
+                                    icon: 'error',
+                                    confirmButtonColor: '#d33',
+                                    confirmButtonText: 'OK'
+                                });
                             }
                         },
                         error: function(xhr) {
@@ -703,12 +749,20 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
                             if (xhr.responseJSON && xhr.responseJSON.message) {
                                 message = xhr.responseJSON.message;
                             }
-                            showAlert('danger', message);
+                            
+                            Swal.fire({
+                                title: 'Error!',
+                                text: message,
+                                icon: 'error',
+                                confirmButtonColor: '#d33',
+                                confirmButtonText: 'OK'
+                            });
                         }
                     });
                 }
             });
         });
+
         
 
             // Handle delete sub-kegiatan button click

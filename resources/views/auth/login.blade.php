@@ -260,7 +260,7 @@
                                                 </span>
                                             @enderror
                                         </div>
-                                        <div class="form-group">
+                                        <div class="form-group mb-4">
                                             <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror"
                                                 id="password" name="password" required placeholder="Password">
                                             @error('password')
@@ -269,12 +269,7 @@
                                                 </span>
                                             @enderror
                                         </div>
-                                        <div class="form-group">
-                                            <div class="custom-control custom-checkbox small">
-                                                <input type="checkbox" class="custom-control-input" id="remember_me" name="remember" {{ old('remember') ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="remember_me">Remember Me</label>
-                                            </div>
-                                        </div>
+                                      
                                         <button type="submit" class="btn btn-primary btn-user btn-block">
                                             Login
                                         </button>

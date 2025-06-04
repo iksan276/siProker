@@ -594,7 +594,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    function viewKegiatan(kegiatanId) {
+        function viewKegiatan(kegiatanId) {
         // Close any open toasts
         $('.toast').toast('hide');
         
@@ -604,7 +604,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (userLevel === 1 || userLevel === 3) {
             // Admin or Super User - redirect to kegiatans page
-            redirectUrl = `/kegiatans?kegiatanID=${kegiatanId}&treeLevel=kegiatan`;
+            redirectUrl = `/kegiatans?kegiatanID=${kegiatanId}`;
         } else if (userLevel === 2) {
             // Regular User - redirect to pilars page
             redirectUrl = `/pilars?kegiatanID=${kegiatanId}`;
@@ -614,6 +614,7 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = redirectUrl;
         }
     }
+
     
     function playNotificationSound() {
         try {
