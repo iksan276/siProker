@@ -181,7 +181,7 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
     
     // Get the user's position ID from session
     $apiUserData = session('api_user_data');
-    $userPositionId = $apiUserData['Posisi']['ID'] ?? null;
+    $userPositionId = 75;
     
     // First, collect all valid program rektors based on user's position ID
     $validProgramRektorIds = [];

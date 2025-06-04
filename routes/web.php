@@ -17,11 +17,12 @@ use App\Http\Controllers\JenisKegiatanController;
 use App\Http\Controllers\SubKegiatanController;
 use App\Http\Controllers\RABController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\RequestController; // Add this import
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\OAuthGoogleController;
 use App\Http\Controllers\IKUPTController;
 use App\Http\Controllers\KriteriaAkreditasiController;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -70,10 +71,14 @@ Route::middleware('auth')->prefix('api')->group(function() {
 Route::get('/auth/oauth_google', [OAuthGoogleController::class, 'authenticate']);
 
 Route::middleware('auth')->group(function () {
-
-      Route::get('/kegiatans/summary', [KegiatanController::class, 'getSummary'])->name('kegiatans.summary');
+    // Notification routes
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+    Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unreadCount');
+    Route::get('/kegiatans/summary', [KegiatanController::class, 'getSummary'])->name('kegiatans.summary');
     
-    // Add this to the middleware('auth') group
+    // Request routes
     Route::resource('requests', RequestController::class);
 
     Route::resource('sub-kegiatans', SubKegiatanController::class);
@@ -131,6 +136,7 @@ Route::middleware('auth')->group(function () {
         Route::get('indikator-kinerjas/renstra-years/{id}', [IndikatorKinerjaController::class,'getRenstraYears'])->name('indikator-kinerjas.renstra-years');
 
         // Kegiatan routes
+               // Kegiatan routes
         Route::get('/kegiatans/export/excel', [KegiatanController::class, 'exportExcel'])->name('kegiatans.export.excel');
 
         // Jenis Kegiatan Routes

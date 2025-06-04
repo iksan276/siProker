@@ -72,4 +72,39 @@ class User extends Authenticatable
     {
         return $this->level === 3;
     }
+    
+    /**
+     * Check if user can receive notifications
+     *
+     * @return bool
+     */
+    public function canReceiveNotifications()
+    {
+        return in_array($this->level, [1, 3]); // admin or super user
+    }
+    
+    /**
+     * Scope for notification recipients
+     */
+    public function scopeNotificationRecipients($query)
+    {
+        return $query->whereIn('level', [1, 3]); // admin and super user
+    }
+    
+    /**
+     * Get user's role name
+     */
+    public function getRoleNameAttribute()
+    {
+        switch ($this->level) {
+            case 1:
+                return 'Admin';
+            case 2:
+                return 'User';
+            case 3:
+                return 'Super User';
+            default:
+                return 'Unknown';
+        }
+    }
 }
