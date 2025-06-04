@@ -239,6 +239,38 @@
 
 <!-- Notification JavaScript -->
 <!-- Update bagian JavaScript untuk redirect berdasarkan role -->
+ <!-- Add this script at the bottom of your topbar.blade.php file -->
+<script>
+// Function to erase cookie
+function eraseCookie(name) {
+    document.cookie = name + '=; Max-Age=-99999999; path=/';
+}
+
+// Function to clear all kegiatan filter cookies
+function clearKegiatanFilterCookies() {
+    // List of all filter cookies used in kegiatans/index.blade.php
+    const filterCookies = [
+        'selected_renstra',
+        'selected_pilar', 
+        'selected_isu',
+        'selected_program_pengembangan',
+        'selected_program_rektor',
+        'selected_units',
+        'selected_kegiatan_ids',
+        'selected_status'
+    ];
+    
+    // Clear each cookie
+    filterCookies.forEach(function(cookieName) {
+        eraseCookie(cookieName);
+    });
+    
+    console.log('All kegiatan filter cookies cleared');
+}
+
+
+</script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Check user level for notification access
@@ -368,6 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (userLevel === 1 || userLevel === 3) {
                 // Admin or Super User - redirect to kegiatans page
                 redirectUrl = `/kegiatans?kegiatanID=${kegiatanId}`;
+                  clearKegiatanFilterCookies();
             } else if (userLevel === 2) {
                 // Regular User - redirect to pilars page
                 redirectUrl = `/pilars?kegiatanID=${kegiatanId}&treeLevel=kegiatan`;
