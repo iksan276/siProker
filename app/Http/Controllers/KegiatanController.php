@@ -86,10 +86,15 @@ public function index(Request $request)
         'rabs'
     ]);
     
-    if ($request->has('kegiatanID') && $request->kegiatanID) {
+   if ($request->has('kegiatanID') && $request->kegiatanID) {
+    // Handle both string and array cases
+    if (is_array($request->kegiatanID)) {
+        $kegiatanIds = $request->kegiatanID;
+    } else {
         $kegiatanIds = explode(',', $request->kegiatanID);
-        $kegiatansQuery->whereIn('KegiatanID', $kegiatanIds);
     }
+    $kegiatansQuery->whereIn('KegiatanID', $kegiatanIds);
+}
     
     // Apply filter if status is provided
     if ($request->has('status') && $request->status) {
@@ -221,19 +226,25 @@ public function index(Request $request)
         $kegiatansQuery->where('ProgramRektorID', $request->programRektorID);
     }
     
-    if ($request->has('unitID') && $request->unitID) {
+if ($request->has('unitID') && $request->unitID) {
+    // Handle both string and array cases
+    if (is_array($request->unitID)) {
+        $unitIds = $request->unitID;
+    } else {
         $unitIds = explode(',', $request->unitID);
-        $kegiatansQuery->whereHas('programRektor', function($query) use ($unitIds) {
-            $query->where(function($q) use ($unitIds) {
-                foreach ($unitIds as $unitId) {
-                    $q->orWhere('PelaksanaID', $unitId)
-                    ->orWhere('PelaksanaID', 'LIKE', $unitId.',%')
-                    ->orWhere('PelaksanaID', 'LIKE', '%,'.$unitId.',%')
-                    ->orWhere('PelaksanaID', 'LIKE', '%,'.$unitId);
-                }
-            });
-        });
     }
+    
+    $kegiatansQuery->whereHas('programRektor', function($query) use ($unitIds) {
+        $query->where(function($q) use ($unitIds) {
+            foreach ($unitIds as $unitId) {
+                $q->orWhere('PelaksanaID', $unitId)
+                ->orWhere('PelaksanaID', 'LIKE', $unitId.',%')
+                ->orWhere('PelaksanaID', 'LIKE', '%,'.$unitId.',%')
+                ->orWhere('PelaksanaID', 'LIKE', '%,'.$unitId);
+            }
+        });
+    });
+}
     
     // Get the filtered results
     $kegiatans = $kegiatansQuery->orderBy('KegiatanID', 'asc')->get();
@@ -700,7 +711,12 @@ public function getSummary(Request $request)
 
     // Apply all the same filters as in index method
     if ($request->has('kegiatanID') && $request->kegiatanID) {
-        $kegiatanIds = explode(',', $request->kegiatanID);
+        // Handle both string and array cases
+        if (is_array($request->kegiatanID)) {
+            $kegiatanIds = $request->kegiatanID;
+        } else {
+            $kegiatanIds = explode(',', $request->kegiatanID);
+        }
         $kegiatansQuery->whereIn('KegiatanID', $kegiatanIds);
     }
 
@@ -769,7 +785,13 @@ public function getSummary(Request $request)
     }
 
     if ($request->has('unitID') && $request->unitID) {
-        $unitIds = explode(',', $request->unitID);
+        // Handle both string and array cases
+        if (is_array($request->unitID)) {
+            $unitIds = $request->unitID;
+        } else {
+            $unitIds = explode(',', $request->unitID);
+        }
+        
         $kegiatansQuery->whereHas('programRektor', function($query) use ($unitIds) {
             $query->where(function($q) use ($unitIds) {
                 foreach ($unitIds as $unitId) {
@@ -787,6 +809,7 @@ public function getSummary(Request $request)
 
     return response()->json(['summary' => $summary]);
 }
+
 
 
     
