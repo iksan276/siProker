@@ -170,131 +170,149 @@ class ApiController extends Controller
         ]);
     }
 
-       public function updateKegiatanStatus(Request $request, $id)
-    {
-        $request->validate([
-            'status' => 'required|in:N,Y,T,R,P,PT,YT,TT,RT,TP',
-            'feedback' => 'nullable|string',
-            'tanggal_pencairan' => 'nullable|date',
-            'approve_all_rabs' => 'nullable|string',
+public function updateKegiatanStatus(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:N,Y,T,R,P,PT,YT,TT,RT,TP',
+        'feedback' => 'nullable|string',
+        'tanggal_pencairan' => 'nullable|date',
+        'approve_all_rabs' => 'nullable|string',
+    ]);
+
+    try {
+        $kegiatan = Kegiatan::findOrFail($id);
+        $oldStatus = $kegiatan->Status;
+        $oldFeedback = $kegiatan->Feedback;
+        
+        Log::info("Updating kegiatan status", [
+            'kegiatan_id' => $id,
+            'old_status' => $oldStatus,
+            'new_status' => $request->status,
+            'user_id' => Auth::id()
         ]);
-
-        try {
-            $kegiatan = Kegiatan::findOrFail($id);
-            $oldStatus = $kegiatan->Status;
-            $oldFeedback = $kegiatan->Feedback;
-            
-            Log::info("Updating kegiatan status", [
-                'kegiatan_id' => $id,
-                'old_status' => $oldStatus,
-                'new_status' => $request->status,
-                'user_id' => Auth::id()
-            ]);
-            
-            $kegiatan->Status = $request->status;
-            
-            if ($request->has('feedback')) {
-                $kegiatan->Feedback = $request->feedback;
-            }
-            
-            if (($request->status === 'TP' || $request->status === 'YT') && $request->has('tanggal_pencairan')) {
-                $kegiatan->TanggalPencairan = $request->tanggal_pencairan;
-            }
-            
-            $kegiatan->DEdited = now();
-            $kegiatan->UEdited = Auth::id();
-            $kegiatan->save();
-
-            if ($request->has('feedback') && $oldFeedback !== $request->feedback && !empty($request->feedback)) {
-                $requestLog = new \App\Models\Request();
-                $requestLog->KegiatanID = $kegiatan->KegiatanID;
-                $requestLog->Feedback = $request->feedback;
-                $requestLog->DCreated = now();
-                $requestLog->UCreated = Auth::id();
-                $requestLog->save();
-            }
-
-            if (!in_array($request->status, ['T', 'TT'])) {
-                SubKegiatan::where('KegiatanID', $kegiatan->KegiatanID)
-                    ->whereNotIn('Status', ['T', 'TT'])
-                    ->update([
-                        'Status' => $request->status,
-                        'DEdited' => now(),
-                        'UEdited' => Auth::id()
-                    ]);
-            }
-
-            if ($request->approve_all_rabs == 'true') {
-                RAB::where('KegiatanID', $kegiatan->KegiatanID)
-                    ->whereNull('SubKegiatanID')
-                    ->update([
-                        'Status' => $request->status,
-                        'DEdited' => now(),
-                        'UEdited' => Auth::id()
-                    ]);
-                
-                if (!in_array($request->status, ['T', 'TT'])) {
-                    $subKegiatans = SubKegiatan::where('KegiatanID', $kegiatan->KegiatanID)
-                        ->whereNotIn('Status', ['T', 'TT'])
-                        ->get();
-                    
-                    foreach ($subKegiatans as $subKegiatan) {
-                        RAB::where('SubKegiatanID', $subKegiatan->SubKegiatanID)
-                            ->update([
-                                'Status' => $request->status,
-                                'DEdited' => now(),
-                                'UEdited' => Auth::id()
-                            ]);
-                    }
-                }
-            }
-
-            // Send notification when status changes to P (ajukan kegiatan) or PT (ajukan TOR)
-            if ($oldStatus !== $request->status) {
-                try {
-                    if ($request->status === 'P') {
-                        Log::info("Sending notification for kegiatan submission", [
-                            'kegiatan_id' => $kegiatan->KegiatanID,
-                            'kegiatan_name' => $kegiatan->Nama,
-                            'sender_id' => Auth::id(),
-                            'sender_name' => Auth::user()->name
-                        ]);
-                        $this->notificationService->sendKegiatanNotification($kegiatan, 'ajukan_kegiatan');
-                    } elseif ($request->status === 'PT') {
-                        Log::info("Sending notification for TOR submission", [
-                            'kegiatan_id' => $kegiatan->KegiatanID,
-                            'kegiatan_name' => $kegiatan->Nama,
-                            'sender_id' => Auth::id(),
-                            'sender_name' => Auth::user()->name
-                        ]);
-                        $this->notificationService->sendKegiatanNotification($kegiatan, 'ajukan_tor');
-                    }
-                } catch (\Exception $e) {
-                    Log::error('Failed to send notification', [
-                        'kegiatan_id' => $kegiatan->KegiatanID,
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString()
-                    ]);
-                    // Don't fail the main operation if notification fails
-                }
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Status kegiatan berhasil diupdate'
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error updating kegiatan status', [
-                'kegiatan_id' => $id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengupdate status kegiatan: ' . $e->getMessage()
-            ], 500);
+        
+        $kegiatan->Status = $request->status;
+        
+        if ($request->has('feedback')) {
+            $kegiatan->Feedback = $request->feedback;
         }
+        
+        if (($request->status === 'TP' || $request->status === 'YT') && $request->has('tanggal_pencairan')) {
+            $kegiatan->TanggalPencairan = $request->tanggal_pencairan;
+        }
+        
+        $kegiatan->DEdited = now();
+        $kegiatan->UEdited = Auth::id();
+        $kegiatan->save();
+
+        if ($request->has('feedback') && $oldFeedback !== $request->feedback && !empty($request->feedback)) {
+            $requestLog = new \App\Models\Request();
+            $requestLog->KegiatanID = $kegiatan->KegiatanID;
+            $requestLog->Feedback = $request->feedback;
+            $requestLog->DCreated = now();
+            $requestLog->UCreated = Auth::id();
+            $requestLog->save();
+        }
+
+        if (!in_array($request->status, ['T', 'TT'])) {
+            SubKegiatan::where('KegiatanID', $kegiatan->KegiatanID)
+                ->whereNotIn('Status', ['T', 'TT'])
+                ->update([
+                    'Status' => $request->status,
+                    'DEdited' => now(),
+                    'UEdited' => Auth::id()
+                ]);
+        }
+
+        if ($request->approve_all_rabs == 'true') {
+            RAB::where('KegiatanID', $kegiatan->KegiatanID)
+                ->whereNull('SubKegiatanID')
+                ->update([
+                    'Status' => $request->status,
+                    'DEdited' => now(),
+                    'UEdited' => Auth::id()
+                ]);
+            
+            if (!in_array($request->status, ['T', 'TT'])) {
+                $subKegiatans = SubKegiatan::where('KegiatanID', $kegiatan->KegiatanID)
+                    ->whereNotIn('Status', ['T', 'TT'])
+                    ->get();
+                
+                foreach ($subKegiatans as $subKegiatan) {
+                    RAB::where('SubKegiatanID', $subKegiatan->SubKegiatanID)
+                        ->update([
+                            'Status' => $request->status,
+                            'DEdited' => now(),
+                            'UEdited' => Auth::id()
+                        ]);
+                }
+            }
+        }
+
+        // Send notification when status changes
+        if ($oldStatus !== $request->status) {
+            try {
+                $currentUser = Auth::user();
+                
+                // Check if current user is admin or super user updating a regular user's kegiatan
+                if (in_array($currentUser->level, [1, 3])) {
+                    Log::info("Admin/Super user updating kegiatan status", [
+                        'kegiatan_id' => $kegiatan->KegiatanID,
+                        'kegiatan_name' => $kegiatan->Nama,
+                        'old_status' => $oldStatus,
+                        'new_status' => $request->status,
+                        'admin_id' => $currentUser->id,
+                        'admin_name' => $currentUser->name
+                    ]);
+                    
+                    $this->notificationService->sendKegiatanNotification($kegiatan, 'status_updated');
+                }
+                
+                // Original notification logic for user submissions
+                if ($request->status === 'P') {
+                    Log::info("Sending notification for kegiatan submission", [
+                        'kegiatan_id' => $kegiatan->KegiatanID,
+                        'kegiatan_name' => $kegiatan->Nama,
+                        'sender_id' => Auth::id(),
+                        'sender_name' => Auth::user()->name
+                    ]);
+                    $this->notificationService->sendKegiatanNotification($kegiatan, 'ajukan_kegiatan');
+                } elseif ($request->status === 'PT') {
+                    Log::info("Sending notification for TOR submission", [
+                        'kegiatan_id' => $kegiatan->KegiatanID,
+                        'kegiatan_name' => $kegiatan->Nama,
+                        'sender_id' => Auth::id(),
+                        'sender_name' => Auth::user()->name
+                    ]);
+                    $this->notificationService->sendKegiatanNotification($kegiatan, 'ajukan_tor');
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send notification', [
+                    'kegiatan_id' => $kegiatan->KegiatanID,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                // Don't fail the main operation if notification fails
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status kegiatan berhasil diupdate'
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error updating kegiatan status', [
+            'kegiatan_id' => $id,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengupdate status kegiatan: ' . $e->getMessage()
+        ], 500);
     }
+}
+
 
 
     public function updateSubKegiatanStatus(Request $request, $id)

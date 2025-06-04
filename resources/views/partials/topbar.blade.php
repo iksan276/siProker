@@ -34,31 +34,33 @@
         </li>
 
         <!-- Nav Item - Alerts -->
-        @if(auth()->user()->isAdmin() || auth()->user()->level == 3)
-        <li class="nav-item dropdown no-arrow mx-1">
-            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-bell fa-fw"></i>
-                <!-- Counter - Alerts -->
-                <span class="badge badge-danger badge-counter" id="notification-count" style="display: none;">0</span>
-            </a>
-            <!-- Dropdown - Alerts -->
-            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                aria-labelledby="alertsDropdown" style="width: 380px; max-height: 400px; overflow-y: auto;">
-                <h6 class="dropdown-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <span>Pusat Notifikasi</span>
-                    <button class="btn btn-sm btn-link text-white p-0" id="mark-all-read" style="font-size: 11px; text-decoration: underline;">
-                        Tandai Semua Dibaca
-                    </button>
-                </h6>
-                <div id="notification-list">
-                    <div class="text-center p-3">
-                        <i class="fas fa-spinner fa-spin"></i> Memuat notifikasi...
-                    </div>
-                </div>
+       <!-- Nav Item - Alerts (Update kondisi untuk semua user) -->
+@if(auth()->user()->isAdmin() || auth()->user()->level == 3 || auth()->user()->level == 2)
+<li class="nav-item dropdown no-arrow mx-1">
+    <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
+        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fas fa-bell fa-fw"></i>
+        <!-- Counter - Alerts -->
+        <span class="badge badge-danger badge-counter" id="notification-count" style="display: none;">0</span>
+    </a>
+    <!-- Dropdown - Alerts -->
+    <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+        aria-labelledby="alertsDropdown" style="width: 380px; max-height: 400px; overflow-y: auto;">
+        <h6 class="dropdown-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <span>Pusat Notifikasi</span>
+            <button class="btn btn-sm btn-link text-white p-0" id="mark-all-read" style="font-size: 11px; text-decoration: underline;">
+                Tandai Semua Dibaca
+            </button>
+        </h6>
+        <div id="notification-list">
+            <div class="text-center p-3">
+                <i class="fas fa-spinner fa-spin"></i> Memuat notifikasi...
             </div>
-        </li>
-        @endif
+        </div>
+    </div>
+</li>
+@endif
+
 
         <!-- Network Status Indicator -->
         <div class="check-internet"></div>
@@ -236,9 +238,11 @@
 </style>
 
 <!-- Notification JavaScript -->
+<!-- Update bagian JavaScript untuk redirect berdasarkan role -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    @if(auth()->user()->isAdmin() || auth()->user()->level == 3)
+    // Check user level for notification access
+    @if(auth()->user()->isAdmin() || auth()->user()->level == 3 || auth()->user()->level == 2)
     
     let notificationUpdateInterval;
     
@@ -269,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
         $.ajax({
             url: '{{ route("notifications.index") }}',
             type: 'GET',
-            timeout: 10000, // 10 second timeout
+            timeout: 10000,
             success: function(notifications) {
                 displayNotifications(notifications);
             },
@@ -317,8 +321,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     minute: '2-digit'
                 });
                 
-                const iconClass = notification.Title.includes('TOR') ? 'fa-file-contract' : 'fa-file-alt';
-                const iconColor = notification.Title.includes('TOR') ? 'bg-warning' : 'bg-primary';
+                               const iconClass = notification.Title.includes('TOR') ? 'fa-file-contract' : 
+                                notification.Title.includes('Status') ? 'fa-sync-alt' : 'fa-file-alt';
+                const iconColor = notification.Title.includes('TOR') ? 'bg-warning' : 
+                                notification.Title.includes('Status') ? 'bg-success' : 'bg-primary';
                 
                 html += `
                     <div class="notification-item ${readClass}" 
@@ -355,8 +361,21 @@ document.addEventListener('DOMContentLoaded', function() {
             // Close dropdown
             $('#alertsDropdown').dropdown('hide');
             
-            // Redirect to kegiatan page with highlight
-            window.location.href = `/kegiatans?kegiatanID=${kegiatanId}`;
+            // Redirect based on user role
+            const userLevel = {{ auth()->user()->level }};
+            let redirectUrl = '';
+            
+            if (userLevel === 1 || userLevel === 3) {
+                // Admin or Super User - redirect to kegiatans page
+                redirectUrl = `/kegiatans?kegiatanID=${kegiatanId}`;
+            } else if (userLevel === 2) {
+                // Regular User - redirect to pilars page
+                redirectUrl = `/pilars?kegiatanID=${kegiatanId}&treeLevel=kegiatan`;
+            }
+            
+            if (redirectUrl) {
+                window.location.href = redirectUrl;
+            }
         });
     }
     
@@ -446,8 +465,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Update bagian Pusher Scripts -->
-@if(auth()->user()->isAdmin() || auth()->user()->level == 3)
+<!-- Update bagian Pusher Scripts untuk semua user -->
+@if(auth()->user()->isAdmin() || auth()->user()->level == 3 || auth()->user()->level == 2)
 <!-- Pusher Scripts -->
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 <script>
@@ -468,7 +487,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Subscribed to channel: private-notifications.{{ auth()->id() }}');
     
-       // Listen for kegiatan status updates
+    // Listen for kegiatan status updates
     channel.bind('kegiatan.status.updated', function(data) {
         console.log('Received notification:', data);
         
@@ -548,7 +567,7 @@ document.addEventListener('DOMContentLoaded', function() {
         playNotificationSound();
     }
     
-   // Format notification time similar to Carbon format
+    // Format notification time similar to Carbon format
     function formatNotificationTime(dateString) {
         if (!dateString) return 'N/A';
         
@@ -579,8 +598,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Close any open toasts
         $('.toast').toast('hide');
         
-        // Redirect to kegiatan page with filter
-        window.location.href = `/kegiatans?kegiatanID=${kegiatanId}&treeLevel=kegiatan`;
+        // Redirect based on user role
+        const userLevel = {{ auth()->user()->level }};
+        let redirectUrl = '';
+        
+        if (userLevel === 1 || userLevel === 3) {
+            // Admin or Super User - redirect to kegiatans page
+            redirectUrl = `/kegiatans?kegiatanID=${kegiatanId}&treeLevel=kegiatan`;
+        } else if (userLevel === 2) {
+            // Regular User - redirect to pilars page
+            redirectUrl = `/pilars?kegiatanID=${kegiatanId}`;
+        }
+        
+        if (redirectUrl) {
+            window.location.href = redirectUrl;
+        }
     }
     
     function playNotificationSound() {
@@ -608,5 +640,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 </script>
 @endif
+
+
+
 
 

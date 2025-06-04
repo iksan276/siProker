@@ -3,45 +3,45 @@
 <head>
     <title>{{ $title }}</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background-color: #f4f4f4; 
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
         }
-        .container { 
-            max-width: 600px; 
-            margin: 0 auto; 
-            padding: 20px; 
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
             background-color: #ffffff;
         }
-        .header { 
-            background-color: #4e73df; 
-            color: white; 
-            padding: 20px; 
-            text-align: center; 
+        .header {
+            background-color: #4e73df;
+            color: white;
+            padding: 20px;
+            text-align: center;
             border-radius: 5px 5px 0 0;
         }
-        .content { 
-            padding: 30px 20px; 
-            background-color: #f8f9fc; 
+        .content {
+            padding: 30px 20px;
+            background-color: #f8f9fc;
             border-left: 1px solid #e3e6f0;
             border-right: 1px solid #e3e6f0;
         }
-        .footer { 
-            padding: 20px; 
-            text-align: center; 
-            color: #666; 
+        .footer {
+            padding: 20px;
+            text-align: center;
+            color: #666;
             background-color: #f8f9fc;
             border: 1px solid #e3e6f0;
             border-radius: 0 0 5px 5px;
         }
-        .btn { 
-            background-color: #4e73df; 
-            color: white; 
-            padding: 12px 25px; 
-            text-decoration: none; 
-            border-radius: 5px; 
+        .btn {
+            background-color: #4e73df;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
             display: inline-block;
             margin-top: 15px;
         }
@@ -126,7 +126,7 @@
             </p>
             
             <p style="margin-top: 30px; font-size: 12px; color: #666;">
-                <strong>Catatan:</strong> Email ini dikirim secara otomatis oleh sistem SIPROKER. 
+                <strong>Catatan:</strong> Email ini dikirim secara otomatis oleh sistem SIPROKER.
                 Mohon tidak membalas email ini.
             </p>
         </div>

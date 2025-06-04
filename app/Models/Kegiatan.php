@@ -30,6 +30,18 @@ class Kegiatan extends Model
     {
         return 'KegiatanID';
     }
+
+        // Add relationship to creator
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'UCreated', 'id');
+    }
+    
+    // Add relationship to editor
+    public function editor()
+    {
+        return $this->belongsTo(User::class, 'UEdited', 'id');
+    }
     
     public function programRektor()
     {

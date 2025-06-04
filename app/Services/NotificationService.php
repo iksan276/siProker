@@ -14,13 +14,36 @@ class NotificationService
 {
     public function sendKegiatanNotification(Kegiatan $kegiatan, string $type)
     {
-      
         $sender = auth()->user();
         
-        // Get ALL admin and super users
-        $recipients = User::whereIn('level', [1, 3])->get(); // 1 = admin, 3 = super user
+        // Get recipients based on notification type
+        $recipients = collect();
+        
+        switch ($type) {
+            case 'ajukan_kegiatan':
+            case 'ajukan_tor':
+                // Send to ALL admin and super users when user submits
+                $recipients = User::whereIn('level', [1, 3])->get();
+                break;
+                
+            case 'status_updated':
+                // Send to the user who created the kegiatan when admin/super user updates status
+                if ($kegiatan->UCreated) {
+                    $kegiatanOwner = User::find($kegiatan->UCreated);
+                    if ($kegiatanOwner && $kegiatanOwner->level == 2) { // Only regular users
+                        $recipients = collect([$kegiatanOwner]);
+                    }
+                }
+                break;
+        }
+        
+        if ($recipients->isEmpty()) {
+            Log::info("No recipients found for notification type: {$type}");
+            return;
+        }
         
         Log::info("Found {$recipients->count()} recipients for notification", [
+            'type' => $type,
             'recipients' => $recipients->pluck('email')->toArray()
         ]);
         
@@ -36,6 +59,11 @@ class NotificationService
             case 'ajukan_tor':
                 $title = 'Pengajuan TOR Kegiatan';
                 $description = "TOR untuk kegiatan '{$kegiatan->Nama}' telah diajukan oleh {$sender->name} dan menunggu persetujuan.";
+                break;
+            case 'status_updated':
+                $statusText = $this->getStatusText($kegiatan->Status);
+                $title = 'Status Kegiatan Diperbarui';
+                $description = "Status kegiatan '{$kegiatan->Nama}' telah diperbarui menjadi '{$statusText}' oleh {$sender->name}.";
                 break;
         }
         
@@ -54,7 +82,7 @@ class NotificationService
                 
                 Log::info("Created notification for user: {$recipient->email}");
                 
-                // Send email directly (no queue)
+                // Send email directly
                 try {
                     Log::info("Attempting to send email to: {$recipient->email}");
                     
@@ -64,10 +92,7 @@ class NotificationService
                     
                     Log::info("Successfully sent email notification to: {$recipient->email}");
                 } catch (\Exception $e) {
-
-                    dd("Failed to send email notification to {$recipient->email}: " . $e->getMessage());
                     Log::error("Failed to send email notification to {$recipient->email}: " . $e->getMessage());
-                    Log::error("Email error trace: " . $e->getTraceAsString());
                 }
                 
             } catch (\Exception $e) {
@@ -82,5 +107,23 @@ class NotificationService
         } catch (\Exception $e) {
             Log::error("Failed to broadcast notification: " . $e->getMessage());
         }
+    }
+    
+    private function getStatusText($status)
+    {
+        $statusMap = [
+            'N' => 'Menunggu',
+            'Y' => 'Disetujui',
+            'T' => 'Ditolak',
+            'R' => 'Revisi',
+            'P' => 'Pengajuan',
+            'PT' => 'Pengajuan TOR',
+            'YT' => 'TOR Disetujui',
+            'TT' => 'TOR Ditolak',
+            'RT' => 'TOR Revisi',
+            'TP' => 'Tunda Pencairan'
+        ];
+        
+        return $statusMap[$status] ?? 'Unknown';
     }
 }
