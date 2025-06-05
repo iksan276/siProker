@@ -214,7 +214,9 @@ public function updateKegiatanStatus(Request $request, $id)
             $requestLog->save();
         }
 
-        if (!in_array($request->status, ['T', 'TT'])) {
+
+        if ($request->approve_all_rabs == 'true') {
+             if (!in_array($request->status, ['T', 'TT'])) {
             SubKegiatan::where('KegiatanID', $kegiatan->KegiatanID)
                 ->whereNotIn('Status', ['T', 'TT'])
                 ->update([
@@ -223,8 +225,6 @@ public function updateKegiatanStatus(Request $request, $id)
                     'UEdited' => Auth::id()
                 ]);
         }
-
-        if ($request->approve_all_rabs == 'true') {
             RAB::where('KegiatanID', $kegiatan->KegiatanID)
                 ->whereNull('SubKegiatanID')
                 ->update([
