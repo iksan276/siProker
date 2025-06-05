@@ -216,7 +216,7 @@ public function updateKegiatanStatus(Request $request, $id)
 
 
         if ($request->approve_all_rabs == 'true') {
-             if (!in_array($request->status, ['T', 'TT'])) {
+            if (in_array($request->status, ['N', 'Y', 'T', 'R'])) {
             SubKegiatan::where('KegiatanID', $kegiatan->KegiatanID)
                 ->whereNotIn('Status', ['T', 'TT'])
                 ->update([
@@ -224,7 +224,7 @@ public function updateKegiatanStatus(Request $request, $id)
                     'DEdited' => now(),
                     'UEdited' => Auth::id()
                 ]);
-        }
+       
             RAB::where('KegiatanID', $kegiatan->KegiatanID)
                 ->whereNull('SubKegiatanID')
                 ->update([
@@ -233,7 +233,7 @@ public function updateKegiatanStatus(Request $request, $id)
                     'UEdited' => Auth::id()
                 ]);
             
-            if (!in_array($request->status, ['T', 'TT'])) {
+            
                 $subKegiatans = SubKegiatan::where('KegiatanID', $kegiatan->KegiatanID)
                     ->whereNotIn('Status', ['T', 'TT'])
                     ->get();
@@ -246,8 +246,8 @@ public function updateKegiatanStatus(Request $request, $id)
                             'UEdited' => Auth::id()
                         ]);
                 }
-            }
-        }
+            
+        }}
 
                // Send notification when status changes
         if ($oldStatus !== $request->status) {
