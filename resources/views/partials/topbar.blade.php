@@ -529,12 +529,54 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update notification count
         setTimeout(function() {
+             function updateNotificationCount(count) {
+        const badge = $('#notification-count');
+        if (count > 0) {
+            badge.text(count > 99 ? '99+' : count).show();
+        } else {
+            badge.hide();
+        }
+    }
+             function loadUnreadCount() {
+        $.ajax({
+            url: '{{ route("notifications.unreadCount") }}',
+            type: 'GET',
+            timeout: 5000,
+            success: function(response) {
+                updateNotificationCount(response.count);
+            },
+            error: function(xhr) {
+                console.error('Error loading unread count:', xhr);
+            }
+        });
+    }
             loadUnreadCount();
         }, 1000);
         
         // If notification dropdown is open, refresh the list
         if ($('#alertsDropdown').attr('aria-expanded') === 'true') {
             setTimeout(function() {
+                 function updateNotificationCount(count) {
+        const badge = $('#notification-count');
+        if (count > 0) {
+            badge.text(count > 99 ? '99+' : count).show();
+        } else {
+            badge.hide();
+        }
+    }
+                 function loadUnreadCount() {
+        $.ajax({
+            url: '{{ route("notifications.unreadCount") }}',
+            type: 'GET',
+            timeout: 5000,
+            success: function(response) {
+                updateNotificationCount(response.count);
+            },
+            error: function(xhr) {
+                console.error('Error loading unread count:', xhr);
+            }
+        });
+    }
                 loadNotifications();
             }, 1500);
         }
