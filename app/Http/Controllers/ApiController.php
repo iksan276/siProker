@@ -327,8 +327,10 @@ public function updateKegiatanStatus(Request $request, $id)
 
         try {
             $subKegiatan = SubKegiatan::findOrFail($id);
+             $oldStatus = $subKegiatan->Status;
             $oldFeedback = $subKegiatan->Feedback;
             $subKegiatan->Status = $request->status;
+            
             
             if ($request->has('feedback')) {
                 $subKegiatan->Feedback = $request->feedback;
@@ -337,6 +339,41 @@ public function updateKegiatanStatus(Request $request, $id)
             $subKegiatan->DEdited = now();
             $subKegiatan->UEdited = Auth::id();
             $subKegiatan->save();
+            // Send notification when status changes and current user is admin/super user
+    if ($oldStatus !== $request->status) {
+    try {
+        $currentUser = Auth::user();
+        
+        Log::info("SubKegiatan status changed, checking notification conditions", [
+            'sub_kegiatan_id' => $subKegiatan->SubKegiatanID,
+            'current_user_level' => $currentUser->level,
+            'is_admin_or_super' => in_array($currentUser->level, [1, 3]) ? 'yes' : 'no'
+        ]);
+        
+        // Check if current user is admin or super user updating a regular user's sub kegiatan
+        if (in_array($currentUser->level, [1, 3])) {
+            Log::info("Admin/Super user updating SubKegiatan status", [
+                'sub_kegiatan_id' => $subKegiatan->SubKegiatanID,
+                'sub_kegiatan_name' => $subKegiatan->Nama,
+                'old_status' => $subKegiatan->getOriginal('Status'),
+                'new_status' => $request->status,
+                'admin_id' => $currentUser->id,
+                'admin_name' => $currentUser->name
+            ]);
+            
+            $this->notificationService->sendSubKegiatanNotification($subKegiatan, 'status_updated');
+            Log::info("Notification service called for SubKegiatan: {$subKegiatan->SubKegiatanID}");
+        }
+            } catch (\Exception $e) {
+                Log::error('Failed to send SubKegiatan notification', [
+                    'sub_kegiatan_id' => $subKegiatan->SubKegiatanID,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                // Don't fail the main operation if notification fails
+            }
+        }
+
 
             if ($request->has('feedback') && $oldFeedback !== $request->feedback && !empty($request->feedback)) {
                 $requestLog = new \App\Models\Request();

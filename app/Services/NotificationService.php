@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\RabNotification; 
 use Illuminate\Support\Facades\Log;
 use App\Models\RAB;
+use App\Mail\SubKegiatanNotification;
+use App\Models\SubKegiatan;
+
 
 class NotificationService
 {
@@ -281,5 +284,86 @@ class NotificationService
         Log::error("Failed to broadcast RAB notification: " . $e->getMessage());
     }
 }
+
+public function sendSubKegiatanNotification(SubKegiatan $subKegiatan, string $type)
+{
+    $sender = auth()->user();
+    
+    // Get the parent kegiatan
+    $kegiatan = $subKegiatan->kegiatan;
+    
+    if (!$kegiatan || !$kegiatan->UCreated) {
+        Log::info("No kegiatan or kegiatan owner found for SubKegiatan notification", [
+            'sub_kegiatan_id' => $subKegiatan->SubKegiatanID,
+            'kegiatan_id' => $subKegiatan->KegiatanID
+        ]);
+        return;
+    }
+    
+    $kegiatanOwner = User::find($kegiatan->UCreated);
+    if (!$kegiatanOwner || $kegiatanOwner->level != 2) { // Only regular users
+        Log::info("Kegiatan owner not found or not a regular user", [
+            'kegiatan_owner_id' => $kegiatan->UCreated,
+            'owner_level' => $kegiatanOwner ? $kegiatanOwner->level : 'null'
+        ]);
+        return;
+    }
+    
+    $recipients = collect([$kegiatanOwner]);
+    
+    Log::info("Found recipient for SubKegiatan notification", [
+        'type' => $type,
+        'recipient' => $kegiatanOwner->email,
+        'sub_kegiatan_id' => $subKegiatan->SubKegiatanID,
+        'kegiatan_id' => $kegiatan->KegiatanID
+    ]);
+    
+    // Determine title and description
+    $title = 'Status Sub Kegiatan Diperbarui';
+    $statusText = $this->getStatusText($subKegiatan->Status);
+    $description = "Status sub kegiatan '{$subKegiatan->Nama}' pada kegiatan '{$kegiatan->Nama}' telah diperbarui statusnya menjadi '{$statusText}' oleh {$sender->name}.";
+    
+    // Create notification in database and send email
+    foreach ($recipients as $recipient) {
+        try {
+            // Create notification in database
+            $notification = Notification::create([
+                'KegiatanID' => $kegiatan->KegiatanID,
+                'Title' => $title,
+                'Description' => $description,
+                'UserID' => $recipient->id,
+                'DCreated' => now(),
+                'UCreated' => $sender->id
+            ]);
+            
+            Log::info("Created SubKegiatan notification for user: {$recipient->email}");
+            
+            // Send email directly
+            try {
+                Log::info("Attempting to send SubKegiatan email to: {$recipient->email}");
+                
+                Mail::to($recipient->email)->send(
+                    new SubKegiatanNotification($kegiatan, $subKegiatan, $sender, $title, $description)
+                );
+                
+                Log::info("Successfully sent SubKegiatan email notification to: {$recipient->email}");
+            } catch (\Exception $e) {
+                Log::error("Failed to send SubKegiatan email notification to {$recipient->email}: " . $e->getMessage());
+            }
+            
+        } catch (\Exception $e) {
+            Log::error("Failed to create SubKegiatan notification for user {$recipient->id}: " . $e->getMessage());
+        }
+    }
+    
+    // Broadcast real-time notification
+    try {
+        event(new KegiatanStatusUpdated($kegiatan, $sender, $title, $description, $recipients->toArray()));
+        Log::info("Broadcasted real-time SubKegiatan notification to {$recipients->count()} recipients");
+    } catch (\Exception $e) {
+        Log::error("Failed to broadcast SubKegiatan notification: " . $e->getMessage());
+    }
+}
+
 
 }
