@@ -457,30 +457,6 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
             resetSearch();
         });
         
-        // Handle tooltip for node names - using direct event binding
-        $(document).on('mouseenter', '.node-name', function() {
-            $(this).tooltip('show');
-        });
-        
-        $(document).on('mouseleave', '.node-name', function() {
-            $(this).tooltip('hide');
-        });
-        
-        // Handle tooltip for expander icons - using direct event binding
-        $(document).on('mouseenter', '.node-expander i', function() {
-            $(this).tooltip('show');
-        });
-        
-        $(document).on('mouseleave', '.node-expander i', function() {
-            $(this).tooltip('hide');
-        });
-        
-        // Ensure tooltips are destroyed when elements are clicked
-        $(document).on('click', '.node-expander', function() {
-            // Hide any tooltips that might be visible
-            $('.tooltip').remove();
-        });
-
         // Handle form submission within modal
         $(document).on('submit', '.modal-form', function(e) {
             e.preventDefault();
@@ -1199,18 +1175,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
         return descendants;
     }
     
-    // Function to initialize tooltips properly
-    function initTooltips() {
-        // First destroy any existing tooltips to prevent duplicates
-        $('[data-toggle="tooltip"]').tooltip('dispose');
-        
-        // Then reinitialize with proper settings
-        $('[data-toggle="tooltip"]').tooltip({
-            trigger: 'hover',
-            container: 'body',
-            animation: false
-        });
-    }
+
     
    // Function to get expand tooltip based on node type
 function getExpandTooltip(nodeType) {

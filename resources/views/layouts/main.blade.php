@@ -610,14 +610,22 @@
 
     <script>
         // Add this to the scripts section of your main.blade.php file
-$(document).ready(function() {
-    // Initialize tooltips
-    $('[data-toggle="tooltip"]').tooltip();
+// $(document).ready(function() {
+//     // Initialize tooltips
+//     $('[data-toggle="tooltip"]').tooltip();
     
-    // Re-initialize tooltips after AJAX content is loaded
-    $(document).ajaxComplete(function() {
-        $('[data-toggle="tooltip"]').tooltip();
-    });
+//     // Re-initialize tooltips after AJAX content is loaded
+//     $(document).ajaxComplete(function() {
+//         $('[data-toggle="tooltip"]').tooltip();
+//     });
+// });
+$(document).ajaxComplete(function() {
+    // Only reinitialize tooltips if we're on the pilars page
+    if (typeof initTooltips === 'function') {
+        setTimeout(function() {
+            initTooltips();
+        }, 100);
+    }
 });
 
   // Page Transition Splashscreen Script
@@ -697,6 +705,8 @@ $(document).ready(function() {
         // Handle modal loading
         $(document).on('click', '.load-modal', function(e) {
             e.preventDefault();
+               e.stopPropagation();
+              $('.tooltip').remove();
             var url = $(this).data('url');
             var title = $(this).data('title');
             
@@ -746,7 +756,24 @@ $(document).ready(function() {
         $('#mainModal').on('hidden.bs.modal', function () {
             initPageSelect2();
         });
+         initTooltips();
     });
+
+    // Function to initialize tooltips properly
+        function initTooltips() {
+            // First destroy any existing tooltips to prevent duplicates
+            $('[data-toggle="tooltip"]').tooltip('dispose');
+            
+            // Then reinitialize with proper settings
+            $('[data-toggle="tooltip"]').tooltip({
+                trigger: 'hover',
+                container: 'body',
+                animation: false,
+                boundary: 'viewport',
+                placement: 'auto'
+            });
+        }
+
     
     // Initialize Select2 for page elements (outside modal)
     function initPageSelect2() {
