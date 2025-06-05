@@ -1531,6 +1531,7 @@ $(document).ready(function() {
 $(document).on('click', '.update-status-kegiatan', function(e) {
     e.preventDefault();
     e.stopPropagation();
+      $('.tooltip').remove();
     var kegiatanId = $(this).data('id');
     
     Swal.fire({
@@ -1741,6 +1742,7 @@ $(document).on('click', '.update-status-kegiatan', function(e) {
 $(document).on('click', '.update-status-subkegiatan', function(e) {
     e.preventDefault();
     e.stopPropagation();
+      $('.tooltip').remove();
     var subKegiatanId = $(this).data('id');
     
     Swal.fire({
@@ -1899,6 +1901,7 @@ $(document).on('click', '.update-status-subkegiatan', function(e) {
 $(document).on('click', '.update-status-rab', function(e) {
     e.preventDefault();
     e.stopPropagation();
+      $('.tooltip').remove();
     var rabId = $(this).data('id');
     
     Swal.fire({

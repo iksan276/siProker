@@ -576,6 +576,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
         $(document).on('click', '.ajukan-kegiatan', function(e) {
             e.preventDefault();
             e.stopPropagation();
+              $('.tooltip').remove();
             var kegiatanId = $(this).data('id');
             var updateUrl = "{{ url('api/kegiatan') }}/" + kegiatanId + "/update-status";
             
@@ -659,6 +660,7 @@ $(document).on('mouseleave', '#tree-grid tbody tr', function() {
         $(document).on('click', '.ajukan-tor-kegiatan', function(e) {
             e.preventDefault();
             e.stopPropagation();
+              $('.tooltip').remove();
             var kegiatanId = $(this).data('id');
             var updateUrl = "{{ url('api/kegiatan') }}/" + kegiatanId + "/update-status";
             
@@ -1359,283 +1361,323 @@ function getCollapseTooltip(nodeType) {
         }
     }
     
-    function loadTreeData(previousLevel, newLevel) {
-        var renstraID = $('#renstraFilter').val();
-        var treeLevel = $('#treeLevelFilter').val();
-        var searchTerm = $('#searchFilter').val().trim();
-        var status = '';
-        var kegiatanID = '';
-        
-        // Only include status filter if tree level is 'kegiatan'
-        if (treeLevel === 'kegiatan') {
-            status = $('#statusFilter').val();
-            kegiatanID = $('#kegiatanFilter').val();
+ // Function to apply the expanded state to the tree
+function applyExpandedState() {
+    // First, identify all nodes that need to be expanded
+    var nodesToExpand = [];
+    
+    // Add all nodes that are marked as expanded
+    for (var nodeId in expandedNodes) {
+        if (expandedNodes[nodeId] && $('tr[data-node-id="' + nodeId + '"]').length) {
+            nodesToExpand.push(nodeId);
         }
-         if (!kegiatanID) {
+    }
+    
+    // Sort nodes by level to ensure parents are expanded before children
+    nodesToExpand.sort(function(a, b) {
+        return (nodeLevels[a] || 0) - (nodeLevels[b] || 0);
+    });
+    
+    // Expand each node
+    nodesToExpand.forEach(function(nodeId) {
+        expandNode(nodeId);
+        var nodeType = nodeTypes[nodeId] || '';
+        var collapseTooltip = getCollapseTooltip(nodeType);
+        
+        $('tr[data-node-id="' + nodeId + '"] .node-expander')
+            .addClass('expanded')
+            .html('<i class="fas fa-chevron-down text-primary" data-toggle="tooltip" title="' + collapseTooltip + '"></i>');
+    });
+    
+    // Hide all child nodes that should not be visible initially
+    hideCollapsedNodes();
+    
+    // Re-initialize tooltips
+    initTooltips();
+}
+
+// New function to hide nodes that should be collapsed
+function hideCollapsedNodes() {
+    $('#tree-grid tbody tr').each(function() {
+        var $row = $(this);
+        var nodeId = $row.data('node-id');
+        var parentId = $row.data('parent');
+        
+        // If this node has a parent
+        if (parentId) {
+            // Check if the parent is expanded
+            if (!expandedNodes[parentId]) {
+                // Parent is not expanded, so hide this node
+                $row.hide();
+            } else {
+                // Parent is expanded, check if all ancestors are expanded
+                var shouldShow = true;
+                var currentParent = parentId;
+                
+                while (currentParent && shouldShow) {
+                    if (!expandedNodes[currentParent]) {
+                        shouldShow = false;
+                    }
+                    currentParent = nodeRelationships[currentParent];
+                }
+                
+                if (shouldShow) {
+                    $row.show();
+                } else {
+                    $row.hide();
+                }
+            }
+        }
+    });
+}
+
+function loadTreeData(previousLevel, newLevel) {
+    var renstraID = $('#renstraFilter').val();
+    var treeLevel = $('#treeLevelFilter').val();
+    var searchTerm = $('#searchFilter').val().trim();
+    var status = '';
+    var kegiatanID = '';
+    
+    // Only include status filter if tree level is 'kegiatan'
+    if (treeLevel === 'kegiatan') {
+        status = $('#statusFilter').val();
         kegiatanID = $('#kegiatanFilter').val();
     }
-        // If we're changing tree levels, preserve expanded state
-        if (previousLevel && newLevel && previousLevel !== newLevel) {
-            preserveExpandedStateAcrossLevels(previousLevel, newLevel);
-        }
-        
-        $.ajax({
-            url: '{{ route('pilars.index') }}',
-            type: 'GET',
-            data: {
-                renstraID: renstraID,
-                treeLevel: treeLevel,
-                status: status,
-                kegiatanID: kegiatanID,
-                format: 'tree'
-            },
-            dataType: 'json',
-            beforeSend: function() {
-                $('#tree-grid-container').html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>');
-            },
-            success: function(response) {
-                // Clear container
-                $('#tree-grid-container').html('<table id="tree-grid" class="table table-bordered"><thead><tr><th class="text-center" style="width: 5%;">No</th><th class="text-center">Nama</th><th class="text-center" style="width: 15%;">Actions</th></tr></thead><tbody></tbody></table>');
-                
-                $('#tree-grid th').addClass('text-dark');
-                // Add rows to the table
-                var treeData = response.data || [];
-                allTreeData = treeData; // Store all tree data for searching
-                var tableBody = $('#tree-grid tbody');
-                
-                if (treeData.length === 0) {
-                                       tableBody.html('<tr><td colspan="3" class="text-center">No data available</td></tr>');
-                    return;
-                }
-                
-                // Reset node relationships and levels
-                nodeRelationships = {};
-                nodeLevels = {};
-                nodeTypes = {};
-                
-                // Build node map for quick lookup
-                var nodeMap = {};
-                treeData.forEach(function(item) {
-                    nodeMap[item.id] = item;
-                    
-                    // Store parent-child relationships
-                    if (item.parent) {
-                        nodeRelationships[item.id] = item.parent;
-                    }
-                    
-                               // Store node levels
-                    nodeLevels[item.id] = item.level;
-                    
-                    // Store node types
-                    nodeTypes[item.id] = item.type;
-                });
-                // Build complete hierarchy information
-                nodeHierarchy = buildNodeHierarchy(treeData);
-                
-                // Special handling for tree level changes
-                if (previousLevel && newLevel && previousLevel !== newLevel) {
-                    // When changing tree levels, we need to ensure parent nodes stay expanded
-                    // if their children were expanded in the previous view
-                    ensureParentNodesExpanded();
-                }
-                
-                // Process tree data to update tooltips based on node type
-                treeData.forEach(function(item) {
-                    // Update tooltip based on node type
-                    if (item.type === 'pilar') {
-                        item.tooltip = 'Ini adalah Pilar';
-                    } else if (item.type === 'isu') {
-                        item.tooltip = 'Ini adalah Isu Strategis';
-                    } else if (item.type === 'program') {
-                        item.tooltip = 'Ini adalah Program Pengembangan';
-                    } else if (item.type === 'rektor') {
-                        item.tooltip = 'Ini adalah Program Rektor';
-                    } else if (item.type === 'indikator') {
-                        item.tooltip = 'Ini adalah Indikator Kinerja';
-                    } else if (item.type === 'kegiatan') {
-                        item.tooltip = 'Ini adalah Kegiatan';
-                    }else if (item.type === 'subkegiatan') {
-                        item.tooltip = 'Ini adalah Sub Kegiatan';
-                    }else if (item.type === 'rab') {
-                        item.tooltip = 'Ini adalah RAB';
-                    }
-                });
-                
-                // First pass: add all rows to the table
-                treeData.forEach(function(item) {
-                    var row = $('<tr></tr>');
-                    
-                    // Set data attributes
-                    row.attr('data-node-id', item.id);
-                    row.attr('data-parent', item.parent || '');
-                    row.attr('data-level', item.level);
-                    row.attr('data-has-children', item.has_children);
-                    row.attr('data-node-type', item.type); // Add node type as data attribute
-                    // Add node type class for styling
-                    row.addClass('node-' + item.type);
-                    
-                    // Apply background color directly based on node type
-                    if (item.type === 'pilar') {
-                        row.css('background-color', 'rgba(231, 74, 59, 0.1)'); // Light red
-                    } else if (item.type === 'isu') {
-                        row.css('background-color', 'rgba(246, 194, 62, 0.1)'); // Light yellow
-                    } else if (item.type === 'program') {
-                        row.css('background-color', 'rgba(28, 200, 138, 0.1)'); // Light green
-                    } else if (item.type === 'rektor') {
-                        row.css('background-color', 'rgba(10, 63, 223, 0.1)'); // Light blue
-                    } else if (item.type === 'indikator') {
-                        row.css('background-color', 'rgba(2, 255, 251, 0.1)'); // Light info
-                    } else if (item.type === 'kegiatan') {
-                        row.css('background-color', 'rgba(156, 39, 176, 0.1)'); // Light purple
-                    }else if (item.type === 'subkegiatan') {
-                        row.css('background-color', 'rgba(255, 140, 0, 0.1)'); // Light orange
-                    }else if (item.type === 'rab') {
-                        row.css('background-color', 'rgba(0, 0, 0, 0.1)'); // Light black
-                    }
-                    
-                    // Add level class for styling
-                    row.addClass('level-' + item.level);
-                    
-                    // Add row class if provided
-                    if (item.row_class) {
-                        row.addClass(item.row_class);
-                    }
-                    
-                    // Initially hide child nodes
-                    if (item.parent) {
-                        row.addClass('child-node').hide();
-                    }
-                    
-                    // Add cells with proper styling
-                    row.append('<td class="text-center" style="white-space:nowrap;width:1px;">' + (item.no || '') + '</td>');
-                    
-                    // Add expander if has children
-                    var expander = '';
-                    if (item.has_children) {
-                        var isExpanded = expandedNodes[item.id];
-                        var tooltipText = isExpanded ? 
-                            getCollapseTooltip(item.type) : 
-                            getExpandTooltip(item.type);
-                        
-                        var expanderIcon = isExpanded ? 
-                            '<i class="fas fa-chevron-down text-primary" data-toggle="tooltip" title="' + tooltipText + '"></i>' : 
-                            '<i class="fas fa-chevron-right text-primary" data-toggle="tooltip" title="' + tooltipText + '"></i>';
-                        
-                        expander = '<span class="node-expander ' + (isExpanded ? 'expanded' : '') + '" data-node-id="' + item.id + '">' + expanderIcon + '</span>';
-                    }
-                    
-                    // Create name cell with tooltip that shows on hover
-                    var nameText = '';
-                    
-                    // Add visual indentation markers based on level - with color gradient
-                    var indentPrefix = '';
-                    for (var i = 0; i < item.level; i++) {
-                        indentPrefix += '<span class="tree-indent text-primary">- - -&nbsp;</span>';
-                    }
-                    
-                    if (item.tooltip && item.type!== 'rab' && item.type!== 'subkegiatan') {
-                        nameText = indentPrefix + '<span class="node-name" data-toggle="tooltip" title="' + item.tooltip + '">' + item.nama + '</span>';
-                    } else {
-                        nameText = indentPrefix + item.nama;
-                    }
-                    
-                    var nameCell = '<td>' + nameText + "&nbsp;&nbsp;" + expander + '</td>';
-                    row.append(nameCell);
-                    row.append('<td class="text-center" style="white-space:nowrap;width:1px;">' + (item.actions || '') + '</td>');
-                    
-                    tableBody.append(row);
-                });
-                
-                // Initialize tooltips
-                initTooltips();
-                
-                // Clean up expandedNodes to remove any that no longer exist in the tree
-                for (var nodeId in expandedNodes) {
-                    if (!$('tr[data-node-id="' + nodeId + '"]').length) {
-                        delete expandedNodes[nodeId];
-                    }
-                }
-                
-                // Apply the expanded state to the tree
-                applyExpandedState();
-                
-                // Save the updated expanded state
-                localStorage.setItem('expandedNodes', JSON.stringify(expandedNodes));
-                
-                // Re-initialize event handlers for dynamic content
-                initEventHandlers();
-                
-                // Apply search if there's a search term
-                if (searchTerm) {
-                    $('#searchFilter').val(searchTerm);
-                    performSearch();
-                }
-            },
-            error: function(xhr) {
-                console.error('Error loading data:', xhr);
-                $('#tree-grid-container').html('<div class="alert alert-danger">Error loading data: ' + (xhr.responseJSON?.message || xhr.statusText) + '</div>');
-            }
-        });
+     if (!kegiatanID) {
+        kegiatanID = $('#kegiatanFilter').val();
     }
     
-    // Function to apply the expanded state to the tree
-    function applyExpandedState() {
-        // First, identify all nodes that need to be expanded
-        var nodesToExpand = [];
-        
-        // Add all nodes that are marked as expanded
-        for (var nodeId in expandedNodes) {
-            if (expandedNodes[nodeId] && $('tr[data-node-id="' + nodeId + '"]').length) {
-                nodesToExpand.push(nodeId);
-            }
-        }
-        
-        // Sort nodes by level to ensure parents are expanded before children
-        nodesToExpand.sort(function(a, b) {
-            return (nodeLevels[a] || 0) - (nodeLevels[b] || 0);
-        });
-        
-        // Expand each node
-        nodesToExpand.forEach(function(nodeId) {
-            expandNode(nodeId);
-            var nodeType = nodeTypes[nodeId] || '';
-            var collapseTooltip = getCollapseTooltip(nodeType);
+    // If we're changing tree levels, preserve expanded state
+    if (previousLevel && newLevel && previousLevel !== newLevel) {
+        preserveExpandedStateAcrossLevels(previousLevel, newLevel);
+    }
+    
+    $.ajax({
+        url: '{{ route('pilars.index') }}',
+        type: 'GET',
+        data: {
+            renstraID: renstraID,
+            treeLevel: treeLevel,
+            status: status,
+            kegiatanID: kegiatanID,
+            format: 'tree'
+        },
+        dataType: 'json',
+        beforeSend: function() {
+            $('#tree-grid-container').html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>');
+        },
+        success: function(response) {
+            // Clear container
+            $('#tree-grid-container').html('<table id="tree-grid" class="table table-bordered"><thead><tr><th class="text-center" style="width: 5%;">No</th><th class="text-center">Nama</th><th class="text-center" style="width: 15%;">Actions</th></tr></thead><tbody></tbody></table>');
             
-            $('tr[data-node-id="' + nodeId + '"] .node-expander')
-                .addClass('expanded')
-                .html('<i class="fas fa-chevron-down text-primary" data-toggle="tooltip" title="' + collapseTooltip + '"></i>');
-        });
-        
-        // Re-initialize tooltips
-        initTooltips();
-    }
-    
-    function expandNode(nodeId) {
-        // Show all direct children of this node
-        $('tr[data-parent="' + nodeId + '"]').show();
-        
-        // Also ensure that if any of these children are expanded, their children are shown too
-        $('tr[data-parent="' + nodeId + '"]').each(function() {
-            var childId = $(this).data('node-id');
-            if (expandedNodes[childId]) {
-                expandNode(childId);
-            }
-        });
-    }
-    
-    function collapseNode(nodeId) {
-        // First, recursively collapse all descendants
-        $('tr[data-parent="' + nodeId + '"]').each(function() {
-            var childId = $(this).data('node-id');
-            collapseNode(childId);
+            $('#tree-grid th').addClass('text-dark');
+            // Add rows to the table
+            var treeData = response.data || [];
+            allTreeData = treeData; // Store all tree data for searching
+            var tableBody = $('#tree-grid tbody');
             
-            // Remove from expanded nodes
-            delete expandedNodes[childId];
-        });
+            if (treeData.length === 0) {
+                tableBody.html('<tr><td colspan="3" class="text-center">No data available</td></tr>');
+                return;
+            }
+            
+            // Reset node relationships and levels
+            nodeRelationships = {};
+            nodeLevels = {};
+            nodeTypes = {};
+            
+            // Build node map for quick lookup
+            var nodeMap = {};
+            treeData.forEach(function(item) {
+                nodeMap[item.id] = item;
+                
+                // Store parent-child relationships
+                if (item.parent) {
+                    nodeRelationships[item.id] = item.parent;
+                }
+                
+                // Store node levels
+                nodeLevels[item.id] = item.level;
+                
+                // Store node types
+                nodeTypes[item.id] = item.type;
+            });
+            // Build complete hierarchy information
+            nodeHierarchy = buildNodeHierarchy(treeData);
+            
+            // Special handling for tree level changes
+            if (previousLevel && newLevel && previousLevel !== newLevel) {
+                // When changing tree levels, we need to ensure parent nodes stay expanded
+                // if their children were expanded in the previous view
+                ensureParentNodesExpanded();
+            }
+            
+            // Process tree data to update tooltips based on node type
+            treeData.forEach(function(item) {
+                // Update tooltip based on node type
+                if (item.type === 'pilar') {
+                    item.tooltip = 'Ini adalah Pilar';
+                } else if (item.type === 'isu') {
+                    item.tooltip = 'Ini adalah Isu Strategis';
+                } else if (item.type === 'program') {
+                    item.tooltip = 'Ini adalah Program Pengembangan';
+                } else if (item.type === 'rektor') {
+                    item.tooltip = 'Ini adalah Program Rektor';
+                } else if (item.type === 'indikator') {
+                    item.tooltip = 'Ini adalah Indikator Kinerja';
+                } else if (item.type === 'kegiatan') {
+                    item.tooltip = 'Ini adalah Kegiatan';
+                }else if (item.type === 'subkegiatan') {
+                    item.tooltip = 'Ini adalah Sub Kegiatan';
+                }else if (item.type === 'rab') {
+                    item.tooltip = 'Ini adalah RAB';
+                }
+            });
+            
+            // First pass: add all rows to the table
+            treeData.forEach(function(item) {
+                var row = $('<tr></tr>');
+                
+                // Set data attributes
+                row.attr('data-node-id', item.id);
+                row.attr('data-parent', item.parent || '');
+                row.attr('data-level', item.level);
+                row.attr('data-has-children', item.has_children);
+                row.attr('data-node-type', item.type); // Add node type as data attribute
+                // Add node type class for styling
+                row.addClass('node-' + item.type);
+                
+                // Apply background color directly based on node type
+                if (item.type === 'pilar') {
+                    row.css('background-color', 'rgba(231, 74, 59, 0.1)'); // Light red
+                } else if (item.type === 'isu') {
+                    row.css('background-color', 'rgba(246, 194, 62, 0.1)'); // Light yellow
+                } else if (item.type === 'program') {
+                    row.css('background-color', 'rgba(28, 200, 138, 0.1)'); // Light green
+                } else if (item.type === 'rektor') {
+                    row.css('background-color', 'rgba(10, 63, 223, 0.1)'); // Light blue
+                } else if (item.type === 'indikator') {
+                    row.css('background-color', 'rgba(2, 255, 251, 0.1)'); // Light info
+                } else if (item.type === 'kegiatan') {
+                    row.css('background-color', 'rgba(156, 39, 176, 0.1)'); // Light purple
+                }else if (item.type === 'subkegiatan') {
+                    row.css('background-color', 'rgba(255, 140, 0, 0.1)'); // Light orange
+                }else if (item.type === 'rab') {
+                    row.css('background-color', 'rgba(0, 0, 0, 0.1)'); // Light black
+                }
+                
+                // Add level class for styling
+                row.addClass('level-' + item.level);
+                
+                // Add row class if provided
+                if (item.row_class) {
+                    row.addClass(item.row_class);
+                }
+                
+                // Initially hide child nodes - PERBAIKAN UTAMA DI SINI
+                if (item.parent) {
+                    row.addClass('child-node').hide();
+                }
+                
+                // Add cells with proper styling
+                row.append('<td class="text-center" style="white-space:nowrap;width:1px;">' + (item.no || '') + '</td>');
+                
+                // Add expander if has children
+                var expander = '';
+                if (item.has_children) {
+                    var isExpanded = expandedNodes[item.id];
+                    var tooltipText = isExpanded ? 
+                        getCollapseTooltip(item.type) : 
+                        getExpandTooltip(item.type);
+                    
+                    var expanderIcon = isExpanded ? 
+                        '<i class="fas fa-chevron-down text-primary" data-toggle="tooltip" title="' + tooltipText + '"></i>' : 
+                        '<i class="fas fa-chevron-right text-primary" data-toggle="tooltip" title="' + tooltipText + '"></i>';
+                    
+                    expander = '<span class="node-expander ' + (isExpanded ? 'expanded' : '') + '" data-node-id="' + item.id + '">' + expanderIcon + '</span>';
+                }
+                
+                // Create name cell with tooltip that shows on hover
+                var nameText = '';
+                
+                // Add visual indentation markers based on level - with color gradient
+                var indentPrefix = '';
+                for (var i = 0; i < item.level; i++) {
+                    indentPrefix += '<span class="tree-indent text-primary">- - -&nbsp;</span>';
+                }
+                
+                if (item.tooltip && item.type!== 'rab' && item.type!== 'subkegiatan') {
+                    nameText = indentPrefix + '<span class="node-name" data-toggle="tooltip" title="' + item.tooltip + '">' + item.nama + '</span>';
+                } else {
+                    nameText = indentPrefix + item.nama;
+                }
+                
+                var nameCell = '<td>' + nameText + "&nbsp;&nbsp;" + expander + '</td>';
+                row.append(nameCell);
+                row.append('<td class="text-center" style="white-space:nowrap;width:1px;">' + (item.actions || '') + '</td>');
+                
+                tableBody.append(row);
+            });
+            
+            // Initialize tooltips
+            initTooltips();
+            
+            // Clean up expandedNodes to remove any that no longer exist in the tree
+            for (var nodeId in expandedNodes) {
+                if (!$('tr[data-node-id="' + nodeId + '"]').length) {
+                    delete expandedNodes[nodeId];
+                }
+            }
+            
+            // Apply the expanded state to the tree - PERBAIKAN UTAMA DI SINI
+            applyExpandedState();
+            
+            // Save the updated expanded state
+            localStorage.setItem('expandedNodes', JSON.stringify(expandedNodes));
+            
+            // Re-initialize event handlers for dynamic content
+            initEventHandlers();
+            
+            // Apply search if there's a search term
+            if (searchTerm) {
+                $('#searchFilter').val(searchTerm);
+                performSearch();
+            }
+        },
+        error: function(xhr) {
+            console.error('Error loading data:', xhr);
+            $('#tree-grid-container').html('<div class="alert alert-danger">Error loading data: ' + (xhr.responseJSON?.message || xhr.statusText) + '</div>');
+        }
+    });
+}
+
+function expandNode(nodeId) {
+    // Show all direct children of this node
+    $('tr[data-parent="' + nodeId + '"]').show();
+    
+    // Also ensure that if any of these children are expanded, their children are shown too
+    $('tr[data-parent="' + nodeId + '"]').each(function() {
+        var childId = $(this).data('node-id');
+        if (expandedNodes[childId]) {
+            expandNode(childId);
+        }
+    });
+}
+
+function collapseNode(nodeId) {
+    // First, recursively collapse all descendants
+    $('tr[data-parent="' + nodeId + '"]').each(function() {
+        var childId = $(this).data('node-id');
+        collapseNode(childId);
         
-        // Then hide direct children
-        $('tr[data-parent="' + nodeId + '"]').hide();
-    }
+        // Remove from expanded nodes
+        delete expandedNodes[childId];
+    });
+    
+    // Then hide direct children
+    $('tr[data-parent="' + nodeId + '"]').hide();
+}
+
 
      // Function to initialize event handlers for dynamic content
      function initEventHandlers() {
