@@ -249,7 +249,7 @@ public function updateKegiatanStatus(Request $request, $id)
             }
         }
 
-        // Send notification when status changes
+               // Send notification when status changes
         if ($oldStatus !== $request->status) {
             try {
                 $currentUser = Auth::user();
@@ -268,24 +268,27 @@ public function updateKegiatanStatus(Request $request, $id)
                     $this->notificationService->sendKegiatanNotification($kegiatan, 'status_updated');
                 }
                 
-                // Original notification logic for user submissions
-                if ($request->status === 'P') {
-                    Log::info("Sending notification for kegiatan submission", [
-                        'kegiatan_id' => $kegiatan->KegiatanID,
-                        'kegiatan_name' => $kegiatan->Nama,
-                        'sender_id' => Auth::id(),
-                        'sender_name' => Auth::user()->name
-                    ]);
-                    $this->notificationService->sendKegiatanNotification($kegiatan, 'ajukan_kegiatan');
-                } elseif ($request->status === 'PT') {
-                    Log::info("Sending notification for TOR submission", [
-                        'kegiatan_id' => $kegiatan->KegiatanID,
-                        'kegiatan_name' => $kegiatan->Nama,
-                        'sender_id' => Auth::id(),
-                        'sender_name' => Auth::user()->name
-                    ]);
-                    $this->notificationService->sendKegiatanNotification($kegiatan, 'ajukan_tor');
+                // Send notification to all admins and super users when regular user submits
+                if ($currentUser->level == 2) { // Regular user
+                    if ($request->status === 'P') {
+                        Log::info("Regular user submitting kegiatan for approval", [
+                            'kegiatan_id' => $kegiatan->KegiatanID,
+                            'kegiatan_name' => $kegiatan->Nama,
+                            'sender_id' => Auth::id(),
+                            'sender_name' => Auth::user()->name
+                        ]);
+                        $this->notificationService->sendKegiatanNotification($kegiatan, 'ajukan_kegiatan');
+                    } elseif ($request->status === 'PT') {
+                        Log::info("Regular user submitting TOR for approval", [
+                            'kegiatan_id' => $kegiatan->KegiatanID,
+                            'kegiatan_name' => $kegiatan->Nama,
+                            'sender_id' => Auth::id(),
+                            'sender_name' => Auth::user()->name
+                        ]);
+                        $this->notificationService->sendKegiatanNotification($kegiatan, 'ajukan_tor');
+                    }
                 }
+                
             } catch (\Exception $e) {
                 Log::error('Failed to send notification', [
                     'kegiatan_id' => $kegiatan->KegiatanID,
@@ -312,7 +315,6 @@ public function updateKegiatanStatus(Request $request, $id)
         ], 500);
     }
 }
-
 
 
     public function updateSubKegiatanStatus(Request $request, $id)

@@ -10,7 +10,7 @@ use App\Mail\KegiatanNotification;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\RabNotification; 
 use Illuminate\Support\Facades\Log;
-use App\Models\RAB; // Tambahkan import ini
+use App\Models\RAB;
 
 class NotificationService
 {
@@ -69,7 +69,7 @@ class NotificationService
                 break;
         }
         
-        // Create notifications in database and send emails for ALL recipients
+        // Create notifications in database for ALL recipients
         foreach ($recipients as $recipient) {
             try {
                 // Create notification in database
@@ -84,21 +84,25 @@ class NotificationService
                 
                 Log::info("Created notification for user: {$recipient->email}");
                 
-                // Send email directly
+            } catch (\Exception $e) {
+                Log::error("Failed to create notification for user {$recipient->id}: " . $e->getMessage());
+            }
+        }
+        
+        // Send email with CC for submission types only
+        if (in_array($type, ['ajukan_kegiatan', 'ajukan_tor']) && $recipients->count() > 0) {
+            $this->sendEmailWithCC($kegiatan, $sender, $title, $description, $recipients);
+        } elseif ($type === 'status_updated' && $recipients->count() > 0) {
+            // For status updates, send individual emails
+            foreach ($recipients as $recipient) {
                 try {
-                    Log::info("Attempting to send email to: {$recipient->email}");
-                    
                     Mail::to($recipient->email)->send(
                         new KegiatanNotification($kegiatan, $sender, $title, $description)
                     );
-                    
                     Log::info("Successfully sent email notification to: {$recipient->email}");
                 } catch (\Exception $e) {
                     Log::error("Failed to send email notification to {$recipient->email}: " . $e->getMessage());
                 }
-                
-            } catch (\Exception $e) {
-                Log::error("Failed to create notification for user {$recipient->id}: " . $e->getMessage());
             }
         }
         
@@ -108,6 +112,57 @@ class NotificationService
             Log::info("Broadcasted real-time notification to {$recipients->count()} recipients");
         } catch (\Exception $e) {
             Log::error("Failed to broadcast notification: " . $e->getMessage());
+        }
+    }
+    
+    private function sendEmailWithCC(Kegiatan $kegiatan, User $sender, string $title, string $description, $recipients)
+    {
+        try {
+            // Get the first admin as primary recipient
+            $primaryRecipient = $recipients->where('level', 1)->first();
+            
+            // If no admin found, use the first super user
+            if (!$primaryRecipient) {
+                $primaryRecipient = $recipients->where('level', 3)->first();
+            }
+            
+            // If still no recipient, use the first available
+            if (!$primaryRecipient) {
+                $primaryRecipient = $recipients->first();
+            }
+            
+            // Get remaining recipients for CC
+            $ccRecipients = $recipients->reject(function ($recipient) use ($primaryRecipient) {
+                return $recipient->id === $primaryRecipient->id;
+            });
+            
+            Log::info("Sending email with CC", [
+                'primary' => $primaryRecipient->email,
+                'cc_count' => $ccRecipients->count(),
+                'cc_emails' => $ccRecipients->pluck('email')->toArray()
+            ]);
+            
+            // Send email with CC
+            Mail::to($primaryRecipient->email)
+                ->cc($ccRecipients->pluck('email')->toArray())
+                ->send(new KegiatanNotification($kegiatan, $sender, $title, $description));
+                
+            Log::info("Successfully sent email with CC to primary: {$primaryRecipient->email} and CC: " . $ccRecipients->pluck('email')->implode(', '));
+            
+        } catch (\Exception $e) {
+            Log::error("Failed to send email with CC: " . $e->getMessage());
+            
+            // Fallback: send individual emails
+            foreach ($recipients as $recipient) {
+                try {
+                    Mail::to($recipient->email)->send(
+                        new KegiatanNotification($kegiatan, $sender, $title, $description)
+                    );
+                    Log::info("Fallback: Successfully sent individual email to: {$recipient->email}");
+                } catch (\Exception $e) {
+                    Log::error("Fallback: Failed to send email to {$recipient->email}: " . $e->getMessage());
+                }
+            }
         }
     }
     
@@ -129,7 +184,7 @@ class NotificationService
         return $statusMap[$status] ?? 'Unknown';
     }
 
-        public function sendRabNotification(RAB $rab, string $type)
+    public function sendRabNotification(RAB $rab, string $type)
     {
         $sender = auth()->user();
         
@@ -187,7 +242,7 @@ class NotificationService
                 try {
                     Log::info("Attempting to send RAB email to: {$recipient->email}");
                     
-                       Mail::to($recipient->email)->send(
+                    Mail::to($recipient->email)->send(
                         new RabNotification($kegiatan, $sender, $title, $description)
                     );
                     
@@ -209,5 +264,4 @@ class NotificationService
             Log::error("Failed to broadcast RAB notification: " . $e->getMessage());
         }
     }
-
 }
