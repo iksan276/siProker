@@ -184,84 +184,102 @@ class NotificationService
         return $statusMap[$status] ?? 'Unknown';
     }
 
-    public function sendRabNotification(RAB $rab, string $type)
-    {
-        $sender = auth()->user();
-        
-        // Get the kegiatan owner (user who created the kegiatan)
+   public function sendRabNotification(RAB $rab, string $type)
+{
+    $sender = auth()->user();
+    
+    // Get the kegiatan - either directly or through subKegiatan
+    $kegiatan = null;
+    if ($rab->KegiatanID) {
+        // RAB belongs directly to kegiatan
         $kegiatan = $rab->kegiatan;
-        if (!$kegiatan || !$kegiatan->UCreated) {
-            Log::info("No kegiatan or kegiatan owner found for RAB notification");
-            return;
-        }
-        
-        $kegiatanOwner = User::find($kegiatan->UCreated);
-        if (!$kegiatanOwner || $kegiatanOwner->level != 2) { // Only regular users
-            Log::info("Kegiatan owner not found or not a regular user");
-            return;
-        }
-        
-        $recipients = collect([$kegiatanOwner]);
-        
-        Log::info("Found recipient for RAB notification", [
-            'type' => $type,
-            'recipient' => $kegiatanOwner->email,
-            'rab_id' => $rab->RABID
+    } elseif ($rab->SubKegiatanID && $rab->subKegiatan) {
+        // RAB belongs to sub kegiatan
+        $kegiatan = $rab->subKegiatan->kegiatan;
+    }
+    
+    if (!$kegiatan || !$kegiatan->UCreated) {
+        Log::info("No kegiatan or kegiatan owner found for RAB notification", [
+            'rab_id' => $rab->RABID,
+            'kegiatan_id' => $rab->KegiatanID,
+            'sub_kegiatan_id' => $rab->SubKegiatanID
         ]);
-        
-        // Determine title and description based on RAB type (kegiatan or sub kegiatan)
-        $title = 'Status RAB Diperbarui';
-        $description = '';
-        $statusText = $this->getStatusText($rab->Status);
-        
-        if ($rab->SubKegiatanID) {
-            // RAB belongs to sub kegiatan
-            $subKegiatan = $rab->subKegiatan;
-            $description = "Status RAB dengan komponen '{$rab->Komponen}' di sub kegiatan '{$subKegiatan->Nama}' pada kegiatan '{$kegiatan->Nama}' telah diperbarui statusnya menjadi '{$statusText}' oleh {$sender->name}.";
-        } else {
-            // RAB belongs directly to kegiatan
-            $description = "Status RAB dengan komponen '{$rab->Komponen}' di kegiatan '{$kegiatan->Nama}' telah diperbarui statusnya menjadi '{$statusText}' oleh {$sender->name}.";
-        }
-        
-        // Create notification in database and send email
-        foreach ($recipients as $recipient) {
-            try {
-                // Create notification in database
-                $notification = Notification::create([
-                    'KegiatanID' => $kegiatan->KegiatanID,
-                    'Title' => $title,
-                    'Description' => $description,
-                    'UserID' => $recipient->id,
-                    'DCreated' => now(),
-                    'UCreated' => $sender->id
-                ]);
-                
-                Log::info("Created RAB notification for user: {$recipient->email}");
-                
-                // Send email directly
-                try {
-                    Log::info("Attempting to send RAB email to: {$recipient->email}");
-                    
-                    Mail::to($recipient->email)->send(
-                        new RabNotification($kegiatan, $sender, $title, $description)
-                    );
-                    
-                    Log::info("Successfully sent RAB email notification to: {$recipient->email}");
-                } catch (\Exception $e) {
-                    Log::error("Failed to send RAB email notification to {$recipient->email}: " . $e->getMessage());
-                }
-                
-            } catch (\Exception $e) {
-                Log::error("Failed to create RAB notification for user {$recipient->id}: " . $e->getMessage());
-            }
-        }
-        
-        // Broadcast real-time notification
+        return;
+    }
+    
+    $kegiatanOwner = User::find($kegiatan->UCreated);
+    if (!$kegiatanOwner || $kegiatanOwner->level != 2) { // Only regular users
+        Log::info("Kegiatan owner not found or not a regular user", [
+            'kegiatan_owner_id' => $kegiatan->UCreated,
+            'owner_level' => $kegiatanOwner ? $kegiatanOwner->level : 'null'
+        ]);
+        return;
+    }
+    
+    $recipients = collect([$kegiatanOwner]);
+    
+    Log::info("Found recipient for RAB notification", [
+        'type' => $type,
+        'recipient' => $kegiatanOwner->email,
+        'rab_id' => $rab->RABID,
+        'kegiatan_id' => $kegiatan->KegiatanID,
+        'sub_kegiatan_id' => $rab->SubKegiatanID
+    ]);
+    
+    // Determine title and description based on RAB type (kegiatan or sub kegiatan)
+    $title = 'Status RAB Diperbarui';
+    $description = '';
+    $statusText = $this->getStatusText($rab->Status);
+    
+    if ($rab->SubKegiatanID && $rab->subKegiatan) {
+        // RAB belongs to sub kegiatan
+        $subKegiatan = $rab->subKegiatan;
+        $description = "Status RAB dengan komponen '{$rab->Komponen}' di sub kegiatan '{$subKegiatan->Nama}' pada kegiatan '{$kegiatan->Nama}' telah diperbarui statusnya menjadi '{$statusText}' oleh {$sender->name}.";
+    } else {
+        // RAB belongs directly to kegiatan
+        $description = "Status RAB dengan komponen '{$rab->Komponen}' di kegiatan '{$kegiatan->Nama}' telah diperbarui statusnya menjadi '{$statusText}' oleh {$sender->name}.";
+    }
+    
+    // Create notification in database and send email
+    foreach ($recipients as $recipient) {
         try {
-            event(new KegiatanStatusUpdated($kegiatan, $sender, $title, $description, $recipients->toArray()));
-            Log::info("Broadcasted real-time RAB notification to {$recipients->count()} recipients");
+            // Create notification in database
+            $notification = Notification::create([
+                'KegiatanID' => $kegiatan->KegiatanID,
+                'Title' => $title,
+                'Description' => $description,
+                'UserID' => $recipient->id,
+                'DCreated' => now(),
+                'UCreated' => $sender->id
+            ]);
+            
+            Log::info("Created RAB notification for user: {$recipient->email}");
+            
+            // Send email directly
+            try {
+                Log::info("Attempting to send RAB email to: {$recipient->email}");
+                
+                Mail::to($recipient->email)->send(
+                    new RabNotification($kegiatan, $sender, $title, $description)
+                );
+                
+                Log::info("Successfully sent RAB email notification to: {$recipient->email}");
+            } catch (\Exception $e) {
+                Log::error("Failed to send RAB email notification to {$recipient->email}: " . $e->getMessage());
+            }
+            
         } catch (\Exception $e) {
-            Log::error("Failed to broadcast RAB notification: " . $e->getMessage());
+            Log::error("Failed to create RAB notification for user {$recipient->id}: " . $e->getMessage());
         }
     }
+    
+    // Broadcast real-time notification
+    try {
+        event(new KegiatanStatusUpdated($kegiatan, $sender, $title, $description, $recipients->toArray()));
+        Log::info("Broadcasted real-time RAB notification to {$recipients->count()} recipients");
+    } catch (\Exception $e) {
+        Log::error("Failed to broadcast RAB notification: " . $e->getMessage());
+    }
+}
+
 }

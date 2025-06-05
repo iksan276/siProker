@@ -370,76 +370,96 @@ public function updateKegiatanStatus(Request $request, $id)
         }
     }
 
-       public function updateRabStatus(Request $request, $id)
-    {
-        $request->validate([
-            'status' => 'required|in:N,Y,T,R',
-            'feedback' => 'nullable|string',
+   public function updateRabStatus(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:N,Y,T,R',
+        'feedback' => 'nullable|string',
+    ]);
+
+    try {
+        $rab = RAB::with(['kegiatan', 'subKegiatan'])->findOrFail($id);
+        $oldStatus = $rab->Status;
+        
+        Log::info("RAB details before update", [
+            'rab_id' => $rab->RABID,
+            'kegiatan_id' => $rab->KegiatanID,
+            'sub_kegiatan_id' => $rab->SubKegiatanID,
+            'komponen' => $rab->Komponen,
+            'old_status' => $oldStatus,
+            'new_status' => $request->status,
+            'has_kegiatan' => $rab->kegiatan ? 'yes' : 'no',
+            'has_sub_kegiatan' => $rab->subKegiatan ? 'yes' : 'no'
         ]);
-
-        try {
-            $rab = RAB::with(['kegiatan', 'subKegiatan'])->findOrFail($id);
-            $oldStatus = $rab->Status;
-            $rab->Status = $request->status;
-            $oldFeedback = $rab->Feedback;
-            
-            if ($request->has('feedback')) {
-                $rab->Feedback = $request->feedback;
-            }
-            
-            $rab->DEdited = now();
-            $rab->UEdited = Auth::id();
-            $rab->save();
-
-            if ($request->has('feedback') && $oldFeedback !== $request->feedback && !empty($request->feedback)) {
-                $requestLog = new \App\Models\Request();
-                $requestLog->RABID = $rab->RABID;
-                $requestLog->Feedback = $request->feedback;
-                $requestLog->DCreated = now();
-                $requestLog->UCreated = Auth::id();
-                $requestLog->save();
-            }
-
-            // Send notification when status changes and current user is admin/super user
-            if ($oldStatus !== $request->status) {
-                try {
-                    $currentUser = Auth::user();
-                    
-                    // Check if current user is admin or super user updating a regular user's RAB
-                    if (in_array($currentUser->level, [1, 3])) {
-                        Log::info("Admin/Super user updating RAB status", [
-                            'rab_id' => $rab->RABID,
-                            'rab_komponen' => $rab->Komponen,
-                            'old_status' => $oldStatus,
-                            'new_status' => $request->status,
-                            'admin_id' => $currentUser->id,
-                            'admin_name' => $currentUser->name
-                        ]);
-                        
-                        $this->notificationService->sendRabNotification($rab, 'status_updated');
-                    }
-                } catch (\Exception $e) {
-                    Log::error('Failed to send RAB notification', [
-                        'rab_id' => $rab->RABID,
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString()
-                    ]);
-                    // Don't fail the main operation if notification fails
-                }
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Status RAB berhasil diupdate'
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error updating RAB status: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengupdate status RAB: ' . $e->getMessage()
-            ], 500);
+        
+        $rab->Status = $request->status;
+        $oldFeedback = $rab->Feedback;
+        
+        if ($request->has('feedback')) {
+            $rab->Feedback = $request->feedback;
         }
+        
+        $rab->DEdited = now();
+        $rab->UEdited = Auth::id();
+        $rab->save();
+
+        if ($request->has('feedback') && $oldFeedback !== $request->feedback && !empty($request->feedback)) {
+            $requestLog = new \App\Models\Request();
+            $requestLog->RABID = $rab->RABID;
+            $requestLog->Feedback = $request->feedback;
+            $requestLog->DCreated = now();
+            $requestLog->UCreated = Auth::id();
+            $requestLog->save();
+        }
+
+        // Send notification when status changes and current user is admin/super user
+        if ($oldStatus !== $request->status) {
+            try {
+                $currentUser = Auth::user();
+                
+                Log::info("Status changed, checking notification conditions", [
+                    'rab_id' => $rab->RABID,
+                    'current_user_level' => $currentUser->level,
+                    'is_admin_or_super' => in_array($currentUser->level, [1, 3]) ? 'yes' : 'no'
+                ]);
+                
+                // Check if current user is admin or super user updating a regular user's RAB
+                if (in_array($currentUser->level, [1, 3])) {
+                    Log::info("Admin/Super user updating RAB status", [
+                        'rab_id' => $rab->RABID,
+                        'rab_komponen' => $rab->Komponen,
+                        'old_status' => $oldStatus,
+                        'new_status' => $request->status,
+                        'admin_id' => $currentUser->id,
+                        'admin_name' => $currentUser->name
+                    ]);
+                    
+                    $this->notificationService->sendRabNotification($rab, 'status_updated');
+                    Log::info("Notification service called for RAB: {$rab->RABID}");
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send RAB notification', [
+                    'rab_id' => $rab->RABID,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                // Don't fail the main operation if notification fails
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status RAB berhasil diupdate'
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error updating RAB status: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengupdate status RAB: ' . $e->getMessage()
+        ], 500);
     }
+}
+
 
 
     public function getSubKegiatansByKegiatan(Request $request)
