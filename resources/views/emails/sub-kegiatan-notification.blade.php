@@ -15,12 +15,30 @@
             padding: 20px;
             background-color: #ffffff;
         }
-        .header {
+       .header {
             background-color: #4e73df;
             color: white;
             padding: 20px;
             text-align: center;
             border-radius: 5px 5px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .header h1 {
+            margin: 0;
+            white-space: nowrap;
+            width: 1px;
+            font-size:22px;
+            line-height: 40px; 
+            display: flex;
+            align-items: center;
         }
         .content {
             padding: 30px 20px;
@@ -49,10 +67,40 @@
             background-color: #2e59d9;
         }
         .info-box {
-            background-color: #e7f3ff;
-            border-left: 4px solid #4e73df;
             padding: 15px;
             margin: 20px 0;
+            border-radius: 5px;
+            border-left: 4px solid;
+        }
+        .info-box-warning { 
+            background-color: #fef5e7; 
+            border-left-color: #f6c23e; 
+            color: #856404;
+        }
+        .info-box-success { 
+            background-color: #d1ecf1; 
+            border-left-color: #1cc88a; 
+            color: #0c5460;
+        }
+        .info-box-danger { 
+            background-color: #f8d7da; 
+            border-left-color: #e74a3b; 
+            color: #721c24;
+        }
+        .info-box-info { 
+            background-color: #d1ecf1; 
+            border-left-color: #36b9cc; 
+            color: #0c5460;
+        }
+        .info-box-primary { 
+            background-color: #e7f3ff; 
+            border-left-color: #4e73df; 
+            color: #004085;
+        }
+        .info-box-secondary { 
+            background-color: #f8f9fa; 
+            border-left-color: #858796; 
+            color: #383d41;
         }
         .detail-table {
             width: 100%;
@@ -70,19 +118,39 @@
             font-weight: bold;
             width: 30%;
         }
+              .badge {
+            display: inline-block;
+            padding: 0.25em 0.6em;
+            font-size: 0.75em;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.375rem;
+            color: #fff;
+        }
+        .badge-warning { background-color: #f6c23e; }
+        .badge-success { background-color: #1cc88a; }
+        .badge-danger { background-color: #e74a3b; }
+        .badge-info { background-color: #36b9cc; }
+        .badge-primary { background-color: #4e73df; }
+        .badge-secondary { background-color: #858796; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
+              <div class="header">
+            <img src="https://siproker.itp.ac.id/asset/itp.png" alt="Logo ITP" class="header-logo">
             <h1>{{ $title }}</h1>
         </div>
         <div class="content">
-            <p>Halo,</p>
+            <p>Halo <b>{{ $recipient->email ?? 'User' }}</b>,</p>
             
-            <div class="info-box">
-                <p><strong>{{ $description }}</strong></p>
+            <div class="info-box {{ isset($infoBoxType) ? 'info-box-' . $infoBoxType : 'info-box-primary' }}">
+                <p style="font-size:16px; margin: 0;">{!! $description !!}</p>
             </div>
+            
             
             <table class="detail-table">
                 <tr>

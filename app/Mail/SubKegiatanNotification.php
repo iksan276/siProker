@@ -18,14 +18,16 @@ class SubKegiatanNotification extends Mailable
     public $sender;
     public $title;
     public $description;
+    public $infoBoxType;
 
-    public function __construct(Kegiatan $kegiatan, SubKegiatan $subKegiatan, User $sender, string $title, string $description)
+    public function __construct(Kegiatan $kegiatan, SubKegiatan $subKegiatan, User $sender, string $title, string $description, string $infoBoxType)
     {
         $this->kegiatan = $kegiatan;
         $this->subKegiatan = $subKegiatan;
         $this->sender = $sender;
         $this->title = $title;
         $this->description = $description;
+        $this->infoBoxType = $infoBoxType;
     }
 
     public function build()

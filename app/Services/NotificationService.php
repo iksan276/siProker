@@ -55,20 +55,22 @@ class NotificationService
         // Determine title and description based on type
         $title = '';
         $description = '';
+        $infoBoxType='';
         
         switch ($type) {
             case 'ajukan_kegiatan':
                 $title = 'Pengajuan Kegiatan Baru';
-                $description = "Kegiatan '{$kegiatan->Nama}' telah diajukan oleh {$sender->name} dan menunggu persetujuan.";
+                $description = "Kegiatan <b>{$kegiatan->Nama}</b> telah diajukan oleh <b>{$sender->name}</b> dan menunggu persetujuan.";
                 break;
             case 'ajukan_tor':
                 $title = 'Pengajuan TOR Kegiatan';
-                $description = "TOR untuk kegiatan '{$kegiatan->Nama}' telah diajukan oleh {$sender->name} dan menunggu persetujuan.";
+                $description = "TOR untuk kegiatan <b>{$kegiatan->Nama}</b> telah diajukan oleh <b>{$sender->name}</b> dan menunggu persetujuan.";
                 break;
             case 'status_updated':
                 $statusText = $this->getStatusText($kegiatan->Status);
                 $title = 'Status Kegiatan Diperbarui';
-                $description = "Status kegiatan '{$kegiatan->Nama}' telah diperbarui menjadi '{$statusText}' oleh {$sender->name}.";
+                $description = "Status kegiatan <b>{$kegiatan->Nama}</b> telah diperbarui menjadi {$statusText} oleh <b>{$sender->name}</b>.";
+                $infoBoxType = $this->getInfoBoxTypeFromStatus($kegiatan->Status);
                 break;
         }
         
@@ -94,13 +96,13 @@ class NotificationService
         
         // Send email with CC for submission types only
         if (in_array($type, ['ajukan_kegiatan', 'ajukan_tor']) && $recipients->count() > 0) {
-            $this->sendEmailWithCC($kegiatan, $sender, $title, $description, $recipients);
+            $this->sendEmailWithCC($kegiatan, $sender, $title, $description, $recipients, $infoBoxType);
         } elseif ($type === 'status_updated' && $recipients->count() > 0) {
             // For status updates, send individual emails
             foreach ($recipients as $recipient) {
                 try {
                     Mail::to($recipient->email)->send(
-                        new KegiatanNotification($kegiatan, $sender, $title, $description)
+                        new KegiatanNotification($kegiatan, $sender, $title, $description, $infoBoxType)
                     );
                     Log::info("Successfully sent email notification to: {$recipient->email}");
                 } catch (\Exception $e) {
@@ -111,14 +113,14 @@ class NotificationService
         
         // Broadcast real-time notification to ALL recipients
         try {
-            event(new KegiatanStatusUpdated($kegiatan, $sender, $title, $description, $recipients->toArray()));
+            event(new KegiatanStatusUpdated($kegiatan, $sender, $title, $description, $recipients->toArray(), $infoBoxType));
             Log::info("Broadcasted real-time notification to {$recipients->count()} recipients");
         } catch (\Exception $e) {
             Log::error("Failed to broadcast notification: " . $e->getMessage());
         }
     }
     
-    private function sendEmailWithCC(Kegiatan $kegiatan, User $sender, string $title, string $description, $recipients)
+    private function sendEmailWithCC(Kegiatan $kegiatan, User $sender, string $title, string $description, $recipients, string $infoBoxType)
     {
         try {
             // Get the first admin as primary recipient
@@ -148,7 +150,7 @@ class NotificationService
             // Send email with CC
             Mail::to($primaryRecipient->email)
                 ->cc($ccRecipients->pluck('email')->toArray())
-                ->send(new KegiatanNotification($kegiatan, $sender, $title, $description));
+                ->send(new KegiatanNotification($kegiatan, $sender, $title, $description, $infoBoxType));
                 
             Log::info("Successfully sent email with CC to primary: {$primaryRecipient->email} and CC: " . $ccRecipients->pluck('email')->implode(', '));
             
@@ -159,7 +161,7 @@ class NotificationService
             foreach ($recipients as $recipient) {
                 try {
                     Mail::to($recipient->email)->send(
-                        new KegiatanNotification($kegiatan, $sender, $title, $description)
+                        new KegiatanNotification($kegiatan, $sender, $title, $description, $infoBoxType)
                     );
                     Log::info("Fallback: Successfully sent individual email to: {$recipient->email}");
                 } catch (\Exception $e) {
@@ -172,20 +174,39 @@ class NotificationService
     private function getStatusText($status)
     {
         $statusMap = [
-            'N' => 'Menunggu',
-            'Y' => 'Disetujui',
-            'T' => 'Ditolak',
-            'R' => 'Revisi',
-            'P' => 'Pengajuan',
-            'PT' => 'Pengajuan TOR',
-            'YT' => 'TOR Disetujui',
-            'TT' => 'TOR Ditolak',
-            'RT' => 'TOR Revisi',
-            'TP' => 'Tunda Pencairan'
+            'N' => '<span class="badge badge-warning">Menunggu</span>',
+            'Y' => '<span class="badge badge-success">Disetujui</span>',
+            'T' => '<span class="badge badge-danger">Ditolak</span>',
+            'R' => '<span class="badge badge-info">Revisi</span>',
+            'P' => '<span class="badge badge-primary">Pengajuan</span>',
+            'PT' => '<span class="badge badge-warning">Pengajuan TOR</span>',
+            'YT' => '<span class="badge badge-success">TOR Disetujui</span>',
+            'TT' => '<span class="badge badge-danger">TOR Ditolak</span>',
+            'RT' => '<span class="badge badge-info">TOR Revisi</span>',
+            'TP' => '<span class="badge badge-warning">Tunda Pencairan</span>'
         ];
-        
-        return $statusMap[$status] ?? 'Unknown';
+            
+        return $statusMap[$status] ?? '<span class="badge badge-secondary">Unknown</span>';
     }
+
+       private function getInfoBoxTypeFromStatus($status)
+    {
+        $statusMap = [
+            'N' => 'warning',    // Menunggu
+            'Y' => 'success',    // Disetujui
+            'T' => 'danger',     // Ditolak
+            'R' => 'info',       // Revisi
+            'P' => 'primary',    // Pengajuan
+            'PT' => 'warning',   // Pengajuan TOR
+            'YT' => 'success',   // TOR Disetujui
+            'TT' => 'danger',    // TOR Ditolak
+            'RT' => 'info',      // TOR Revisi
+            'TP' => 'warning'    // Tunda Pencairan
+        ];
+            
+        return $statusMap[$status] ?? 'secondary';
+    }
+
 
    public function sendRabNotification(RAB $rab, string $type)
 {
@@ -233,14 +254,17 @@ class NotificationService
     $title = 'Status RAB Diperbarui';
     $description = '';
     $statusText = $this->getStatusText($rab->Status);
+    $infoBoxType='';
     
     if ($rab->SubKegiatanID && $rab->subKegiatan) {
         // RAB belongs to sub kegiatan
         $subKegiatan = $rab->subKegiatan;
-        $description = "Status RAB dengan komponen '{$rab->Komponen}' di sub kegiatan '{$subKegiatan->Nama}' pada kegiatan '{$kegiatan->Nama}' telah diperbarui statusnya menjadi '{$statusText}' oleh {$sender->name}.";
+        $infoBoxType = $this->getInfoBoxTypeFromStatus($rab->Status);
+        $description = "Status RAB dengan komponen <b>{$rab->Komponen}</b> di sub kegiatan <b>{$subKegiatan->Nama}</b> pada kegiatan <b>{$kegiatan->Nama}</b> telah diperbarui statusnya menjadi {$statusText} oleh <b>{$sender->name}</b>.";
     } else {
         // RAB belongs directly to kegiatan
-        $description = "Status RAB dengan komponen '{$rab->Komponen}' di kegiatan '{$kegiatan->Nama}' telah diperbarui statusnya menjadi '{$statusText}' oleh {$sender->name}.";
+         $infoBoxType = $this->getInfoBoxTypeFromStatus($rab->Status);
+        $description = "Status RAB dengan komponen <b>{$rab->Komponen}</b> di kegiatan <b>{$kegiatan->Nama}</b> telah diperbarui statusnya menjadi {$statusText} oleh <b>{$sender->name}</b>.";
     }
     
     // Create notification in database and send email
@@ -263,7 +287,7 @@ class NotificationService
                 Log::info("Attempting to send RAB email to: {$recipient->email}");
                 
                 Mail::to($recipient->email)->send(
-                    new RabNotification($kegiatan, $sender, $title, $description)
+                    new RabNotification($kegiatan, $sender, $title, $description, $infoBoxType)
                 );
                 
                 Log::info("Successfully sent RAB email notification to: {$recipient->email}");
@@ -278,7 +302,7 @@ class NotificationService
     
     // Broadcast real-time notification
     try {
-        event(new KegiatanStatusUpdated($kegiatan, $sender, $title, $description, $recipients->toArray()));
+        event(new KegiatanStatusUpdated($kegiatan, $sender, $title, $description, $recipients->toArray(), $infoBoxType));
         Log::info("Broadcasted real-time RAB notification to {$recipients->count()} recipients");
     } catch (\Exception $e) {
         Log::error("Failed to broadcast RAB notification: " . $e->getMessage());
@@ -322,7 +346,7 @@ public function sendSubKegiatanNotification(SubKegiatan $subKegiatan, string $ty
     $title = 'Status Sub Kegiatan Diperbarui';
     $statusText = $this->getStatusText($subKegiatan->Status);
     $description = "Status sub kegiatan '{$subKegiatan->Nama}' pada kegiatan '{$kegiatan->Nama}' telah diperbarui statusnya menjadi '{$statusText}' oleh {$sender->name}.";
-    
+     $infoBoxType = $this->getInfoBoxTypeFromStatus($subKegiatan->Status);
     // Create notification in database and send email
     foreach ($recipients as $recipient) {
         try {
@@ -343,7 +367,7 @@ public function sendSubKegiatanNotification(SubKegiatan $subKegiatan, string $ty
                 Log::info("Attempting to send SubKegiatan email to: {$recipient->email}");
                 
                 Mail::to($recipient->email)->send(
-                    new SubKegiatanNotification($kegiatan, $subKegiatan, $sender, $title, $description)
+                    new SubKegiatanNotification($kegiatan, $subKegiatan, $sender, $title, $description, $infoBoxType)
                 );
                 
                 Log::info("Successfully sent SubKegiatan email notification to: {$recipient->email}");
@@ -358,7 +382,7 @@ public function sendSubKegiatanNotification(SubKegiatan $subKegiatan, string $ty
     
     // Broadcast real-time notification
     try {
-        event(new KegiatanStatusUpdated($kegiatan, $sender, $title, $description, $recipients->toArray()));
+        event(new KegiatanStatusUpdated($kegiatan, $sender, $title, $description, $recipients->toArray(), $infoBoxType));
         Log::info("Broadcasted real-time SubKegiatan notification to {$recipients->count()} recipients");
     } catch (\Exception $e) {
         Log::error("Failed to broadcast SubKegiatan notification: " . $e->getMessage());
