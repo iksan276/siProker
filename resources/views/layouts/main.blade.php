@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ $title ?? 'Admin Panel' }}</title>
+    <title>{{ $title ?? 'SIPROKER - ITP' }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Load jQuery first -->
     <script src="{{ asset('sb-admin/vendor/jquery/jquery.min.js') }}"></script>
     
     <!-- Then load other CSS and JS dependencies -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('asset/itp.png') }}">
     <link href="{{ asset('sb-admin/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
     <link href="{{ asset('sb-admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
     <link href="{{ asset('sb-admin/vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">

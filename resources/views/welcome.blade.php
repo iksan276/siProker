@@ -3,12 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="SIPROKER - Sistem Informasi Program Kerja Dosen yang memudahkan pengelolaan dan evaluasi program kerja secara efisien dan transparan.">
+    <meta name="description" content="SIPROKER - Sistem Informasi Program Kerja yang memudahkan pengelolaan dan evaluasi program kerja secara efisien dan transparan.">
     
-    <title>SIPROKER - Sistem Informasi Program Kerja Dosen</title>
+     <title>{{ 'SIPROKER - ITP' }}</title>
     
     <!-- Favicon -->
-    <link rel="icon" href="{{ asset('asset/favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('asset/itp.png') }}">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1484,10 +1484,10 @@
             <div class="hero-content" data-aos="fade-right" data-aos-duration="1000">
                 <h1 class="hero-title">
                     <span class="text-gradient">SIPROKER</span><br>
-                    Sistem Informasi Program Kerja Dosen
+                    Sistem Informasi Program Kerja
                 </h1>
                 <p class="hero-subtitle">
-                    Platform terintegrasi untuk mengelola, memantau, dan mengevaluasi program kerja dosen secara efisien dan transparan. Tingkatkan produktivitas dan kualitas program kerja Anda dengan SIPROKER.
+                    Platform terintegrasi untuk mengelola, memantau, dan mengevaluasi program kerja secara efisien dan transparan. Tingkatkan produktivitas dan kualitas program kerja Anda dengan SIPROKER.
                 </p>
                 <div class="hero-cta">
                     @auth
@@ -1539,7 +1539,7 @@
         <div class="container">
             <h2 class="section-title text-center" data-aos="fade-up">Fitur Unggulan</h2>
             <p class="section-subtitle text-start" data-aos="fade-up" data-aos-delay="100">
-                SIPROKER menyediakan berbagai fitur yang dirancang untuk memudahkan pengelolaan program kerja dosen
+                SIPROKER menyediakan berbagai fitur yang dirancang untuk memudahkan pengelolaan program kerja
             </p>
             
             <div class="features-grid">
@@ -1592,7 +1592,7 @@
                     </div>
                     <h3 class="feature-title">Kolaborasi Tim</h3>
                     <p class="feature-description">
-                        Bekerja sama dengan rekan dosen dan staf dalam mengelola program kerja dengan fitur kolaborasi.
+                        Bekerja sama dengan rekan dan staf dalam mengelola program kerja dengan fitur kolaborasi.
                     </p>
                     <a href="#" class="feature-link">
                         Pelajari lebih lanjut <i class="fas fa-arrow-right"></i>
@@ -1635,7 +1635,7 @@
         <div class="container">
             <h2 class="section-title text-center" data-aos="fade-up">Cara Kerja SIPROKER</h2>
             <p class="section-subtitle text-start" data-aos="fade-up" data-aos-delay="100">
-                Proses sederhana untuk memulai dan mengelola program kerja dosen dengan SIPROKER
+                Proses sederhana untuk memulai dan mengelola program kerja dengan SIPROKER
             </p>
             
             <div class="steps-container">
@@ -1707,7 +1707,7 @@
                         <div class="swiper-slide">
                             <div class="testimonial-card">
                                 <div class="testimonial-content">
-                                    "SIPROKER sangat membantu saya dalam mengelola dan melacak program kerja. Interface yang intuitif dan fitur yang lengkap membuat pekerjaan menjadi lebih efisien. Saya sangat merekomendasikan platform ini untuk semua dosen."
+                                    "SIPROKER sangat membantu saya dalam mengelola dan melacak program kerja. Interface yang intuitif dan fitur yang lengkap membuat pekerjaan menjadi lebih efisien. Saya sangat merekomendasikan platform ini untuk semua."
                                 </div>
                                 <div class="testimonial-author">
                                     <div class="testimonial-avatar">
@@ -1732,7 +1732,7 @@
                         <div class="swiper-slide">
                             <div class="testimonial-card">
                                 <div class="testimonial-content">
-                                    "Fitur kolaborasi tim di SIPROKER memudahkan saya berkoordinasi dengan rekan dosen lain. Laporan analitik juga sangat membantu dalam evaluasi program kerja dan pengambilan keputusan strategis."
+                                    "Fitur kolaborasi tim di SIPROKER memudahkan saya berkoordinasi dengan rekan lain. Laporan analitik juga sangat membantu dalam evaluasi program kerja dan pengambilan keputusan strategis."
                                 </div>
                                 <div class="testimonial-author">
                                     <div class="testimonial-avatar">
@@ -1757,7 +1757,7 @@
                         <div class="swiper-slide">
                             <div class="testimonial-card">
                                 <div class="testimonial-content">
-                                    "Sebagai ketua jurusan, SIPROKER membantu saya memantau kinerja program kerja seluruh dosen. Sistem notifikasi dan pengingat sangat berguna untuk memastikan semua tenggat waktu terpenuhi dan program berjalan lancar."
+                                    "Sebagai ketua jurusan, SIPROKER membantu saya memantau kinerja program kerja seluruh. Sistem notifikasi dan pengingat sangat berguna untuk memastikan semua tenggat waktu terpenuhi dan program berjalan lancar."
                                 </div>
                                 <div class="testimonial-author">
                                     <div class="testimonial-avatar">
@@ -1816,7 +1816,7 @@
         <div class="container">
             <h2 class="section-title text-center" style="color: white;" data-aos="fade-up">SIPROKER dalam Angka</h2>
             <p class="section-subtitle text-start" style="color: rgba(255, 255, 255, 0.8);" data-aos="fade-up" data-aos-delay="100">
-                Dampak SIPROKER dalam meningkatkan efisiensi pengelolaan program kerja dosen
+                Dampak SIPROKER dalam meningkatkan efisiensi pengelolaan program kerja
             </p>
             
             <div class="stats-grid">
@@ -1901,7 +1901,7 @@
             <div class="cta-content" data-aos="fade-right">
                 <h2 class="cta-title">Siap Mengoptimalkan Program Kerja Anda?</h2>
                 <p class="cta-description">
-                    Bergabunglah dengan SIPROKER dan rasakan kemudahan dalam mengelola program kerja dosen. Tingkatkan produktivitas dan kualitas program kerja Anda sekarang juga!
+                    Bergabunglah dengan SIPROKER dan rasakan kemudahan dalam mengelola program kerja. Tingkatkan produktivitas dan kualitas program kerja Anda sekarang juga!
                 </p>
                 <a href="{{ route('login') }}" class="btn btn-primary btn-lg">
                     <i class="fas fa-sign-in-alt"></i> Masuk Sekarang
@@ -1949,7 +1949,7 @@
                         <div class="footer-logo-text">SIPROKER</div>
                     </div>
                     <p class="footer-description">
-                        Sistem Informasi Program Kerja Dosen yang memudahkan pengelolaan dan evaluasi program kerja secara efisien dan transparan.
+                        Sistem Informasi Program Kerja yang memudahkan pengelolaan dan evaluasi program kerja secara efisien dan transparan.
                     </p>
                     <div class="footer-social">
                         <a href="#" class="footer-social-link">
