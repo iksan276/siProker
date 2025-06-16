@@ -603,13 +603,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="toast-header bg-primary text-white">
                     <i class="fas fa-bell mr-2"></i>
                     <strong class="mr-auto">Notifikasi Baru</strong>
-                    <small>${formatNotificationTime(notification.created_at)}</small>
                     <button type="button" class="ml-2 mb-1 close text-white" data-dismiss="toast">
                         <span>&times;</span>
                     </button>
                 </div>
                 <div class="toast-body">
-                    <div class="mb-2">
+                    <div class="mb-2 mt-3">
                         <strong>${notification.title}</strong>
                     </div>
                     <div class="mb-2 text-muted" style="font-size: 0.9em;">

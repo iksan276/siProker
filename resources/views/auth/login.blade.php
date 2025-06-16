@@ -36,6 +36,21 @@
             --secondary-light: #8b5cf6;
         }
         
+        .siproker-text {
+        font-size: 24px;
+        font-weight: bold;
+        background-size: 200% 200%;
+        color: transparent;
+        -webkit-background-clip: text;
+        background-clip: text;
+        animation: gradient-animation 3s ease infinite, pulse 2s infinite;
+        text-shadow: 0 0 5px rgba(78, 115, 223, 0.1);
+        letter-spacing: 1px;
+        background: var(--primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
         .bg-gradient-primary {
             background: linear-gradient(135deg, var(--primary-lightest) 0%, #f8fafc 100%) !important;
             position: relative;
@@ -226,7 +241,9 @@
                             <div class="col-lg-6">
                                 <div class="p-5">
                                     <div class="text-center">
-                                        <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
+                                        <h1 class="h4 text-gray-900 mb-4 siproker-text">SIPR 
+                                  <img src="{{ asset('asset/itp.png') }}" alt="Logo" style="width: 30px; height: 30px;border:#6447eb solid 1px;border-radius:24px">
+                             KER</h1>
                                     </div>
                                     
                                     <!-- Session Status -->
