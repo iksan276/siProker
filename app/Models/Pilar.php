@@ -11,6 +11,7 @@ class Pilar extends Model
     public $timestamps = false;
     
     protected $fillable = [
+        'PilarID',
         'RenstraID',
         'Nama',
         'NA',

@@ -24,6 +24,7 @@ class IndikatorKinerjaExportV2 implements FromCollection, WithHeadings, WithMapp
     public function headings(): array
     {
         return [
+            'IndikatorKinerjaID',
             'SatuanID',
             'Nama',
             'Baseline',
@@ -43,6 +44,7 @@ class IndikatorKinerjaExportV2 implements FromCollection, WithHeadings, WithMapp
     public function map($indikator): array
     {
         return [
+            $indikator->IndikatorKinerjaID,
             $indikator->SatuanID,
             $indikator->Nama,
             $indikator->Baseline,

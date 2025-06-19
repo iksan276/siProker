@@ -24,6 +24,7 @@ class ProgramPengembanganExport implements FromCollection, WithHeadings, WithMap
     public function headings(): array
     {
         return [
+            'ProgramPengembanganID',
             'IsuStrategisID',
             'Nama',
             'Status'
@@ -33,6 +34,7 @@ class ProgramPengembanganExport implements FromCollection, WithHeadings, WithMap
     public function map($program): array
     {
         return [
+            $program->ProgramPengembanganID,
             $program->IsuID,
             $program->Nama,
             $program->NA

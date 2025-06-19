@@ -24,6 +24,7 @@ class PilarExport implements FromCollection, WithHeadings, WithMapping, WithTitl
     public function headings(): array
     {
         return [
+            'PilarID',
             'RenstraID',
             'Nama',
             'Status'
@@ -33,6 +34,7 @@ class PilarExport implements FromCollection, WithHeadings, WithMapping, WithTitl
     public function map($pilar): array
     {
         return [
+            $pilar->PilarID,
             $pilar->RenstraID,
             $pilar->Nama,
             $pilar->NA

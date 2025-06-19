@@ -11,6 +11,7 @@ class ProgramPengembangan extends Model
     public $timestamps = false;
     
     protected $fillable = [
+        'ProgramPengembanganID', // Tambahkan ini
         'IsuID',
         'Nama',
         'NA',

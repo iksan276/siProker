@@ -11,6 +11,7 @@ class IsuStrategis extends Model
     public $timestamps = false;
     
     protected $fillable = [
+        'IsuID', // Tambahkan ini
         'PilarID',
         'Nama',
         'NA',

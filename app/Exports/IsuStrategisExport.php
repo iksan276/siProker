@@ -24,6 +24,7 @@ class IsuStrategisExport implements FromCollection, WithHeadings, WithMapping, W
     public function headings(): array
     {
         return [
+            'IsuStrategisID',
             'PilarID',
             'Nama',
             'Status'
@@ -33,6 +34,7 @@ class IsuStrategisExport implements FromCollection, WithHeadings, WithMapping, W
     public function map($isu): array
     {
         return [
+            $isu->IsuID,
             $isu->PilarID,
             $isu->Nama,
             $isu->NA

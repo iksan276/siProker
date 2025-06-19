@@ -11,6 +11,7 @@ class IndikatorKinerja extends Model
     public $timestamps = false;
     
     protected $fillable = [
+        'IndikatorKinerjaID',
         'SatuanID',
         'Nama',
         'Baseline',

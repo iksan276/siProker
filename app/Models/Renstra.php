@@ -11,6 +11,7 @@ class Renstra extends Model
     public $timestamps = false;
     
     protected $fillable = [
+        'RenstraID', 
         'Nama',
         'PeriodeMulai',
         'PeriodeSelesai',

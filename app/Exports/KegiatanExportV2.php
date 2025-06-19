@@ -24,6 +24,7 @@ class KegiatanExportV2 implements FromCollection, WithHeadings, WithMapping, Wit
     public function headings(): array
     {
         return [
+            'KegiatanID',
             'ProgramRektorID',
             'Nama',
             'Tanggal Mulai',
@@ -38,6 +39,7 @@ class KegiatanExportV2 implements FromCollection, WithHeadings, WithMapping, Wit
     public function map($kegiatan): array
     {
         return [
+            $kegiatan->KegiatanID,
             $kegiatan->ProgramRektorID,
             $kegiatan->Nama,
             Carbon::parse($kegiatan->TanggalMulai)->format('Y-m-d'),

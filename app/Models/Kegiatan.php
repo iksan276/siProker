@@ -11,6 +11,7 @@ class Kegiatan extends Model
     public $timestamps = false;
     
     protected $fillable = [
+        'KegiatanID',
         'ProgramRektorID',
         'Nama',
         'TanggalMulai',

@@ -25,6 +25,7 @@ class ProgramRektorExportV2 implements FromCollection, WithHeadings, WithMapping
     public function headings(): array
     {
         return [
+            'ProgramRektorID',
             'ProgramPengembanganID',
             'IndikatorKinerjaID',
             'Nama',
@@ -45,6 +46,7 @@ class ProgramRektorExportV2 implements FromCollection, WithHeadings, WithMapping
     public function map($program): array
     {
         return [
+            $program->ProgramRektorID,
             $program->ProgramPengembanganID,
             $program->IndikatorKinerjaID,
             $program->Nama,

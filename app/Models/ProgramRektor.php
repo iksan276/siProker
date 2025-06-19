@@ -11,6 +11,7 @@ class ProgramRektor extends Model
     public $timestamps = false;
     
     protected $fillable = [
+        'ProgramRektorID', // Tambahkan ini
         'ProgramPengembanganID',
         'IndikatorKinerjaID',
         'Nama',

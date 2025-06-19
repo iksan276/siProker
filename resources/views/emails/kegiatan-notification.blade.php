@@ -56,7 +56,7 @@
         }
         .btn {
             background-color: #4e73df;
-            color: white;
+            color: white !important;
             padding: 12px 25px;
             text-decoration: none;
             border-radius: 5px;
@@ -187,7 +187,7 @@
             <p>Silakan login ke sistem untuk melihat detail lengkap dan memberikan persetujuan.</p>
             
             <p style="text-align: center; margin-top: 30px;">
-                <a href="{{ url('/kegiatans?kegiatanID=' . $kegiatan->KegiatanID) }}" class="btn text-white">
+                <a href="{{ url('/kegiatans?kegiatanID=' . $kegiatan->KegiatanID) }}" class="btn">
                     Lihat Detail Kegiatan
                 </a>
             </p>
