@@ -39,7 +39,6 @@ class UnitExport implements FromCollection, WithHeadings, WithMapping, WithTitle
             return collect([]);
         }
         
-        dd($response->json());
         $units = $response->json();
         
         // Convert array to collection of objects
@@ -60,7 +59,7 @@ class UnitExport implements FromCollection, WithHeadings, WithMapping, WithTitle
     public function map($unit): array
     {
         return [
-            $unit->ID ?? '',
+            $unit->PosisiID ?? '',
             $unit->Nama ?? '',
             $unit->NA ?? 'N',
         ];
