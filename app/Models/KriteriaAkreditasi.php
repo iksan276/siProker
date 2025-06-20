@@ -11,6 +11,7 @@ class KriteriaAkreditasi extends Model
     public $timestamps = false;
     
     protected $fillable = [
+        'KriteriaAkreditasiID', // Tambahkan ini untuk upsert
         'Nama',
         'Key',
         'NA',

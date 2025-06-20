@@ -17,6 +17,7 @@ class JenisKegiatan extends Model
     
     // Define fillable fields
     protected $fillable = [
+        'JenisKegiatanID', // Tambahkan ini untuk upsert
         'Nama',
         'NA',
         'DCreated',

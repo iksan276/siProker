@@ -11,6 +11,7 @@ class Satuan extends Model
     public $timestamps = false;
     
     protected $fillable = [
+        'SatuanID', // Tambahkan ini untuk upsert
         'Nama',
         'NA',
         'DCreated',

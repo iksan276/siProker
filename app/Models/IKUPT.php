@@ -11,6 +11,7 @@ class IKUPT extends Model
     public $timestamps = false;
     
     protected $fillable = [
+        'IKUPTID',
         'Nama',
         'Key',
         'NA',

@@ -11,6 +11,7 @@ class MataAnggaran extends Model
     public $timestamps = false;
     
     protected $fillable = [
+        'MataAnggaranID', // Tambahkan ini untuk upsert
         'Nama',
         'NA',
         'DCreated',
