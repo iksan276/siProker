@@ -59,7 +59,7 @@ class UnitExport implements FromCollection, WithHeadings, WithMapping, WithTitle
     public function map($unit): array
     {
         return [
-            $unit->UnitID ?? '',
+            $unit->ID ?? '',
             $unit->Nama ?? '',
             $unit->NA ?? 'N',
         ];
