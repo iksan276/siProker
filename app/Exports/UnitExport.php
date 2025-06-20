@@ -39,6 +39,7 @@ class UnitExport implements FromCollection, WithHeadings, WithMapping, WithTitle
             return collect([]);
         }
         
+        dd($response->json());
         $units = $response->json();
         
         // Convert array to collection of objects
