@@ -1123,10 +1123,10 @@
     }
 
     .particle {
+          opacity: 0.1;
         position: absolute;
         border-radius: 50%;
-        background: linear-gradient(135deg, rgba(147, 197, 253, 0.3) 0%, rgba(255, 255, 255, 0.3) 100%);
-        opacity: 1;
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
         animation: float 15s infinite ease-in-out;
     }
 

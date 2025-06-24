@@ -5006,8 +5006,162 @@ input[type=submit].btn-block {
     background-clip: border-box;
     border: 1px solid #e3e6f0;
     border-radius: .35rem;
-    border-left: 5px solid #4268d6
+    border-left: 5px solid transparent;
+    border-image: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) 1;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
+
+/* Bentuk Gedung Kampus - Sudut Kanan Atas */
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 60px;
+    height: 40px;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    clip-path: polygon(40% 0%, 100% 0%, 100% 60%, 85% 100%, 70% 80%, 55% 100%, 40% 85%);
+    opacity: 0.12;
+    animation: campus-building 4s ease-in-out infinite;
+}
+
+/* Bentuk Buku/Diploma - Sudut Kiri Bawah */
+.card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 35px;
+    background: linear-gradient(45deg, #3b82f6 0%, #8b5cf6 100%);
+    clip-path: polygon(0% 40%, 15% 0%, 100% 20%, 85% 100%, 0% 100%);
+    opacity: 0.1;
+    animation: academic-book 3.5s ease-in-out infinite alternate;
+}
+
+/* Bentuk Topi Wisuda - Sudut Kanan Bawah (muncul saat hover) */
+.card:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 45px;
+    height: 30px;
+    background: linear-gradient(225deg, #3b82f6 0%, #8b5cf6 100%);
+    clip-path: polygon(20% 60%, 80% 60%, 100% 100%, 0% 100%);
+    opacity: 0.15;
+    animation: graduation-hat 2s ease-in-out infinite;
+    z-index: 1;
+}
+
+/* Ornamen Akademik - Sudut Kiri Atas (muncul saat hover) */
+.card:hover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(315deg, #3b82f6 0%, #8b5cf6 100%);
+    clip-path: polygon(0% 0%, 70% 0%, 100% 30%, 100% 100%, 30% 100%, 0% 70%);
+    opacity: 0.12;
+    animation: academic-seal 2.5s ease-in-out infinite;
+    z-index: 1;
+}
+
+/* Animasi untuk gedung kampus */
+@keyframes campus-building {
+    0%, 100% {
+        opacity: 0.12;
+        transform: scale(1);
+        filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.2));
+    }
+    50% {
+        opacity: 0.18;
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.3));
+    }
+}
+
+/* Animasi untuk buku akademik */
+@keyframes academic-book {
+    0% {
+        opacity: 0.1;
+        transform: scale(1) rotate(0deg);
+        filter: drop-shadow(0 0 3px rgba(59, 130, 246, 0.2));
+    }
+    100% {
+        opacity: 0.16;
+        transform: scale(1.08) rotate(2deg);
+        filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.4));
+    }
+}
+
+/* Animasi untuk topi wisuda */
+@keyframes graduation-hat {
+    0%, 100% {
+        opacity: 0.15;
+        transform: scale(1) rotate(0deg);
+        filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
+    }
+    50% {
+        opacity: 0.22;
+        transform: scale(1.1) rotate(-3deg);
+        filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.5));
+    }
+}
+
+/* Animasi untuk seal akademik */
+@keyframes academic-seal {
+    0%, 100% {
+        opacity: 0.12;
+        transform: scale(1) rotate(0deg);
+        filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.25));
+    }
+    50% {
+        opacity: 0.18;
+        transform: scale(1.06) rotate(5deg);
+        filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.4));
+    }
+}
+
+/* Efek hover untuk card */
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(59, 130, 246, 0.15);
+}
+
+/* Efek tambahan untuk transisi yang smooth */
+.card:before,
+.card:after {
+    transition: all 0.3s ease;
+}
+
+/* Responsif untuk layar kecil */
+@media (max-width: 768px) {
+    .card::before {
+        width: 45px;
+        height: 30px;
+    }
+    
+    .card::after {
+        width: 40px;
+        height: 28px;
+    }
+    
+    .card:hover::before {
+        width: 35px;
+        height: 25px;
+    }
+    
+    .card:hover::after {
+        width: 32px;
+        height: 32px;
+    }
+}
+
 
 .card>hr {
     margin-right: 0;
@@ -6338,21 +6492,51 @@ a.close.disabled {
 }
 
 .modal-header {
+    position: relative;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    padding: 1rem 1rem;
-    border-bottom: 1px solid #e3e6f0;
-    border-top-left-radius: calc(.3rem - 1px);
-    border-top-right-radius: calc(.3rem - 1px)
+    padding: 1.5rem 1.5rem;
+    border-bottom: none;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    color: white;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.modal-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&h=1080&fit=crop&crop=center&auto=format&q=80') center/cover;
+    opacity: 0.1;
+    animation: float 20s ease-in-out infinite;
+    z-index: -1;
+}
+
+.modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    height: 16px;
+    background: inherit;
+    clip-path: polygon(0 0, 3% 100%, 6% 0, 9% 100%, 12% 0, 15% 100%, 18% 0, 21% 100%, 24% 0, 27% 100%, 30% 0, 33% 100%, 36% 0, 39% 100%, 42% 0, 45% 100%, 48% 0, 51% 100%, 54% 0, 57% 100%, 60% 0, 63% 100%, 66% 0, 69% 100%, 72% 0, 75% 100%, 78% 0, 81% 100%, 84% 0, 87% 100%, 90% 0, 93% 100%, 96% 0, 99% 100%, 100% 0, 100% 100%, 0 100%);
+    z-index: 1;
 }
 
 .modal-header .close {
+    color: white !important;
     padding: 1rem 1rem;
     margin: -1rem -1rem -1rem auto
 }
 
 .modal-title {
+    color: white !important;
     margin-bottom: 0;
     line-height: 1.5
 }
