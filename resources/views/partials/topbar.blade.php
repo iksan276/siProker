@@ -2,7 +2,7 @@
 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
     <!-- Sidebar Toggle (Topbar) -->
-    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-1">
+    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-1 text-white">
         <i class="fa fa-bars"></i>
     </button>
     <!-- SIPROKER Title with Animation -->
@@ -13,30 +13,12 @@
     <!-- Topbar Navbar -->
     <ul class="navbar-nav ml-auto">
 
-        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
-        <li class="nav-item dropdown no-arrow d-sm-none">
-            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-search fa-fw"></i>
-            </a>
-            <!-- Dropdown - Messages -->
-            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in" aria-labelledby="searchDropdown">
-                <form class="form-inline mr-auto w-100 navbar-search">
-                    <div class="input-group">
-                        <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
-                        <div class="input-group-append">
-                            <button class="btn btn-primary" type="button">
-                                <i class="fas fa-search fa-sm"></i>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </li>
+     
 
         <!-- Nav Item - Alerts -->
        <!-- Nav Item - Alerts (Update kondisi untuk semua user) -->
 @if(auth()->user()->isAdmin() || auth()->user()->level == 3 || auth()->user()->level == 2)
-<li class="nav-item dropdown no-arrow mx-1">
+<li class="nav-item dropdown no-arrow mx-1" style="z--index: 9999;">
     <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <i class="fas fa-bell fa-fw"></i>
@@ -70,7 +52,7 @@
         <!-- Nav Item - User Information -->
         <li class="nav-item dropdown no-arrow">
             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ Auth::user()->name }}</span>
+                <span class="mr-2 d-none d-lg-inline  small text-white">{{ Auth::user()->name }}</span>
                 <img class="img-profile rounded-circle" src="{{ asset('sb-admin/img/undraw_profile.svg') }}">
             </a>
             <!-- Dropdown - User Information -->
@@ -95,20 +77,132 @@
 
 <!-- Add CSS for SIPROKER title animation and notifications -->
 <style>
+      .topbar {
+        background: linear-gradient(135deg, #4c71dd 0%, #8b5cf6 100%) !important;
+        backdrop-filter: blur(15px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 10px 40px rgba(59, 130, 246, 0.2), 0 4px 20px rgba(139, 92, 246, 0.15);
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Animated background overlay */
+    .topbar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        animation: shimmer 3s infinite;
+        pointer-events: none;
+    }
+    .topbar::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 150%;
+    background: url('../../asset/photo-1551288049-bebda4e38f71.jpeg') center/cover;
+    opacity: 0.1;
+    animation: float 20s ease-in-out infinite;
+    z-index: -1;
+}
+
+@keyframes float {
+    0%, 100% { 
+        transform: translateY(0px) translateX(0px) scale(1); 
+    }
+    25% { 
+        transform: translateY(-10px) translateX(5px) scale(1.02); 
+    }
+    50% { 
+        transform: translateY(-5px) translateX(-5px) scale(1.01); 
+    }
+    75% { 
+        transform: translateY(-15px) translateX(3px) scale(1.03); 
+    }
+}
+
+    @keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+    
+    
+    /* SIPROKER Title Enhanced */
     .siproker-text {
-        font-size: 24px;
-        font-weight: bold;
-        background-size: 200% 200%;
-        color: transparent;
+        font-size: 32px;
+        font-weight: 900;
+        background: linear-gradient(45deg, #ffffff, #f8fafc, #e2e8f0, #ffffff);
+        background-size: 300% 300%;
         -webkit-background-clip: text;
         background-clip: text;
-        animation: gradient-animation 3s ease infinite, pulse 2s infinite;
-        text-shadow: 0 0 5px rgba(78, 115, 223, 0.1);
-        letter-spacing: 1px;
-        background: linear-gradient(90deg, var(--primary), var(--secondary));
-        -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         color: transparent;
+        animation: gradient-flow 4s ease-in-out infinite, glow-pulse 3s ease-in-out infinite, float 6s ease-in-out infinite;
+        text-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+        letter-spacing: 3px;
+        position: relative;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .siproker-text::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        animation: shine 4s ease-in-out infinite;
+        pointer-events: none;
+        border-radius: 8px;
+    }
+    
+    .siproker-text::after {
+        content: 'SIPROKER';
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: pulse-glow 2s ease-in-out infinite alternate;
+       
+    }
+    
+    @keyframes gradient-flow {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    @keyframes glow-pulse {
+        0%, 100% { 
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+        }
+        50% { 
+            filter: drop-shadow(0 6px 20px rgba(255, 255, 255, 0.3));
+        }
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-2px); }
+    }
+    
+    @keyframes shine {
+        0% { transform: translateX(-100%) skewX(-15deg); }
+        100% { transform: translateX(200%) skewX(-15deg); }
+    }
+    
+    @keyframes pulse-glow {
+        0% { opacity: 0.3; }
+        100% { opacity: 0.6; }
     }
     
     @keyframes gradient-animation {
