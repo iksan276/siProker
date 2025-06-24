@@ -78,7 +78,7 @@
 <!-- Add CSS for SIPROKER title animation and notifications -->
 <style>
       .topbar {
-        background: linear-gradient(135deg, #4c71dd 0%, #8b5cf6 100%) !important;
+        background: linear-gradient(135deg, #4c71dd 0%, #4c71dd 100%) !important;
         backdrop-filter: blur(15px);
         border-bottom: 1px solid rgba(255, 255, 255, 0.15);
         box-shadow: 0 10px 40px rgba(59, 130, 246, 0.2), 0 4px 20px rgba(139, 92, 246, 0.15);
