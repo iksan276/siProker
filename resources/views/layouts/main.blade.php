@@ -23,6 +23,220 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
      
    <style>
+<!-- Tambahkan di dalam tag <style> yang sudah ada, setelah style yang sudah ada -->
+
+/* Scroll to Top Button - Enhanced 3D Blue Design */
+.scroll-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #4e73df 0%, #2563eb 50%, #1d4ed8 100%);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 9998;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(100px) scale(0.8);
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 
+        0 8px 25px rgba(78, 115, 223, 0.4),
+        0 4px 12px rgba(78, 115, 223, 0.3),
+        inset 0 2px 4px rgba(255, 255, 255, 0.2),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.scroll-to-top::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+}
+
+.scroll-to-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.scroll-to-top:hover {
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 
+        0 15px 35px rgba(78, 115, 223, 0.5),
+        0 8px 20px rgba(78, 115, 223, 0.4),
+        inset 0 3px 6px rgba(255, 255, 255, 0.3),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(135deg, #5a82f7 0%, #3b82f6 50%, #2563eb 100%);
+}
+
+.scroll-to-top:hover::before {
+    transform: translateX(100%);
+}
+
+.scroll-to-top:active {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        0 8px 20px rgba(78, 115, 223, 0.6),
+        0 4px 12px rgba(78, 115, 223, 0.5),
+        inset 0 1px 3px rgba(255, 255, 255, 0.4),
+        inset 0 -1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.scroll-to-top i {
+    color: white;
+    font-size: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.scroll-to-top:hover i {
+    transform: translate(-50%, -50%) translateY(-2px);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Pulse animation for attention */
+.scroll-to-top.pulse {
+    animation: scrollPulse 2s infinite;
+}
+
+@keyframes scrollPulse {
+    0% {
+        box-shadow: 
+            0 8px 25px rgba(78, 115, 223, 0.4),
+            0 4px 12px rgba(78, 115, 223, 0.3),
+            0 0 0 0 rgba(78, 115, 223, 0.7);
+    }
+    50% {
+        box-shadow: 
+            0 8px 25px rgba(78, 115, 223, 0.4),
+            0 4px 12px rgba(78, 115, 223, 0.3),
+            0 0 0 15px rgba(78, 115, 223, 0);
+    }
+    100% {
+        box-shadow: 
+            0 8px 25px rgba(78, 115, 223, 0.4),
+            0 4px 12px rgba(78, 115, 223, 0.3),
+            0 0 0 0 rgba(78, 115, 223, 0);
+    }
+}
+
+/* Progress ring around the button */
+.scroll-to-top::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border: 3px solid transparent;
+    border-top-color: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    transform: rotate(0deg);
+    transition: all 0.3s ease;
+}
+
+.scroll-to-top:hover::after {
+    transform: rotate(180deg);
+    border-top-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .scroll-to-top {
+        width: 50px;
+        height: 50px;
+        bottom: 20px;
+        right: 20px;
+    }
+    
+    .scroll-to-top i {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .scroll-to-top {
+        width: 45px;
+        height: 45px;
+        bottom: 15px;
+        right: 15px;
+    }
+    
+    .scroll-to-top i {
+        font-size: 14px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .scroll-to-top {
+        background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 50%, #1e3a8a 100%);
+        box-shadow: 
+            0 8px 25px rgba(30, 64, 175, 0.4),
+            0 4px 12px rgba(30, 64, 175, 0.3),
+            inset 0 2px 4px rgba(255, 255, 255, 0.1),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .scroll-to-top:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%);
+        box-shadow: 
+            0 15px 35px rgba(30, 64, 175, 0.5),
+            0 8px 20px rgba(30, 64, 175, 0.4),
+            inset 0 3px 6px rgba(255, 255, 255, 0.2),
+            inset 0 -3px 6px rgba(0, 0, 0, 0.25);
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .scroll-to-top {
+        border: 2px solid #ffffff;
+        background: #0066cc;
+    }
+    
+    .scroll-to-top:hover {
+        background: #0052a3;
+        border-color: #ffffff;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .scroll-to-top {
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        animation: none;
+    }
+    
+    .scroll-to-top:hover {
+        transform: none;
+    }
+    
+    .scroll-to-top::before,
+    .scroll-to-top::after {
+        transition: none;
+        animation: none;
+    }
+    
+    .scroll-to-top.pulse {
+        animation: none;
+    }
+}
+
+
+
 /* Enhanced Tooltip Styling - keep existing */
 .fas.fa-info-circle.text-primary {
   font-size: 1.2rem;
@@ -1267,6 +1481,12 @@
             @include('partials.footer')
         </div>
     </div>
+<!-- Tambahkan setelah closing tag </div> dari #wrapper, sebelum modal component -->
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" style="border:none" id="scrollToTop" aria-label="Scroll to top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
 
     <!-- Include the reusable modal component -->
     @include('components.modal')
@@ -2181,6 +2401,171 @@ $(document).ajaxComplete(function() {
     }
 
     // ... sisa kode yang sudah ada ...
+</script>
+<!-- Tambahkan script ini setelah script yang sudah ada, sebelum closing tag </body> -->
+
+<script>
+// Enhanced Scroll to Top Functionality
+(function() {
+    const scrollToTopBtn = document.getElementById('scrollToTop');
+    let isScrolling = false;
+    let scrollTimeout;
+    
+    // Show/hide button based on scroll position
+    function toggleScrollButton() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        // Show button when scrolled down 300px or more
+        if (scrollTop > 300) {
+            scrollToTopBtn.classList.add('show');
+            
+            // Add pulse effect when near bottom (last 20% of page)
+            const scrollPercentage = (scrollTop + windowHeight) / documentHeight;
+            if (scrollPercentage > 0.8) {
+                scrollToTopBtn.classList.add('pulse');
+            } else {
+                scrollToTopBtn.classList.remove('pulse');
+            }
+        } else {
+            scrollToTopBtn.classList.remove('show', 'pulse');
+        }
+    }
+    
+    // Smooth scroll to top with easing
+    function scrollToTop() {
+        if (isScrolling) return;
+        
+        isScrolling = true;
+        const startPosition = window.pageYOffset;
+        const startTime = performance.now();
+        const duration = Math.min(1500, Math.max(800, startPosition / 3)); // Dynamic duration
+        
+        // Easing function for smooth animation
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+        
+        function animateScroll(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easedProgress = easeOutCubic(progress);
+            
+            const currentPosition = startPosition * (1 - easedProgress);
+            window.scrollTo(0, currentPosition);
+            
+            if (progress < 1) {
+                requestAnimationFrame(animateScroll);
+            } else {
+                isScrolling = false;
+                // Add a subtle bounce effect when reaching top
+                scrollToTopBtn.style.transform = 'translateY(0) scale(1.2)';
+                setTimeout(() => {
+                    scrollToTopBtn.style.transform = '';
+                }, 200);
+            }
+        }
+        
+        requestAnimationFrame(animateScroll);
+    }
+    
+    // Throttled scroll event listener for better performance
+    function throttledScrollHandler() {
+        if (scrollTimeout) return;
+        
+        scrollTimeout = setTimeout(() => {
+            toggleScrollButton();
+            scrollTimeout = null;
+        }, 16); // ~60fps
+    }
+    
+    // Event listeners
+    window.addEventListener('scroll', throttledScrollHandler, { passive: true });
+    window.addEventListener('resize', toggleScrollButton, { passive: true });
+    
+    // Click event with haptic feedback (if supported)
+    scrollToTopBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Haptic feedback for mobile devices
+        if ('vibrate' in navigator) {
+            navigator.vibrate(50);
+        }
+        
+        // Visual feedback
+        this.style.transform = 'translateY(-3px) scale(0.95)';
+        setTimeout(() => {
+            this.style.transform = '';
+        }, 150);
+        
+        scrollToTop();
+    });
+    
+    // Keyboard accessibility
+    scrollToTopBtn.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            scrollToTop();
+        }
+    });
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', toggleScrollButton);
+    
+    // Handle page visibility changes
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            toggleScrollButton();
+        }
+    });
+    
+    // Progressive enhancement: Add intersection observer for better performance
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(
+            function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // User is at the top of the page
+                        scrollToTopBtn.classList.remove('show', 'pulse');
+                    }
+                });
+            },
+            { 
+                root: null, 
+                rootMargin: '0px', 
+                threshold: 0.1 
+            }
+        );
+        
+        // Observe the top of the page
+        const topSentinel = document.createElement('div');
+        topSentinel.style.height = '1px';
+        topSentinel.style.position = 'absolute';
+        topSentinel.style.top = '0';
+        topSentinel.style.left = '0';
+        topSentinel.style.pointerEvents = 'none';
+        document.body.insertBefore(topSentinel, document.body.firstChild);
+        observer.observe(topSentinel);
+    }
+    
+    // Add smooth scroll behavior to all internal links
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('a[href^="#"]');
+        if (link && link.getAttribute('href') !== '#') {
+            const targetId = link.getAttribute('href').substring(1);
+            const targetElement = document.getElementById(targetId);
+            
+            if (targetElement) {
+                e.preventDefault();
+                targetElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+    });
+})();
 </script>
 
 
