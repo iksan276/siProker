@@ -692,16 +692,41 @@
             position: relative;
         }
         
-        .step-connector {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 50%;
-            width: 2px;
-            background: linear-gradient(to bottom, var(--primary-lighter), var(--secondary-light));
-            transform: translateX(-50%);
-            z-index: 1;
-        }
+       .step-connector {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--primary-lighter), var(--secondary-light));
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+/* Responsive Styles - tambahkan ini */
+@media (max-width: 768px) {
+    .step-connector {
+        display: none; /* Sembunyikan garis connector pada layar mobile */
+    }
+    
+    .step {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    
+    .step:nth-child(even) {
+        direction: ltr;
+    }
+    
+    .step:nth-child(even) .step-content {
+        text-align: center;
+    }
+    
+    .step-number {
+        margin: var(--spacing-6) auto;
+    }
+}
+
         
         .step {
             display: grid;
@@ -1631,66 +1656,67 @@
     </section>
     
     <!-- How It Works Section -->
-    <section class="section how-it-works" id="how-it-works">
-        <div class="container">
-            <h2 class="section-title text-center" data-aos="fade-up">Cara Kerja SIPROKER</h2>
-            <p class="section-subtitle text-start" data-aos="fade-up" data-aos-delay="100">
-                Proses sederhana untuk memulai dan mengelola program kerja dengan SIPROKER
-            </p>
+   <section class="section how-it-works" id="how-it-works">
+    <div class="container">
+        <h2 class="section-title text-center" data-aos="fade-up">Cara Kerja SIPROKER</h2>
+        <p class="section-subtitle text-center" data-aos="fade-up" data-aos-delay="100">
+            Proses sederhana untuk memulai dan mengelola program kerja dengan SIPROKER
+        </p>
+        
+        <div class="steps-container">
+            <div class="step-connector"></div>
             
-            <div class="steps-container">
-                <div class="step-connector"></div>
-                
-                <!-- Step 1 -->
-                <div class="step" data-aos="fade-up" data-aos-delay="200">
-                    <div class="step-content">
-                        <h3 class="step-title">Registrasi & Login</h3>
-                        <p class="step-description">
-                            Daftar akun SIPROKER atau login dengan kredensial yang diberikan oleh administrator. Akses dashboard personal Anda untuk memulai.
-                        </p>
-                    </div>
-                    <div class="step-number">1</div>
-                    <div></div>
+            <!-- Step 1 -->
+            <div class="step" data-aos="fade-up" data-aos-delay="200">
+                <div class="step-content">
+                    <h3 class="step-title">Registrasi & Login</h3>
+                    <p class="step-description">
+                        Daftar akun SIPROKER atau login dengan kredensial yang diberikan oleh administrator. Akses dashboard personal Anda untuk memulai.
+                    </p>
                 </div>
-                
-                <!-- Step 2 -->
-                <div class="step" data-aos="fade-up" data-aos-delay="300">
-                    <div></div>
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                        <h3 class="step-title">Buat Program Kerja</h3>
-                        <p class="step-description">
-                            Buat program kerja baru dengan mengisi detail seperti judul, deskripsi, tenggat waktu, dan anggota tim yang terlibat.
-                        </p>
-                    </div>
+                <div class="step-number">1</div>
+                <div></div>
+            </div>
+            
+            <!-- Step 2 -->
+            <div class="step" data-aos="fade-up" data-aos-delay="300">
+                <div></div>
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3 class="step-title">Buat Program Kerja</h3>
+                    <p class="step-description">
+                        Buat program kerja baru dengan mengisi detail seperti judul, deskripsi, tenggat waktu, dan anggota tim yang terlibat.
+                    </p>
                 </div>
-                
-                <!-- Step 3 -->
-                <div class="step" data-aos="fade-up" data-aos-delay="400">
-                    <div class="step-content">
-                        <h3 class="step-title">Kelola & Pantau Progres</h3>
-                        <p class="step-description">
-                            Kelola program kerja, tambahkan tugas, unggah dokumen, dan pantau progres melalui dashboard yang informatif.
-                        </p>
-                    </div>
-                    <div class="step-number">3</div>
-                    <div></div>
+            </div>
+            
+            <!-- Step 3 -->
+            <div class="step" data-aos="fade-up" data-aos-delay="400">
+                <div class="step-content">
+                    <h3 class="step-title">Kelola & Pantau Progres</h3>
+                    <p class="step-description">
+                        Kelola program kerja, tambahkan tugas, unggah dokumen, dan pantau progres melalui dashboard yang informatif.
+                    </p>
                 </div>
-                
-                <!-- Step 4 -->
-                <div class="step" data-aos="fade-up" data-aos-delay="500">
-                    <div></div>
-                    <div class="step-number">4</div>
-                    <div class="step-content">
-                        <h3 class="step-title">Evaluasi & Laporan</h3>
-                        <p class="step-description">
-                            Evaluasi keberhasilan program kerja dan hasilkan laporan komprehensif untuk keperluan dokumentasi dan peningkatan.
-                        </p>
-                    </div>
+                <div class="step-number">3</div>
+                <div></div>
+            </div>
+            
+            <!-- Step 4 -->
+            <div class="step" data-aos="fade-up" data-aos-delay="500">
+                <div></div>
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3 class="step-title">Evaluasi & Laporan</h3>
+                    <p class="step-description">
+                        Evaluasi keberhasilan program kerja dan hasilkan laporan komprehensif untuk keperluan dokumentasi dan peningkatan.
+                    </p>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
+
     
     <!-- Testimonials Section -->
     <section class="section testimonials" id="testimonials">
