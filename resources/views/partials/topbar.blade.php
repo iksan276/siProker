@@ -690,12 +690,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     function showToastNotification(notification) {
-        // Create toast element with better styling
+        // Get color class based on info_box_type
+        const colorClass = getToastColorClass(notification.info_box_type || 'info');
+        const iconClass = getToastIconClass(notification.info_box_type || 'info');
+        
+        // Create toast element with dynamic styling
         const toast = $(`
             <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" 
                  style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 350px; max-width: 400px;">
-                <div class="toast-header bg-primary text-white">
-                    <i class="fas fa-bell mr-2"></i>
+                <div class="toast-header ${colorClass} text-white">
+                    <i class="fas ${iconClass} mr-2"></i>
                     <strong class="mr-auto">Notifikasi Baru</strong>
                     <button type="button" class="ml-2 mb-1 close text-white" data-dismiss="toast">
                         <span>&times;</span>
@@ -731,8 +735,32 @@ document.addEventListener('DOMContentLoaded', function() {
             $(this).remove();
         });
         
-        // Play notification sound (optional)
-        playNotificationSound();
+        // Play notification sound based on type
+        playNotificationSound(notification.info_box_type || 'info');
+    }
+    
+    function getToastColorClass(infoBoxType) {
+        const colorMap = {
+            'success': 'bg-success',
+            'danger': 'bg-danger', 
+            'warning': 'bg-warning',
+            'info': 'bg-info',
+            'primary': 'bg-primary',
+            'secondary': 'bg-secondary'
+        };
+        return colorMap[infoBoxType] || 'bg-info';
+    }
+    
+    function getToastIconClass(infoBoxType) {
+        const iconMap = {
+            'success': 'fa-check-circle',
+            'danger': 'fa-times-circle',
+            'warning': 'fa-exclamation-triangle', 
+            'info': 'fa-info-circle',
+            'primary': 'fa-bell',
+            'secondary': 'fa-bell'
+        };
+        return iconMap[infoBoxType] || 'fa-bell';
     }
     
     // Format notification time similar to Carbon format
@@ -783,31 +811,263 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+   
     
-    function playNotificationSound() {
+</script>
+
+<!-- Audio System Script -->
+<script>
+// 🎵 ULTRA EFFICIENT AUDIO SYSTEM - Zero AudioContext errors!
+let audioSystem = {
+    context: null,
+    enabled: false,
+    initialized: false,
+    queue: [],
+    
+    // Only create context when ACTUALLY needed and user has interacted
+    createContext() {
+        if (this.context) return this.context;
+        
         try {
-            // Simple notification beep
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.value = 800;
-            oscillator.type = 'sine';
-            
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.5);
+            this.context = new (window.AudioContext || window.webkitAudioContext)();
+            console.log('🎵 AudioContext created:', this.context.state);
+            return this.context;
         } catch (e) {
-            // Audio not supported or blocked
-            console.log('Audio notification not available');
+            console.error('🎵 AudioContext creation failed:', e);
+            return null;
+        }
+    },
+    
+    // Initialize ONLY after user interaction
+    async init() {
+        if (this.initialized) return true;
+        
+        const ctx = this.createContext();
+        if (!ctx) return false;
+        
+        if (ctx.state === 'suspended') {
+            try {
+                await ctx.resume();
+                console.log('🎵 AudioContext resumed successfully');
+            } catch (e) {
+                console.error('🎵 Failed to resume AudioContext:', e);
+                return false;
+            }
+        }
+        
+        if (ctx.state === 'running') {
+            this.enabled = true;
+            this.initialized = true;
+            this.processQueue();
+            return true;
+        }
+        
+        return false;
+    },
+    
+    // Process queued sounds
+    processQueue() {
+        if (this.queue.length > 0) {
+            console.log('🎵 Processing', this.queue.length, 'queued sounds');
+            const sounds = [...this.queue];
+            this.queue = [];
+            sounds.forEach(soundType => {
+                setTimeout(() => this.playSound(soundType), 100);
+            });
+        }
+    },
+    
+    // Main play function
+    play(type) {
+        if (!this.enabled || !this.context || this.context.state !== 'running') {
+            console.log('🎵 Audio not ready, queuing:', type);
+            this.queue.push(type);
+            return;
+        }
+        
+        this.playSound(type);
+    },
+    
+    // Actual sound generation
+    playSound(type) {
+        if (!this.context || this.context.state !== 'running') return;
+        
+        console.log('🎵 Playing:', type);
+        
+        try {
+            switch(type) {
+                case 'success-approved': this.royalFanfare(); break;
+                case 'success-tor-approved': this.victoryBells(); break;
+                case 'danger-rejected': this.dramaticFall(); break;
+                case 'danger-tor-rejected': this.urgentAlert(); break;
+                case 'warning-waiting': this.elegantChime(); break;
+                case 'warning-tor-submission': this.gentleNotification(); break;
+                case 'warning-postponed': this.suspensefulTone(); break;
+                case 'info-revision': this.thoughtfulMelody(); break;
+                case 'info-tor-revision': this.creativePing(); break;
+                default: this.mysteriousTone(); break;
+            }
+        } catch (e) {
+            console.error('🎵 Sound generation error:', e);
+        }
+    },
+    
+    // Optimized sound functions
+    createOscillator(freq, type = 'sine', duration = 0.5, volume = 0.3) {
+        if (!this.context || this.context.state !== 'running') return;
+        
+        try {
+            const osc = this.context.createOscillator();
+            const gain = this.context.createGain();
+            
+            osc.connect(gain);
+            gain.connect(this.context.destination);
+            
+            osc.frequency.value = freq;
+            osc.type = type;
+            
+            gain.gain.setValueAtTime(volume, this.context.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.context.currentTime + duration);
+            
+            osc.start();
+            osc.stop(this.context.currentTime + duration);
+        } catch (e) {
+            console.error('🎵 Oscillator error:', e);
+        }
+    },
+    
+    royalFanfare() {
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, i) => {
+            setTimeout(() => this.createOscillator(freq, 'sine', 0.3, 0.4), i * 100);
+        });
+    },
+    
+    victoryBells() {
+        const bells = [880, 1174.66, 1396.91];
+        bells.forEach((freq, i) => {
+            setTimeout(() => this.createOscillator(freq, 'sine', 0.8, 0.3), i * 300);
+        });
+    },
+    
+    dramaticFall() {
+        const notes = [880, 659.25, 440, 329.63];
+        notes.forEach((freq, i) => {
+            setTimeout(() => this.createOscillator(freq, 'sawtooth', 0.3, 0.3), i * 150);
+        });
+    },
+    
+    urgentAlert() {
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => this.createOscillator(440, 'square', 0.1, 0.4), i * 200);
+        }
+    },
+    
+    elegantChime() {
+        const chimes = [1046.50, 1174.66, 1318.51];
+        chimes.forEach((freq, i) => {
+            setTimeout(() => this.createOscillator(freq, 'sine', 1.0 - (i * 0.2), 0.2), i * 200);
+        });
+    },
+    
+    gentleNotification() {
+        setTimeout(() => this.createOscillator(659.25, 'sine', 0.3, 0.25), 0);
+        setTimeout(() => this.createOscillator(783.99, 'sine', 0.4, 0.25), 200);
+    },
+    
+    suspensefulTone() {
+        if (!this.context || this.context.state !== 'running') return;
+        
+        try {
+            const osc = this.context.createOscillator();
+            const gain = this.context.createGain();
+            
+            osc.connect(gain);
+            gain.connect(this.context.destination);
+            
+            osc.frequency.setValueAtTime(400, this.context.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, this.context.currentTime + 0.8);
+            osc.type = 'triangle';
+            
+            gain.gain.setValueAtTime(0.2, this.context.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.context.currentTime + 0.8);
+            
+            osc.start();
+            osc.stop(this.context.currentTime + 0.8);
+        } catch (e) {
+            console.error('🎵 Suspenseful tone error:', e);
+        }
+    },
+    
+    thoughtfulMelody() {
+        const melody = [523.25, 587.33, 659.25, 587.33];
+        melody.forEach((freq, i) => {
+            setTimeout(() => this.createOscillator(freq, 'sine', 0.2 + (i * 0.05), 0.2), i * 150);
+        });
+    },
+    
+    creativePing() {
+        const pings = [800, 1200, 1600];
+        pings.forEach((freq, i) => {
+            setTimeout(() => this.createOscillator(freq, 'sine', 0.1 + (i * 0.1), 0.3), i * 100);
+        });
+    },
+    
+    mysteriousTone() {
+        if (!this.context || this.context.state !== 'running') return;
+        
+        try {
+            const osc = this.context.createOscillator();
+            const gain = this.context.createGain();
+            
+            osc.connect(gain);
+            gain.connect(this.context.destination);
+            
+            osc.frequency.setValueAtTime(200, this.context.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, this.context.currentTime + 1.0);
+            osc.type = 'sine';
+            
+            gain.gain.setValueAtTime(0.1, this.context.currentTime);
+            gain.gain.linearRampToValueAtTime(0.3, this.context.currentTime + 0.5);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.context.currentTime + 1.0);
+            
+            osc.start();
+            osc.stop(this.context.currentTime + 1.0);
+        } catch (e) {
+            console.error('🎵 Mysterious tone error:', e);
         }
     }
+};
+
+// Global functions
+window.playSound = (type) => audioSystem.play(type);
+window.initializeAudio = () => audioSystem.init();
+
+// Notification sound with status mapping
+window.playNotificationSound = function(infoBoxType, status) {
+    const statusMap = {
+        'Y': 'success-approved',
+        'YT': 'success-tor-approved', 
+        'T': 'danger-rejected',
+        'TT': 'danger-tor-rejected',
+        'N': 'warning-waiting',
+        'PT': 'warning-tor-submission',
+        'TP': 'warning-postponed',
+        'R': 'info-revision',
+        'RT': 'info-tor-revision'
+    };
+    
+    const soundType = statusMap[status] || (infoBoxType === 'success' ? 'success-approved' :
+                                          infoBoxType === 'danger' ? 'danger-rejected' :
+                                         infoBoxType === 'warning' ? 'warning-waiting' : 'info-revision');
+    
+    audioSystem.play(soundType);
+};
+
+
 </script>
+
+
 @endif
 
 

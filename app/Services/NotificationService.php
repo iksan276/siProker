@@ -112,12 +112,12 @@ class NotificationService
         }
         
         // Broadcast real-time notification to ALL recipients
-        try {
-            event(new KegiatanStatusUpdated($kegiatan, $sender, $title, $description, $recipients->toArray(), $infoBoxType));
-            Log::info("Broadcasted real-time notification to {$recipients->count()} recipients");
-        } catch (\Exception $e) {
-            Log::error("Failed to broadcast notification: " . $e->getMessage());
-        }
+                try {
+                event(new KegiatanStatusUpdated($kegiatan, $sender, $title, $description, $recipients->toArray(), $infoBoxType));
+                Log::info("Broadcasted real-time notification to {$recipients->count()} recipients");
+            } catch (\Exception $e) {
+                Log::error("Failed to broadcast notification: " . $e->getMessage());
+            }
     }
     
     private function sendEmailWithCC(Kegiatan $kegiatan, User $sender, string $title, string $description, $recipients, string $infoBoxType)
@@ -301,12 +301,12 @@ class NotificationService
     }
     
     // Broadcast real-time notification
-    try {
-        event(new KegiatanStatusUpdated($kegiatan, $sender, $title, $description, $recipients->toArray(), $infoBoxType));
-        Log::info("Broadcasted real-time RAB notification to {$recipients->count()} recipients");
-    } catch (\Exception $e) {
-        Log::error("Failed to broadcast RAB notification: " . $e->getMessage());
-    }
+   try {
+    event(new KegiatanStatusUpdated($kegiatan, $sender, $title, $description, $recipients->toArray(), $infoBoxType));
+    Log::info("Broadcasted real-time RAB notification to {$recipients->count()} recipients");
+} catch (\Exception $e) {
+    Log::error("Failed to broadcast RAB notification: " . $e->getMessage());
+}
 }
 
 public function sendSubKegiatanNotification(SubKegiatan $subKegiatan, string $type)
@@ -381,12 +381,12 @@ public function sendSubKegiatanNotification(SubKegiatan $subKegiatan, string $ty
     }
     
     // Broadcast real-time notification
-    try {
-        event(new KegiatanStatusUpdated($kegiatan, $sender, $title, $description, $recipients->toArray(), $infoBoxType));
-        Log::info("Broadcasted real-time SubKegiatan notification to {$recipients->count()} recipients");
-    } catch (\Exception $e) {
-        Log::error("Failed to broadcast SubKegiatan notification: " . $e->getMessage());
-    }
+        try {
+            event(new KegiatanStatusUpdated($kegiatan, $sender, $title, $description, $recipients->toArray(), $infoBoxType));
+            Log::info("Broadcasted real-time SubKegiatan notification to {$recipients->count()} recipients");
+        } catch (\Exception $e) {
+            Log::error("Failed to broadcast SubKegiatan notification: " . $e->getMessage());
+        }
 }
 
 
