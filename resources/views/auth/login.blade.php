@@ -216,6 +216,343 @@
             position: relative;
             z-index: 1;
         }
+        .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-lighter) 0%, var(--secondary-light) 100%);
+    opacity: 0.4;
+    animation: float 15s infinite ease-in-out;
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+}
+
+.particle-1 {
+    width: 80px;
+    height: 80px;
+    top: 10%;
+    left: 5%;
+    animation-delay: 0s;
+    background: linear-gradient(135deg, var(--primary-lighter), var(--accent-light));
+}
+
+.particle-2 {
+    width: 60px;
+    height: 60px;
+    top: 20%;
+    right: 10%;
+    animation-delay: 2s;
+    background: linear-gradient(135deg, var(--secondary-light), var(--primary-lighter));
+}
+
+.particle-3 {
+    width: 120px;
+    height: 120px;
+    bottom: 15%;
+    left: 15%;
+    animation-delay: 4s;
+    background: linear-gradient(135deg, var(--accent-light), var(--primary-light));
+}
+
+.particle-4 {
+    width: 50px;
+    height: 50px;
+    bottom: 10%;
+    right: 20%;
+    animation-delay: 6s;
+    background: linear-gradient(135deg, var(--primary-lighter), var(--secondary-light));
+}
+
+.particle-5 {
+    width: 70px;
+    height: 70px;
+    top: 50%;
+    left: 30%;
+    animation-delay: 8s;
+    background: linear-gradient(135deg, var(--secondary-light), var(--accent-light));
+}
+
+.particle-6 {
+    width: 40px;
+    height: 40px;
+    top: 30%;
+    left: 70%;
+    animation-delay: 1s;
+    background: linear-gradient(135deg, var(--accent-light), var(--primary-lighter));
+}
+
+.particle-7 {
+    width: 90px;
+    height: 90px;
+    bottom: 40%;
+    right: 5%;
+    animation-delay: 3s;
+    background: linear-gradient(135deg, var(--primary-light), var(--secondary-light));
+}
+
+.particle-8 {
+    width: 35px;
+    height: 35px;
+    top: 70%;
+    left: 10%;
+    animation-delay: 5s;
+    background: linear-gradient(135deg, var(--secondary-light), var(--primary-lighter));
+}
+
+.particle-9 {
+    width: 65px;
+    height: 65px;
+    top: 15%;
+    left: 50%;
+    animation-delay: 7s;
+    background: linear-gradient(135deg, var(--accent-light), var(--secondary-light));
+}
+
+.particle-10 {
+    width: 55px;
+    height: 55px;
+    bottom: 25%;
+    left: 60%;
+    animation-delay: 9s;
+    background: linear-gradient(135deg, var(--primary-lighter), var(--accent-light));
+}
+
+/* 3D Geometric Shapes */
+.geometric-shape {
+    position: absolute;
+    opacity: 0.1;
+    animation: rotate3d 20s infinite linear;
+    z-index: 0;
+}
+
+.shape-1 {
+    width: 100px;
+    height: 100px;
+    top: 20%;
+    left: 20%;
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    transform: rotate(45deg);
+    border-radius: 20px;
+    animation-delay: 0s;
+}
+
+.shape-2 {
+    width: 80px;
+    height: 80px;
+    top: 60%;
+    right: 25%;
+    background: linear-gradient(45deg, var(--secondary), var(--accent));
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    animation-delay: 2s;
+}
+
+.shape-3 {
+    width: 120px;
+    height: 120px;
+    bottom: 30%;
+    left: 10%;
+    background: linear-gradient(45deg, var(--accent), var(--primary));
+    border-radius: 50%;
+    animation-delay: 4s;
+}
+
+.shape-4 {
+    width: 90px;
+    height: 90px;
+    top: 40%;
+    right: 15%;
+    background: linear-gradient(45deg, var(--primary-light), var(--secondary-light));
+    clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
+    animation-delay: 6s;
+}
+
+.shape-5 {
+    width: 70px;
+    height: 70px;
+    top: 10%;
+    right: 40%;
+    background: linear-gradient(45deg, var(--secondary-light), var(--primary-light));
+    transform: rotate(30deg);
+    border-radius: 15px;
+    animation-delay: 8s;
+}
+
+.shape-6 {
+    width: 110px;
+    height: 110px;
+    bottom: 10%;
+    right: 10%;
+    background: linear-gradient(45deg, var(--accent-light), var(--secondary-light));
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    animation-delay: 10s;
+}
+/* 3D Container for Hero Image */
+.hero-3d-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.hero-3d-element {
+    position: absolute;
+    border-radius: var(--radius-xl);
+    opacity: 0.6;
+    animation: float3d 12s infinite ease-in-out;
+}
+
+.element-1 {
+    width: 60px;
+    height: 60px;
+    top: 10%;
+    right: 10%;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.3), rgba(124, 58, 237, 0.3));
+    transform: rotateX(45deg) rotateY(45deg);
+    animation-delay: 0s;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.2);
+}
+
+.element-2 {
+    width: 80px;
+    height: 80px;
+    bottom: 20%;
+    left: -10%;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(245, 158, 11, 0.3));
+    transform: rotateX(-30deg) rotateY(60deg);
+    animation-delay: 2s;
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.2);
+}
+
+.element-3 {
+    width: 50px;
+    height: 50px;
+    top: 50%;
+    right: -5%;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(37, 99, 235, 0.3));
+    transform: rotateX(60deg) rotateY(-45deg);
+    animation-delay: 4s;
+    box-shadow: 0 10px 30px rgba(245, 158, 11, 0.2);
+}
+
+.element-4 {
+    width: 70px;
+    height: 70px;
+    bottom: 40%;
+    left: 5%;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.3), rgba(245, 158, 11, 0.3));
+    transform: rotateX(-45deg) rotateY(30deg);
+    animation-delay: 6s;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.2);
+}
+
+/* Enhanced Animations */
+@keyframes float {
+    0% {
+        transform: translateY(0) rotate(0deg) scale(1);
+    }
+    33% {
+        transform: translateY(-20px) rotate(5deg) scale(1.05);
+    }
+    66% {
+        transform: translateY(-10px) rotate(-3deg) scale(0.95);
+    }
+    100% {
+        transform: translateY(0) rotate(0deg) scale(1);
+    }
+}
+
+@keyframes rotate3d {
+    0% {
+        transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+    }
+    33% {
+        transform: rotateX(120deg) rotateY(120deg) rotateZ(120deg);
+    }
+    66% {
+        transform: rotateX(240deg) rotateY(240deg) rotateZ(240deg);
+    }
+    100% {
+        transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg);
+    }
+}
+
+@keyframes float3d {
+    0% {
+        transform: translateY(0) rotateX(45deg) rotateY(45deg);
+    }
+    50% {
+        transform: translateY(-15px) rotateX(60deg) rotateY(60deg);
+    }
+    100% {
+        transform: translateY(0) rotateX(45deg) rotateY(45deg);
+    }
+}
+
+/* Enhanced Hero Image Container */
+.hero-image-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px;
+}
+
+.hero-image {
+    max-width: 100%;
+    border-radius: var(--radius-2xl);
+    box-shadow: 
+        var(--shadow-xl),
+        0 0 50px rgba(37, 99, 235, 0.2);
+    position: relative;
+    z-index: 2;
+    transform: translateZ(20px);
+    transition: transform 0.3s ease;
+}
+
+.hero-image:hover {
+    transform: translateZ(30px) scale(1.02);
+}
+
+.hero-image-bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: var(--radius-2xl);
+    transform: rotate(-3deg) scale(0.95) translateZ(-10px);
+    z-index: 1;
+    opacity: 0.8;
+        box-shadow: 0 20px 40px rgba(37, 99, 235, 0.3);
+    animation: float-bg 8s infinite ease-in-out;
+}
+
+@keyframes float-bg {
+    0% {
+        transform: rotate(-3deg) scale(0.95) translateZ(-10px);
+    }
+    50% {
+        transform: rotate(-5deg) scale(0.97) translateZ(-15px);
+    }
+    100% {
+        transform: rotate(-3deg) scale(0.95) translateZ(-10px);
+    }
+}
+
+/
+/* Enhanced Hero Particles Background */
+.hero-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(37, 99, 235, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(124, 58, 237, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
+}
+
     </style>
 </head>
 
@@ -227,6 +564,24 @@
         <div class="particle"></div>
         <div class="particle"></div>
         <div class="particle"></div>
+           <div class="particle particle-1"></div>
+        <div class="particle particle-2"></div>
+        <div class="particle particle-3"></div>
+        <div class="particle particle-4"></div>
+        <div class="particle particle-5"></div>
+        <div class="particle particle-6"></div>
+        <div class="particle particle-7"></div>
+        <div class="particle particle-8"></div>
+        <div class="particle particle-9"></div>
+        <div class="particle particle-10"></div>
+        
+        <!-- 3D Geometric Shapes -->
+        <div class="geometric-shape shape-1"></div>
+        <div class="geometric-shape shape-2"></div>
+        <div class="geometric-shape shape-3"></div>
+        <div class="geometric-shape shape-4"></div>
+        <div class="geometric-shape shape-5"></div>
+        <div class="geometric-shape shape-6"></div>
     </div>
     
     <div class="container">
@@ -314,7 +669,14 @@
             </div>
         </div>
     </div>
-
+   <!-- 3D Container Background -->
+            <div class="hero-3d-container">
+                <div class="hero-3d-element element-1"></div>
+                <div class="hero-3d-element element-2"></div>
+                <div class="hero-3d-element element-3"></div>
+                <div class="hero-3d-element element-4"></div>
+            </div>
+            
     <!-- Bootstrap core JavaScript-->
     <script src="{{ asset('sb-admin/vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('sb-admin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
