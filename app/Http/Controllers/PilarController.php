@@ -402,7 +402,7 @@ private function buildTreeData($pilars, $userId, $startLevel = 'pilar', $statusF
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <button data-toggle="tooltip" title="Tambah Kegiatan" class="btn btn-primary btn-square btn-sm load-modal" 
-                                    data-url="' . route('kegiatans.create') . '?program_rektor=' . $rektor->ProgramRektorID . '" 
+                                    data-url="' . route('kegiatans.create') . '?programRektorID=' . $rektor->ProgramRektorID . '" 
                                     data-title="Tambah Kegiatan">
                                     <i class="fas fa-plus"></i>
                                 </button>',
